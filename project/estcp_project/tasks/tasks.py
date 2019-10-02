@@ -191,6 +191,22 @@ def remove_work_env(ctx, work_dir=get_current_work_dir()):
 ns.add_task(remove_work_env)
 # task: reset/clean env
 
+
+@task
+def commit(ctx, message, work_dir=get_current_work_dir()):
+    """
+    Prefixes commit message with workdir.
+    """
+    wd = work_dir
+    if wd not in (wd.name for wd in work.find_WorkDirs()):
+        print('Work dir not found.')
+        exit(1)
+    wd = work.WorkDir(wd)
+
+    message = f"[{wd.name}] " + message
+    ctx.run(f"git commit  -m  {message}")
+ns.add_task(commit)
+
 # run dvc conda run
 
 
