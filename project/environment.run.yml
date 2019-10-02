@@ -1,0 +1,7 @@
+dependencies:
+  - pyprojroot
+  - dvc
+  - invoke
+environment:
+  PYTHONPATH:
+    - {{root}}
