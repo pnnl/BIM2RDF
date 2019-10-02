@@ -21,7 +21,7 @@ class WorkDir():
         self.dir.mkdir(exist_ok=True)
 
         if not (self.dir / 'environment.run.yml').exists():
-            # need a min file so devenv doesn't complain
+            # need a min file so deve nv doesn't complain
             yaml.dump(self.minrunenv, open(self.dir/'environment.run.yml','w'))
         
         if not (self.dir / 'environment.devenv.yml').exists():
@@ -52,10 +52,9 @@ class WorkDir():
     def devenv_name(self):
         return 'estcp-'+self.name
 
-    def make_devenv_file(self,
+    def make_devenv(self,
                     name='self.devenv_name',
                     includes=[]): # includes rel to proj home
-        
         if name == 'self.devenv_name':
             name = self.devenv_name
         includes.append(here('./project/environment.run.yml'))
@@ -66,12 +65,14 @@ class WorkDir():
         includes = [str(Path(*parts(p)))
                      for p in list(includes)+[self.base_devenv, self.dir/'environment.run.yml' ]]
         dev_env = {'includes': includes, 'name': name}
-        #breakpoint()
+        return dev_env
+
+    def make_devenv_file(self, *args, **kwargs):
+        dev_env = self.make_devenv(*args, **kwargs)
         with open(self.dir / 'environment.devenv.yml', 'w') as ef:
             yaml.dump(dev_env, ef)
         ef.close()
         return dev_env
-
 
     @classmethod
     def is_work_dir(cls, dir: Path):

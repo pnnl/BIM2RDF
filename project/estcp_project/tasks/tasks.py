@@ -1,4 +1,4 @@
-from invoke import task, Collection
+from invoke import task, Collection, call
 from estcp_project import root
 import yaml
 from .. import work
@@ -116,6 +116,7 @@ def make_dev_env(ctx, work_dir=get_current_work_dir(),  recreate=False):
         print("Create dev environment from 'base' environment:")
         print("> conda activate base")
         print(f"> cd { work_dir } (the work dir)")
+        print(f"Modify environment.run.yml and environment.devenv.yml as needed.")
         print("> conda devenv")
         print("Then come back with: conda activate estcp-project.")
         exit(1)
@@ -127,6 +128,7 @@ def make_dev_env(ctx, work_dir=get_current_work_dir(),  recreate=False):
     #conda_base = (Path(conda_base) / 'Scripts' / 'conda')
     #breakpoint()
     #ctx.run(f'conda devenv --file "{devenv}"', env={'PATH': str(conda_base) })
+    #print("Now modify environment.run.yml and environment.devenv.yml.")
 ns.add_task(make_dev_env)
 
 
@@ -147,12 +149,21 @@ def work_on(ctx, work_dir):
     # checking if env created for the workdir
     if envlist.count(wd.devenv_name+'\n') != 1:
         make_dev_env(ctx, work_dir=wd.name)
-        if wd.minrunenv == yaml.safe_load(open(wd.dir/'environment.run.yml')):
-            print('Created minimal dev env. Modify environment.[devenv|run].yml as needed and make dev env')
+    
+    minRunenv = \
+        wd.minrunenv \
+        == yaml.safe_load(open(wd.dir/'environment.run.yml'))
+    minDevenv = \
+        yaml.safe_load(open(wd.dir/'environment.devenv.yml')) \
+        == wd.make_devenv()
+    if (minRunenv and minDevenv):
+        print('Created minimal dev env.')
+        print('Modify environment.[devenv|run].yml as needed and rerun this command.')
 
     env_name = get_current_conda_env()
     if wd.devenv_name != env_name:
-        print(f'Activate environment: conda activate {wd.devenv_name}')
+        print(f'Activate environment:')
+        print(f'> conda activate {wd.devenv_name}')
         exit(1)
 
     if wd.dir.resolve() != Path('.').resolve():
@@ -189,10 +200,8 @@ def remove_work_env(ctx, work_dir=get_current_work_dir()):
         else:
             print(f"> conda env remove -n {wd.devenv_name}")
 ns.add_task(remove_work_env)
-# task: reset/clean env
 
-
-@task
+@task(help={'message': "Commit message. Use quotes."})
 def commit(ctx, message, work_dir=get_current_work_dir()):
     """
     Prefixes commit message with workdir.
@@ -204,12 +213,27 @@ def commit(ctx, message, work_dir=get_current_work_dir()):
     wd = work.WorkDir(wd)
 
     message = f"[{wd.name}] " + message
-    ctx.run(f"git commit  -m  {message}")
+    ctx.run(f"git commit  -m  \"{message}\"")
 ns.add_task(commit)
 
+
+
+#@task
+def _dvc_run(ctx, ):
+    """
+    Executes .dvc files.
+    """
+    ...
+    wd = work_dir
+    if wd not in (wd.name for wd in work.find_WorkDirs()):
+        print('Work dir not found.')
+        exit(1)
+    wd = work.WorkDir(wd)
+    work_on(ctx, wd.dir)
+#ns.add_task(commit)
+
 # run dvc conda run
-
-
+# task: reset/clean env
 # clean env
 
 # git commit [tags]
