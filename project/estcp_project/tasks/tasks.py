@@ -127,9 +127,8 @@ def make_dev_env(ctx, work_dir=get_current_work_dir(),  recreate=False):
     #conda_base = (Path(conda_base) / 'Scripts' / 'conda')
     #breakpoint()
     #ctx.run(f'conda devenv --file "{devenv}"', env={'PATH': str(conda_base) })
-
-
 ns.add_task(make_dev_env)
+
 
 @task(help={'dir': dir_help})
 def work_on(ctx, work_dir):
@@ -166,7 +165,30 @@ def work_on(ctx, work_dir):
 ns.add_task(work_on)
 
 
-
+@task
+def remove_work_env(ctx, work_dir=get_current_work_dir()):
+    """
+    Removes conda environment associated with work dir.
+    """
+    wd = work_dir
+    if wd not in (wd.name for wd in work.find_WorkDirs()):
+        print('Work dir not found.')
+        exit(1)
+    wd = work.WorkDir(wd)
+    #                                           sometimes nonzero exit returned :/
+    envlist = ctx.run('conda env list', hide='out', warn=True).stdout
+    # checking if env created for the workdir
+    if envlist.count(wd.devenv_name+'\n') != 1:
+        print("No env associated with work dir.")
+        return
+    else:
+        if wd.devenv_name == get_current_conda_env():
+            print("Can't remove current env. Go to another env:")
+            print("> conda activate estcp-project")
+            exit(1)
+        else:
+            print(f"> conda env remove -n {wd.devenv_name}")
+ns.add_task(remove_work_env)
 # task: reset/clean env
 
 # run dvc conda run
