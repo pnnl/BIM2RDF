@@ -9,7 +9,10 @@ class WorkDir():
                   # could also be some configs
     base_devenv = here('./dev-bootstrap/environment.yml')
     envfn = 'environment.yml'
-    minrunenv = {'dependencies': [], 'environment': {}}
+    minrunenv = {'dependencies': [],
+                 'includes': [],
+                'environment':
+                    {'PYTHONPATH': ['{{root}}/'] }}
 
     def __init__(self, dir: Path):
         self.dir = here() / Path(dir)
@@ -54,10 +57,13 @@ class WorkDir():
 
     def make_devenv(self,
                     name='self.devenv_name',
+                    workdir_run_deps=[],
                     includes=[]): # includes rel to proj home
         if name == 'self.devenv_name':
             name = self.devenv_name
-        includes.append(here('./project/environment.run.yml'))
+        includes = list(includes)
+        for dep in (set(workdir_run_deps) | set(['project'])):
+            includes.append(here(f'./{dep}/environment.run.yml'))
         
         def prefix_parts(): return ['{{root}}']+['..']*self.n_upto_proj()
         def parts(p): return prefix_parts() + list(p.absolute().relative_to(here().absolute()).parts)

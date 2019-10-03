@@ -96,7 +96,7 @@ def get_current_WorkDir():
     return
 
 @task
-def make_dev_env(ctx, work_dir=get_current_work_dir(),  recreate=False):
+def make_dev_env(ctx, work_dir=get_current_work_dir(), recreate=False):
     """
     Create conda development environment.
     """
@@ -110,7 +110,8 @@ def make_dev_env(ctx, work_dir=get_current_work_dir(),  recreate=False):
             (wd.dir / 'environment.yml').unlink()
         except FileNotFoundError:
             pass
-        ctx.run(f'conda env remove -n {wd.devenv_name}')
+        ctx.run(f'> conda env remove -n {wd.devenv_name}')
+        #remove_work_env(ctx, work_dir)
 
     if 'base' != get_current_conda_env():
         print("Create dev environment from 'base' environment:")
@@ -118,7 +119,8 @@ def make_dev_env(ctx, work_dir=get_current_work_dir(),  recreate=False):
         print(f"> cd { work_dir } (the work dir)")
         print(f"Modify environment.run.yml and environment.devenv.yml as needed.")
         print("> conda devenv")
-        print("Then come back with: conda activate estcp-project.")
+        print("Then enter the environment:")
+        print(f"> conda activate {wd.devenv_name}")
         exit(1)
     #with ctx.cd(str(wd.dir.absolute())): doesn't work
     #devenv = wd.dir / 'environment.devenv.yml'
@@ -174,7 +176,6 @@ def work_on(ctx, work_dir):
     
     print('Ready to work!')
 ns.add_task(work_on)
-
 
 @task
 def remove_work_env(ctx, work_dir=get_current_work_dir()):
