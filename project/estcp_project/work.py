@@ -70,7 +70,7 @@ class WorkDir():
         from pathlib import PurePosixPath as Path
         includes = [str(Path(*parts(p)))
                      for p in list(includes)+[self.base_devenv, self.dir/'environment.run.yml' ]]
-        dev_env = {'includes': includes, 'name': name}
+        dev_env = {'includes': includes, 'name': name, 'environment': {'WORK_DIR': self.name}}
         return dev_env
 
     def make_devenv_file(self, *args, **kwargs):

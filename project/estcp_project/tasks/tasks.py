@@ -234,6 +234,29 @@ def commit(ctx, message, work_dir=cur_work_dir):
 ns.add_task(commit)
 
 
+@task# TODO hide?
+def _prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
+    """
+    git commit hook.
+    Uses WORK_DIR env var to prefix commit msg.
+    """
+    import os
+    WORK_DIR = os.environ.get('WORK_DIR')
+    if WORK_DIR:
+        wd = work.WorkDir(WORK_DIR)
+        message = f"[{wd.name}] " + open(COMMIT_MSG_FILE, 'r').read()
+        cmf = open(COMMIT_MSG_FILE, 'w')
+        cmf.write(message)
+        cmf.close()
+    else:
+        print('No WORK_DIR environment variable.')
+        exit(1)
+
+ns.add_task(_prepare_commit_msg_hook)
+
+# setup task. copy git hook
+
+#check_state(cd = workdir and workdir env var)
 
 #@task
 def _dvc_run(ctx, ):
