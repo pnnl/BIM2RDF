@@ -8,6 +8,9 @@ from pathlib import Path
 ns = Collection()
 
 
+
+
+
 # SETUP tasks
 setup_coll = Collection('setup')
 
@@ -49,26 +52,6 @@ setup_coll.add_task(create_secrets)
 
 ns.add_collection(setup_coll)
 
-dir_help = 'directory relative to project directory'
-@task(help={'dir': dir_help})
-def create_WorkDir(ctx, dir):
-    """
-    Initializes a work dir with special files.
-    """
-    dir = Path(dir)
-    if len(dir.parts) > 1:
-        print('keep work directories flat')
-        exit(1)
-    wd = work.WorkDir(dir)
-    return wd
-
-@task
-def list_work_dirs(ctx):
-    """Lists work directories"""
-    for wd in work.find_WorkDirs():
-        print(wd.name)
-ns.add_task(list_work_dirs)
-
 def get_current_conda_env():
     import os
     dir = Path(os.getenv('CONDA_PREFIX')) # can't rely conda info active env
@@ -95,8 +78,38 @@ def get_current_WorkDir():
         return work.WorkDir(wd)
     return
 
+
+
+dir_help = 'directory relative to project directory'
+@task(help={'dir': dir_help})
+def create_WorkDir(ctx, dir):
+    """
+    Initializes a work dir with special files.
+    """
+    dir = Path(dir)
+    if len(dir.parts) > 1:
+        print('keep work directories flat')
+        exit(1)
+    wd = work.WorkDir(dir)
+    return wd
+
 @task
-def make_dev_env(ctx, work_dir=get_current_work_dir(), recreate=False):
+def list_work_dirs(ctx):
+    """Lists work directories"""
+    for wd in work.find_WorkDirs():
+        print(wd.name)
+ns.add_task(list_work_dirs)
+
+
+cur_work_dir = get_current_work_dir()
+def get_cur_work_dir_help():
+    cd = ''
+    if cur_work_dir:
+        cd += f" Default: {cur_work_dir}"
+    return f"Work directory."+cd
+
+@task(help={'work-dir': get_cur_work_dir_help()  })
+def make_dev_env(ctx, work_dir=cur_work_dir, recreate=False):
     """
     Create conda development environment.
     """
@@ -176,8 +189,8 @@ def work_on(ctx, work_dir):
     print('Ready to work!')
 ns.add_task(work_on)
 
-@task
-def remove_work_env(ctx, work_dir=get_current_work_dir()):
+@task(help={'work-dir': get_cur_work_dir_help() })
+def remove_work_env(ctx, work_dir=cur_work_dir):
     """
     Removes conda environment associated with work dir.
     """
@@ -204,8 +217,9 @@ def remove_work_env(ctx, work_dir=get_current_work_dir()):
             print(f"> conda env remove -n {wd.devenv_name}")
 ns.add_task(remove_work_env)
 
-@task(help={'message': "Commit message. Use quotes."})
-def commit(ctx, message, work_dir=get_current_work_dir()):
+@task(help={'message': "Commit message. Use quotes.",
+            'work-dir': get_cur_work_dir_help() })
+def commit(ctx, message, work_dir=cur_work_dir):
     """
     Prefixes commit message with workdir.
     """
