@@ -110,8 +110,7 @@ def make_dev_env(ctx, work_dir=get_current_work_dir(), recreate=False):
             (wd.dir / 'environment.yml').unlink()
         except FileNotFoundError:
             pass
-        ctx.run(f'> conda env remove -n {wd.devenv_name}')
-        #remove_work_env(ctx, work_dir)
+        remove_work_env(ctx, work_dir)
 
     if 'base' != get_current_conda_env():
         print("Create dev environment from 'base' environment:")
@@ -195,8 +194,11 @@ def remove_work_env(ctx, work_dir=get_current_work_dir()):
         return
     else:
         if wd.devenv_name == get_current_conda_env():
-            print("Can't remove current env. Go to another env:")
-            print("> conda activate estcp-project")
+            if wd.devenv_name == 'estcp-project':
+                print("Don't remove base/project env.")
+            else:
+                print("Can't remove current env. Go to another env:")
+                print("> conda activate estcp-project")
             exit(1)
         else:
             print(f"> conda env remove -n {wd.devenv_name}")
