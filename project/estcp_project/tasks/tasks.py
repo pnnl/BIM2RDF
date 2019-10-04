@@ -9,8 +9,6 @@ ns = Collection()
 
 
 
-
-
 # SETUP tasks
 setup_coll = Collection('setup')
 
@@ -43,6 +41,18 @@ def create_secrets(ctx):
         return ret
     estcp_project.config.save_secrets(input_secrets)
 setup_coll.add_task(create_secrets)
+
+
+@task
+def create_git_hook(ctx):
+    """
+    Set up git commit automation.
+    """
+    src = root /  'git' / 'hooks' / 'prepare-commit-msg'
+    dst = root / '.git' / 'hooks' / 'prepare-commit-msg'
+    src = open(src, 'r').read()
+    open(dst, 'w').write(src)
+setup_coll.add_task(create_git_hook)
 
 #@task(, default=True)
 #def setup(ctx, ):
@@ -187,6 +197,8 @@ def work_on(ctx, work_dir):
         exit(1)
     
     print('Ready to work!')
+# TODO check WORK_DIR set
+# notice: you may want to create a new branch
 ns.add_task(work_on)
 
 @task(help={'work-dir': get_cur_work_dir_help() })
@@ -255,7 +267,7 @@ def _prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
 ns.add_task(_prepare_commit_msg_hook)
 
 # setup task. copy git hook
-
+# todo: use WORK_DIR instead of conda env where applicable
 #check_state(cd = workdir and workdir env var)
 
 #@task
@@ -276,5 +288,5 @@ def _dvc_run(ctx, ):
 # task: reset/clean env
 # clean env
 
-# git commit [tags]
+
 # ok just do setup.py programmatically
