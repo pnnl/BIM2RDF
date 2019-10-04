@@ -14,19 +14,28 @@ setup_coll = Collection('setup')
 ns.add_collection(setup_coll)
 
 @task
-def set_dvc_repo(ctx, dir=r"E:\ArmyReserve\ESTCP\Machine Learning\software-files\dont-touch\not-code-dvc-repo"):
+def set_dvc_repo(ctx,
+                prompt=False,
+                dir=r"\\pnl\projects\ArmyReserve\ESTCP\Machine Learning\software-files\dont-touch\not-code-dvc-repo"):
     """
     Set sharefolder as (non- source code) DVC repository.
     """
-    dir = Path(dir)
+    if prompt:
+        if input(f"Enter 'Y' if {dir} is the DVC repo. ").lower() == 'y':
+            pass
+        else:
+            dir = input("input DVC repo: ")
+
+    dir = Path(dir).resolve().absolute()
     if not dir.is_dir():
         raise FileNotFoundError('not a directory or directory not found')
-
-    dir = dir.absolute()
     ctx.run(f"dvc remote add sharefolder \"{dir}\" -f")
     ctx.run(f"dvc config core.remote sharefolder")
-setup_coll.add_task(set_dvc_repo)
+    sdvc = root / 'data' / 'sample.dvc'
+    # will not error if file in (local) cache but wrong remote
+    ctx.run(f"dvc pull \"{root/'data'/'sample.dvc'}\"")
 
+setup_coll.add_task(set_dvc_repo)
 
 @task
 def create_secrets(ctx):
@@ -43,7 +52,6 @@ def create_secrets(ctx):
     estcp_project.config.save_secrets(input_secrets)
 setup_coll.add_task(create_secrets)
 
-
 @task
 def create_git_hook(ctx):
     """
@@ -55,14 +63,16 @@ def create_git_hook(ctx):
     open(dst, 'w').write(src)
 setup_coll.add_task(create_git_hook)
 
-
-
-#@task(, default=True)
-#def setup(ctx, ):
-#     """All setup tasks"""
-#     pass
-# setup_coll.add_task(setup)
-
+@task(
+    pre=[
+        create_git_hook,
+        create_git_hook,
+        call(set_dvc_repo, prompt=True)],
+    default=True)
+def setup(ctx,):
+     """All setup tasks"""
+     pass
+setup_coll.add_task(setup)
 
 def get_current_conda_env():
     import os
