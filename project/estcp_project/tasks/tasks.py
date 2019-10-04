@@ -196,6 +196,9 @@ def work_on(ctx, work_dir):
         rdir = Path(*rdir)
         print(f"Change directory to {rdir}")
         exit(1)
+
+    if 'master' == ctx.run('git rev-parse --abbrev-ref HEAD', hide='out').stdout.replace('\n',''):
+        print('Notice: You many want to create a branch for your work.')
     
     print('Ready to work!')
 # TODO check WORK_DIR set
