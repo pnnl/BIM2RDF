@@ -11,6 +11,7 @@ ns = Collection()
 
 # SETUP tasks
 setup_coll = Collection('setup')
+ns.add_collection(setup_coll)
 
 @task
 def set_dvc_repo(ctx, dir=r"E:\ArmyReserve\ESTCP\Machine Learning\software-files\dont-touch\not-code-dvc-repo"):
@@ -54,13 +55,14 @@ def create_git_hook(ctx):
     open(dst, 'w').write(src)
 setup_coll.add_task(create_git_hook)
 
+
+
 #@task(, default=True)
 #def setup(ctx, ):
 #     """All setup tasks"""
 #     pass
 # setup_coll.add_task(setup)
 
-ns.add_collection(setup_coll)
 
 def get_current_conda_env():
     import os
@@ -110,7 +112,6 @@ def list_work_dirs(ctx):
         print(wd.name)
 ns.add_task(list_work_dirs)
 
-
 cur_work_dir = get_current_work_dir()
 def get_cur_work_dir_help():
     cd = ''
@@ -118,7 +119,7 @@ def get_cur_work_dir_help():
         cd += f" Default: {cur_work_dir}"
     return f"Work directory."+cd
 
-@task(help={'work-dir': get_cur_work_dir_help()  })
+@task(help={'work-dir': get_cur_work_dir_help()})
 def make_dev_env(ctx, work_dir=cur_work_dir, recreate=False):
     """
     Create conda development environment.
@@ -229,49 +230,30 @@ def remove_work_env(ctx, work_dir=cur_work_dir):
             print(f"> conda env remove -n {wd.devenv_name}")
 ns.add_task(remove_work_env)
 
-@task(help={'message': "Commit message. Use quotes.",
-            'work-dir': get_cur_work_dir_help() })
-def commit(ctx, message, work_dir=cur_work_dir):
-    """
-    Prefixes commit message with workdir.
-    """
-    wd = work_dir
-    if wd not in (wd.name for wd in work.find_WorkDirs()):
-        print('Work dir not found.')
-        exit(1)
-    wd = work.WorkDir(wd)
+# @task(help={'message': "Commit message. Use quotes.",
+#             'work-dir': get_cur_work_dir_help() })
+# def commit(ctx, message, work_dir=cur_work_dir):
+#     """
+#     Prefixes commit message with workdir.
+#     """
+#     wd = work_dir
+#     if wd not in (wd.name for wd in work.find_WorkDirs()):
+#         print('Work dir not found.')
+#         exit(1)
+#     wd = work.WorkDir(wd)
 
-    message = f"[{wd.name}] " + message
-    ctx.run(f"git commit  -m  \"{message}\"")
-ns.add_task(commit)
+#     message = f"[{wd.name}] " + message
+#     ctx.run(f"git commit  -m  \"{message}\"")
+# ns.add_task(commit)
 
 
-@task# TODO hide?
-def _prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
-    """
-    git commit hook.
-    Uses WORK_DIR env var to prefix commit msg.
-    """
-    import os
-    WORK_DIR = os.environ.get('WORK_DIR')
-    if WORK_DIR:
-        wd = work.WorkDir(WORK_DIR)
-        message = f"[{wd.name}] " + open(COMMIT_MSG_FILE, 'r').read()
-        cmf = open(COMMIT_MSG_FILE, 'w')
-        cmf.write(message)
-        cmf.close()
-    else:
-        print('No WORK_DIR environment variable.')
-        exit(1)
 
-ns.add_task(_prepare_commit_msg_hook)
 
-# setup task. copy git hook
 # todo: use WORK_DIR instead of conda env where applicable
 #check_state(cd = workdir and workdir env var)
 
 #@task
-def _dvc_run(ctx, ):
+def dvc_run(ctx, ):
     """
     Executes .dvc files.
     """
@@ -290,3 +272,26 @@ def _dvc_run(ctx, ):
 
 
 # ok just do setup.py programmatically
+
+# 
+_coll = Collection('_')
+ns.add_collection(_coll)
+
+@task
+def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
+    """
+    git commit hook.
+    Uses WORK_DIR env var to prefix commit msg.
+    """
+    import os
+    WORK_DIR = os.environ.get('WORK_DIR')
+    if WORK_DIR:
+        wd = work.WorkDir(WORK_DIR)
+        message = f"[{wd.name}] " + open(COMMIT_MSG_FILE, 'r').read()
+        cmf = open(COMMIT_MSG_FILE, 'w')
+        cmf.write(message)
+        cmf.close()
+    else:
+        print('No WORK_DIR environment variable.')
+        exit(1)
+_coll.add_task(prepare_commit_msg_hook)
