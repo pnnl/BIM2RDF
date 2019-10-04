@@ -4,4 +4,4 @@ dependencies:
   - invoke
 environment:
   PYTHONPATH:
-    - {{root}}
+    - '{{root}}/'
