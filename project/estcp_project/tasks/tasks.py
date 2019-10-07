@@ -282,7 +282,7 @@ def dvc_run(ctx, ):
 # run dvc conda run
 # task: reset/clean env
 # clean env
-
+# TODO feature: optionally print out shell cmds.
 
 # ok just do setup.py programmatically
 
