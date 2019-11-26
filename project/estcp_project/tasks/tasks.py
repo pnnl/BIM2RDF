@@ -151,10 +151,17 @@ def _make_dev_env(work_dir=cur_work_dir, ):
 
 def _change_dir(wd):
     if wd.dir.resolve() != Path('.').resolve():
-        rdir = ['..']*wd.n_upto_proj() + [wd.name]
-        rdir = Path(*rdir)
+        n_up = len(Path('.').absolute().parts) - len(wd.dir.absolute().parts) + 1
+        assert(n_up!=0)
+        if n_up>0:
+            deeper = True
+            rdir = ['..']*n_up + [wd.name]
+            rdir = Path(*rdir)
+        else:
+            deeper = False
+            rdir = Path(wd.dir).absolute().relative_to(Path('.').absolute())
         print(f"Change directory to {rdir}")
-        return 1
+        return True
     else:
         return None
 
@@ -168,27 +175,36 @@ def work_on(ctx, work_dir, ):
     Keep invoking until desired state achieved.
     """
     cur_branch = ctx.run('git rev-parse --abbrev-ref HEAD', hide='out').stdout.replace('\n','')
+    cur_env_name = get_current_conda_env()
 
-    #def init_commit():
-    #    ctx.run(f"git add wd.")
-    # ctx run git add wd.dir
-        #ctx.run(f'git commit -m  " [{wd.name}]  "') TODO
+    def init_commit(wd):
+        ctx.run(f'git add "{wd.dir}"')
+        ctx.run(f'git commit -m  " [{wd.name}]  initial commit"')
 
     # best programmed with a state diagram. TODO 
+
+    # 0. best to do this from the project env
+    project_env = work.WorkDir(root/'project').devenv_name  # hardcoding warning
+    if cur_env_name !=  project_env:
+        print("Change to project environment.")
+        print(f"> conda activate {project_env}")
+        exit(1)
+
     # 1. check work dir creation
     wd = work_dir
     if wd not in (wd.name for wd in work.find_WorkDirs()):
         # state of just creating a workdir
         if cur_branch != 'master':
-            if input(f"Current git branch is not 'master'. Enter 'Y' if  you're sure that you want to initialize the work dir in '{cur_branch}' branch.").lower() == 'y':
+            if input(f"Current git branch is not 'master'. Enter 'Y' if  you're sure that you want to initialize the work dir in the '{cur_branch}' branch.").lower() == 'y':
                 wd = _create_WorkDir(wd)
-                ctx.run
+                init_commit(wd)
             else:
                 print('Switch to master.')
                 print('> git checkout master')
                 exit(1)
         else:
             wd = _create_WorkDir(wd)
+            init_commit(wd)
     else:
         wd = work.WorkDir(wd)
     
@@ -213,8 +229,7 @@ def work_on(ctx, work_dir, ):
         # but no exit(1)
 
     # 4. check if in env
-    env_name = get_current_conda_env()
-    if wd.devenv_name != env_name:
+    if wd.devenv_name != cur_env_name:
         print(f'Activate environment:')
         print(f'> conda activate {wd.devenv_name}')
         exit(1)
@@ -231,7 +246,7 @@ def work_on(ctx, work_dir, ):
 # TODO check WORK_DIR set
 ns.add_task(work_on)
 
-
+# TODO: recreate is this followed by a workon
 @task(help={'work-dir': get_cur_work_dir_help() })
 def remove_work_env(ctx, work_dir=cur_work_dir):
     """
@@ -281,9 +296,8 @@ ns.add_task(remove_work_env)
 
 # todo: use WORK_DIR instead of conda env where applicable
 #check_state(cd = workdir and workdir env var)
-
-#@task
-def dvc_run(ctx, ):
+#@task TODO
+def dvc_run(ctx,  work_dir=cur_work_dir):
     """
     Executes .dvc files.
     """
@@ -294,7 +308,7 @@ def dvc_run(ctx, ):
         exit(1)
     wd = work.WorkDir(wd)
     work_on(ctx, wd.dir)
-#ns.add_task(commit)
+#ns.add_task(dvc_run)
 
 # run dvc conda run
 # task: reset/clean env
