@@ -34,7 +34,6 @@ def set_dvc_repo(ctx,
     sdvc = root / 'data' / 'sample.dvc'
     # will not error if file in (local) cache but wrong remote
     ctx.run(f"dvc pull \"{root/'data'/'sample.dvc'}\"")
-
 setup_coll.add_task(set_dvc_repo)
 
 @task
@@ -101,17 +100,13 @@ def get_current_WorkDir():
     return
 
 
-
-dir_help = 'directory relative to project directory'
-@task(help={'dir': dir_help})
-def create_WorkDir(ctx, dir):
+def _create_WorkDir(dir):
     """
     Initializes a work dir with special files.
     """
     dir = Path(dir)
     if len(dir.parts) > 1:
         print('keep work directories flat')
-        exit(1)
     wd = work.WorkDir(dir)
     return wd
 
@@ -129,62 +124,83 @@ def get_cur_work_dir_help():
         cd += f" Default: {cur_work_dir}"
     return f"Work directory."+cd
 
-@task(help={'work-dir': get_cur_work_dir_help()})
-def make_dev_env(ctx, work_dir=cur_work_dir, recreate=False):
+
+def _make_dev_env(work_dir=cur_work_dir, ):
     """
     Create conda development environment.
     """
-    if not work_dir:
-        print('No work directory. Create one.')
-        exit(1)
+    assert(work_dir)
     wd = work.WorkDir(work_dir)
     
-    if recreate:
-        try:
-            (wd.dir / 'environment.yml').unlink()
-        except FileNotFoundError:
-            pass
-        remove_work_env(ctx, work_dir)
+    #if recreate:
+    #    try:
+    #        (wd.dir / 'environment.yml').unlink()
+    #    except FileNotFoundError:
+    #        pass
+    #    remove_work_env(work_dir)
 
-    if 'base' != get_current_conda_env():
-        print("Create dev environment from 'base' environment:")
-        print("> conda activate base")
-        print(f"> cd { work_dir } (the work dir)")
-        print(f"Modify environment.run.yml and environment.devenv.yml as needed.")
-        print("> conda devenv")
-        print("Then enter the environment:")
-        print(f"> conda activate {wd.devenv_name}")
-        exit(1)
-    #with ctx.cd(str(wd.dir.absolute())): doesn't work
-    #devenv = wd.dir / 'environment.devenv.yml'
-    #devenv = devenv.absolute()
-    #conda_base = (Path(str(
-    #conda_base = ctx.run('conda info --base', hide='out').stdout.replace('\n','')
-    #conda_base = (Path(conda_base) / 'Scripts' / 'conda')
-    #breakpoint()
-    #ctx.run(f'conda devenv --file "{devenv}"', env={'PATH': str(conda_base) })
-    #print("Now modify environment.run.yml and environment.devenv.yml.")
-ns.add_task(make_dev_env)
+    # expecting this condition almost always
+    print("Create dev environment from 'base' environment:")
+    print("> conda activate base")
+    _change_dir(wd)
+    print(f"Modify environment.run.yml and environment.devenv.yml as needed.")
+    print("> conda devenv")
+    print("Then enter the environment:")
+    print(f"> conda activate {wd.devenv_name}")
 
 
-@task(help={'dir': dir_help})
-def work_on(ctx, work_dir):
+def _change_dir(wd):
+    if wd.dir.resolve() != Path('.').resolve():
+        rdir = ['..']*wd.n_upto_proj() + [wd.name]
+        rdir = Path(*rdir)
+        print(f"Change directory to {rdir}")
+        return 1
+    else:
+        return None
+
+# TODO create recreate env task
+
+
+@task(help={'work_dir': "directory to work on something"})
+def work_on(ctx, work_dir, ):
     """
     Instructs what to do to work on something.
     Keep invoking until desired state achieved.
     """
+    cur_branch = ctx.run('git rev-parse --abbrev-ref HEAD', hide='out').stdout.replace('\n','')
+
+    #def init_commit():
+    #    ctx.run(f"git add wd.")
+    # ctx run git add wd.dir
+        #ctx.run(f'git commit -m  " [{wd.name}]  "') TODO
+
+    # best programmed with a state diagram. TODO 
+    # 1. check work dir creation
     wd = work_dir
     if wd not in (wd.name for wd in work.find_WorkDirs()):
-        wd = create_WorkDir(ctx, wd)
+        # state of just creating a workdir
+        if cur_branch != 'master':
+            if input(f"Current git branch is not 'master'. Enter 'Y' if  you're sure that you want to initialize the work dir in '{cur_branch}' branch.").lower() == 'y':
+                wd = _create_WorkDir(wd)
+                ctx.run
+            else:
+                print('Switch to master.')
+                print('> git checkout master')
+                exit(1)
+        else:
+            wd = _create_WorkDir(wd)
     else:
         wd = work.WorkDir(wd)
-
+    
+    # 2. check env creation
     #                                           sometimes nonzero exit returned :/
     envlist = ctx.run('conda env list', hide='out', warn=True).stdout
     # checking if env created for the workdir
     if envlist.count(wd.devenv_name+'\n') != 1:
-        make_dev_env(ctx, work_dir=wd.name)
+        _make_dev_env(work_dir=wd.name)
+        exit(1)
     
+    # 3. did you try ?
     minRunenv = \
         wd.minrunenv \
         == yaml.safe_load(open(wd.dir/'environment.run.yml'))
@@ -192,28 +208,29 @@ def work_on(ctx, work_dir):
         yaml.safe_load(open(wd.dir/'environment.devenv.yml')) \
         == wd.make_devenv()
     if (minRunenv and minDevenv):
-        print('Created minimal dev env.')
-        print('Modify environment.[devenv|run].yml as needed and rerun this command.')
+        print('Minimal dev env detected.')
+        _make_dev_env(work_dir=wd.name)
+        # but no exit(1)
 
+    # 4. check if in env
     env_name = get_current_conda_env()
     if wd.devenv_name != env_name:
         print(f'Activate environment:')
         print(f'> conda activate {wd.devenv_name}')
         exit(1)
 
-    if wd.dir.resolve() != Path('.').resolve():
-        rdir = ['..']*wd.n_upto_proj() + [wd.name]
-        rdir = Path(*rdir)
-        print(f"Change directory to {rdir}")
+    # 5. check if in dir
+    if _change_dir(wd):
         exit(1)
 
-    if 'master' == ctx.run('git rev-parse --abbrev-ref HEAD', hide='out').stdout.replace('\n',''):
+    # 6. check if in a branch
+    if ('master' == cur_branch) and (wd.name != 'project'):
         print('Notice: You many want to create a branch for your work.')
     
     print('Ready to work!')
 # TODO check WORK_DIR set
-# notice: you may want to create a new branch
 ns.add_task(work_on)
+
 
 @task(help={'work-dir': get_cur_work_dir_help() })
 def remove_work_env(ctx, work_dir=cur_work_dir):
