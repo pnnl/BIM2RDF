@@ -1,6 +1,6 @@
 includes:
-- '{{root}}/../project/environment.run.yml'
 - '{{root}}/../dev-bootstrap/environment.yml'
+- '{{root}}/../project/environment.run.yml'
 name: estcp-project
 environment:
   WORK_DIR: project
