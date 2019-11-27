@@ -152,7 +152,7 @@ def _make_dev_env(work_dir=cur_work_dir, ):
 def _change_dir(wd):
     if wd.dir.resolve() != Path('.').resolve():
         n_up = len(Path('.').absolute().parts) - len(wd.dir.absolute().parts) + 1
-        assert(n_up!=0)
+        assert( (n_up-1) !=0)
         if n_up>0:
             deeper = True
             rdir = ['..']*n_up + [wd.name]
@@ -160,7 +160,8 @@ def _change_dir(wd):
         else:
             deeper = False
             rdir = Path(wd.dir).absolute().relative_to(Path('.').absolute())
-        print(f"Change directory to {rdir}")
+        print(f"Change directory to {rdir}.")
+        print(f"> cd {rdir}")
         return True
     else:
         return None
@@ -224,7 +225,7 @@ def work_on(ctx, work_dir, ):
         yaml.safe_load(open(wd.dir/'environment.devenv.yml')) \
         == wd.make_devenv()
     if (minRunenv and minDevenv):
-        print('Minimal dev env detected.')
+        print('Minimal dev or run env detected.')
         _make_dev_env(work_dir=wd.name)
         # but no exit(1)
 
