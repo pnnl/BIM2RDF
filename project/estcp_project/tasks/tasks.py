@@ -325,7 +325,7 @@ ns.add_collection(_coll)
 @task
 def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
     """
-    git commit hook.
+    (ignore. internal task.) git commit hook.
     Uses WORK_DIR env var to prefix commit msg.
     """
     import os
