@@ -224,10 +224,13 @@ def work_on(ctx, work_dir, ):
     minDevenv = \
         yaml.safe_load(open(wd.dir/'environment.devenv.yml')) \
         == wd.make_devenv()
-    if (minRunenv and minDevenv):
+    #            'or' instead of 'and' since the intent is to get the user to do /something/.
+    if (minRunenv or minDevenv):
         print('Minimal dev or run env detected.')
         _make_dev_env(work_dir=wd.name)
         # but no exit(1)
+
+    # check if devenv in run env includes. TODO
 
     # 4. check if in env
     if wd.devenv_name != cur_env_name:
