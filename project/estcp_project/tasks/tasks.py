@@ -51,21 +51,40 @@ def create_secrets(ctx):
     estcp_project.config.save_secrets(input_secrets)
 setup_coll.add_task(create_secrets)
 
-@task
-def create_git_hook(ctx):
-    """
-    Set up git commit automation.
-    """
-    src = root /  'git' / 'hooks' / 'prepare-commit-msg'
-    dst = root / '.git' / 'hooks' / 'prepare-commit-msg'
+
+def copy_git_hook_file(name):
+    src = root /  'git' / 'hooks' / name
+    dst = root / '.git' / 'hooks' / name
     src = open(src, 'r').read()
     open(dst, 'w').write(src)
-setup_coll.add_task(create_git_hook)
+
+@task
+def create_project_git_commit_hook(ctx):
+    """
+    Set up git commit automation which prepends commits with [<workdir>]
+    """
+    copy_git_hook_file('prepare-commit-msg')
+    
+setup_coll.add_task(create_project_git_commit_hook)
+
+
+@task
+def create_dvc_git_hooks(ctx):
+    # luckily it doesn't conflict with project git commit hook
+    """
+    Set up dvc git hooks.
+    """
+    copy_git_hook_file('post-checkout')
+    copy_git_hook_file('pre-commit')
+    copy_git_hook_file('pre-push')
+setup_coll.add_task(create_dvc_git_hooks)
+
 
 @task(
     pre=[
-        create_git_hook,
-        create_git_hook,
+        create_secrets,
+        create_project_git_commit_hook,
+        create_dvc_git_hooks,
         call(set_dvc_repo, prompt=True)],
     default=True)
 def setup(ctx,):
@@ -330,7 +349,7 @@ ns.add_collection(_coll)
 @task
 def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
     """
-    (ignore. internal task.) git commit hook.
+    (ignore. internal task.) git commit hook for workdir tag
     Uses WORK_DIR env var to prefix commit msg.
     """
     import os
