@@ -1,7 +1,12 @@
 dependencies:
   - pyprojroot
-  - dvc
   - invoke
+  - dvc
+  - pip:
+    # this is probably is a pip first pkg
+    # i opened this https://github.com/conda-forge/dvc-feedstock/issues/52 
+    # TODO: temporarily as pip so change back to conda-forge later. also in data-interface/run reqs
+    - dvc # might be a good idea to create a wrapped dvc so it doesn't pollute the current env.
 environment:
   PYTHONPATH:
     - '{{root}}/'
