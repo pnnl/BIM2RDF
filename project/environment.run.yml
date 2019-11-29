@@ -2,6 +2,7 @@ dependencies:
   - pyprojroot
   - invoke
   - dvc
+  - pip # remove when not (explicitly) needed
   - pip:
     # this is probably is a pip first pkg
     # i opened this https://github.com/conda-forge/dvc-feedstock/issues/52 
