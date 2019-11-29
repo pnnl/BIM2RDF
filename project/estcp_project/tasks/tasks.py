@@ -184,16 +184,18 @@ def work_on(ctx, work_dir, ):
 
     # best programmed with a state diagram. TODO 
 
-    # 0. best to do this from the project env
-    project_env = work.WorkDir(root/'project').devenv_name  # hardcoding warning
-    if cur_env_name !=  project_env:
-        print("Change to project environment.")
-        print(f"> conda activate {project_env}")
-        exit(1)
+
 
     # 1. check work dir creation
     wd = work_dir
     if wd not in (wd.name for wd in work.find_WorkDirs()):
+        # best to do this from the project env 
+        # b/c the git hook prepends WORK_DIR
+        project_env = work.WorkDir(root/'project').devenv_name  # hardcoding warning
+        if cur_env_name !=  project_env:
+            print("Change to project environment before creating a new workdir.")
+            print(f"> conda activate {project_env}")
+            exit(1)
         # state of just creating a workdir
         if cur_branch != 'master':
             if input(f"Current git branch is not 'master'. Enter 'Y' if  you're sure that you want to initialize the work dir in the '{cur_branch}' branch.").lower() == 'y':
@@ -224,10 +226,13 @@ def work_on(ctx, work_dir, ):
     minDevenv = \
         yaml.safe_load(open(wd.dir/'environment.devenv.yml')) \
         == wd.make_devenv()
-    if (minRunenv and minDevenv):
+    #            'or' instead of 'and' since the intent is to get the user to do /something/.
+    if (minRunenv or minDevenv):
         print('Minimal dev or run env detected.')
         _make_dev_env(work_dir=wd.name)
         # but no exit(1)
+
+    # check if devenv in run env includes. TODO
 
     # 4. check if in env
     if wd.devenv_name != cur_env_name:
