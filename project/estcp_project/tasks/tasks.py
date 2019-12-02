@@ -199,7 +199,7 @@ def work_on(ctx, work_dir, ):
 
     def init_commit(wd):
         ctx.run(f'git add "{wd.dir}"')
-        ctx.run(f'git commit -m  " [{wd.name}]  initial commit"')
+        ctx.run(f'git commit -m  " [{wd.name}]  initial placeholder commit"')
 
     # best programmed with a state diagram. TODO 
 
