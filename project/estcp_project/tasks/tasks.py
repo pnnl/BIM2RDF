@@ -287,7 +287,7 @@ def remove_work_env(ctx, work_dir=cur_work_dir):
     # checking if env created for the workdir
     if envlist.count(wd.devenv_name+'\n') != 1:
         print("No env associated with work dir.")
-        return
+        exit(0)
     else:
         if wd.devenv_name == get_current_conda_env():
             if wd.devenv_name == 'estcp-project':
@@ -297,6 +297,10 @@ def remove_work_env(ctx, work_dir=cur_work_dir):
                 print("> conda activate estcp-project")
             exit(1)
         else:
+            #(wd.dir / wd.envfn).unlink(missing_ok=True) py3.8
+            envfn = (wd.dir / wd.envfn)
+            if envfn.exists():
+                envfn.unlink()
             print(f"> conda env remove -n {wd.devenv_name}")
 ns.add_task(remove_work_env)
 
