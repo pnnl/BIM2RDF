@@ -57,6 +57,9 @@ def copy_git_hook_file(name):
     dst = root / '.git' / 'hooks' / name
     src = open(src, 'r').read()
     open(dst, 'w').write(src)
+    # +x flag set in git. so the following isn't needed
+    #from stat import S_IXUSR
+    #dst.chmod(S_IXUSR)
 
 @task
 def create_project_git_commit_hook(ctx):
@@ -64,7 +67,6 @@ def create_project_git_commit_hook(ctx):
     Set up git commit automation which prepends commits with [<workdir>]
     """
     copy_git_hook_file('prepare-commit-msg')
-    
 setup_coll.add_task(create_project_git_commit_hook)
 
 
