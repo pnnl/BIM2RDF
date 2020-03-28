@@ -15,7 +15,7 @@ ns.add_collection(setup_coll)
 
 @task
 def set_dvc_repo(ctx,
-                prompt=False,
+                prompt=True,
                 dir=r"\\pnl\projects\ArmyReserve\ESTCP\Machine Learning\software-files\dont-touch\not-code-dvc-repo"):
     """
     Set sharefolder as (non- source code) DVC repository.
@@ -29,8 +29,8 @@ def set_dvc_repo(ctx,
     dir = Path(dir).resolve().absolute()
     if not dir.is_dir():
         raise FileNotFoundError('not a directory or directory not found')
-    ctx.run(f"dvc remote add sharefolder \"{dir}\" -f")
-    ctx.run(f"dvc config core.remote sharefolder")
+    ctx.run(f"dvc config --local core.remote sharefolder")
+    ctx.run(f"dvc remote add --local sharefolder \"{dir}\" -f")
     sdvc = root / 'data' / 'sample.dvc'
     # will not error if file in (local) cache but wrong remote
     ctx.run(f"dvc pull \"{root/'data'/'sample.dvc'}\"")
