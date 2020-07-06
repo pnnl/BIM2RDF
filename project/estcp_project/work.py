@@ -55,6 +55,20 @@ class WorkDir():
     def devenv_name(self):
         return 'estcp-'+self.name
 
+    def get_env_path(self):
+        from subprocess import check_output
+        _ = check_output('conda env list --json')
+        import json
+        _ = json.loads(_)
+        _ = _['envs']
+        from  pathlib import Path
+        for pth in _:
+            pth = Path(pth)
+            if pth.stem == self.devenv_name:
+                return pth
+        return None
+
+
     def make_devenv(self,
                     name='self.devenv_name',
                     workdir_run_deps=[],

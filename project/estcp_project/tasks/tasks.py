@@ -82,11 +82,27 @@ def create_dvc_git_hooks(ctx):
 setup_coll.add_task(create_dvc_git_hooks)
 
 
+@task
+def create_project_wrappers(ctx, ):
+    """
+    Create wrappers around project tool executables.
+    """
+    #for #dvc, git, invoke, work-on.sh/enter: bash --login -i
+    for exe in ['dvc', 'git', 'invoke', 'inv']:
+        create_exec_wrapper(ctx, exe=exe, work_dir='project')
+setup_coll.add_task(create_project_wrappers)
+
+
+# hardcode work-on bin/run
+# just stub to get run-in sccript create-wrappers -t conda -f stub -d %CD%/bin --conda-env-dir %CONDA_PREFIX%
+
+
 @task(
     pre=[
         create_secrets,
         create_project_git_commit_hook,
         create_dvc_git_hooks,
+        create_project_wrappers,
         call(set_dvc_repo, prompt=True)],
     default=True)
 def setup(ctx,):
@@ -121,7 +137,7 @@ def get_current_WorkDir():
     return
 
 
-def _create_WorkDir(dir):
+def _create_WorkDir(ctx, dir):
     """
     Initializes a work dir with special files.
     """
@@ -146,7 +162,24 @@ def get_cur_work_dir_help():
     return f"Work directory."+cd
 
 
+@task
+def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test_exe_in_env=...):
+    """
+    Create executable wrapped in work dir env.
+    """
+    if work_dir not in (wd.name for wd in work.find_WorkDirs()):
+        print('work dir not found')
+        exit(1)
+    wd = work.WorkDir(root / work_dir)
+    env_pth = wd.get_env_path()
+    assert(env_pth)
+    # overwrites
+    ctx.run(f"create-wrappers -t conda -f {exe} -d {wd.dir/'wbin'} --conda-env-dir {env_pth}")
+ns.add_task(create_exec_wrapper)
+
+
 def _make_dev_env(work_dir=cur_work_dir, ):
+    # TODO use conda run base devenv
     """
     Create conda development environment.
     """
@@ -166,8 +199,6 @@ def _make_dev_env(work_dir=cur_work_dir, ):
     _change_dir(wd)
     print(f"Modify environment.run.yml and environment.devenv.yml as needed.")
     print("> conda devenv")
-    print("Then enter the environment:")
-    print(f"> conda activate {wd.devenv_name}")
 
 
 def _change_dir(wd):
@@ -191,7 +222,7 @@ def _change_dir(wd):
 
 
 @task(help={'work_dir': "directory to work on something"})
-def work_on(ctx, work_dir, ):
+def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     """
     Instructs what to do to work on something.
     Keep invoking until desired state achieved.
@@ -204,7 +235,6 @@ def work_on(ctx, work_dir, ):
         ctx.run(f'git commit -m  " [{wd.name}]  initial placeholder commit"')
 
     # best programmed with a state diagram. TODO 
-
 
 
     # 1. check work dir creation
@@ -220,14 +250,14 @@ def work_on(ctx, work_dir, ):
         # state of just creating a workdir
         if cur_branch != 'master':
             if input(f"Current git branch is not 'master'. Enter 'Y' if  you're sure that you want to initialize the work dir in the '{cur_branch}' branch.").lower() == 'y':
-                wd = _create_WorkDir(wd)
+                wd = _create_WorkDir(ctx, wd)
                 init_commit(wd)
             else:
                 print('Switch to master.')
                 print('> git checkout master')
                 exit(1)
         else:
-            wd = _create_WorkDir(wd)
+            wd = _create_WorkDir(ctx, wd)
             init_commit(wd)
     else:
         wd = work.WorkDir(wd)
@@ -252,6 +282,9 @@ def work_on(ctx, work_dir, ):
         print('Minimal dev or run env detected.')
         _make_dev_env(work_dir=wd.name)
         # but no exit(1)
+    
+    create_exec_wrapper(ctx, exe='_stub', work_dir=wd.name)
+    #TODO: create shell script
 
     # check if devenv in run env includes. TODO
 
