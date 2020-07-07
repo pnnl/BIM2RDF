@@ -1,11 +1,11 @@
 dependencies:
   - pyprojroot
   - python=3.7
-  - invoke=1.4.1 
+  - invoke=1.4.1
   - dvc=1.1.7
-  - git 
+  - git
+  - exec-wrappers=1.1.4
 includes:
-- '{{root}}/../dev-bootstrap/environment.yml'
 - '{{root}}/../project/environment.run.yml'
 name: estcp-project
 environment:

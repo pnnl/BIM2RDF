@@ -88,13 +88,10 @@ def create_project_wrappers(ctx, ):
     Create wrappers around project tool executables.
     """
     #for #dvc, git, invoke, work-on.sh/enter: bash --login -i
-    for exe in ['dvc', 'git', 'invoke', 'inv']:
-        create_exec_wrapper(ctx, exe=exe, work_dir='project')
+    for exe in ['dvc', 'invoke', 'inv',]+['git', 'bash']:
+        create_exec_wrapper(ctx, exe_name=exe, work_dir='project')
 setup_coll.add_task(create_project_wrappers)
 
-
-# hardcode work-on bin/run
-# just stub to get run-in sccript create-wrappers -t conda -f stub -d %CD%/bin --conda-env-dir %CONDA_PREFIX%
 
 
 @task(
@@ -163,7 +160,7 @@ def get_cur_work_dir_help():
 
 
 @task
-def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test_exe_in_env=...):
+def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, ):
     """
     Create executable wrapped in work dir env.
     """
@@ -172,9 +169,40 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test_exe_in_en
         exit(1)
     wd = work.WorkDir(root / work_dir)
     env_pth = wd.get_env_path()
-    assert(env_pth)
-    # overwrites
-    ctx.run(f"create-wrappers -t conda -f {exe} -d {wd.dir/'wbin'} --conda-env-dir {env_pth}")
+    if not env_pth:
+        raise Exception('no associated environment')
+    
+    def create_wrapper(exe_name, test=True):
+        import shutil
+        if not test:
+            # overwrites
+            # just fills in a name
+            ctx.run(f"create-wrappers -t conda -f {exe_name} -d \"{wd.dir/'wbin'}\" --conda-env-dir \"{env_pth}\"")
+            return Path(shutil.which(exe_name, path=f"{wd.dir/'wbin'}"))  # Path doesn't work until py3.8
+        
+        wpth = create_wrapper(exe_name, test=False) # stub
+        wtxt = open(wpth).read()
+        assert(wpth.exists())
+        wpth.unlink() #missing_ok=False) # py38 thing. wpth must exist
+        # so now the following doesn't pick up the wrapped exe. breaks out of recursion issues.
+        get_exe_py = f"from shutil import which; print(which(\'{exe_name}\'))"
+        exe = ctx.run(f"{wd.dir/'wbin'/'run-in'} python -c \"{get_exe_py}\"", hide='out').stdout.replace('\n', '')
+        if exe=='None': raise Exception(f'{exe_name} exe not found')
+
+        # create wrappers uses colon, :,  to separate -f exec. windows problem. so using $exe to sub in
+        _ = wtxt.replace(exe_name, f"{Path(exe).absolute()}")
+        open(wpth, 'w').write(_)
+        return wpth
+        
+    if exe_name == '_stub':
+        test = False
+    else:
+        test = True
+    wpth = create_wrapper(exe_name, test=test)
+    print('created wrapper', wpth)
+    return wpth
+    
+        
 ns.add_task(create_exec_wrapper)
 
 
@@ -283,22 +311,23 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
         _make_dev_env(work_dir=wd.name)
         # but no exit(1)
     
-    create_exec_wrapper(ctx, exe='_stub', work_dir=wd.name)
+    # 4. create wrapper script
+    create_exec_wrapper(ctx, exe_name='_stub', work_dir=wd.name)
     #TODO: create shell script
 
     # check if devenv in run env includes. TODO
 
-    # 4. check if in env
+    # 5. check if in env
     if wd.devenv_name != cur_env_name:
         print(f'Activate environment:')
         print(f'> conda activate {wd.devenv_name}')
         exit(1)
 
-    # 5. check if in dir
+    # 6. check if in dir
     if _change_dir(wd):
         exit(1)
 
-    # 6. check if in a branch
+    # 7. check if in a branch
     if ('master' == cur_branch) and (wd.name != 'project'):
         print('Notice: You many want to create a branch for your work.')
     

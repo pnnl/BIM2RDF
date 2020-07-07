@@ -1,9 +1,7 @@
+channels:
+  - conda-forge
 dependencies:
-  - pyprojroot
-  # - python=3.7 # wouldn't be needed goes in devenv
-  # - invoke=1.4.1 # move to /bin thing goes in devenv
-  # - dvc=1.1.1 # bin thing goes in devenv
-  # - git # bin thing
+  - pyprojroot # useful but also actcs as a (minimal) stub so that /something/ gets put into an env
 environment:
   PYTHONPATH:
     - '{{root}}/'

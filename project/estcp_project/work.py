@@ -57,7 +57,7 @@ class WorkDir():
 
     def get_env_path(self):
         from subprocess import check_output
-        _ = check_output('conda env list --json')
+        _ = check_output('conda env list --json', shell=True)
         import json
         _ = json.loads(_)
         _ = _['envs']
@@ -83,7 +83,7 @@ class WorkDir():
         def parts(p): return prefix_parts() + list(p.absolute().relative_to(here().absolute()).parts)
         from pathlib import PurePosixPath as Path
         includes = [str(Path(*parts(p)))
-                     for p in list(includes)+[self.base_devenv, self.dir/'environment.run.yml' ]]
+                     for p in list(includes)+[self.dir/'environment.run.yml' ]]
         dev_env = {'includes': includes, 'name': name, 'dependencies':[], 'environment': {'WORK_DIR': self.name}}
         return dev_env
 
