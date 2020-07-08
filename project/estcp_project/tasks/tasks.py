@@ -198,7 +198,7 @@ def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, test=True
         return wpth
         
     if exe_name == '_stub':
-        return create_wrapper(exe_name, test=test)
+        return create_wrapper(exe_name, test=False)
     wpth = create_wrapper(exe_name, test=True)
     from shutil import copy2 as copyexe # attempt to copy all metadata (mainly keeping +x attrib)
     from shutil import which
@@ -214,6 +214,15 @@ def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, test=True
     print(f"created wrapper {env_exec_pth} for {exe_name}")
     return wpth
 ns.add_task(create_exec_wrapper)
+
+
+
+def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
+    if work_dir not in (wd.name for wd in work.find_WorkDirs()):
+        print('work dir not found')
+        exit(1)
+    wd = work.WorkDir(root / work_dir)
+    sdir = wd / 'scripts'
 
 
 def _make_dev_env(work_dir=cur_work_dir, ):
@@ -321,9 +330,10 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
         _make_dev_env(work_dir=wd.name)
         # but no exit(1)
     
-    # 4. create wrapper script
+    # 4. create wrapper scripts
+    #TODO: craete script wrappers
     create_exec_wrapper(ctx, exe_name='_stub', work_dir=wd.name)
-    #TODO: create shell script
+    
 
     # check if devenv in run env includes. TODO
 
