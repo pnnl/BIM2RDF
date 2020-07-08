@@ -159,10 +159,13 @@ def get_cur_work_dir_help():
     return f"Work directory."+cd
 
 
-@task
-def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, ):
+@task(help={
+    'exe_name': "name of executable",
+    'test': "test if executable can be seen before making a wrapper around it"
+    })
+def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, test=True): #TODO: create script arg?
     """
-    Create executable wrapped in work dir env.
+    Create wrapper around executable in work dir env.
     """
     if work_dir not in (wd.name for wd in work.find_WorkDirs()):
         print('work dir not found')
@@ -173,12 +176,12 @@ def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, ):
         raise Exception('no associated environment')
     
     def create_wrapper(exe_name, test=True):
-        import shutil
+        from shutil import which
         if not test:
             # overwrites
             # just fills in a name
             ctx.run(f"create-wrappers -t conda -f {exe_name} -d \"{wd.dir/'wbin'}\" --conda-env-dir \"{env_pth}\"")
-            return Path(shutil.which(exe_name, path=f"{wd.dir/'wbin'}"))  # Path doesn't work until py3.8
+            return Path(which(exe_name, path=f"{wd.dir/'wbin'}"))  # Path doesn't work until py3.8
         
         wpth = create_wrapper(exe_name, test=False) # stub
         wtxt = open(wpth).read()
@@ -195,14 +198,21 @@ def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, ):
         return wpth
         
     if exe_name == '_stub':
-        test = False
-    else:
-        test = True
-    wpth = create_wrapper(exe_name, test=test)
-    print('created wrapper', wpth)
+        return create_wrapper(exe_name, test=test)
+    wpth = create_wrapper(exe_name, test=True)
+    from shutil import copy2 as copyexe # attempt to copy all metadata (mainly keeping +x attrib)
+    from shutil import which
+    assert(wpth.stem == exe_name)
+    env_exec_pth = wpth.parent / f"{exe_name}-{wd.name}{wpth.suffix}"
+    copyexe(wpth, env_exec_pth)
+    run_in_pth = which('run-in', path=str(wpth.parent))
+    assert(run_in_pth)
+    run_in_pth = Path(run_in_pth)
+    assert(run_in_pth.exists())
+    copyexe(run_in_pth, run_in_pth.parent / f"{run_in_pth.stem}-{wd.name}{run_in_pth.suffix}")
+    print(f"created wrapper {wpth} for {exe_name}")
+    print(f"created wrapper {env_exec_pth} for {exe_name}")
     return wpth
-    
-        
 ns.add_task(create_exec_wrapper)
 
 
@@ -421,7 +431,7 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
     Uses WORK_DIR env var to prefix commit msg.
     """
     import os
-    WORK_DIR = os.environ.get('WORK_DIR')
+    WORK_DIR = os.environ.get('WORK_DIR') # COULD USE cd ??
     if WORK_DIR:
         wd = work.WorkDir(WORK_DIR)
         message = f"[{wd.name}] " + open(COMMIT_MSG_FILE, 'r').read()
