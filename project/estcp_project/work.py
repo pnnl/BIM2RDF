@@ -4,6 +4,7 @@ import yaml
 
 
 class WorkDir():
+    # TODO: probably better managed as a tree
     file_names = {'environment.devenv.yml',
                   'environment.run.yml'} 
                   # could also be some configs
@@ -30,6 +31,10 @@ class WorkDir():
         if not (self.dir / 'environment.devenv.yml').exists():
             self.make_devenv_file()
 
+        # wbin and scripts? self.dir.mkdir(exist_ok=True)
+        #(self.dir / 'wbin').mkdir(exist_ok=True) this is generated
+        (self.dir / 'scripts').mkdir(exist_ok=True)
+
     
     def reset(self):
         # rem stuff
@@ -55,7 +60,7 @@ class WorkDir():
     def devenv_name(self):
         return 'estcp-'+self.name
 
-    def get_env_path(self):
+    def get_env_path(self): # not sure this is the place to put this. as it has less to do with 'dir'
         from subprocess import check_output
         _ = check_output('conda env list --json', shell=True)
         import json

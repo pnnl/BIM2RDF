@@ -199,7 +199,7 @@ def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, test=True
         
     if exe_name == '_stub':
         return create_wrapper(exe_name, test=False)
-    wpth = create_wrapper(exe_name, test=True)
+    wpth = create_wrapper(exe_name, test=test)
     from shutil import copy2 as copyexe # attempt to copy all metadata (mainly keeping +x attrib)
     from shutil import which
     assert(wpth.stem == exe_name)
@@ -215,14 +215,51 @@ def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, test=True
     return wpth
 ns.add_task(create_exec_wrapper)
 
-
-
+@task
 def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
     if work_dir not in (wd.name for wd in work.find_WorkDirs()):
         print('work dir not found')
         exit(1)
     wd = work.WorkDir(root / work_dir)
-    sdir = wd / 'scripts'
+    sdir = wd.dir / 'scripts'
+    assert(sdir.exists())
+
+    # .r, .sh, .py, .bat., .
+    for script_pth in sdir.glob('*'):
+        if script_pth.is_dir(): continue
+        name = script_pth.stem
+        ext = script_pth.suffix[1:] if script_pth.suffix else None
+
+        lines_f = lambda: open(script_pth).readlines()
+        if ext == 'cmdlines':
+            # assume a simple script that's just lines of commands
+            #https://stackoverflow.com/questions/734598/how-do-i-make-a-batch-file-terminate-upon-encountering-an-error/46813196#46813196
+            # cool polyglot program
+            pre = [
+            '#!/bin/bash 2> nul',
+            ':; set -o errexit',
+            ':; function goto() { return $?; }',
+            '',
+            '',
+            ]
+            #command 1 || goto :error
+            #command 2 || goto :error
+            #command 3 || goto :error
+            post = [
+            ':; exit 0',
+            'exit /b 0',
+            '',
+            ':error',
+            'exit /b %errorlevel%',
+            ]
+            wpth = create_exec_wrapper(ctx, exe_name=name,  work_dir=work_dir, test=False)
+            lines = pre + [f"{ln.strip()} || goto :error" for ln in lines_f()] + post
+            lines = [ln.strip()+'\n' for  ln in lines]
+            open(wpth, 'w').writelines(lines)
+
+        else:
+            print(f'{script_pth} not processed.')
+ns.add_task(create_scripts_wrappers)
 
 
 def _make_dev_env(work_dir=cur_work_dir, ):
