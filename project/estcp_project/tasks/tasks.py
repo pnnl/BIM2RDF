@@ -163,10 +163,11 @@ def get_cur_work_dir_help():
     'exe_name': "name of executable",
     'test': "test if executable can be seen before making a wrapper around it"
     })
-def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, test=True): #TODO: create script arg?
+def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True): #TODO: create script arg?
     """
     Create wrapper around executable in work dir env.
     """
+    exe_pth = Path(exe_pth)
     if work_dir not in (wd.name for wd in work.find_WorkDirs()):
         print('work dir not found')
         exit(1)
@@ -175,13 +176,17 @@ def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, test=True
     if not env_pth:
         raise Exception('no associated environment')
     
-    def create_wrapper(exe_name, test=True):
+    exe_name = exe_pth.stem
+
+    def create_wrapper(exe_pth, test=True):
+        exe_pth = Path(exe_pth)
+        exe_name = exe_pth.stem
+        exe_prefix_switch = f"-b {exe_pth.parent}" if exe_pth.parent.parts else ''
         from shutil import which
         if not test:
             # overwrites
-            # just fills in a name
-            ctx.run(f"create-wrappers -t conda -f {exe_name} -d \"{wd.dir/'wbin'}\" --conda-env-dir \"{env_pth}\"")
-            return Path(which(exe_name, path=f"{wd.dir/'wbin'}"))  # Path doesn't work until py3.8
+            ctx.run(f"create-wrappers -t conda {exe_prefix_switch} -f {exe_name} -d {wd.dir/'wbin'} --conda-env-dir {env_pth}")
+            return Path(which(exe_name, path=str(wd.dir/'wbin')))  # Path doesn't work until py3.8
         
         wpth = create_wrapper(exe_name, test=False) # stub
         wtxt = open(wpth).read()
@@ -199,7 +204,7 @@ def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, test=True
         
     if exe_name == '_stub':
         return create_wrapper(exe_name, test=False)
-    wpth = create_wrapper(exe_name, test=test)
+    wpth = create_wrapper(exe_pth, test=test)
     from shutil import copy2 as copyexe # attempt to copy all metadata (mainly keeping +x attrib)
     from shutil import which
     assert(wpth.stem == exe_name)
@@ -212,7 +217,7 @@ def create_exec_wrapper(ctx, exe_name='_stub',  work_dir=cur_work_dir, test=True
     copyexe(run_in_pth, run_in_pth.parent / f"{run_in_pth.stem}-{wd.name}{run_in_pth.suffix}")
     print(f"created wrapper {wpth} for {exe_name}")
     print(f"created wrapper {env_exec_pth} for {exe_name}")
-    return wpth
+    return wpth, env_exec_pth
 ns.add_task(create_exec_wrapper)
 
 @task
@@ -223,12 +228,33 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
     wd = work.WorkDir(root / work_dir)
     sdir = wd.dir / 'scripts'
     assert(sdir.exists())
+    
+    def make_cmd_script(cmd):
+        #https://stackoverflow.com/questions/17510688/single-script-to-run-in-both-windows-batch-and-linux-bash
+        lines = [
+        "#!/usr/bin/env sh",                     # 0
+        "@ 2>/dev/null # 2>nul & echo off",      # 1
+        ":; alias ::=''",                        # 2
+        f':: exec {cmd} "$@"',                   # 3
+        ":: exit",                               # 4
+        f'{cmd} %*',                             # 5
+        "exit /B",                               # 6
+        ]
+        return lines
+
+    def chmod_px(pth):
+        import stat
+        return pth.chmod(pth.stat().st_mode | stat.S_IEXEC)
 
     # .r, .sh, .py, .bat., .
     for script_pth in sdir.glob('*'):
         if script_pth.is_dir(): continue
         name = script_pth.stem
         ext = script_pth.suffix[1:] if script_pth.suffix else None
+        sbin_bat = sdir / 'bin' / f"{name}.bat"
+        sbin_sh =  sdir / 'bin' / f"{name}.sh"
+        sbin_name = sdir / 'bin' / name
+        sbins = (sbin_bat, sbin_sh)
 
         lines_f = lambda: open(script_pth).readlines()
         if ext == 'cmdlines':
@@ -252,10 +278,26 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             ':error',
             'exit /b %errorlevel%',
             ]
-            wpth = create_exec_wrapper(ctx, exe_name=name,  work_dir=work_dir, test=False)
             lines = pre + [f"{ln.strip()} || goto :error" for ln in lines_f()] + post
             lines = [ln.strip()+'\n' for  ln in lines]
-            open(wpth, 'w').writelines(lines)
+            for sbin in sbins:
+                open(sbin, 'w').writelines(lines)
+                chmod_px(sbin)
+            wpths = create_exec_wrapper(ctx, sbin_name,  work_dir=work_dir, test=False)
+
+        elif ext == 'py':
+            # prep
+            _wpths = create_exec_wrapper(ctx, exe_name=f"_{name}", work_dir=work_dir, test=False)
+            for _wpth in _wpths:
+                 # just using createexecwrapper to make a .bat or .sh
+                open(_wpth, 'w').writelines(ln.strip()+'\n' for ln in make_cmd_script(f"python {script_pth.absolute()}"))
+            # do
+            __wpths = create_exec_wrapper(ctx, exe_name=f"__{name}", work_dir=work_dir, test=False)
+            for __wpth in __wpths:
+                open(__wpth).read().replace(f'__{name}', name)
+                wpth = __wpth.parent / (name + __wpth.suffix)
+                if wpth.exists(): wpth.unlink()
+                __wpth.rename(name)
 
         else:
             print(f'{script_pth} not processed.')

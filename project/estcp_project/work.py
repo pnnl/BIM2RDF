@@ -34,6 +34,7 @@ class WorkDir():
         # wbin and scripts? self.dir.mkdir(exist_ok=True)
         #(self.dir / 'wbin').mkdir(exist_ok=True) this is generated
         (self.dir / 'scripts').mkdir(exist_ok=True)
+        (self.dir / 'scripts' / 'bin').mkdir(exist_ok=True)
 
     
     def reset(self):
