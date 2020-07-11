@@ -188,19 +188,14 @@ def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True)
             ctx.run(f"create-wrappers -t conda {exe_prefix_switch} -f {exe_name} -d {wd.dir/'wbin'} --conda-env-dir {env_pth}")
             return Path(which(exe_name, path=str(wd.dir/'wbin')))  # Path doesn't work until py3.8
         
-        wpth = create_wrapper(exe_name, test=False) # stub
-        wtxt = open(wpth).read()
-        assert(wpth.exists())
-        wpth.unlink() #missing_ok=False) # py38 thing. wpth must exist
-        # so now the following doesn't pick up the wrapped exe. breaks out of recursion issues.
-        get_exe_py = f"from shutil import which; print(which(\'{exe_name}\'))"
-        exe = ctx.run(f"{wd.dir/'wbin'/'run-in'} python -c \"{get_exe_py}\"", hide='out').stdout.replace('\n', '')
-        if exe=='None': raise Exception(f'{exe_name} exe not found')
-
-        # create wrappers uses colon, :,  to separate -f exec. windows problem. so using $exe to sub in
-        _ = wtxt.replace(exe_name, f"{Path(exe).absolute()}")
-        open(wpth, 'w').write(_)
-        return wpth
+        if not exe_pth.parent.parts:
+            # so now the following doesn't pick up the wrapped exe. breaks out of recursion issues.
+            get_exe_py = f"from shutil import which; print(which(\'{exe_name}\'))"
+            exe = ctx.run(f"{wd.dir/'wbin'/'run-in'} python -c \"{get_exe_py}\"", hide='out').stdout.replace('\n', '')
+            if exe=='None': raise Exception(f'{exe_name} exe not found')
+            exe_pth = Path(exe).absolute()
+        
+        return create_wrapper(exe_pth, test=False)
         
     if exe_name == '_stub':
         return create_wrapper(exe_name, test=False)
@@ -242,9 +237,16 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         ]
         return lines
 
+    
     def chmod_px(pth):
         import stat
         return pth.chmod(pth.stat().st_mode | stat.S_IEXEC)
+    
+    def write_sbin(sbin, lines):
+        lines = [ln.strip()+'\n' for  ln in lines]
+        if sbin.suffix == '.sh':
+            open(sbin, 'w', newline='\n').writelines(lines)
+        chmod_px(sbin)
 
     # .r, .sh, .py, .bat., .
     for script_pth in sdir.glob('*'):
@@ -279,25 +281,14 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             'exit /b %errorlevel%',
             ]
             lines = pre + [f"{ln.strip()} || goto :error" for ln in lines_f()] + post
-            lines = [ln.strip()+'\n' for  ln in lines]
-            for sbin in sbins:
-                open(sbin, 'w').writelines(lines)
-                chmod_px(sbin)
-            wpths = create_exec_wrapper(ctx, sbin_name,  work_dir=work_dir, test=False)
+            for sbin in sbins: write_sbin(sbin, lines)
+            wpths = create_exec_wrapper(ctx, sbin_name,  work_dir=work_dir, test=True)
 
         elif ext == 'py':
             # prep
-            _wpths = create_exec_wrapper(ctx, exe_name=f"_{name}", work_dir=work_dir, test=False)
-            for _wpth in _wpths:
-                 # just using createexecwrapper to make a .bat or .sh
-                open(_wpth, 'w').writelines(ln.strip()+'\n' for ln in make_cmd_script(f"python {script_pth.absolute()}"))
-            # do
-            __wpths = create_exec_wrapper(ctx, exe_name=f"__{name}", work_dir=work_dir, test=False)
-            for __wpth in __wpths:
-                open(__wpth).read().replace(f'__{name}', name)
-                wpth = __wpth.parent / (name + __wpth.suffix)
-                if wpth.exists(): wpth.unlink()
-                __wpth.rename(name)
+            lines = make_cmd_script(f"python {script_pth.absolute()}")
+            for sbin in sbins: write_sbin(sbin, lines)
+            wpths = create_exec_wrapper(ctx, sbin_name, work_dir=work_dir, test=True)
 
         else:
             print(f'{script_pth} not processed.')
