@@ -89,7 +89,7 @@ def create_project_wrappers(ctx, ):
     """
     #for #dvc, git, invoke, work-on.sh/enter: bash --login -i
     for exe in ['dvc', 'invoke', 'inv',]+['git', 'bash']:
-        create_exec_wrapper(ctx, exe_name=exe, work_dir='project')
+        create_exec_wrapper(ctx, exe, work_dir='project')
 setup_coll.add_task(create_project_wrappers)
 
 

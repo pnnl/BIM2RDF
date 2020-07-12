@@ -2,6 +2,7 @@ channels:
   - conda-forge
 dependencies:
   - pyprojroot # useful but also actcs as a (minimal) stub so that /something/ gets put into an env
+  # pip local install ?
 environment:
   PYTHONPATH:
     - '{{root}}/'
