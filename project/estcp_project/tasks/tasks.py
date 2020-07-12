@@ -189,7 +189,6 @@ def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True)
             return Path(which(exe_name, path=str(wd.dir/'wbin')))  # Path doesn't work until py3.8
         
         if not exe_pth.parent.parts:
-            # so now the following doesn't pick up the wrapped exe. breaks out of recursion issues.
             get_exe_py = f"from shutil import which; print(which(\'{exe_name}\'))"
             exe_pth = ctx.run(f"{wd.dir/'wbin'/'run-in'} python -c \"{get_exe_py}\"", hide='out').stdout.replace('\n', '')
             if exe_pth=='None': raise Exception(f'{exe_name} exe not found')
@@ -201,6 +200,8 @@ def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True)
         
     if exe_name == '_stub':
         return create_wrapper(exe_name, test=False)
+    # so now the following doesn't pick up the wrapped exe. breaks out of recursion issues.
+    create_wrapper(exe_pth, test=False).unlink()
     wpth = create_wrapper(exe_pth, test=test)
     from shutil import copy2 as copyexe # attempt to copy all metadata (mainly keeping +x attrib)
     from shutil import which
@@ -419,9 +420,8 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
         # but no exit(1)
     
     # 4. create wrapper scripts
-    #TODO: craete script wrappers
-    create_exec_wrapper(ctx, exe_name='_stub', work_dir=wd.name)
-    
+    create_exec_wrapper(ctx, '_stub', work_dir=wd.name)
+    create_scripts_wrappers(ctx, work_dir=wd.name)
 
     # check if devenv in run env includes. TODO
 
