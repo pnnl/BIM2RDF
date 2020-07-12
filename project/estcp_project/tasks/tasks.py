@@ -223,29 +223,59 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
     wd = work.WorkDir(root / work_dir)
     sdir = wd.dir / 'scripts'
     assert(sdir.exists())
+    (sdir / 'bin').mkdir(exist_ok=True)
     
-    def make_cmd_script(cmd):
-        #https://stackoverflow.com/questions/17510688/single-script-to-run-in-both-windows-batch-and-linux-bash
-        lines = [
-        "#!/usr/bin/env sh",                     # 0
-        "@ 2>/dev/null # 2>nul & echo off",      # 1
-        ":; alias ::=''",                        # 2
-        f':: exec {cmd} "$@"',                   # 3
-        ":: exit",                               # 4
-        f'{cmd} %*',                             # 5
-        "exit /B",                               # 6
-        ]
-        return lines
-
+    def make_cmd_script(cmds):
+        # assuming simple case: just lines of cmds
+        if isinstance(cmds, str):
+            cmds = [cmds]
+        cmds = [cmd.strip() for cmd in cmds]
+        lines = []
+        al = lambda ln: lines.append(ln)
+        #https://stackoverflow.com/questions/17510688/single-script-to-run-in-both-windows-batch-and-linux-bash/17623721#17623721
+        al('echo >/dev/null # >nul & GOTO WINDOWS & rem ^')
+        # ***********************************************************
+        # * NOTE: If you modify this content, be sure to remove carriage returns (\r) 
+        # *       from the Linux part and leave them in together with the line feeds 
+        # *       (\n) for the Windows part. In summary:
+        # *           New lines in Linux: \n
+        # *           New lines in Windows: \r\n 
+        # ***********************************************************
+        # Do Linux Bash commands here... for example:
+        #StartDir="$(pwd)"
+        # Then, when all Linux commands are complete, end the script with 'exit'...
+        al('set -e')
+        for i, cmd in enumerate(cmds):
+            if not cmd.replace(' ', ''): continue
+            if i == 0:
+                al(f"{cmd} \"$@\"")
+            else:
+                al(cmd)
+        al('exit 0')
+        al('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
+        al(':WINDOWS')
+        #'REM Do Windows CMD commands here... for example:
+        #SET StartDir=%cd%
+        for i, cmd in enumerate(cmds):
+            if not cmd.replace(' ', ''): continue
+            if i == 0:
+                al(f"{cmd} %* || exit /b")
+            else:
+                al(  f"{cmd}  || exit /b")
+        #REM Then, when all Windows commands are complete... the script is done.
+        return tuple(lines)
     
     def chmod_px(pth):
         import stat
         return pth.chmod(pth.stat().st_mode | stat.S_IEXEC)
     
     def write_sbin(sbin, lines):
+        lines = make_cmd_script(lines)
         lines = [ln.strip()+'\n' for  ln in lines]
         if sbin.suffix == '.sh':
             open(sbin, 'w', newline='\n').writelines(lines)
+        else:
+            open(sbin, 'w', ).writelines(lines)
         chmod_px(sbin)
 
     # .r, .sh, .py, .bat., .
@@ -255,38 +285,18 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         ext = script_pth.suffix[1:] if script_pth.suffix else None
         sbin_bat = sdir / 'bin' / f"{name}.bat"
         sbin_sh =  sdir / 'bin' / f"{name}.sh"
+        sbin_cmd =  sdir / 'bin' / f"{name}.cmd"
         sbin_name = sdir / 'bin' / name
-        sbins = (sbin_bat, sbin_sh)
+        sbins = (sbin_cmd,)
 
-        lines_f = lambda: open(script_pth).readlines()
+        lines = open(script_pth).readlines()
         if ext == 'cmdlines':
-            # assume a simple script that's just lines of commands
-            #https://stackoverflow.com/questions/734598/how-do-i-make-a-batch-file-terminate-upon-encountering-an-error/46813196#46813196
-            # cool polyglot program
-            pre = [
-            '#!/bin/bash 2> nul',
-            ':; set -o errexit',
-            ':; function goto() { return $?; }',
-            '',
-            '',
-            ]
-            #command 1 || goto :error
-            #command 2 || goto :error
-            #command 3 || goto :error
-            post = [
-            ':; exit 0',
-            'exit /b 0',
-            '',
-            ':error',
-            'exit /b %errorlevel%',
-            ]
-            lines = pre + [f"{ln.strip()} || goto :error" for ln in lines_f()] + post
             for sbin in sbins: write_sbin(sbin, lines)
             wpths = create_exec_wrapper(ctx, sbin_name,  work_dir=work_dir, test=True)
 
         elif ext == 'py':
             # prep
-            lines = make_cmd_script(f"python {script_pth.absolute()}")
+            lines = [f"python {script_pth.absolute()}"]
             for sbin in sbins: write_sbin(sbin, lines)
             wpths = create_exec_wrapper(ctx, sbin_name, work_dir=work_dir, test=True)
 
