@@ -191,10 +191,12 @@ def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True)
         if not exe_pth.parent.parts:
             # so now the following doesn't pick up the wrapped exe. breaks out of recursion issues.
             get_exe_py = f"from shutil import which; print(which(\'{exe_name}\'))"
-            exe = ctx.run(f"{wd.dir/'wbin'/'run-in'} python -c \"{get_exe_py}\"", hide='out').stdout.replace('\n', '')
-            if exe=='None': raise Exception(f'{exe_name} exe not found')
-            exe_pth = Path(exe).absolute()
-        
+            exe_pth = ctx.run(f"{wd.dir/'wbin'/'run-in'} python -c \"{get_exe_py}\"", hide='out').stdout.replace('\n', '')
+            if exe_pth=='None': raise Exception(f'{exe_name} exe not found')
+        else:
+            exe_pth = Path(exe_pth).absolute()
+            if not exe_pth.exists():
+                raise Exception(f'{exe_pth} does not exist')
         return create_wrapper(exe_pth, test=False)
         
     if exe_name == '_stub':
@@ -299,6 +301,12 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             lines = [f"python {script_pth.absolute()}"]
             for sbin in sbins: write_sbin(sbin, lines)
             wpths = create_exec_wrapper(ctx, sbin_name, work_dir=work_dir, test=True)
+
+        elif ext == 'bat':
+            wpths = create_exec_wrapper(ctx, script_pth, work_dir=work_dir, test=True)
+        elif ext == 'sh':
+            from shutil import copy2 as copyexe
+            wpths = create_exec_wrapper(ctx, copyexe(script_pth, sbin_name), work_dir=work_dir, test=True)
 
         else:
             print(f'{script_pth} not processed.')
