@@ -287,7 +287,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         sbin_sh =  sdir / 'bin' / f"{name}.sh"
         sbin_cmd =  sdir / 'bin' / f"{name}.cmd"
         sbin_name = sdir / 'bin' / name
-        sbins = (sbin_cmd,)
+        sbins = (sbin_bat, sbin_name) # (win, linux)
 
         lines = open(script_pth).readlines()
         if ext == 'cmdlines':
