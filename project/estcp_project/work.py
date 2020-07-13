@@ -13,7 +13,12 @@ class WorkDir():
     minrunenv = {'dependencies': [],
                  'includes': [],
                 'environment':
-                    {'PYTHONPATH': ['{{root}}/'] }}
+                    {
+                        'PYTHONPATH': ['{{root}}'],
+                        'RUN_WORK_DIRS': ['{{root}}'],
+                        'PATH': ['{{root}}/wbin']
+                    }
+                }
 
     def __init__(self, dir: Path):
         self.dir = here() / Path(dir)

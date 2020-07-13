@@ -342,29 +342,34 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
     """
     assert(work_dir)
     wd = work.WorkDir(work_dir)
-    import os#.pathsep os.environ
-    dep_work_dirs = os.getenv('RUN_WORK_DIRS')
-    if dep_work_dirs:
+    make_devenv(ctx, work_dir=wd.name)
+    import os
+    # have to render the devenv first
+    dep_work_dirs = ctx.run(f"conda run -n {wd.devenv_name} python -c \"import os; print(os.getenv('RUN_WORK_DIRS'))\"", hide='out').stdout.replace('\n','')
+    if dep_work_dirs != 'None':
         dep_work_dirs = [Path(dwd).stem for dwd in dep_work_dirs.split(os.pathsep) if dwd]
     else:
         dep_work_dirs = []
-    
+        print('no RUN_WORK_DIRS found!'); exit(1)
     done = []
     for dwd in dep_work_dirs:
         if dwd in done: continue # possibly deduping
-        if prompt:
-            if input(f"create {dwd} env? [enter y] ").lower().strip() == 'y':
-                make_devenv(ctx, work_dir=dwd)
-        else:
-            make_devenv(ctx, work_dir=dwd)
-        create_scripts_wrappers(ctx, work_dir=wd.name)
-        for asetup in  _get_setup_names(wd):
+        # make the dev env
+        if dwd != wd.name:
             if prompt:
-                if input(f"execute {asetup} for {dwd}? [enter y] ").lower().strip() == 'y':
-                    ctx.run(f"run-in {asetup}", echo=True)
+                if input(f"create {dwd} env? [enter y] ").lower().strip() == 'y':
+                    make_devenv(ctx, work_dir=dwd)
             else:
-                ctx.run(f"run-in {asetup}", echo=True)
-        done.append(dwd)
+                make_devenv(ctx, work_dir=dwd)
+        create_scripts_wrappers(ctx, work_dir=dwd)
+        dWD = work.WorkDir(dwd)
+        for asetup in  _get_setup_names(dWD):
+            if prompt:
+                if input(f"execute {asetup} for {dWD.name}? [enter y] ").lower().strip() == 'y':
+                    ctx.run(f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True)
+            else:
+                ctx.run(    f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True)
+        done.append(dWD.name)
     #ctx.run(f"conda run --cwd {wd.dir} -n {wd.env name} conda devenv", echo=True) # pyt=True does't work on windows
 ns.add_task(run_setup_tasks)
 
