@@ -314,27 +314,16 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
 ns.add_task(create_scripts_wrappers)
 
 
-def _make_dev_env(work_dir=cur_work_dir, ):
-    # TODO use conda run base devenv
+@task
+def make_devenv(ctx, work_dir=cur_work_dir):
     """
     Create conda development environment.
     """
     assert(work_dir)
     wd = work.WorkDir(work_dir)
-    
-    #if recreate:
-    #    try:
-    #        (wd.dir / 'environment.yml').unlink()
-    #    except FileNotFoundError:
-    #        pass
-    #    remove_work_env(work_dir)
+    ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True) # pyt=True does't work on windows
+ns.add_task(make_devenv)
 
-    # expecting this condition almost always
-    print("Create dev environment from 'base' environment:")
-    print("> conda activate base")
-    _change_dir(wd)
-    print(f"Modify environment.run.yml and environment.devenv.yml as needed.")
-    print("> conda devenv")
 
 
 def _change_dir(wd):
@@ -398,15 +387,7 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     else:
         wd = work.WorkDir(wd)
     
-    # 2. check env creation
-    #                                           sometimes nonzero exit returned :/
-    envlist = ctx.run('conda env list', hide='out', warn=True).stdout
-    # checking if env created for the workdir
-    if envlist.count(wd.devenv_name+'\n') != 1:
-        _make_dev_env(work_dir=wd.name)
-        exit(1)
-    
-    # 3. did you try ?
+    # 2. env creation
     minRunenv = \
         wd.minrunenv \
         == yaml.safe_load(open(wd.dir/'environment.run.yml'))
@@ -416,8 +397,7 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     #            'or' instead of 'and' since the intent is to get the user to do /something/.
     if (minRunenv or minDevenv):
         print('Minimal dev or run env detected.')
-        _make_dev_env(work_dir=wd.name)
-        # but no exit(1)
+    make_devenv(ctx, work_dir=wd.name)
     
     # 4. create wrapper scripts
     create_exec_wrapper(ctx, '_stub', work_dir=wd.name)
@@ -491,7 +471,6 @@ ns.add_task(remove_work_env)
 #     message = f"[{wd.name}] " + message
 #     ctx.run(f"git commit  -m  \"{message}\"")
 # ns.add_task(commit)
-
 
 
 
