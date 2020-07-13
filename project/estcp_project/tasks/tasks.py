@@ -20,7 +20,7 @@ def set_dvc_repo(ctx,
     Set sharefolder as (non- source code) DVC repository.
     """
     if prompt:
-        if input(f"Enter 'Y' if {dir} is the DVC repo. ").lower() == 'y':
+        if input(f"Enter 'Y' if {dir} is the DVC repo. ").lower().strip() == 'y':
             pass
         else:
             dir = input("input DVC repo: ")
@@ -44,8 +44,8 @@ def create_secrets(ctx):
     def input_secrets(): # in tasks
         ret = {}
         ret['mdms'] = {}
-        ret['mdms']['user'] = input('mdms user: ')
-        ret['mdms']['password'] = input('mdms password: ')
+        ret['mdms']['user'] = input('mdms user: ').strip()
+        ret['mdms']['password'] = input('mdms password: ').strip()
         return ret
     estcp_project.config.save_secrets(input_secrets)
 setup_coll.add_task(create_secrets)
@@ -330,20 +330,42 @@ def _get_setup_names(wd):
     return list(sorted({p.stem for p in (wd.dir/'scripts').glob('setup*') }))
 
 @task(
-    help={'setup_list': 'the name of the setup script  (can be used multiple times to list)'},
+    help={
+        'setup_list': 'the name of the setup script  (can be used multiple times to list)',
+        'prompt': 'prompt setup tasks',
+        },
     iterable = ['setup_list']
 )
-def run_setup_tasks(ctx, work_dir=cur_work_dir, setup_list=[]):
+def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
     """
-    execute setup tasks to be executed in work dir env.
+    execute setup tasks for the workdir
     """
     assert(work_dir)
     wd = work.WorkDir(work_dir)
-    create_scripts_wrappers(ctx, work_dir=wd.name)
-    setup_list = setup_list if setup_list else _get_setup_names(wd)
-    for asetup in setup_list:
-        ctx.run(f"run-in {asetup}", echo=True)
-    #ctx.run(f"conda run --cwd {wd.dir} -n {wd.} conda devenv", echo=True) # pyt=True does't work on windows
+    import os#.pathsep os.environ
+    dep_work_dirs = os.getenv('RUN_WORK_DIRS')
+    if dep_work_dirs:
+        dep_work_dirs = [Path(dwd).stem for dwd in dep_work_dirs.split(os.pathsep) if dwd]
+    else:
+        dep_work_dirs = []
+    
+    done = []
+    for dwd in dep_work_dirs:
+        if dwd in done: continue # possibly deduping
+        if prompt:
+            if input(f"create {dwd} env? [enter y] ").lower().strip() == 'y':
+                make_devenv(ctx, work_dir=dwd)
+        else:
+            make_devenv(ctx, work_dir=dwd)
+        create_scripts_wrappers(ctx, work_dir=wd.name)
+        for asetup in  _get_setup_names(wd):
+            if prompt:
+                if input(f"execute {asetup} for {dwd}? [enter y] ").lower().strip() == 'y':
+                    ctx.run(f"run-in {asetup}", echo=True)
+            else:
+                ctx.run(f"run-in {asetup}", echo=True)
+        done.append(dwd)
+    #ctx.run(f"conda run --cwd {wd.dir} -n {wd.env name} conda devenv", echo=True) # pyt=True does't work on windows
 ns.add_task(run_setup_tasks)
 
 
@@ -448,6 +470,7 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     print('Ready to work!')
 # TODO check WORK_DIR set
 ns.add_task(work_on)
+
 
 # TODO: recreate is this followed by a workon
 @task(help={'work-dir': get_cur_work_dir_help() })
