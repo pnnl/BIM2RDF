@@ -8,7 +8,6 @@ from pathlib import Path
 ns = Collection()
 
 
-
 # SETUP tasks
 setup_coll = Collection('setup')
 ns.add_collection(setup_coll)
@@ -314,6 +313,8 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
 ns.add_task(create_scripts_wrappers)
 
 
+
+
 @task
 def make_devenv(ctx, work_dir=cur_work_dir):
     """
@@ -323,6 +324,27 @@ def make_devenv(ctx, work_dir=cur_work_dir):
     wd = work.WorkDir(work_dir)
     ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True) # pyt=True does't work on windows
 ns.add_task(make_devenv)
+
+
+def _get_setup_names(wd):
+    return list(sorted({p.stem for p in (wd.dir/'scripts').glob('setup*') }))
+
+@task(
+    help={'setup_list': 'the name of the setup script  (can be used multiple times to list)'},
+    iterable = ['setup_list']
+)
+def run_setup_tasks(ctx, work_dir=cur_work_dir, setup_list=[]):
+    """
+    execute setup tasks to be executed in work dir env.
+    """
+    assert(work_dir)
+    wd = work.WorkDir(work_dir)
+    create_scripts_wrappers(ctx, work_dir=wd.name)
+    setup_list = setup_list if setup_list else _get_setup_names(wd)
+    for asetup in setup_list:
+        ctx.run(f"run-in {asetup}", echo=True)
+    #ctx.run(f"conda run --cwd {wd.dir} -n {wd.} conda devenv", echo=True) # pyt=True does't work on windows
+ns.add_task(run_setup_tasks)
 
 
 
@@ -400,22 +422,26 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     make_devenv(ctx, work_dir=wd.name)
     
     # 4. create wrapper scripts
+    for w in (wd.dir / 'wbin').glob('*'): w.unlink()
     create_exec_wrapper(ctx, '_stub', work_dir=wd.name)
     create_scripts_wrappers(ctx, work_dir=wd.name)
 
+    # 5. run setup tasks
+    run_setup_tasks(ctx, work_dir=work_dir, )
+
     # check if devenv in run env includes. TODO
 
-    # 5. check if in env
+    # 6. check if in env
     if wd.devenv_name != cur_env_name:
         print(f'Activate environment:')
         print(f'> conda activate {wd.devenv_name}')
         exit(1)
 
-    # 6. check if in dir
+    # 7. check if in dir
     if _change_dir(wd):
         exit(1)
 
-    # 7. check if in a branch
+    # 8. check if in a branch
     if ('master' == cur_branch) and (wd.name != 'project'):
         print('Notice: You many want to create a branch for your work.')
     
