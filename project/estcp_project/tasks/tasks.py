@@ -127,11 +127,15 @@ def _get_current_work_dir():
             return
 
 @task
-def get_current_work_dir(ctx):
+def current_work_dir(ctx):
     cd = _get_current_work_dir()
     if cd: print(cd)
     else: exit(1)
-ns.add_task(get_current_work_dir)
+ns.add_task(current_work_dir)
+@task
+def project_root(ctx):
+    print(root)
+ns.add_task(project_root)
 
 
 def get_current_WorkDir():
