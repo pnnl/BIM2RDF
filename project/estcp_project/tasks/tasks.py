@@ -4,12 +4,24 @@ import yaml
 from .. import work
 from pathlib import Path
 
-ns = Collection()
+# need a var called ns!!!
+ns = coll = collection = Collection()
+# PROJECT
+coll.add_collection(Collection('project'))
+coll.collections['project'].add_collection(Collection('setup'))
+coll.collections['project'].add_collection(Collection('action'))
+coll.collections['project'].add_collection(Collection('info'))
 
 
-# SETUP tasks
-setup_coll = Collection('setup')
-ns.add_collection(setup_coll)
+# WORK DIR 
+coll.add_collection(Collection('work-dir'))
+coll.collections['work-dir'].add_collection(Collection('setup'))
+coll.collections['work-dir'].add_collection(Collection('action'))
+coll.collections['work-dir'].add_collection(Collection('info'))
+
+
+test_coll = Collection('test')
+coll.add_collection(test_coll)
 
 @task
 def set_dvc_repo(ctx,
@@ -32,7 +44,8 @@ def set_dvc_repo(ctx,
     sdvc = root / 'data' / 'sample.dvc'
     # will not error if file in (local) cache but wrong remote
     ctx.run(f"dvc pull \"{root/'data'/'sample.dvc'}\"")
-setup_coll.add_task(set_dvc_repo)
+test_coll.add_task(set_dvc_repo)
+
 
 @task
 def create_secrets(ctx):
@@ -47,7 +60,7 @@ def create_secrets(ctx):
         ret['mdms']['password'] = input('mdms password: ').strip()
         return ret
     estcp_project.config.save_secrets(input_secrets)
-setup_coll.add_task(create_secrets)
+coll.collections['project'].collections['setup'].add_task(create_secrets)
 
 
 def copy_git_hook_file(name):
@@ -65,8 +78,7 @@ def create_project_git_commit_hook(ctx):
     Set up git commit automation which prepends commits with [<workdir>]
     """
     copy_git_hook_file('prepare-commit-msg')
-setup_coll.add_task(create_project_git_commit_hook)
-
+coll.collections['project'].collections['setup'].add_task(create_project_git_commit_hook)
 
 @task
 def create_dvc_git_hooks(ctx):
@@ -77,8 +89,7 @@ def create_dvc_git_hooks(ctx):
     copy_git_hook_file('post-checkout')
     copy_git_hook_file('pre-commit')
     copy_git_hook_file('pre-push')
-setup_coll.add_task(create_dvc_git_hooks)
-
+coll.collections['project'].collections['setup'].add_task(create_dvc_git_hooks)
 
 @task
 def create_project_wrappers(ctx, ):
@@ -88,8 +99,7 @@ def create_project_wrappers(ctx, ):
     #for #dvc, git, invoke, work-on.sh/enter: bash --login -i
     for exe in ['dvc', 'invoke', 'inv',]+['git', 'bash']:
         create_exec_wrapper(ctx, exe, work_dir='project')
-setup_coll.add_task(create_project_wrappers)
-
+coll.collections['project'].collections['setup'].add_task(create_project_wrappers)
 
 
 @task(
@@ -103,7 +113,8 @@ setup_coll.add_task(create_project_wrappers)
 def setup(ctx,):
      """All setup tasks"""
      pass
-setup_coll.add_task(setup)
+coll.collections['project'].collections['setup'].add_task(setup)
+
 
 def get_current_conda_env():
     import os
@@ -126,16 +137,28 @@ def _get_current_work_dir():
         else:
             return
 
+
+@task
+def project_root(ctx):
+    print(root)
+coll.collections['project'].collections['info'].add_task(project_root)
+
+
+
+@task
+def work_dir_list(ctx):
+    """Lists work directories"""
+    for wd in work.find_WorkDirs():
+        print(wd.name)
+coll.collections['project'].collections['info'].add_task(work_dir_list)
+
+
 @task
 def current_work_dir(ctx):
     cd = _get_current_work_dir()
     if cd: print(cd)
     else: exit(1)
-ns.add_task(current_work_dir)
-@task
-def project_root(ctx):
-    print(root)
-ns.add_task(project_root)
+coll.collections['work-dir'].collections['info'].add_task(current_work_dir)
 
 
 def get_current_WorkDir():
@@ -155,12 +178,6 @@ def _create_WorkDir(ctx, dir):
     wd = work.WorkDir(dir)
     return wd
 
-@task
-def list_work_dirs(ctx):
-    """Lists work directories"""
-    for wd in work.find_WorkDirs():
-        print(wd.name)
-ns.add_task(list_work_dirs)
 
 cur_work_dir = _get_current_work_dir()
 def get_cur_work_dir_help():
@@ -227,7 +244,8 @@ def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True)
     print(f"created wrapper {wpth} for {exe_name}")
     print(f"created wrapper {env_exec_pth} for {exe_name}")
     return wpth, env_exec_pth
-ns.add_task(create_exec_wrapper)
+coll.collections['work-dir'].collections['action'].add_task(create_exec_wrapper)
+
 
 @task
 def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
@@ -322,8 +340,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
 
         else:
             print(f'{script_pth} not processed.')
-ns.add_task(create_scripts_wrappers)
-
+coll.collections['work-dir'].collections['action'].add_task(create_scripts_wrappers)
 
 
 
@@ -335,7 +352,7 @@ def make_devenv(ctx, work_dir=cur_work_dir):
     assert(work_dir)
     wd = work.WorkDir(work_dir)
     ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True) # pyt=True does't work on windows
-ns.add_task(make_devenv)
+coll.collections['work-dir'].collections['setup'].add_task(make_devenv)
 
 
 def _get_setup_names(wd):
@@ -383,8 +400,7 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
                 ctx.run(    f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True)
         done.append(dWD.name)
     #ctx.run(f"conda run --cwd {wd.dir} -n {wd.env name} conda devenv", echo=True) # pyt=True does't work on windows
-ns.add_task(run_setup_tasks)
-
+coll.collections['work-dir'].collections['setup'].add_task(run_setup_tasks)
 
 
 def _change_dir(wd):
@@ -486,7 +502,7 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     
     print('Ready to work!')
 # TODO check WORK_DIR set
-ns.add_task(work_on)
+coll.collections['work-dir'].collections['action'].add_task(work_on)
 
 
 # TODO: recreate is this followed by a workon
@@ -520,7 +536,8 @@ def remove_work_env(ctx, work_dir=cur_work_dir):
             if envfn.exists():
                 envfn.unlink()
             print(f"> conda env remove -n {wd.devenv_name}")
-ns.add_task(remove_work_env)
+coll.collections['work-dir'].collections['action'].add_task(remove_work_env)
+
 
 # @task(help={'message': "Commit message. Use quotes.",
 #             'work-dir': get_cur_work_dir_help() })
@@ -564,8 +581,7 @@ def dvc_run(ctx,  work_dir=cur_work_dir):
 # ok just do setup.py programmatically
 
 # 
-_coll = Collection('_')
-ns.add_collection(_coll)
+coll.add_collection(Collection('_'))
 
 @task
 def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
@@ -584,4 +600,4 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
     else:
         print('No WORK_DIR environment variable.')
         exit(1)
-_coll.add_task(prepare_commit_msg_hook)
+coll.collections['_'].add_task(prepare_commit_msg_hook)
