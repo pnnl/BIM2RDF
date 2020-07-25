@@ -4,7 +4,6 @@ import yaml
 from .. import work
 from pathlib import Path
 
-
 ns = Collection()
 
 
@@ -114,7 +113,8 @@ def get_current_conda_env():
     else:
         return dir.parts[-1]
 
-def get_current_work_dir():
+
+def _get_current_work_dir():
     import os
     _ = Path(os.curdir).absolute()
     _ = _.relative_to(root)
@@ -126,8 +126,16 @@ def get_current_work_dir():
         else:
             return
 
+@task
+def get_current_work_dir(ctx):
+    cd = _get_current_work_dir()
+    if cd: print(cd)
+    else: exit(1)
+ns.add_task(get_current_work_dir)
+
+
 def get_current_WorkDir():
-    wd = get_current_work_dir()
+    wd = _get_current_work_dir()
     if wd:
         return work.WorkDir(wd)
     return
@@ -150,7 +158,7 @@ def list_work_dirs(ctx):
         print(wd.name)
 ns.add_task(list_work_dirs)
 
-cur_work_dir = get_current_work_dir()
+cur_work_dir = _get_current_work_dir()
 def get_cur_work_dir_help():
     cd = ''
     if cur_work_dir:
