@@ -236,6 +236,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         for i, cmd in enumerate(cmds):
             if not cmd.replace(' ', ''): continue
             if i == 0:
+                # pass args to 1st cmd
                 al(f"{cmd} \"$@\"")
             else:
                 al(cmd)
