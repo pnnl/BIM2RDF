@@ -244,12 +244,15 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         al(':WINDOWS')
         #'REM Do Windows CMD commands here... for example:
         #SET StartDir=%cd%
+        cmds_line = ""
         for i, cmd in enumerate(cmds):
             if not cmd.replace(' ', ''): continue
             if i == 0:
-                al(f"{cmd} %* || exit /b")
+                # pass args to 1st cmd
+                cmds_line += f"{cmd} %* &&"
             else:
-                al(  f"{cmd}  || exit /b")
+                cmds_line += f"{cmd} &&"
+        al(cmds_line.strip('&&'))
         #REM Then, when all Windows commands are complete... the script is done.
         return tuple(lines)
 
