@@ -20,9 +20,6 @@ coll.collections['work-dir'].add_collection(Collection('action'))
 coll.collections['work-dir'].add_collection(Collection('info'))
 
 
-test_coll = Collection('test')
-coll.add_collection(test_coll)
-
 @task
 def set_dvc_repo(ctx,
                 prompt=True,
@@ -44,7 +41,7 @@ def set_dvc_repo(ctx,
     sdvc = root / 'data' / 'sample.dvc'
     # will not error if file in (local) cache but wrong remote
     ctx.run(f"dvc pull \"{root/'data'/'sample.dvc'}\"")
-test_coll.add_task(set_dvc_repo)
+coll.collections['project'].collections['setup'].add_task(set_dvc_repo)
 
 
 @task
