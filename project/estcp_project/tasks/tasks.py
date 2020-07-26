@@ -560,7 +560,7 @@ def dvc_run(ctx,  work_dir=cur_work_dir):
 # ok just do setup.py programmatically
 
 #
-coll.add_collection(Collection('_'))
+coll.collections['project'].add_collection(Collection('_git'))
 
 @task
 def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
@@ -586,4 +586,4 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
         cmf = open(COMMIT_MSG_FILE, 'w')
         cmf.write(message)
         cmf.close()
-coll.collections['_'].add_task(prepare_commit_msg_hook)
+coll.collections['project'].collections['_git'].add_task(prepare_commit_msg_hook)
