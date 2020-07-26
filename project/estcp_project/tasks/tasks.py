@@ -20,23 +20,27 @@ coll.collections['work-dir'].add_collection(Collection('action'))
 coll.collections['work-dir'].add_collection(Collection('info'))
 
 
+
+
 @task
 def set_dvc_repo(ctx,
-                prompt=True,
-                dir=r"\\pnl\projects\ArmyReserve\ESTCP\Machine Learning\software-files\dont-touch\not-code-dvc-repo"):
+                dir=r"\\pnl\projects\ArmyReserve\ESTCP\Machine Learning\software-files\dont-touch\not-code-dvc-repo",
+                ):
     """
     Set sharefolder as (non- source code) DVC repository.
     """
-    if prompt:
-        if input(f"Enter 'Y' if {dir} is the DVC repo. ").lower().strip() == 'y':
-            pass
-        else:
-            dir = input("input DVC repo: ")
+    import json
+    dir_from_config = (
+        ctx.run(f"dvc config --local core.remote sharefolder")
+        .stdout
+        .strip()
+    )
+    dir = json.loads(dir_from_config)['url'] if dir_from_config else dir
 
     dir = Path(dir).resolve().absolute()
     if not dir.is_dir():
         raise FileNotFoundError('not a directory or directory not found')
-    ctx.run(f"dvc config --local core.remote sharefolder")
+    
     ctx.run(f"dvc remote add --local sharefolder \"{dir}\" -f")
     sdvc = root / 'data' / 'sample.dvc'
     # will not error if file in (local) cache but wrong remote
@@ -44,49 +48,22 @@ def set_dvc_repo(ctx,
 coll.collections['project'].collections['setup'].add_task(set_dvc_repo)
 
 
-@task
-def create_secrets(ctx):
-    """
-    Set up secrets config.
-    """
-    import estcp_project.config
-    def input_secrets(): # in tasks
-        ret = {}
-        ret['mdms'] = {}
-        ret['mdms']['user'] = input('mdms user: ').strip()
-        ret['mdms']['password'] = input('mdms password: ').strip()
-        return ret
-    estcp_project.config.save_secrets(input_secrets)
-coll.collections['project'].collections['setup'].add_task(create_secrets)
+# TODO move to db stuff
+# @task
+# def create_secrets(ctx):
+#     """
+#     Set up secrets config.
+#     """
+#     import estcp_project.config
+#     def input_secrets(): # in tasks
+#         ret = {}
+#         ret['mdms'] = {}
+#         ret['mdms']['user'] = input('mdms user: ').strip()
+#         ret['mdms']['password'] = input('mdms password: ').strip()
+#         return ret
+#     estcp_project.config.save_secrets(input_secrets)
+# coll.collections['project'].collections['setup'].add_task(create_secrets)
 
-
-def copy_git_hook_file(name):
-    src = root /  'git' / 'hooks' / name
-    dst = root / '.git' / 'hooks' / name
-    src = open(src, 'r').read()
-    open(dst, 'w').write(src)
-    # +x flag set in git. so the following isn't needed
-    #from stat import S_IXUSR
-    #dst.chmod(S_IXUSR)
-
-@task
-def create_project_git_commit_hook(ctx):
-    """
-    Set up git commit automation which prepends commits with [<workdir>]
-    """
-    copy_git_hook_file('prepare-commit-msg')
-coll.collections['project'].collections['setup'].add_task(create_project_git_commit_hook)
-
-@task
-def create_dvc_git_hooks(ctx):
-    # luckily it doesn't conflict with project git commit hook
-    """
-    Set up dvc git hooks.
-    """
-    copy_git_hook_file('post-checkout')
-    copy_git_hook_file('pre-commit')
-    copy_git_hook_file('pre-push')
-coll.collections['project'].collections['setup'].add_task(create_dvc_git_hooks)
 
 @task
 def create_project_wrappers(ctx, ):
@@ -101,9 +78,6 @@ coll.collections['project'].collections['setup'].add_task(create_project_wrapper
 
 @task(
     pre=[
-        create_secrets,
-        create_project_git_commit_hook,
-        create_dvc_git_hooks,
         create_project_wrappers,
         call(set_dvc_repo, prompt=True)],
     default=True)
