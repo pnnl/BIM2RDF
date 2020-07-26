@@ -13,7 +13,7 @@ coll.collections['project'].add_collection(Collection('action'))
 coll.collections['project'].add_collection(Collection('info'))
 
 
-# WORK DIR 
+# WORK DIR
 coll.add_collection(Collection('work-dir'))
 coll.collections['work-dir'].add_collection(Collection('setup'))
 coll.collections['work-dir'].add_collection(Collection('action'))
@@ -97,7 +97,7 @@ def create_project_wrappers(ctx, ):
     Create wrappers around project tool executables.
     """
     #for #dvc, git, invoke, work-on.sh/enter: bash --login -i
-    for exe in ['dvc', 'invoke', 'inv',]+['git', 'bash']:
+    for exe in ['dvc', 'invoke', 'inv',]+['git', 'bash', 'pre-commit']:
         create_exec_wrapper(ctx, exe, work_dir='project')
 coll.collections['project'].collections['setup'].add_task(create_project_wrappers)
 
@@ -203,7 +203,7 @@ def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True)
     env_pth = wd.get_env_path()
     if not env_pth:
         raise Exception('no associated environment')
-    
+
     exe_name = exe_pth.stem
 
     def create_wrapper(exe_pth, test=True):
@@ -215,7 +215,7 @@ def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True)
             # overwrites
             ctx.run(f"create-wrappers -t conda {exe_prefix_switch} -f {exe_name} -d {wd.dir/'wbin'} --conda-env-dir {env_pth}")
             return Path(which(exe_name, path=str(wd.dir/'wbin')))  # Path doesn't work until py3.8
-        
+
         if not exe_pth.parent.parts:
             get_exe_py = f"from shutil import which; print(which(\'{exe_name}\'))"
             exe_pth = ctx.run(f"{wd.dir/'wbin'/'run-in'} python -c \"{get_exe_py}\"", hide='out').stdout.replace('\n', '')
@@ -225,7 +225,7 @@ def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True)
             if not exe_pth.exists():
                 raise Exception(f'{exe_pth} does not exist')
         return create_wrapper(exe_pth, test=False)
-        
+
     if exe_name == '_stub':
         return create_wrapper(exe_name, test=False)
     # so now the following doesn't pick up the wrapped exe. breaks out of recursion issues.
@@ -256,7 +256,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
     sdir = wd.dir / 'scripts'
     assert(sdir.exists())
     (sdir / 'bin').mkdir(exist_ok=True)
-    
+
     def make_cmd_script(cmds):
         # assuming simple case: just lines of cmds
         if isinstance(cmds, str):
@@ -267,11 +267,11 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         #https://stackoverflow.com/questions/17510688/single-script-to-run-in-both-windows-batch-and-linux-bash/17623721#17623721
         al('echo >/dev/null # >nul & GOTO WINDOWS & rem ^')
         # ***********************************************************
-        # * NOTE: If you modify this content, be sure to remove carriage returns (\r) 
-        # *       from the Linux part and leave them in together with the line feeds 
+        # * NOTE: If you modify this content, be sure to remove carriage returns (\r)
+        # *       from the Linux part and leave them in together with the line feeds
         # *       (\n) for the Windows part. In summary:
         # *           New lines in Linux: \n
-        # *           New lines in Windows: \r\n 
+        # *           New lines in Windows: \r\n
         # ***********************************************************
         # Do Linux Bash commands here... for example:
         #StartDir="$(pwd)"
@@ -296,11 +296,11 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
                 al(  f"{cmd}  || exit /b")
         #REM Then, when all Windows commands are complete... the script is done.
         return tuple(lines)
-    
+
     def chmod_px(pth):
         import stat
         return pth.chmod(pth.stat().st_mode | stat.S_IEXEC)
-    
+
     def write_sbin(sbin, lines):
         lines = make_cmd_script(lines)
         lines = [ln.strip()+'\n' for  ln in lines]
@@ -423,7 +423,7 @@ def _change_dir(wd):
 # TODO create recreate env task
 
 
-@task(help={'work_dir': "directory to work on something"})
+@task(help={'work_dir': "directory to work in a workdir"})
 def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     """
     Instructs what to do to work on something.
@@ -436,13 +436,13 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
         ctx.run(f'git add "{wd.dir}"')
         ctx.run(f'git commit -m  " [{wd.name}]  initial placeholder commit"')
 
-    # best programmed with a state diagram. TODO 
+    # best programmed with a state diagram. TODO
 
 
     # 1. check work dir creation
     wd = work_dir
     if wd not in (wd.name for wd in work.find_WorkDirs()):
-        # best to do this from the project env 
+        # best to do this from the project env
         # b/c the git hook prepends WORK_DIR
         project_env = work.WorkDir(root/'project').devenv_name  # hardcoding warning
         if cur_env_name !=  project_env:
@@ -463,7 +463,7 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
             init_commit(wd)
     else:
         wd = work.WorkDir(wd)
-    
+
     # 2. env creation
     minRunenv = \
         wd.minrunenv \
@@ -475,7 +475,7 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     if (minRunenv or minDevenv):
         print('Minimal dev or run env detected.')
     make_devenv(ctx, work_dir=wd.name)
-    
+
     # 4. create wrapper scripts
     for w in (wd.dir / 'wbin').glob('*'): w.unlink()
     create_exec_wrapper(ctx, '_stub', work_dir=wd.name)
@@ -499,10 +499,10 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     # 8. check if in a branch
     if ('master' == cur_branch) and (wd.name != 'project'):
         print('Notice: You many want to create a branch for your work.')
-    
+
     print('Ready to work!')
-# TODO check WORK_DIR set
 coll.collections['work-dir'].collections['action'].add_task(work_on)
+coll.add_task(work_on)
 
 
 # TODO: recreate is this followed by a workon
@@ -539,26 +539,8 @@ def remove_work_env(ctx, work_dir=cur_work_dir):
 coll.collections['work-dir'].collections['action'].add_task(remove_work_env)
 
 
-# @task(help={'message': "Commit message. Use quotes.",
-#             'work-dir': get_cur_work_dir_help() })
-# def commit(ctx, message, work_dir=cur_work_dir):
-#     """
-#     Prefixes commit message with workdir.
-#     """
-#     wd = work_dir
-#     if wd not in (wd.name for wd in work.find_WorkDirs()):
-#         print('Work dir not found.')
-#         exit(1)
-#     wd = work.WorkDir(wd)
-
-#     message = f"[{wd.name}] " + message
-#     ctx.run(f"git commit  -m  \"{message}\"")
-# ns.add_task(commit)
 
 
-
-# todo: use WORK_DIR instead of conda env where applicable
-#check_state(cd = workdir and workdir env var)
 #@task TODO
 def dvc_run(ctx,  work_dir=cur_work_dir):
     """
@@ -580,24 +562,31 @@ def dvc_run(ctx,  work_dir=cur_work_dir):
 
 # ok just do setup.py programmatically
 
-# 
+#
 coll.add_collection(Collection('_'))
 
 @task
 def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
     """
     (ignore. internal task.) git commit hook for workdir tag
-    Uses WORK_DIR env var to prefix commit msg.
+    Uses takes the first dir part to prepend
     """
-    import os
-    WORK_DIR = os.environ.get('WORK_DIR') # COULD USE cd ??
-    if WORK_DIR:
-        wd = work.WorkDir(WORK_DIR)
-        message = f"[{wd.name}] " + open(COMMIT_MSG_FILE, 'r').read()
+    import git
+    repo = git.Repo(root)
+    work_dirs = []
+    for pth in repo.index.diff("HEAD"):
+        pth = Path(pth.a_path) # a_path or b_path idk
+        if len(pth.parts) == 1: # assume project
+            work_dirs.append('project')
+        else:
+            work_dirs.append(pth.parts[0])
+    work_dirs = frozenset(work_dirs)
+    
+    if work_dirs:
+        work_dir_tags = ""
+        for wd in work_dirs: work_dir_tags += f"[{wd}]"
+        message = f"{work_dir_tags} " + open(COMMIT_MSG_FILE, 'r').read()
         cmf = open(COMMIT_MSG_FILE, 'w')
         cmf.write(message)
         cmf.close()
-    else:
-        print('No WORK_DIR environment variable.')
-        exit(1)
 coll.collections['_'].add_task(prepare_commit_msg_hook)
