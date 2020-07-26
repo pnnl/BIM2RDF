@@ -320,10 +320,10 @@ def _get_setup_names(wd):
 
 @task(
     help={
-        'setup_list': 'the name of the setup script  (can be used multiple times to list)',
+        #'setup_list': 'the name of the setup script  (can be used multiple times to list)',
         'prompt': 'prompt setup tasks',
         },
-    iterable = ['setup_list']
+    #iterable = ['setup_list']
 )
 def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
     """
