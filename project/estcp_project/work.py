@@ -36,6 +36,9 @@ class WorkDir():
         if not (self.dir / 'environment.devenv.yml').exists():
             self.make_devenv_file()
 
+        if not (self.dir / 'readme.md').exists():
+            open(self.dir/ 'readme.md', 'w').write('TODO: write readme')
+
         # wbin and scripts? self.dir.mkdir(exist_ok=True)
         #(self.dir / 'wbin').mkdir(exist_ok=True) this is generated
         (self.dir / 'scripts').mkdir(exist_ok=True)
