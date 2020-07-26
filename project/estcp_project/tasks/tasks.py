@@ -48,21 +48,6 @@ def set_dvc_repo(ctx,
 coll.collections['project'].collections['setup'].add_task(set_dvc_repo)
 
 
-# TODO move to db stuff
-# @task
-# def create_secrets(ctx):
-#     """
-#     Set up secrets config.
-#     """
-#     import estcp_project.config
-#     def input_secrets(): # in tasks
-#         ret = {}
-#         ret['mdms'] = {}
-#         ret['mdms']['user'] = input('mdms user: ').strip()
-#         ret['mdms']['password'] = input('mdms password: ').strip()
-#         return ret
-#     estcp_project.config.save_secrets(input_secrets)
-# coll.collections['project'].collections['setup'].add_task(create_secrets)
 
 
 @task
