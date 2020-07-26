@@ -79,7 +79,7 @@ coll.collections['project'].collections['setup'].add_task(create_project_wrapper
 @task(
     pre=[
         create_project_wrappers,
-        call(set_dvc_repo, prompt=True)],
+        call(set_dvc_repo, )],
     default=True)
 def setup(ctx,):
      """All setup tasks"""
