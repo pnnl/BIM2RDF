@@ -506,7 +506,7 @@ def remove_work_env(ctx, work_dir=cur_work_dir):
             envfn = (wd.dir / wd.envfn)
             if envfn.exists():
                 envfn.unlink()
-            print(f"> conda env remove -n {wd.devenv_name}")
+            ctx.run(f"conda env remove -n {wd.devenv_name}")
 coll.collections['work-dir'].collections['action'].add_task(remove_work_env)
 
 
