@@ -395,11 +395,10 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     cur_env_name = get_current_conda_env()
 
     def init_commit(wd):
-        ctx.run(f'git add "{wd.dir}"')
-        ctx.run(f'git commit -m  " [{wd.name}]  initial placeholder commit"')
+        ctx.run(f"conda run -n {work.WorkDir('project').devenv_name} git add {wd.dir}")
+        ctx.run(f"conda run -n {work.WorkDir('project').devenv_name} git commit -m  \"initial placeholder commit\"",)
 
     # best programmed with a state diagram. TODO
-
 
     # 1. check work dir creation
     wd = work_dir
