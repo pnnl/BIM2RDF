@@ -329,6 +329,7 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
     """
     execute setup tasks for the workdir
     """
+    # consider ESSS/deps https://github.com/ESSS/conda-devenv/issues/108
     assert(work_dir)
     wd = work.WorkDir(work_dir)
     make_devenv(ctx, work_dir=wd.name)
@@ -353,11 +354,12 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
         create_scripts_wrappers(ctx, work_dir=dwd)
         dWD = work.WorkDir(dwd)
         for asetup in  _get_setup_names(dWD):
-            if prompt:
-                if input(f"execute {asetup} for {dWD.name}? [enter y] ").lower().strip() == 'y':
-                    ctx.run(f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True)
-            else:
-                ctx.run(    f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True)
+            with ctx.cd(str(dWD.dir)):
+                if prompt:
+                    if input(f"execute {asetup} for {dWD.name}? [enter y] ").lower().strip() == 'y':
+                        ctx.run(f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True)
+                else:
+                    ctx.run(    f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True)
         done.append(dWD.name)
     #ctx.run(f"conda run --cwd {wd.dir} -n {wd.env name} conda devenv", echo=True) # pyt=True does't work on windows
 coll.collections['work-dir'].collections['setup'].add_task(run_setup_tasks)
