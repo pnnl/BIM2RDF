@@ -53,8 +53,7 @@ def create_project_wrappers(ctx, ):
     """
     Create wrappers around project tool executables.
     """
-    #for #dvc, git, invoke, work-on.sh/enter: bash --login -i
-    for exe in ['dvc', 'invoke', 'inv',]+['git', 'bash', 'pre-commit', 'python']:
+    for exe in ['dvc', 'invoke', 'inv',]+['git', 'bash', 'pre-commit',]:
         create_exec_wrapper(ctx, exe, work_dir='project')
 coll.collections['project'].collections['setup'].add_task(create_project_wrappers)
 
@@ -63,19 +62,39 @@ def install_git_hooks(ctx):
     """
     install git hooks using pre-commit tool
     """
-    ctx.run(f"pre-commit install", )
-    ctx.run(f"pre-commit install --hook-type prepare-commit-msg")
+    def inform_hookfile(hf):
+        #https://github.com/pre-commit/pre-commit/issues/1329
+        get_exe_py = f"from shutil import which; print(which(\'project-python\'))"
+        exe_pth = ctx.run(f"{work.WorkDir('project').dir/'wbin'/'run-in'} python -c \"{get_exe_py}\"", hide='out').stdout.replace('\n', '')
+        if exe_pth=='None': raise Exception(f'{exe_name} exe not found')
+        uninformed_line = "INSTALL_PYTHON ="
+        informed_line = f"INSTALL_PYTHON = \"{Path(exe_pth)}\""
+        informed_line = informed_line.encode('unicode-escape').decode() + "\n"
+        _ = open(hf).readlines()
+        assert(''.join(_).count(uninformed_line) == 1)
+        lines = []
+        for al in _:
+            if uninformed_line in al:
+                al = informed_line
+            lines.append(al)
+        open(hf, 'w').writelines(lines)
 
+    ctx.run(f"pre-commit install" )
+    # make the stupid pre-commit exec invocation see the pre-commit exec instead of a python
+    inform_hookfile(root / '.git' / 'hooks' / 'pre-commit')
+    ctx.run(f"pre-commit install    --hook-type     prepare-commit-msg")
+    inform_hookfile(root / '.git' / 'hooks' / 'prepare-commit-msg')
+coll.collections['project'].collections['setup'].add_task(install_git_hooks)
 
 @task(default=True)
 def setup(ctx,):
     """All setup tasks"""
     create_project_wrappers(ctx)
+    create_scripts_wrappers(ctx, work_dir='project')
     install_git_hooks(ctx)
     set_dvc_repo(ctx)
     #run_setup_tasks(ctx, work_dir='project') inf loop
     #make_devenv(ctx, work_dir='project') # doesn't make sense
-    create_scripts_wrappers(ctx, work_dir='project')
 coll.collections['project'].collections['setup'].add_task(setup)
 
 
