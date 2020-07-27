@@ -67,15 +67,17 @@ def install_git_hooks(ctx):
     ctx.run(f"pre-commit install --hook-type prepare-commit-msg")
 
 
-@task(
-    pre=[
-        create_project_wrappers,
-        install_git_hooks,
-        call(set_dvc_repo, )],
-    default=True)
+@task(default=True)
 def setup(ctx,):
-     """All setup tasks"""
-     pass
+    """All setup tasks"""
+    create_project_wrappers(ctx)
+    install_git_hooks(ctx)
+    set_dvc_repo(ctx)
+    #run_setup_tasks(ctx, work_dir='project') inf loop
+    #make_devenv(ctx, work_dir='project') # doesn't make sense
+    create_scripts_wrappers(ctx, work_dir='project')
+
+
 coll.collections['project'].collections['setup'].add_task(setup)
 
 
