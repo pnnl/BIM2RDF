@@ -6,7 +6,7 @@ import yaml
 class WorkDir():
     # TODO: probably better managed as a tree
     file_names = {'environment.devenv.yml',
-                  'environment.run.yml'} 
+                  'environment.run.yml'}
                   # could also be some configs
     base_devenv = here('./dev-bootstrap/environment.yml')
     envfn = 'environment.yml'
@@ -32,18 +32,18 @@ class WorkDir():
         if not (self.dir / 'environment.run.yml').exists():
             # need a min file so deve nv doesn't complain
             yaml.dump(self.minrunenv, open(self.dir/'environment.run.yml','w'))
-        
+
         if not (self.dir / 'environment.devenv.yml').exists():
             self.make_devenv_file()
 
         if not (self.dir / 'readme.md').exists():
-            open(self.dir/ 'readme.md', 'w').write('TODO: write readme')
+            open(self.dir/ 'readme.md', 'w').write('TODO: write readme\n')
 
         # wbin and scripts? self.dir.mkdir(exist_ok=True)
         #(self.dir / 'wbin').mkdir(exist_ok=True) this is generated
         (self.dir / 'scripts').mkdir(exist_ok=True)
 
-    
+
     def reset(self):
         # rem stuff
         #return WorkDir initialized
@@ -91,7 +91,7 @@ class WorkDir():
         includes = list(includes)
         for dep in (set(workdir_run_deps) | set(['project'])):
             includes.append(here(f'./{dep}/environment.run.yml'))
-        
+
         def prefix_parts(): return ['{{root}}']+['..']*self.n_upto_proj()
         def parts(p): return prefix_parts() + list(p.absolute().relative_to(here().absolute()).parts)
         from pathlib import PurePosixPath as Path
