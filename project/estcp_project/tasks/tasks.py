@@ -54,7 +54,7 @@ def create_project_wrappers(ctx, ):
     Create wrappers around project tool executables.
     """
     #for #dvc, git, invoke, work-on.sh/enter: bash --login -i
-    for exe in ['dvc', 'invoke', 'inv',]+['git', 'bash', 'pre-commit']:
+    for exe in ['dvc', 'invoke', 'inv',]+['git', 'bash', 'pre-commit', 'python']:
         create_exec_wrapper(ctx, exe, work_dir='project')
 coll.collections['project'].collections['setup'].add_task(create_project_wrappers)
 
@@ -76,8 +76,6 @@ def setup(ctx,):
     #run_setup_tasks(ctx, work_dir='project') inf loop
     #make_devenv(ctx, work_dir='project') # doesn't make sense
     create_scripts_wrappers(ctx, work_dir='project')
-
-
 coll.collections['project'].collections['setup'].add_task(setup)
 
 
