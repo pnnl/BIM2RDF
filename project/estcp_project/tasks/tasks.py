@@ -40,14 +40,12 @@ def set_dvc_repo(ctx,
     dir = Path(dir).resolve().absolute()
     if not dir.is_dir():
         raise FileNotFoundError('not a directory or directory not found')
-    
+
     ctx.run(f"dvc remote add --local sharefolder \"{dir}\" -f")
     sdvc = root / 'data' / 'sample.dvc'
     # will not error if file in (local) cache but wrong remote
     ctx.run(f"dvc pull \"{root/'data'/'sample.dvc'}\"")
 coll.collections['project'].collections['setup'].add_task(set_dvc_repo)
-
-
 
 
 @task
@@ -60,10 +58,19 @@ def create_project_wrappers(ctx, ):
         create_exec_wrapper(ctx, exe, work_dir='project')
 coll.collections['project'].collections['setup'].add_task(create_project_wrappers)
 
+@task
+def install_git_hooks(ctx):
+    """
+    install git hooks using pre-commit tool
+    """
+    ctx.run(f"pre-commit install", )
+    ctx.run(f"pre-commit install --hook-type prepare-commit-msg")
+
 
 @task(
     pre=[
         create_project_wrappers,
+        install_git_hooks,
         call(set_dvc_repo, )],
     default=True)
 def setup(ctx,):
@@ -543,7 +550,7 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
         else:
             work_dirs.append(pth.parts[0])
     work_dirs = frozenset(work_dirs)
-    
+
     if work_dirs:
         work_dir_tags = ""
         for wd in work_dirs: work_dir_tags += f"[{wd}]"
