@@ -376,17 +376,8 @@ coll.collections['work-dir'].collections['setup'].add_task(run_setup_tasks)
 
 def _change_dir(wd):
     if wd.dir.resolve() != Path('.').resolve():
-        n_up = len(Path('.').absolute().parts) - len(wd.dir.absolute().parts) + 1
-        assert( (n_up-1) !=0)
-        if n_up>0:
-            deeper = True
-            rdir = ['..']*n_up + [wd.name]
-            rdir = Path(*rdir)
-        else:
-            deeper = False
-            rdir = Path(wd.dir).absolute().relative_to(Path('.').absolute())
-        print(f"Change directory to {rdir}.")
-        print(f"> cd {rdir}")
+        print(f"Change directory to {wd.dir}.")
+        print(f"> cd {wd.dir}")
         return True
     else:
         return None
