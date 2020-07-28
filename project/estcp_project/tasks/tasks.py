@@ -86,9 +86,13 @@ coll.collections['project'].collections['setup'].add_task(install_git_hooks)
 @task(default=True)
 def setup(ctx,):
     """All setup tasks"""
+    print('creating project wrappers')
     create_project_wrappers(ctx)
+    print('creating scripts wrappers')
     create_scripts_wrappers(ctx, work_dir='project')
+    print('installing git hooks')
     install_git_hooks(ctx)
+    print('setting dvc repo')
     set_dvc_repo(ctx)
     #run_setup_tasks(ctx, work_dir='project') inf loop
     #make_devenv(ctx, work_dir='project') # doesn't make sense
