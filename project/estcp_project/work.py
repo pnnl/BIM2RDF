@@ -8,7 +8,7 @@ class WorkDir():
     file_names = {'environment.devenv.yml',
                   'environment.run.yml'}
                   # could also be some configs
-    base_devenv = here('./dev-bootstrap/environment.yml')
+    base_devenv = here('./environment.yml')
     envfn = 'environment.yml'
     minrunenv = {'dependencies': [],
                  'includes': [],
