@@ -20,24 +20,21 @@ coll.collections['work-dir'].add_collection(Collection('action'))
 coll.collections['work-dir'].add_collection(Collection('info'))
 
 
-
+config = yaml.safe_load((root / 'project' / 'config.yml').open())
 
 @task
-def set_dvc_repo(ctx,
-                dir=r"\\pnl\projects\ArmyReserve\ESTCP\Machine Learning\software-files\dont-touch\not-code-dvc-repo",
-                ):
+def set_dvc_repo(ctx):
     """
     Set sharefolder as (non- source code) DVC repository.
     """
-    import json
-    dir_from_config = (
-        ctx.run(f"dvc config --local core.remote sharefolder")
-        .stdout
-        .strip()
-    )
-    dir = json.loads(dir_from_config)['url'] if dir_from_config else dir
-
-    dir = Path(dir).resolve().absolute()
+    # import json
+    # dir_from_config = (
+    #     ctx.run(f"dvc config --local core.remote sharefolder")
+    #     .stdout
+    #     .strip()
+    # )
+    # dir = json.loads(dir_from_config)['url'] if dir_from_config else dir
+    dir = Path(config['dvc']['dir'])
     if not dir.is_dir():
         raise FileNotFoundError('not a directory or directory not found')
 
