@@ -1,11 +1,7 @@
 channels:
-  - conda-forge
+  - conda-forge # generally, don't remove. 'default' repo
 dependencies:
   - pyprojroot # useful but also actcs as a (minimal) stub so that /something/ gets put into an env
-  # pip local install ?
-  # or conda build??
-  # or just have something called setup and build .simplescript
-  # or setup.bat/sh in proj root?
 environment:
   PYTHONPATH:
     - '{{root}}'
@@ -13,4 +9,3 @@ environment:
     - '{{root}}/wbin'
   RUN_WORK_DIRS:
     - '{{root}}'
-  
