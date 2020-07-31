@@ -1,3 +1,11 @@
 ---
 dvc:
+    # on mac ...
+    #share dir
     dir: \\pnl\projects\ArmyReserve\ESTCP\Machine Learning\software-files\dont-touch\not-code-dvc-repo
+
+git: # integrations only applied if pre-commit=true
+    _: true
+    #pre-commit: true # not recommended to be false
+    #dvc: true
+    #commit-msg: true # not recommended to false

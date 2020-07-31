@@ -37,7 +37,6 @@ def set_dvc_repo(ctx):
     dir = Path(config['dvc']['dir'])
     if not dir.is_dir():
         raise FileNotFoundError('not a directory or directory not found')
-
     ctx.run(f"dvc remote add --local sharefolder \"{dir}\" -f")
     sdvc = root / 'data' / 'sample.dvc'
     # will not error if file in (local) cache but wrong remote
@@ -90,10 +89,13 @@ def setup(ctx,):
     create_project_wrappers(ctx)
     print('creating scripts wrappers')
     create_scripts_wrappers(ctx, work_dir='project')
-    print('installing git hooks')
-    install_git_hooks(ctx)
+    if 'git' in config:
+        print('installing git hooks')
+        install_git_hooks(ctx)
     print('setting dvc repo')
     set_dvc_repo(ctx)
+
+
     #run_setup_tasks(ctx, work_dir='project') inf loop
     #make_devenv(ctx, work_dir='project') # doesn't make sense
 coll.collections['project'].collections['setup'].add_task(setup)
@@ -189,7 +191,7 @@ def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True)
 
     exe_name = exe_pth.stem
 
-    def create_wrapper(exe_pth, test=True):
+    def create_wrapper(exe_pth, test=True): # TODO rename exp_pth > exe_pth_or_name
         exe_pth = Path(exe_pth)
         exe_name = exe_pth.stem
         exe_prefix_switch = f"-b {exe_pth.parent}" if exe_pth.parent.parts else ''
