@@ -96,7 +96,8 @@ class WorkDir():
         def parts(p): return prefix_parts() + list(p.absolute().relative_to(here().absolute()).parts)
         from pathlib import PurePosixPath as Path
         includes = [str(Path(*parts(p)))
-                     for p in list(includes)+[self.dir/'environment.run.yml' ]]
+        # TODO:               changing the order of the includes didn't change PATH appending order
+                     for p in [self.dir/'environment.run.yml']+list(includes)]
         dev_env = {'includes': includes, 'name': name, 'dependencies':[], 'environment': {'WORK_DIR': self.name}}
         return dev_env
 
