@@ -1,6 +1,4 @@
 from .root import root
 
-__all__ = [root]
-
-
-
+root_dir = root
+__all__ = [root, root_dir]
