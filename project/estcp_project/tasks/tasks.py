@@ -279,10 +279,10 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             if not cmd.replace(' ', ''): continue
             if i == 0:
                 # pass args to 1st cmd
-                cmds_line += f"{cmd} %* &&"
+                cmds_line += f"{cmd} %* && "
             else:
-                cmds_line += f"{cmd} &&"
-        al(cmds_line.strip('&&'))
+                cmds_line += f"{cmd} && "
+        al(cmds_line.strip('&&').strip('&& ')) # rem trailing &&
         #REM Then, when all Windows commands are complete... the script is done.
         return tuple(lines)
 
@@ -312,7 +312,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
 
         lines = open(script_pth).readlines()
         if ext == 'cmdlines':
-            for sbin in sbins: write_sbin(sbin, [ln for ln in lines if not ln.startswith('#')])
+            for sbin in sbins: write_sbin(sbin, [ln.replace("$WORK_DIR", str(wd.dir)) for ln in lines if not ln.startswith('#')])
             wpths = create_exec_wrapper(ctx, sbin_name,  work_dir=work_dir, test=True)
 
         elif ext == 'py':
