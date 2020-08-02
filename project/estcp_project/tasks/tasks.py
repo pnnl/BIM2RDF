@@ -54,7 +54,7 @@ def create_project_wrappers(ctx, ):
 coll.collections['project'].collections['setup'].add_task(create_project_wrappers)
 
 @task
-def install_git_hooks(ctx):
+def set_git_hooks(ctx):
     """
     install git hooks using pre-commit tool
     """
@@ -75,12 +75,16 @@ def install_git_hooks(ctx):
             lines.append(al)
         open(hf, 'w').writelines(lines)
 
-    ctx.run(f"pre-commit install" )
-    # make the stupid pre-commit exec invocation see the pre-commit exec instead of a python
-    inform_hookfile(root / '.git' / 'hooks' / 'pre-commit')
-    ctx.run(f"pre-commit install    --hook-type     prepare-commit-msg")
-    inform_hookfile(root / '.git' / 'hooks' / 'prepare-commit-msg')
-coll.collections['project'].collections['setup'].add_task(install_git_hooks)
+    if config['git']:
+        ctx.run(f"pre-commit install" )
+        # make the stupid pre-commit exec invocation see the pre-commit exec instead of a python
+        inform_hookfile(root / '.git' / 'hooks' / 'pre-commit')
+        ctx.run(f"pre-commit install    --hook-type     prepare-commit-msg")
+        inform_hookfile(root / '.git' / 'hooks' / 'prepare-commit-msg')
+    else:
+        ctx.run(f"pre-commit uninstall" )
+        ctx.run(f"pre-commit uninstall    --hook-type     prepare-commit-msg")
+coll.collections['project'].collections['setup'].add_task(set_git_hooks)
 
 @task(default=True)
 def setup(ctx,):
@@ -89,13 +93,10 @@ def setup(ctx,):
     create_project_wrappers(ctx)
     print('creating scripts wrappers')
     create_scripts_wrappers(ctx, work_dir='project')
-    if 'git' in config:
-        print('installing git hooks')
-        install_git_hooks(ctx)
+    print('setting git hooks')
+    set_git_hooks(ctx)
     print('setting dvc repo')
     set_dvc_repo(ctx)
-
-
     #run_setup_tasks(ctx, work_dir='project') inf loop
     #make_devenv(ctx, work_dir='project') # doesn't make sense
 coll.collections['project'].collections['setup'].add_task(setup)
