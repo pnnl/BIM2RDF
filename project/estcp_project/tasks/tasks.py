@@ -387,9 +387,9 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
             with ctx.cd(str(dWD.dir)):
                 if prompt:
                     if input(f"execute {asetup} for {dWD.name}? [enter y] ").lower().strip() == 'y':
-                        ctx.run(f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True)
+                        assert(ctx.run(f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True).ok)
                 else:
-                    ctx.run(    f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True)
+                    assert(    ctx.run(    f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True).ok)
         done.append(dWD.name)
     #ctx.run(f"conda run --cwd {wd.dir} -n {wd.env name} conda devenv", echo=True) # pyt=True does't work on windows
 coll.collections['work-dir'].collections['setup'].add_task(run_setup_tasks)
@@ -407,7 +407,7 @@ def _change_dir(wd):
 
 
 @task(help={'work_dir': "directory to work in a workdir"})
-def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
+def work_on(ctx, work_dir, setup_prompt=False): # TODO rename work_on_check ?
     """
     Instructs what to do to work on something.
     Keep invoking until desired state achieved.
@@ -432,17 +432,17 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
             print(f"> conda activate {project_env}")
             exit(1)
         # state of just creating a workdir
-        if cur_branch != 'master':
-            if input(f"Current git branch is not 'master'. Enter 'Y' if  you're sure that you want to initialize the work dir in the '{cur_branch}' branch.").lower() == 'y':
-                wd = _create_WorkDir(ctx, wd)
-                init_commit(wd)
-            else:
-                print('Switch to master.')
-                print('> git checkout master')
-                exit(1)
-        else:
-            wd = _create_WorkDir(ctx, wd)
-            init_commit(wd)
+        # if cur_branch != 'master':
+        #     if input(f"Current git branch is not 'master'. Enter 'Y' if  you're sure that you want to initialize the work dir in the '{cur_branch}' branch.").lower() == 'y':
+        #         wd = _create_WorkDir(ctx, wd)
+        #         init_commit(wd)
+        #     else:
+        #         print('Switch to master.')
+        #         print('> git checkout master')
+        #         exit(1)
+        #else:
+        wd = _create_WorkDir(ctx, wd)
+        #init_commit(wd)
     else:
         wd = work.WorkDir(wd)
 
@@ -464,7 +464,7 @@ def work_on(ctx, work_dir, ): # TODO rename work_on_check ?
     create_scripts_wrappers(ctx, work_dir=wd.name)
 
     # 5. run setup tasks
-    run_setup_tasks(ctx, work_dir=work_dir, )
+    run_setup_tasks(ctx, work_dir=work_dir, prompt=setup_prompt)
 
     # check if devenv in run env includes. TODO
 
@@ -522,7 +522,7 @@ coll.collections['work-dir'].collections['action'].add_task(remove_work_env)
 
 
 
-
+# TODO: reset work dir
 #@task TODO
 def dvc_run(ctx,  work_dir=cur_work_dir):
     """
