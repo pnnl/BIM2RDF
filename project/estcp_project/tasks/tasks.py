@@ -174,14 +174,14 @@ def get_cur_work_dir_help():
 
 
 @task(help={
-    'exe_name': "name of executable",
+    'exe': "name or path of executable",
     'test': "test if executable can be seen before making a wrapper around it"
     })
-def create_exec_wrapper(ctx, exe_pth='_stub',  work_dir=cur_work_dir, test=True): #TODO: create script arg?
+def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #TODO: create script arg?
     """
     Create wrapper around executable in work dir env.
     """
-    exe_pth = Path(exe_pth)
+    exe_pth = Path(exe)
     if work_dir not in (wd.name for wd in work.find_WorkDirs()):
         print('work dir not found')
         exit(1)
@@ -341,7 +341,8 @@ def make_devenv(ctx, work_dir=cur_work_dir):
     """
     assert(work_dir)
     wd = work.WorkDir(work_dir)
-    ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True) # pyt=True does't work on windows
+    # asserts maybe aren't necessary b/c warn=False default
+    assert(ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True).ok) # pyt=True does't work on windows
 coll.collections['work-dir'].collections['setup'].add_task(make_devenv)
 
 
@@ -406,11 +407,15 @@ def _change_dir(wd):
 # TODO create recreate env task
 
 
-@task(help={'work_dir': "directory to work in a workdir"})
-def work_on(ctx, work_dir, setup_prompt=False): # TODO rename work_on_check ?
+@task(
+    help={
+    'work-dir': "directory to work in a workdir",
+    'prompt-setup': 'prompt setup tasks',
+    }
+)
+def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
     """
-    Instructs what to do to work on something.
-    Keep invoking until desired state achieved.
+    Sets up an existing or new work dir.
     """
     cur_branch = ctx.run('git rev-parse --abbrev-ref HEAD', hide='out').stdout.replace('\n','')
     cur_env_name = get_current_conda_env()
@@ -464,7 +469,7 @@ def work_on(ctx, work_dir, setup_prompt=False): # TODO rename work_on_check ?
     create_scripts_wrappers(ctx, work_dir=wd.name)
 
     # 5. run setup tasks
-    run_setup_tasks(ctx, work_dir=work_dir, prompt=setup_prompt)
+    run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup)
 
     # check if devenv in run env includes. TODO
 
