@@ -15,7 +15,6 @@ class WorkDir():
                 'environment':
                     {
                         'PYTHONPATH': ['{{root}}'],
-                        'RUN_WORK_DIRS': ['{{root}}'],
                         'PATH': ['{{root}}/wbin']
                     }
                 }

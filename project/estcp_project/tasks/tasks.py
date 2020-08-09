@@ -147,6 +147,7 @@ def current_work_dir(ctx):
 coll.collections['work-dir'].collections['info'].add_task(current_work_dir)
 
 
+
 def get_current_WorkDir():
     wd = _get_current_work_dir()
     if wd:
@@ -171,6 +172,25 @@ def get_cur_work_dir_help():
     if cur_work_dir:
         cd += f" Default: {cur_work_dir}"
     return f"Work directory."+cd
+
+
+def _get_workdir_deps(ctx, WD):
+    return [wdn for wdn in ctx.run(f"deps -p {WD.dir}", hide='out').stdout.split('\n') if wdn]
+
+
+@task(help={'work-dir':get_cur_work_dir_help()})
+def work_dir_deps(ctx, work_dir=cur_work_dir):
+    """
+    lists dependencies of work dir
+    """
+    if work_dir not in (wd.name for wd in work.find_WorkDirs()):
+        print('work dir not found')
+        exit(1)
+    for wdn in _get_workdir_deps(ctx, work.WorkDir(work_dir)):
+        print(wdn)
+coll.collections['work-dir'].collections['info'].add_task(work_dir_deps)
+
+
 
 
 @task(help={
@@ -360,18 +380,12 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
     """
     execute setup tasks for the workdir
     """
-    # consider ESSS/deps https://github.com/ESSS/conda-devenv/issues/108
     assert(work_dir)
     wd = work.WorkDir(work_dir)
-    make_devenv(ctx, work_dir=wd.name)
     import os
     # have to render the devenv first
-    dep_work_dirs = ctx.run(f"conda run -n {wd.devenv_name} python -c \"import os; print(os.getenv('RUN_WORK_DIRS'))\"", hide='out').stdout.replace('\n','')
-    if dep_work_dirs != 'None':
-        dep_work_dirs = [Path(dwd).stem for dwd in dep_work_dirs.split(os.pathsep) if dwd]
-    else:
-        dep_work_dirs = []
-        print('no RUN_WORK_DIRS found!'); exit(1)
+    dep_work_dirs = _get_workdir_deps(ctx, wd)
+    assert(dep_work_dirs) # should have at least project
     done = []
     for dwd in dep_work_dirs:
         if dwd in done: continue # possibly deduping
@@ -382,15 +396,17 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
                     make_devenv(ctx, work_dir=dwd)
             else:
                 make_devenv(ctx, work_dir=dwd)
-        create_scripts_wrappers(ctx, work_dir=dwd)
-        dWD = work.WorkDir(dwd)
+        create_exec_wrapper(    ctx, '_stub', work_dir=dwd)
+        create_scripts_wrappers(ctx,          work_dir=dwd)
+        dWD = work.WorkDir(                            dwd)
         for asetup in  _get_setup_names(dWD):
             with ctx.cd(str(dWD.dir)):
                 if prompt:
                     if input(f"execute {asetup} for {dWD.name}? [enter y] ").lower().strip() == 'y':
                         assert(ctx.run(f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True).ok)
                 else:
-                    assert(    ctx.run(    f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True).ok)
+                    # asserts may not be needed b/c warn=False
+                    assert(    ctx.run(f"{dWD.dir/'wbin'/'run-in'} {asetup}", echo=True).ok)
         done.append(dWD.name)
     #ctx.run(f"conda run --cwd {wd.dir} -n {wd.env name} conda devenv", echo=True) # pyt=True does't work on windows
 coll.collections['work-dir'].collections['setup'].add_task(run_setup_tasks)
@@ -429,8 +445,8 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
     # 1. check work dir creation
     wd = work_dir
     if wd not in (wd.name for wd in work.find_WorkDirs()):
+        new_work_dir = True
         # best to do this from the project env
-        # b/c the git hook prepends WORK_DIR
         project_env = work.WorkDir(root/'project').devenv_name  # hardcoding warning
         if cur_env_name !=  project_env:
             print("Change to project environment before creating a new workdir.")
@@ -448,7 +464,9 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
         #else:
         wd = _create_WorkDir(ctx, wd)
         #init_commit(wd)
+
     else:
+        new_work_dir = False
         wd = work.WorkDir(wd)
 
     # 2. env creation
@@ -461,12 +479,6 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
     #            'or' instead of 'and' since the intent is to get the user to do /something/.
     if (minRunenv or minDevenv):
         print('Minimal dev or run env detected.')
-    make_devenv(ctx, work_dir=wd.name)
-
-    # 4. create wrapper scripts
-    for w in (wd.dir / 'wbin').glob('*'): w.unlink()
-    create_exec_wrapper(ctx, '_stub', work_dir=wd.name)
-    create_scripts_wrappers(ctx, work_dir=wd.name)
 
     # 5. run setup tasks
     run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup)
@@ -485,7 +497,7 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
 
     # 8. check if in a branch
     if ('master' == cur_branch) and (wd.name != 'project'):
-        print('Notice: You many want to create a branch for your work.')
+        print('Note: You many want to create a branch for your work.')
 
     print('Ready to work!')
 coll.collections['work-dir'].collections['action'].add_task(work_on)

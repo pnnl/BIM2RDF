@@ -7,5 +7,3 @@ environment:
     - '{{root}}'
   PATH:
     - '{{root}}/wbin'
-  RUN_WORK_DIRS:
-    - '{{root}}'
