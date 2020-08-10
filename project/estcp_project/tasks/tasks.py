@@ -191,6 +191,35 @@ def work_dir_deps(ctx, work_dir=cur_work_dir):
 coll.collections['work-dir'].collections['info'].add_task(work_dir_deps)
 
 
+@task(help={'work-dir': get_cur_work_dir_help()})
+def work_dir_deps_tree(ctx, work_dir=cur_work_dir):
+    cache = {}
+    def __get_workdir_deps(ctx, parent):
+        if parent.name in cache:
+            ds = cache[parent.name]
+            return ds
+        else:
+            cache[parent.name] = _get_workdir_deps(ctx, parent)
+            return __get_workdir_deps(ctx, parent)
+
+    def r(parent, t='+'):
+        print(t+parent.name)
+        t += '---'
+        for child in __get_workdir_deps(ctx, parent):
+            if child == parent.name: continue
+            r(work.WorkDir(child), t=t)
+
+    if not work_dir:
+        work_dirs = (wd for wd in work.find_WorkDirs())
+    else:
+        if work_dir not in (wd.name for wd in work.find_WorkDirs()):
+            print('work dir not found')
+            exit(1)
+        work_dirs = (work.WorkDir(work_dir), )
+    for wd in work_dirs:
+        r(wd)
+coll.collections['project'].collections['info'].add_task(work_dir_deps_tree)
+
 
 
 @task(help={
@@ -390,12 +419,11 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
     for dwd in dep_work_dirs:
         if dwd in done: continue # possibly deduping
         # make the dev env
-        if dwd != wd.name:
-            if prompt:
-                if input(f"create {dwd} env? [enter y] ").lower().strip() == 'y':
-                    make_devenv(ctx, work_dir=dwd)
-            else:
+        if prompt:
+            if input(f"create {dwd} env? [enter y] ").lower().strip() == 'y':
                 make_devenv(ctx, work_dir=dwd)
+        else:
+            make_devenv(    ctx, work_dir=dwd)
         create_exec_wrapper(    ctx, '_stub', work_dir=dwd)
         create_scripts_wrappers(ctx,          work_dir=dwd)
         dWD = work.WorkDir(                            dwd)
@@ -450,7 +478,7 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
         project_env = work.WorkDir(root/'project').devenv_name  # hardcoding warning
         if cur_env_name !=  project_env:
             print("Change to project environment before creating a new workdir.")
-            print(f"> conda activate {project_env}")
+            print(f"> conda activate {work.WorkDir(root/'project').devenv_name}")
             exit(1)
         # state of just creating a workdir
         # if cur_branch != 'master':
@@ -470,15 +498,12 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
         wd = work.WorkDir(wd)
 
     # 2. env creation
-    minRunenv = \
-        wd.minrunenv \
-        == yaml.safe_load(open(wd.dir/'environment.run.yml'))
     minDevenv = \
         yaml.safe_load(open(wd.dir/'environment.devenv.yml')) \
         == wd.make_devenv()
     #            'or' instead of 'and' since the intent is to get the user to do /something/.
-    if (minRunenv or minDevenv):
-        print('Minimal dev or run env detected.')
+    if minDevenv:
+        print('Minimal env detected. Make sure that this is intended.')
 
     # 5. run setup tasks
     run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup)
@@ -496,7 +521,7 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
         exit(1)
 
     # 8. check if in a branch
-    if ('master' == cur_branch) and (wd.name != 'project'):
+    if cur_branch in {'master', 'main'}:
         print('Note: You many want to create a branch for your work.')
 
     print('Ready to work!')

@@ -6,18 +6,10 @@ import yaml
 class WorkDir():
     # TODO: probably better managed as a tree
     file_names = {'environment.devenv.yml',
-                  'environment.run.yml'}
+                  }
                   # could also be some configs
     base_devenv = here('./environment.yml')
     envfn = 'environment.yml'
-    minrunenv = {'dependencies': [],
-                 'includes': [],
-                'environment':
-                    {
-                        'PYTHONPATH': ['{{root}}'],
-                        'PATH': ['{{root}}/wbin']
-                    }
-                }
 
     def __init__(self, dir: Path):
         self.dir = here() / Path(dir)
@@ -27,10 +19,6 @@ class WorkDir():
 
     def create_files(self):
         self.dir.mkdir(exist_ok=True)
-
-        if not (self.dir / 'environment.run.yml').exists():
-            # need a min file so deve nv doesn't complain
-            yaml.dump(self.minrunenv, open(self.dir/'environment.run.yml','w'))
 
         if not (self.dir / 'environment.devenv.yml').exists():
             self.make_devenv_file()
@@ -83,21 +71,22 @@ class WorkDir():
 
     def make_devenv(self,
                     name='self.devenv_name',
-                    workdir_run_deps=[],
-                    includes=[]): # includes rel to proj home
+                    include_work_dirs=[]):
         if name == 'self.devenv_name':
             name = self.devenv_name
-        includes = list(includes)
-        for dep in (set(workdir_run_deps) | set(['project'])):
-            includes.append(here(f'./{dep}/environment.run.yml'))
-
-        def prefix_parts(): return ['{{root}}']+['..']*self.n_upto_proj()
-        def parts(p): return prefix_parts() + list(p.absolute().relative_to(here().absolute()).parts)
-        from pathlib import PurePosixPath as Path
-        includes = [str(Path(*parts(p)))
-        # TODO:               changing the order of the includes didn't change PATH appending order
-                     for p in [self.dir/'environment.run.yml']+list(includes)]
-        dev_env = {'includes': includes, 'name': name, 'dependencies':[], 'environment': {'WORK_DIR': self.name}}
+        from pathlib import PurePosixPath as P
+        include_work_dirs = list(include_work_dirs)
+        include_work_dirs = include_work_dirs + ['project'] if 'project' not in include_work_dirs else include_work_dirs
+        includes = [ str(P("{{root}}") / P("..") / P(inc).stem/ 'environment.devenv.yml' ) for inc in include_work_dirs]
+        dev_env = {
+            'includes': includes,
+            'name': name,
+            'dependencies':[],
+            'environment': {
+                'PATH':       ['{{root}}/wbin', '{{root}}'],
+                'PYTHONPATH': [                 '{{root}}'],
+            }
+        }
         return dev_env
 
     def make_devenv_file(self, *args, **kwargs):

@@ -1,9 +1,0 @@
-channels:
-  - conda-forge # generally, don't remove. 'default' repo
-dependencies:
-  - pyprojroot # useful but also actcs as a (minimal) stub so that /something/ gets put into an env
-environment:
-  PYTHONPATH:
-    - '{{root}}'
-  PATH:
-    - '{{root}}/wbin'
