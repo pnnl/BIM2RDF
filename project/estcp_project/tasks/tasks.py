@@ -362,7 +362,12 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
 
         lines = open(script_pth).readlines()
         if ext == 'cmdlines':
-            for sbin in sbins: write_sbin(sbin, [ln.replace("$WORK_DIR", str(wd.dir)) for ln in lines if not ln.startswith('#')])
+            for sbin in sbins: write_sbin(
+                sbin,
+                [ln.replace("$WORK_DIR", str(wd.name)).replace("$WORK_DIR_PATH", str(wd.dir))
+                for ln in lines
+                if not ln.startswith('#')]
+                )
             wpths = create_exec_wrapper(ctx, sbin_name,  work_dir=work_dir, test=True)
 
         elif ext == 'py':
