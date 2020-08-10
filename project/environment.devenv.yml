@@ -1,7 +1,7 @@
 channels:
   - conda-forge
 dependencies:
-  - pyprojroot # minimal package so /something/ gets installed into dependent env
+  - pyprojroot=0.2.0 # minimal package so /something/ gets installed into dependent env
   # otherwise conda will not list the created env :/
   # some of the below tools will be exposed via wrappers in wbin
   - python=3.7            # [not is_included]

@@ -1,5 +1,5 @@
 from pathlib import Path
-from . import root # 0.1.2
+from . import root as project_root
 import yaml
 
 
@@ -8,11 +8,11 @@ class WorkDir():
     file_names = {'environment.devenv.yml',
                   }
                   # could also be some configs
-    base_devenv = root / 'environment.yml'
+    base_devenv = project_root / 'environment.yml'
     envfn = 'environment.yml'
 
     def __init__(self, dir: Path):
-        self.dir = root / Path(dir)
+        self.dir = project_root / Path(dir)
         self.name = self.dir.name
         if not self.is_work_dir(self.dir):
             self.create_files()
@@ -46,7 +46,7 @@ class WorkDir():
         for _ in range(len(p.parts)):
             p = p / '..'
             n = n + 1
-            if p.samefile(root):
+            if p.samefile(project_root):
                 return n
         raise FileNotFoundError
 
@@ -85,10 +85,10 @@ class WorkDir():
             'environment': {
                 'WORK_DIR':      str(self.name),
                 'WORKDIR':       str(self.name),
-                'WORK_DIR_PATH': str(self.dir),
-                'WORKDIR_PATH':  str(self.dir),
-                'PROJECT_ROOT':  str(root),
-                'PROJECTROOT':   str(root),
+                'WORK_DIR_PATH': '{{root}}', # not above variable!!
+                'WORKDIR_PATH':  '{{root}}',
+                'PROJECT_ROOT':  '{{root}}/../',
+                'PROJECTROOT':   '{{root}}/../',
                 'PATH':       ['{{root}}/wbin', '{{root}}'],
                 'PYTHONPATH': [                 '{{root}}'],
             }
@@ -137,6 +137,6 @@ class WorkDir():
             return False
 
 def find_WorkDirs():
-    for dir in root.glob('**/'):
+    for dir in project_root.glob('**/'):
         if WorkDir.is_work_dir(dir):
             yield WorkDir(dir)
