@@ -1,5 +1,5 @@
 from invoke import task, Collection, call
-from estcp_project import root
+from .. import root
 import yaml
 from .. import work
 from pathlib import Path
@@ -364,9 +364,17 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         if ext == 'cmdlines':
             for sbin in sbins: write_sbin(
                 sbin,
-                [ln.replace("$WORK_DIR", str(wd.name)).replace("$WORK_DIR_PATH", str(wd.dir))
+                # TODO:     get these from work.WorkDir  devenv creation method
+                [
+                     ln.replace("$WORK_DIR",      str(wd.name))
+                       .replace("$WORKDIR",       str(wd.name))
+                       .replace("$WORK_DIR_PATH", str(wd.dir ))
+                       .replace("$WORKDIR_PATH",  str(wd.dir ))
+                       .replace("$PROJECT_ROOT",  str(root   ))
+                       .replace("$PROJECTROOT",   str(root   ))
                 for ln in lines
-                if not ln.startswith('#')]
+                if not ln.startswith('#')
+                ]
                 )
             wpths = create_exec_wrapper(ctx, sbin_name,  work_dir=work_dir, test=True)
 
@@ -396,7 +404,11 @@ def make_devenv(ctx, work_dir=cur_work_dir):
     assert(work_dir)
     wd = work.WorkDir(work_dir)
     # asserts maybe aren't necessary b/c warn=False default
-    assert(ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True).ok) # pyt=True does't work on windows
+    # idk why this failure didnt exit nonzero!!
+    with ctx.cd(str(wd.dir)):
+        ctx.run("conda devenv", echo=True)
+    #assert(ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True).stdout) # pyt=True does't work on windows
+    #assert('command failed' not in ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True).stdout) # pyt=True does't work on windows
 coll.collections['work-dir'].collections['setup'].add_task(make_devenv)
 
 
@@ -522,8 +534,8 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
         exit(1)
 
     # 7. check if in dir
-    if _change_dir(wd):
-        exit(1)
+    #if _change_dir(wd):
+    #    exit(1)
 
     # 8. check if in a branch
     if cur_branch in {'master', 'main'}:
