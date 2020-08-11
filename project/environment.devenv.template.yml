@@ -1,3 +1,5 @@
+# copy/paste this rather generic template
+
 #                           add more work if needed
 {% set included_workdirs = ['project', ] %}
 
