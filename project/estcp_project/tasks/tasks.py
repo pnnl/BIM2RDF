@@ -364,7 +364,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         if ext == 'cmdlines':
             for sbin in sbins: write_sbin(
                 sbin,
-                # TODO:     get these from work.WorkDir  devenv creation method
+                # TODO:     get these from workdir env os.getenv. defined in environment.devenv.template.yml
                 [
                      ln.replace("$WORK_DIR",      str(wd.name))
                        .replace("$WORKDIR",       str(wd.name))
@@ -516,11 +516,10 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
 
     # 2. env creation
     minDevenv = \
-        yaml.safe_load(open(wd.dir/'environment.devenv.yml')) \
-        == wd.make_devenv()
-    #            'or' instead of 'and' since the intent is to get the user to do /something/.
+       (open(wd.dir/'environment.devenv.yml')).read() \
+       == wd.make_devenv()
     if minDevenv:
-        print('Minimal env detected. Make sure that this is intended.')
+       print('Minimal env detected. Make sure that this is intended.')
 
     # 5. run setup tasks
     run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup)

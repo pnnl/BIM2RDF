@@ -72,34 +72,13 @@ class WorkDir():
     def make_devenv(self,
                     name='self.devenv_name',
                     include_work_dirs=[]):
-        if name == 'self.devenv_name':
-            name = self.devenv_name
-        from pathlib import PurePosixPath as P
-        include_work_dirs = list(include_work_dirs)
-        include_work_dirs = include_work_dirs + ['project'] if 'project' not in include_work_dirs else include_work_dirs
-        includes = [ str(P("{{root}}") / P("..") / P(inc).stem/ 'environment.devenv.yml' ) for inc in include_work_dirs]
-        dev_env = {
-            'includes': includes,
-            'name': name,
-            'dependencies':[],
-            'environment': {
-                'WORK_DIR':      str(self.name),
-                'WORKDIR':       str(self.name),
-                'WORK_DIR_PATH': '{{root}}', # not above variable!!
-                'WORKDIR_PATH':  '{{root}}',
-                'PROJECT_ROOT':  '{{root}}/../',
-                'PROJECTROOT':   '{{root}}/../',
-                'PATH':       ['{{root}}/wbin', '{{root}}'],
-                'PYTHONPATH': [                 '{{root}}'],
-            }
-        }
-        return dev_env
+        return open(project_root / 'project'/ 'environment.devenv.template.yml').read()
 
     def make_devenv_file(self, *args, **kwargs):
         dev_env = self.make_devenv(*args, **kwargs)
-        with open(self.dir / 'environment.devenv.yml', 'w') as ef:
-            yaml.dump(dev_env, ef)
-        ef.close()
+        f = open(self.dir / 'environment.devenv.yml', 'w')
+        f.write(dev_env)
+        f.close()
         return dev_env
 
     @classmethod
