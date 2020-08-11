@@ -1,5 +1,9 @@
 # so to not be included in devenvs that include this
-{% set run_req = not is_included %}
+{% set included_workdirs = ['project', ] %}
+{% set dev_req =     not is_included %}
+{% set run_req =         is_included %}
+{% set wrapped_exe = not is_included %}
+
 channels:
   - conda-forge
 environment:
@@ -21,14 +25,12 @@ dependencies:
   # otherwise conda will not list the created env :/
   # some of the below tools will be exposed via wrappers in wbin
   # ie, they will not be 'installed' in dependent envs (envs that include this)
-  - python=3.7            # [run_req]
-  - invoke=1.4.1          # [run_req]
-  - dvc=1.4.0             # [run_req]
-  - git                   # [run_req]
-  - gitpython=3.1.3       # [run_req]
-  - exec-wrappers=1.1.4   # [run_req]
-  - deps=1.1.1            # [run_req]
-  - pre-commit=2.6.0      # [run_req]
-includes:
-  - '{{root}}/environment.devenv.template.yml'
+  - python=3.7            # [not is_included]
+  - gitpython=3.1.3       # [not is_included]
+  - exec-wrappers=1.1.4   # [not is_included]
+  - invoke=1.4.1          # [wrapped_exe]
+  - dvc=1.4.0             # [wrapped_exe]
+  - git                   # [wrapped_exe]
+  - deps=1.1.1            # [wrapped_exe]
+  - pre-commit=2.6.0      # [wrapped_exe]
 name: {{'estcp-' + os.path.basename(root)}}
