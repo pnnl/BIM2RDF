@@ -202,9 +202,9 @@ def work_dir_deps_tree(ctx, work_dir=cur_work_dir):
             cache[parent.name] = _get_workdir_deps(ctx, parent)
             return __get_workdir_deps(ctx, parent)
 
-    def r(parent, t='+'):
+    def r(parent, t=''):
         print(t+parent.name)
-        t += '---'
+        t += '   |'
         for child in __get_workdir_deps(ctx, parent):
             if child == parent.name: continue
             r(work.WorkDir(child), t=t)
