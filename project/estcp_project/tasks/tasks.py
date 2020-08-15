@@ -547,37 +547,25 @@ coll.add_task(work_on)
 
 # TODO: recreate is this followed by a workon
 @task(help={'work-dir': get_cur_work_dir_help() })
-def remove_work_env(ctx, work_dir=cur_work_dir):
+def reset(ctx, work_dir=cur_work_dir):
     """
-    Removes conda environment associated with work dir.
-    """
+    Recrecreates enviroments associated with the work dir.
+    (including the special project work dir).
+    """ #                  hah this wouldn't be possible with a container like docker.
     wd = work_dir
     if wd not in (wd.name for wd in work.find_WorkDirs()):
         print('Work dir not found.')
         exit(1)
     wd = work.WorkDir(wd)
     #                                           sometimes nonzero exit returned :/
-    envlist = ctx.run('conda env list', hide='out', warn=True).stdout
-    # checking if env created for the workdir
-    if envlist.count(wd.devenv_name+'\n') != 1:
-        print("No env associated with work dir.")
-        exit(0)
-    else:
-        if wd.devenv_name == get_current_conda_env():
-            if wd.devenv_name == 'estcp-project':
-                print("Don't remove base/project env.")
-            else:
-                print("Can't remove current env. Go to another env:")
-                print("> conda activate estcp-project")
-            exit(1)
-        else:
-            #(wd.dir / wd.envfn).unlink(missing_ok=True) py3.8
-            envfn = (wd.dir / wd.envfn)
-            if envfn.exists():
-                envfn.unlink()
-            ctx.run(f"conda env remove -n {wd.devenv_name}")
-coll.collections['work-dir'].collections['action'].add_task(remove_work_env)
-
+    envs = {env.strip() for env in ctx.run('conda env list', hide='out', warn=True).stdout.split('\n')}
+    dep_envs = {work.WorkDir(dwd).devenv_name for dwd in _get_workdir_deps(ctx, wd)}
+    rem_envs = envs.intersection(dep_envs)
+    for wdenv in rem_envs:
+        ctx.run(f"conda env remove -n {wdenv}")
+    work_on(ctx, wd.name)
+    print('Deactivate then reactivate your environment.')
+coll.collections['work-dir'].collections['action'].add_task(reset)
 
 
 # TODO: reset work dir
