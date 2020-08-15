@@ -366,12 +366,12 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
                 sbin,
                 # TODO:     get these from workdir env os.getenv. defined in environment.devenv.template.yml
                 [
-                     ln.replace("$WORK_DIR",      str(wd.name))
-                       .replace("$WORKDIR",       str(wd.name))
-                       .replace("$WORK_DIR_PATH", str(wd.dir ))
-                       .replace("$WORKDIR_PATH",  str(wd.dir ))
-                       .replace("$PROJECT_ROOT",  str(root   ))
-                       .replace("$PROJECTROOT",   str(root   ))
+                     ln.replace("${WORK_DIR}",      str(wd.name))
+                       .replace("${WORKDIR}",       str(wd.name))
+                       .replace("${WORK_DIR_PATH}", str(wd.dir ))
+                       .replace("${WORKDIR_PATH}",  str(wd.dir ))
+                       .replace("${PROJECT_ROOT}",  str(root   ))
+                       .replace("${PROJECTROOT}",   str(root   ))
                 for ln in lines
                 if not ln.startswith('#')
                 ]
