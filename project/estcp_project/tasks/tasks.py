@@ -610,7 +610,10 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
         else:
             work_dir = pth.parts[0]
             if work_dir == 'notebooking' and (root / pth).exists():
-                m = match(r"display_name: Python \[conda env:estcp-(.*)\]", open(root / pth).read())
+                try:
+                    m = match(r"display_name: Python \[conda env:estcp-(.*)\]", open(root / pth).read())
+                except UnicodeDecodeError:
+                    continue
                 if m:
                     work_dir = m.groups()[0]
             work_dirs.append(work_dir)
