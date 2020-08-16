@@ -314,7 +314,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         al('set -e')
         for i, cmd in enumerate(cmds):
             if not cmd.replace(' ', ''): continue
-            if i == 0:
+            if i == 1:
                 # pass args to 1st cmd
                 al(f"{cmd} \"$@\"")
             else:
@@ -327,7 +327,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         cmds_line = ""
         for i, cmd in enumerate(cmds):
             if not cmd.replace(' ', ''): continue
-            if i == 0:
+            if i == 1:
                 # pass args to 1st cmd
                 cmds_line += f"{cmd} %* && "
             else:
@@ -365,7 +365,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             for sbin in sbins: write_sbin(
                 sbin,
                 # TODO:     get these from workdir env os.getenv. defined in environment.devenv.template.yml
-                [
+                [f"cd {wd.dir}"]+[
                      ln.replace("${WORK_DIR}",      str(wd.name))
                        .replace("${WORKDIR}",       str(wd.name))
                        .replace("${WORK_DIR_PATH}", str(wd.dir ))
