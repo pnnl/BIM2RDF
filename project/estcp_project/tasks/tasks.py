@@ -599,6 +599,7 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
     (ignore. internal task.) git commit hook for workdir tag
     Uses takes the first dir part to prepend
     """
+    from re import match
     import git
     repo = git.Repo(root)
     work_dirs = []
@@ -607,13 +608,18 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
         if len(pth.parts) == 1: # assume project
             work_dirs.append('project')
         else:
-            work_dirs.append(pth.parts[0])
+            work_dir = pth.parts[0]
+            if work_dir == 'notebooking':
+                m = match(r"display_name: Python \[conda env:estcp-(.*)\]", open(root / pth).read())
+                if m:
+                    work_dir = m.groups()[0]
+            work_dirs.append(work_dir)
     work_dirs = frozenset(work_dirs)
 
     if work_dirs:
-        work_dir_tags = ""
-        for wd in work_dirs: work_dir_tags += f"[{wd}]"
-        message = f"{work_dir_tags} " + open(COMMIT_MSG_FILE, 'r').read()
+        tags = ""
+        for wd in work_dirs: tags += f"[{wd}]"
+        message = f"{tags} " + open(COMMIT_MSG_FILE, 'r').read()
         cmf = open(COMMIT_MSG_FILE, 'w')
         cmf.write(message)
         cmf.close()
