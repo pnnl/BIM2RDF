@@ -49,7 +49,7 @@ def create_project_wrappers(ctx, ):
     """
     Create wrappers around project tool executables.
     """
-    for exe in ['dvc', 'invoke', 'inv',]+['git', 'bash', 'pre-commit',]:
+    for exe in ['dvc', ]+['git', 'bash', 'pre-commit',]:
         create_exec_wrapper(ctx, exe, work_dir='project')
 coll.collections['project'].collections['setup'].add_task(create_project_wrappers)
 
