@@ -609,7 +609,7 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
             work_dirs.append('project')
         else:
             work_dir = pth.parts[0]
-            if work_dir == 'notebooking':
+            if work_dir == 'notebooking' and (root / pth).exists():
                 m = match(r"display_name: Python \[conda env:estcp-(.*)\]", open(root / pth).read())
                 if m:
                     work_dir = m.groups()[0]
