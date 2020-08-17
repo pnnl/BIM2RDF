@@ -192,7 +192,10 @@ coll.collections['work-dir'].collections['info'].add_task(work_dir_deps)
 
 
 @task(help={'work-dir': get_cur_work_dir_help()})
-def work_dir_deps_tree(ctx, work_dir=cur_work_dir):
+def work_dir_deps_tree(ctx, work_dir=cur_work_dir, all_dirs=False):
+    """
+    print dependency tree of work dir
+    """
     cache = {}
     def __get_workdir_deps(ctx, parent):
         if parent.name in cache:
@@ -209,7 +212,7 @@ def work_dir_deps_tree(ctx, work_dir=cur_work_dir):
             if child == parent.name: continue
             r(work.WorkDir(child), t=t)
 
-    if not work_dir:
+    if all_dirs:
         work_dirs = (wd for wd in work.find_WorkDirs())
     else:
         if work_dir not in (wd.name for wd in work.find_WorkDirs()):
