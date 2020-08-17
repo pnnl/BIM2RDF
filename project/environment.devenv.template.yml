@@ -7,9 +7,11 @@
 {% set included_workdirs = ['project', 'notebooking'] %}
 
 dependencies:
-    - ipykernel # [dev_req if 'notebooking' in included_dirs else False] # also can have irkernel
-    #- sometestframework         # [dev_req]
-    #- some analysis library     # [run_req]
+  {% if 'notebooking' in included_dirs %}
+  - ipykernel   # also can have irkernel
+  {% endif %}
+  #- sometestframework         # [dev_req]
+  #- some analysis library     # [run_req]
 environment:
   # probably want to append PATH and PYTHONPATH in your env
   PATH:
