@@ -30,11 +30,20 @@ dependencies:
   # some of the below tools will be exposed via wrappers in wbin
   # ie, they will not be 'installed' in dependent envs (envs that include this)
   - python=3.7            # [not is_included]
+  # code mgt
   - gitpython=3.1.3       # [not is_included]
-  - exec-wrappers=1.1.4   # [not is_included]
-  - invoke=1.4.1          # [not is_included]
-  - dvc=1.4.0             # [wrapped_exe]
   - git                   # [wrapped_exe]
-  - deps=1.1.1            # [wrapped_exe]
   - pre-commit=2.6.0      # [wrapped_exe]
+  # data/non-source file mgt.
+  - dvc=1.4.0             # [wrapped_exe]
+  # env mgt.
+  - deps=1.1.1            # [wrapped_exe]
+  - exec-wrappers=1.1.4   # [not is_included]
+  # automation
+  - invoke=1.4.1          # [not is_included]
+
+# project name could come from estcp.name file.
+# something like:
+# 1. find file with *.name in root
+# 2. set PROJECT_NAME=*
 name: {{'estcp-' + os.path.basename(root)}}
