@@ -19,7 +19,7 @@ environment:
     - '{{root}}'
   PYTHONPATH:
     - '{{root}}'
-  # don't define the following in envs that include this
+  #                              don't define the following in envs that include this
   WORK_DIR: '{{  os.path.basename(root) }}'                       # [not is_included]
   WORKDIR:  '{{  os.path.basename(root) }}'                       # [not is_included]
   WORK_DIR_PATH: '{{root}}'                                       # [not is_included]
