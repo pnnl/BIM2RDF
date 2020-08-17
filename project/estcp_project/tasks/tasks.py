@@ -440,19 +440,29 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
     done = []
     for dwd in dep_work_dirs:
         if dwd in done: continue # possibly deduping
-        # make the dev env
+        # 1. make the dev env
         if prompt:
-            if input(f"create {dwd} env? [enter y] ").lower().strip() == 'y':
+            if input(f"create {dwd} env? [enter y for yes] ").lower().strip() == 'y':
                 make_devenv(ctx, work_dir=dwd)
         else:
             make_devenv(    ctx, work_dir=dwd)
-        create_exec_wrapper(    ctx, '_stub', work_dir=dwd)
-        create_scripts_wrappers(ctx,          work_dir=dwd)
-        dWD = work.WorkDir(                            dwd)
+
+        # 2. make script wrappers
+        def make_wrappers():
+            create_exec_wrapper(    ctx, '_stub', work_dir=dwd)
+            create_scripts_wrappers(ctx,          work_dir=dwd)
+        if prompt:
+            if input(f"make scripts wrappers for {dwd}? [enter y for yes]").lower().strip() == 'y':
+                make_wrappers()
+        else:
+            make_wrappers()
+
+        # 3. exec setups
+        dWD = work.WorkDir(dwd)
         for asetup in  _get_setup_names(dWD):
             with ctx.cd(str(dWD.dir)):
                 if prompt:
-                    if input(f"execute {asetup} for {dWD.name}? [enter y] ").lower().strip() == 'y':
+                    if input(f"execute {asetup} for {dWD.name}? [enter y for yes] ").lower().strip() == 'y':
                         assert(ctx.run(f"{dWD.dir/'wbin'/'run-in'} {dWD.name}-{asetup}", echo=True).ok)
                 else:
                     # asserts may not be needed b/c warn=False
@@ -546,6 +556,8 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
         print('Note: You many want to create a branch for your work.')
 
     print('Ready to work!')
+    print(f'Activate environment:')
+    print(f'> conda activate {wd.devenv_name}')
 coll.collections['work-dir'].collections['action'].add_task(work_on)
 coll.add_task(work_on)
 
