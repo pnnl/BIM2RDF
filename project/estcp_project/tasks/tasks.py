@@ -389,15 +389,16 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             wpths = create_exec_wrapper(ctx, sbin_name, work_dir=work_dir, test=True)
 
         elif ext == 'bat':
-            wpths = create_exec_wrapper(ctx, script_pth, work_dir=work_dir, test=True)
+            write_sbin(sbin_bat, lines)
+            wpths = create_exec_wrapper(ctx, sbin_name, work_dir=work_dir, test=True)
+            print('not recommended to create just .bat script. include corresponding .sh script.')
         elif ext == 'sh':
-            from shutil import copy2 as copyexe
-            wpths = create_exec_wrapper(ctx, copyexe(script_pth, sbin_name), work_dir=work_dir, test=True)
-
+            write_sbin(sbin_name, lines)
+            wpths = create_exec_wrapper(ctx, sbin_name, work_dir=work_dir, test=True)
+            print('not recommended to create just .sh script. include corresponding .bat script.')
         else:
             print(f'{script_pth} not processed.')
 coll.collections['work-dir'].collections['action'].add_task(create_scripts_wrappers)
-
 
 
 @task
