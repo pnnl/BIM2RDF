@@ -10,6 +10,9 @@ environment:
   # probably want to append PATH and PYTHONPATH in your env
   PATH:
     - '{{root}}'
+    # adds all wrapped executables to path.
+    # makes the wrapped exes available in all envs that include project
+    # if using a wrapped exe in a work dir, include it as a dependency in include section.
     {% for maybe_dir in  os.scandir( os.path.abspath(os.path.join(root, '..')) )   %}
     {% if maybe_dir.is_dir() %}
     - {{ os.path.abspath(os.path.join(maybe_dir, "wbin")) }}

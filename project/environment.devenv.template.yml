@@ -15,6 +15,7 @@ dependencies:
   #- some analysis library     # [run_req]
 environment:
   # probably want to append to PATH and PYTHONPATH in your env
+  # see wrapped exec note in project/environment.devenv.yml
   PATH:
     - '{{root}}'
   PYTHONPATH:
