@@ -4,6 +4,7 @@
 {% set run_req =         is_included %}
 {% set wrapped_exe = not is_included %}
 
+#                almost need 'project' but 'notebooking' is optional
 {% set included_workdirs = ['project', 'notebooking'] %}
 
 dependencies:
