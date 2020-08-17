@@ -272,13 +272,13 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
     from shutil import copy2 as copyexe # attempt to copy all metadata (mainly keeping +x attrib)
     from shutil import which
     assert(wpth.stem == exe_name)
-    env_exec_pth = wpth.parent / f"{exe_name}-{wd.name}{wpth.suffix}"
+    env_exec_pth = wpth.parent / f"{wd.name}-{exe_name}{wpth.suffix}"
     copyexe(wpth, env_exec_pth)
     run_in_pth = which('run-in', path=str(wpth.parent))
     assert(run_in_pth)
     run_in_pth = Path(run_in_pth)
     assert(run_in_pth.exists())
-    copyexe(run_in_pth, run_in_pth.parent / f"{run_in_pth.stem}-{wd.name}{run_in_pth.suffix}")
+    copyexe(run_in_pth, run_in_pth.parent / f"{wd.name}-{run_in_pth.stem}{run_in_pth.suffix}")
     print(f"created wrapper {wpth} for {exe_name}")
     print(f"created wrapper {env_exec_pth} for {exe_name}")
     return wpth, env_exec_pth
@@ -452,10 +452,10 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
             with ctx.cd(str(dWD.dir)):
                 if prompt:
                     if input(f"execute {asetup} for {dWD.name}? [enter y] ").lower().strip() == 'y':
-                        assert(ctx.run(f"{dWD.dir/'wbin'/'run-in'} {asetup}-{dWD.name}", echo=True).ok)
+                        assert(ctx.run(f"{dWD.dir/'wbin'/'run-in'} {dWD.name}-{asetup}", echo=True).ok)
                 else:
                     # asserts may not be needed b/c warn=False
-                    assert(    ctx.run(f"{dWD.dir/'wbin'/'run-in'} {asetup}-{dWD.name}", echo=True).ok)
+                    assert(    ctx.run(f"{dWD.dir/'wbin'/'run-in'} {dWD.name}-{asetup}", echo=True).ok)
         done.append(dWD.name)
     #ctx.run(f"conda run --cwd {wd.dir} -n {wd.env name} conda devenv", echo=True) # pyt=True does't work on windows
 coll.collections['work-dir'].collections['setup'].add_task(run_setup_tasks)
