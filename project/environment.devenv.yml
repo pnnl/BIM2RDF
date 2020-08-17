@@ -9,8 +9,12 @@ channels:
 environment:
   # probably want to append PATH and PYTHONPATH in your env
   PATH:
-    - '{{ os.path.join(root, "wbin") }}'
     - '{{root}}'
+    {% for maybe_dir in  os.scandir( os.path.abspath(os.path.join(root, '..')) )   %}
+    {% if maybe_dir.is_dir() %}
+    - {{ os.path.abspath(os.path.join(maybe_dir, "wbin")) }}
+    {% endif %}
+    {% endfor %}
   PYTHONPATH:
     - '{{root}}'
   # don't define the following in envs that include this

@@ -13,9 +13,8 @@ dependencies:
   #- sometestframework         # [dev_req]
   #- some analysis library     # [run_req]
 environment:
-  # probably want to append PATH and PYTHONPATH in your env
+  # probably want to append to PATH and PYTHONPATH in your env
   PATH:
-    - '{{ os.path.join(root, "wbin") }}'
     - '{{root}}'
   PYTHONPATH:
     - '{{root}}'
