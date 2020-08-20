@@ -579,7 +579,7 @@ def reset(ctx, work_dir=cur_work_dir):
     dep_envs = {work.WorkDir(dwd).devenv_name for dwd in _get_workdir_deps(ctx, wd)}
     rem_envs = envs.intersection(dep_envs)
     for wdenv in rem_envs:
-        ctx.run(f"conda env remove -n {wdenv}")
+        ctx.run(f"conda env remove -n {wdenv}", echo=True)
     work_on(ctx, wd.name)
     print('Deactivate then reactivate your environment.')
 coll.collections['work-dir'].collections['action'].add_task(reset)
