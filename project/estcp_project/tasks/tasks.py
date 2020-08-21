@@ -576,10 +576,19 @@ def reset(ctx, work_dir=cur_work_dir):
     wd = work.WorkDir(wd)
     #                                           sometimes nonzero exit returned :/
     envs = {env.strip() for env in ctx.run('conda env list', hide='out', warn=True).stdout.split('\n')}
-    dep_envs = {work.WorkDir(dwd).devenv_name for dwd in _get_workdir_deps(ctx, wd)}
+    deps = _get_workdir_deps(ctx, wd)
+    dep_envs = {work.WorkDir(dwd).devenv_name for dwd in deps}
     rem_envs = envs.intersection(dep_envs)
     for wdenv in rem_envs:
         ctx.run(f"conda env remove -n {wdenv}", echo=True)
+    # and rem wrappers
+    from shutil import rmtree
+    for dep in deps:
+        wdir = work.WorkDir(dep).dir
+        if        (wdir / 'wbin').exists():
+            rmtree(wdir / 'wbin')
+        if       ( wdir / 'scripts' / 'bin').exists():
+            rmtree(wdir / 'scripts' / 'bin')
     work_on(ctx, wd.name)
     print('Deactivate then reactivate your environment.')
 coll.collections['work-dir'].collections['action'].add_task(reset)
@@ -628,7 +637,7 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
             work_dir = pth.parts[0]
             if work_dir == 'notebooking' and (root / pth).exists():
                 try:
-                    m = match(r"display_name: Python \[conda env:estcp-(.*)\]", open(root / pth).read())
+                    m = match(r"display_name: estcp-(.*)-(.*)", open(root / pth).read())
                 except UnicodeDecodeError:
                     continue
                 if m:
