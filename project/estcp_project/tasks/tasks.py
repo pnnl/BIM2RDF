@@ -390,7 +390,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
 
         elif ext == 'bat':
             write_sbin(sbin_bat, lines)
-            wpths = create_exec_wrapper(ctx, sbin_name, work_dir=work_dir, test=True)
+            wpths = create_exec_wrapper(ctx, sbin_bat, work_dir=work_dir, test=True)
             print('not recommended to create just .bat script. include corresponding .sh script.')
         elif ext == 'sh':
             write_sbin(sbin_name, lines)
