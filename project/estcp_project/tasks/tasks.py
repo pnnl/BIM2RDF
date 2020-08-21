@@ -1,4 +1,4 @@
-from invoke import task, Collection, call
+from invoke import task, Collection
 from .. import root
 import yaml
 from .. import work
@@ -589,6 +589,9 @@ def reset(ctx, work_dir=cur_work_dir):
             rmtree(wdir / 'wbin')
         if       ( wdir / 'scripts' / 'bin').exists():
             rmtree(wdir / 'scripts' / 'bin')
+        # remove generated env file
+        if ( wdir / 'environment.yml').exists():
+            (wdir / 'environment.yml').unlink()
     work_on(ctx, wd.name)
     print('Deactivate then reactivate your environment.')
 coll.collections['work-dir'].collections['action'].add_task(reset)
