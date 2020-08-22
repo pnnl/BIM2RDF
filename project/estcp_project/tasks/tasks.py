@@ -265,7 +265,12 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
         return create_wrapper(exe_pth, test=False)
 
     if exe_name == '_stub':
-        return create_wrapper(exe_name, test=False)
+        wpth = create_wrapper(exe_name, test=False)
+        wpth.unlink()
+        wpth, env_exec_pth = create_exec_wrapper(ctx, '_prefixed-stub', work_dir=work_dir, test=False)
+        wpth.unlink()
+        env_exec_pth.unlink()
+        return wpth, env_exec_pth
     # so now the following doesn't pick up the wrapped exe. breaks out of recursion issues.
     create_wrapper(exe_pth, test=False).unlink()
     wpth = create_wrapper(exe_pth, test=test)
@@ -278,6 +283,7 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
     assert(run_in_pth)
     run_in_pth = Path(run_in_pth)
     assert(run_in_pth.exists())
+    # creating {name prefix}-run-in
     copyexe(run_in_pth, run_in_pth.parent / f"{wd.name}-{run_in_pth.stem}{run_in_pth.suffix}")
     print(f"created wrapper {wpth} for {exe_name}")
     print(f"created wrapper {env_exec_pth} for {exe_name}")
@@ -448,8 +454,8 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
             make_devenv(    ctx, work_dir=dwd)
 
         # 2. make script wrappers
+        create_exec_wrapper(    ctx, '_stub', work_dir=dwd)
         def make_wrappers():
-            create_exec_wrapper(    ctx, '_stub', work_dir=dwd)
             create_scripts_wrappers(ctx,          work_dir=dwd)
         if prompt:
             if input(f"make scripts wrappers for ({dwd})? [enter y for yes]").lower().strip() == 'y':
