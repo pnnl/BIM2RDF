@@ -9,7 +9,7 @@
 
 dependencies:
   # fill out your deps
-  {% if 'notebooking' in included_dirs %}
+  {% if 'notebooking' in included_workdirs %}
   - ipykernel   # also can have irkernel
   {% endif %}
   #- sometestframework         # [dev_req]
