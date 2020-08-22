@@ -37,10 +37,10 @@ def set_dvc_repo(ctx):
     dir = Path(config['dvc']['dir'])
     if not dir.is_dir():
         raise FileNotFoundError('not a directory or directory not found')
-    ctx.run(f"dvc remote add --local sharefolder \"{dir}\" -f")
+    ctx.run(f"dvc remote add --local sharefolder \"{dir}\" -f", echo=True)
     sdvc = root / 'data' / 'sample.dvc'
     # will not error if file in (local) cache but wrong remote
-    ctx.run(f"dvc pull \"{root/'data'/'sample.dvc'}\"")
+    ctx.run(f"dvc pull \"{root/'data'/'sample.dvc'}\"", echo=True)
 coll.collections['project'].collections['setup'].add_task(set_dvc_repo)
 
 
@@ -76,14 +76,14 @@ def set_git_hooks(ctx):
         open(hf, 'w').writelines(lines)
 
     if config['git']:
-        ctx.run(f"pre-commit install" )
+        ctx.run(f"pre-commit install", echo=True)
         # make the stupid pre-commit exec invocation see the pre-commit exec instead of a python
-        inform_hookfile(root / '.git' / 'hooks' / 'pre-commit')
-        ctx.run(f"pre-commit install    --hook-type     prepare-commit-msg")
+        inform_hookfile(root / '.git' / 'hooks' / 'pre-commit', )
+        ctx.run(f"pre-commit install    --hook-type     prepare-commit-msg", echo=True)
         inform_hookfile(root / '.git' / 'hooks' / 'prepare-commit-msg')
     else:
-        ctx.run(f"pre-commit uninstall" )
-        ctx.run(f"pre-commit uninstall    --hook-type     prepare-commit-msg")
+        ctx.run(f"pre-commit uninstall", echo=True)
+        ctx.run(f"pre-commit uninstall    --hook-type     prepare-commit-msg", echo=True)
 coll.collections['project'].collections['setup'].add_task(set_git_hooks)
 
 @task(default=True)
@@ -251,7 +251,7 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
         from shutil import which
         if not test:
             # overwrites
-            ctx.run(f"create-wrappers -t conda {exe_prefix_switch} -f {exe_name} -d {wd.dir/'wbin'} --conda-env-dir {env_pth}")
+            ctx.run(f"create-wrappers -t conda {exe_prefix_switch} -f {exe_name} -d {wd.dir/'wbin'} --conda-env-dir {env_pth}", echo=True)
             return Path(which(exe_name, path=str(wd.dir/'wbin')))  # Path doesn't work until py3.8
 
         if not exe_pth.parent.parts:
@@ -497,8 +497,8 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
     cur_env_name = get_current_conda_env()
 
     def init_commit(wd):
-        ctx.run(f"conda run -n {work.WorkDir('project').devenv_name} git add {wd.dir}")
-        ctx.run(f"conda run -n {work.WorkDir('project').devenv_name} git commit -m  \"initial placeholder commit\"",)
+        ctx.run(f"conda run -n {work.WorkDir('project').devenv_name} git add {wd.dir}", echo=True)
+        ctx.run(f"conda run -n {work.WorkDir('project').devenv_name} git commit -m  \"initial placeholder commit\"", echo=True)
 
     # best programmed with a state diagram. TODO
 
