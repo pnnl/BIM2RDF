@@ -1,5 +1,5 @@
 from invoke import task, Collection
-from .. import root
+from .. import project_root_dir
 import yaml
 from .. import work
 from pathlib import Path
@@ -20,7 +20,7 @@ coll.collections['work-dir'].add_collection(Collection('action'))
 coll.collections['work-dir'].add_collection(Collection('info'))
 
 
-config = yaml.safe_load((root / 'project' / 'config.yml').open())
+config = yaml.safe_load((project_root_dir / 'project' / 'config.yml').open())
 
 @task
 def set_dvc_repo(ctx):
@@ -38,9 +38,9 @@ def set_dvc_repo(ctx):
     if not dir.is_dir():
         raise FileNotFoundError('not a directory or directory not found')
     ctx.run(f"dvc remote add --local sharefolder \"{dir}\" -f", echo=True)
-    sdvc = root / 'data' / 'sample.dvc'
+    sdvc = project_root_dir / 'data' / 'sample.dvc'
     # will not error if file in (local) cache but wrong remote
-    ctx.run(f"dvc pull \"{root/'data'/'sample.dvc'}\"", echo=True)
+    ctx.run(f"dvc pull \"{project_root_dir /'data'/'sample.dvc'}\"", echo=True)
 coll.collections['project'].collections['setup'].add_task(set_dvc_repo)
 
 
@@ -78,9 +78,9 @@ def set_git_hooks(ctx):
     if config['git']:
         ctx.run(f"pre-commit install", echo=True)
         # make the stupid pre-commit exec invocation see the pre-commit exec instead of a python
-        inform_hookfile(root / '.git' / 'hooks' / 'pre-commit', )
+        inform_hookfile(project_root_dir / '.git' / 'hooks' / 'pre-commit', )
         ctx.run(f"pre-commit install    --hook-type     prepare-commit-msg", echo=True)
-        inform_hookfile(root / '.git' / 'hooks' / 'prepare-commit-msg')
+        inform_hookfile(project_root_dir / '.git' / 'hooks' / 'prepare-commit-msg')
     else:
         ctx.run(f"pre-commit uninstall", echo=True)
         ctx.run(f"pre-commit uninstall    --hook-type     prepare-commit-msg", echo=True)
@@ -114,7 +114,7 @@ def get_current_conda_env():
 def _get_current_work_dir():
     import os
     _ = Path(os.curdir).absolute()
-    _ = _.relative_to(root)
+    _ = _.relative_to(project_root_dir)
     if len(_.parts) == 0:
         return
     else:
@@ -126,7 +126,7 @@ def _get_current_work_dir():
 
 @task
 def project_root(ctx):
-    print(root)
+    print(project_root_dir)
 coll.collections['project'].collections['info'].add_task(project_root)
 
 
@@ -237,7 +237,7 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
     if work_dir not in (wd.name for wd in work.find_WorkDirs()):
         print('work dir not found')
         exit(1)
-    wd = work.WorkDir(root / work_dir)
+    wd = work.WorkDir(project_root_dir / work_dir)
     env_pth = wd.get_env_path()
     if not env_pth:
         raise Exception('no associated environment')
@@ -290,7 +290,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
     if work_dir not in (wd.name for wd in work.find_WorkDirs()):
         print('work dir not found')
         exit(1)
-    wd = work.WorkDir(root / work_dir)
+    wd = work.WorkDir(project_root_dir / work_dir)
     sdir = wd.dir / 'scripts'
     assert(sdir.exists())
     (sdir / 'bin').mkdir(exist_ok=True)
@@ -374,8 +374,8 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
                        .replace("${WORKDIR}",       str(wd.name))
                        .replace("${WORK_DIR_PATH}", str(wd.dir ))
                        .replace("${WORKDIR_PATH}",  str(wd.dir ))
-                       .replace("${PROJECT_ROOT}",  str(root   ))
-                       .replace("${PROJECTROOT}",   str(root   ))
+                       .replace("${PROJECT_ROOT}",  str(project_root_dir   ))
+                       .replace("${PROJECTROOT}",   str(project_root_dir   ))
                 for ln in lines
                 if not ln.startswith('#')
                 ]
@@ -507,10 +507,10 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
     if wd not in (wd.name for wd in work.find_WorkDirs()):
         new_work_dir = True
         # best to do this from the project env
-        project_env = work.WorkDir(root/'project').devenv_name  # hardcoding warning
+        project_env = work.WorkDir(project_root_dir/'project').devenv_name  # hardcoding warning
         if cur_env_name !=  project_env:
             print("Change to project environment before creating a new workdir.")
-            print(f"> conda activate {work.WorkDir(root/'project').devenv_name}")
+            print(f"> conda activate {work.WorkDir(project_root_dir/'project').devenv_name}")
             exit(1)
         # state of just creating a workdir
         # if cur_branch != 'master':
@@ -642,7 +642,7 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
     """
     from re import match
     import git
-    repo = git.Repo(root)
+    repo = git.Repo(project_root_dir)
     work_dirs = []
     for pth in repo.index.diff("HEAD"):
         pth = Path(pth.a_path) # a_path or b_path idk
@@ -650,9 +650,9 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
             work_dirs.append('project')
         else:
             work_dir = pth.parts[0]
-            if work_dir == 'notebooking' and (root / pth).exists():
+            if work_dir == 'notebooking' and (project_root_dir / pth).exists():
                 try:
-                    m = match(r"display_name: estcp-(.*)-(.*)", open(root / pth).read())
+                    m = match(r"display_name: estcp-(.*)-(.*)", open(project_root_dir / pth).read())
                 except UnicodeDecodeError:
                     continue
                 if m:

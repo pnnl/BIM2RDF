@@ -1,5 +1,5 @@
 from pathlib import Path
-from . import root as project_root
+from . import project_root
 import yaml
 
 
