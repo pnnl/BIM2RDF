@@ -575,11 +575,15 @@ def reset(ctx, work_dir=cur_work_dir):
         exit(1)
     wd = work.WorkDir(wd)
     #                                           sometimes nonzero exit returned :/
-    envs = {env.strip() for env in ctx.run('conda env list', hide='out', warn=True).stdout.split('\n')}
+    import json
+    all_env_dirs = json.loads(ctx.run('conda env list --json', hide='out', warn=True).stdout)['envs']
+    all_envs = {Path(ed).stem for ed in all_env_dirs}
     deps = _get_workdir_deps(ctx, wd)
     dep_envs = {work.WorkDir(dwd).devenv_name for dwd in deps}
-    rem_envs = envs.intersection(dep_envs)
+    rem_envs = all_envs.intersection(dep_envs)
+    assert(rem_envs)
     for wdenv in rem_envs:
+        if wdenv == 'estcp-project': continue # have to exclude project. hardcode name warning.
         ctx.run(f"conda env remove -n {wdenv}", echo=True)
     for dep in deps:
         del_wrappers(dep)
