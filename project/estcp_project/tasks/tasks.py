@@ -442,7 +442,7 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
         if dwd in done: continue # possibly deduping
         # 1. make the dev env
         if prompt:
-            if input(f"create {dwd} env? [enter y for yes] ").lower().strip() == 'y':
+            if input(f"create ({dwd}) env? [enter y for yes] ").lower().strip() == 'y':
                 make_devenv(ctx, work_dir=dwd)
         else:
             make_devenv(    ctx, work_dir=dwd)
@@ -452,7 +452,7 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
             create_exec_wrapper(    ctx, '_stub', work_dir=dwd)
             create_scripts_wrappers(ctx,          work_dir=dwd)
         if prompt:
-            if input(f"make scripts wrappers for {dwd}? [enter y for yes]").lower().strip() == 'y':
+            if input(f"make scripts wrappers for ({dwd})? [enter y for yes]").lower().strip() == 'y':
                 make_wrappers()
         else:
             make_wrappers()
@@ -462,7 +462,7 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
         for asetup in  _get_setup_names(dWD):
             with ctx.cd(str(dWD.dir)):
                 if prompt:
-                    if input(f"execute {asetup} for {dWD.name}? [enter y for yes] ").lower().strip() == 'y':
+                    if input(f"execute {asetup} for ({dWD.name})? [enter y for yes] ").lower().strip() == 'y':
                         assert(ctx.run(f"{dWD.dir/'wbin'/'run-in'} {dWD.name}-{asetup}", echo=True).ok)
                 else:
                     # asserts may not be needed b/c warn=False
@@ -581,20 +581,28 @@ def reset(ctx, work_dir=cur_work_dir):
     rem_envs = envs.intersection(dep_envs)
     for wdenv in rem_envs:
         ctx.run(f"conda env remove -n {wdenv}", echo=True)
-    # and rem wrappers
-    from shutil import rmtree
     for dep in deps:
-        wdir = work.WorkDir(dep).dir
-        if        (wdir / 'wbin').exists():
-            rmtree(wdir / 'wbin')
-        if       ( wdir / 'scripts' / 'bin').exists():
-            rmtree(wdir / 'scripts' / 'bin')
-        # remove generated env file
-        if ( wdir / 'environment.yml').exists():
-            (wdir / 'environment.yml').unlink()
+        del_wrappers(dep)
+        del_envfile(dep)
     work_on(ctx, wd.name)
     print('Deactivate then reactivate your environment.')
 coll.collections['work-dir'].collections['action'].add_task(reset)
+
+
+def del_wrappers(wd):
+    # and rem wrappers
+    from shutil import rmtree
+    wdir = work.WorkDir(wd).dir
+    if        (wdir / 'wbin').exists():
+        rmtree(wdir / 'wbin')
+    if       ( wdir / 'scripts' / 'bin').exists():
+        rmtree(wdir / 'scripts' / 'bin')
+
+def del_envfile(wd):
+    wdir = work.WorkDir(wd).dir
+    # remove generated env file
+    if ( wdir / 'environment.yml').exists():
+        (wdir / 'environment.yml').unlink()
 
 
 # TODO: reset work dir
