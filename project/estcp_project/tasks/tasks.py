@@ -584,7 +584,7 @@ def reset(ctx, work_dir=cur_work_dir):
     assert(rem_envs)
     for wdenv in rem_envs:
         if wdenv == 'estcp-project': continue # have to exclude project. hardcode name warning.
-        ctx.run(f"conda env remove -n {wdenv}", echo=True)
+        ctx.run(f"conda env remove -n {wdenv} --yes", echo=True)
     for dep in deps:
         del_wrappers(dep)
         del_envfile(dep)
