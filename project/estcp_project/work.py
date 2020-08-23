@@ -8,7 +8,7 @@ class WorkDir():
     file_names = {'environment.devenv.yml',
                   }
                   # could also be some configs
-    base_devenv = project_root / 'environment.yml'
+    dir_names = {'scripts'}
     envfn = 'environment.yml'
 
     def __init__(self, dir: Path):
@@ -86,7 +86,9 @@ class WorkDir():
         dir = Path(dir)
         if not dir.is_dir():
             return False
-        if all([(dir/f).is_file() for f in cls.file_names]):
+        iall_files = all([(dir/f).is_file() for f in cls.file_names])
+        iall_dirs =  all([(dir/d).is_dir()  for d in cls.dir_names ])
+        if iall_files and iall_dirs:
             return True
         return False
 
