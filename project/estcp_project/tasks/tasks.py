@@ -597,6 +597,7 @@ def reset(ctx, work_dir=cur_work_dir):
     work_on(ctx, wd.name)
     print('Deactivate then reactivate your environment.')
 coll.collections['work-dir'].collections['action'].add_task(reset)
+coll.add_task(reset)
 
 
 def del_wrappers(wd):
