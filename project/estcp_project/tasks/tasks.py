@@ -89,6 +89,8 @@ coll.collections['project'].collections['setup'].add_task(set_git_hooks)
 @task(default=True)
 def setup(ctx,):
     """All setup tasks"""
+    if ' ' in str(project_root_dir):
+        raise ValueError(f"Project directory: {project_root_dir} has spaces. Move to location w/o spaces.")
     print('creating project wrappers')
     create_project_wrappers(ctx)
     print('creating scripts wrappers')
@@ -509,6 +511,8 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
     # best programmed with a state diagram. TODO
 
     # 1. check work dir creation
+    if ' ' in work_dir:
+        raise ValueError(f"Work directory, {work_dir}, has spaces. Create work directory w/o spaces.")
     wd = work_dir
     if wd not in (wd.name for wd in work.find_WorkDirs()):
         new_work_dir = True
