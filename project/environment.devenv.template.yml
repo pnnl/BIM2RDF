@@ -5,7 +5,7 @@
 {% set wrapped_exe = not is_included %}
 
 #                almost need 'project' but 'notebooking' is optional
-{% set included_workdirs = ['project', 'notebooking'] %}
+{% set included_workdirs = ['project', 'notebooking' , 'api'] %}
 
 dependencies:
   # fill out your deps
