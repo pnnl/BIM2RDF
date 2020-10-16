@@ -674,10 +674,18 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
             work_dirs.append(work_dir)
     work_dirs = frozenset(work_dirs)
 
+    def find_tags(txt):
+        from re import findall
+        return findall("\[([^\[\]]{1,})\]", txt)
+
     if work_dirs:
         tags = ""
-        for wd in work_dirs: tags += f"[{wd}]"
-        message = f"{tags} " + open(COMMIT_MSG_FILE, 'r').read()
+        message = open(COMMIT_MSG_FILE, 'r').read()
+        existing_tags = find_tags(message)
+        for wd in work_dirs:
+            if wd not in existing_tags:
+                tags += f"[{wd}]"
+        message = f"{tags} " + message
         cmf = open(COMMIT_MSG_FILE, 'w')
         cmf.write(message)
         cmf.close()
