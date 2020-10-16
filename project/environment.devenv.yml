@@ -32,13 +32,14 @@ dependencies:
   # otherwise conda will not list the created env :/
   # some of the below tools will be exposed via wrappers in wbin
   # ie, they will not be 'installed' in dependent envs (envs that include this)
+  # keep python fixed
   - python=3.7            # [not is_included]
   # code mgt
-  - gitpython=3.1.3       # [not is_included]
+  - gitpython=3.1         # [not is_included]
   - git                   # [wrapped_exe]
-  - pre-commit=2.6.0      # [wrapped_exe]
+  - pre-commit=2.7        # [wrapped_exe]
   # data/non-source file mgt.
-  - dvc=1.6               # [wrapped_exe]
+  - dvc=1.8               # [wrapped_exe]
   # env mgt.
   - deps=1.1.1            # [wrapped_exe]
   - exec-wrappers=1.1.4   # [not is_included]
