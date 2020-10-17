@@ -573,11 +573,12 @@ coll.add_task(work_on)
 
 
 # TODO: recreate is this followed by a workon
-@task(help={'work-dir': get_cur_work_dir_help() })
-def reset(ctx, work_dir=cur_work_dir):
+@task(help={
+    'work-dir': get_cur_work_dir_help(),
+    'hard': 'deletes env dirs (instead of asking conda to (nicely) remove them'})
+def reset(ctx, work_dir=cur_work_dir, hard=False):
     """
-    Recrecreates enviroments associated with the work dir.
-    (including the special project work dir).
+    Recrecreates enviroments associated with the work dir by 'removing' environments.
     """ #                  hah this wouldn't be possible with a container like docker.
     wd = work_dir
     if wd not in (wd.name for wd in work.find_WorkDirs()):
@@ -592,12 +593,15 @@ def reset(ctx, work_dir=cur_work_dir):
     dep_envs = {work.WorkDir(dwd).devenv_name for dwd in deps}
     rem_envs = set(all_envs).intersection(dep_envs)
     assert(rem_envs)
-    #from shutil import rmtree
     for wdenv in rem_envs:
         if wdenv == 'estcp-project': continue # have to exclude project. hardcode name warning.
-        ctx.run(f"conda env remove -n {wdenv} --yes", echo=True)
-        #print(f'deleting {all_envs[wdenv]}')
-        #rmtree(all_envs[wdenv])
+        if hard:
+            from shutil import rmtree
+            print(f'deleting env dir {all_envs[wdenv]}')
+            rmtree(all_envs[wdenv])
+        else: # 
+            ctx.run(f"conda env remove -n {wdenv} --yes", echo=True)
+            
     for dep in deps:
         del_wrappers(dep)
         del_envfile(dep)
