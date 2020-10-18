@@ -572,6 +572,8 @@ coll.collections['work-dir'].collections['action'].add_task(work_on)
 coll.add_task(work_on)
 
 
+
+
 # TODO: recreate is this followed by a workon
 @task(help={
     'work-dir': get_cur_work_dir_help(),
@@ -586,8 +588,36 @@ def reset(ctx, work_dir=cur_work_dir, hard=False):
         exit(1)
     wd = work.WorkDir(wd)
     #                                           sometimes nonzero exit returned :/
+    
+    def onerror(func, path, exc_info):
+        """
+        Error handler for ``shutil.rmtree``.
+
+        If the error is due to an access error (read only file)
+        it attempts to add write permission and then retries.
+
+        If the error is for another reason it re-raises the error.
+
+        Usage : ``shutil.rmtree(path, onerror=onerror)``
+        """
+        import stat
+        import os
+        if not os.access(path, os.W_OK):
+            # Is the error an access error ?
+            os.chmod(path, stat.S_IWUSR)
+            func(path)
+        else:
+            raise
+        
     import json
-    all_env_dirs = json.loads(ctx.run('conda env list --json', hide='out', warn=True).stdout)['envs']
+    all_env_dirs = json.loads(ctx.run('conda info --json', hide='out', warn=True).stdout)['envs_dirs']
+    from itertools import chain
+    all_env_dirs = (Path(dr) for dr in all_env_dirs)
+    all_env_dirs = (dr for dr in all_env_dirs if dr.exists())
+    all_env_dirs = (dr.iterdir() for dr in all_env_dirs)
+    from itertools import chain
+    all_env_dirs = chain.from_iterable(all_env_dirs)
+    all_env_dirs = (pth for pth in  all_env_dirs if pth.is_dir())
     all_envs = {Path(ed).stem: ed for ed in all_env_dirs}
     deps = _get_workdir_deps(ctx, wd)
     dep_envs = {work.WorkDir(dwd).devenv_name for dwd in deps}
@@ -598,7 +628,7 @@ def reset(ctx, work_dir=cur_work_dir, hard=False):
         if hard:
             from shutil import rmtree
             print(f'deleting env dir {all_envs[wdenv]}')
-            rmtree(all_envs[wdenv])
+            rmtree(all_envs[wdenv], onerror=onerror)
         else: # 
             ctx.run(f"conda env remove -n {wdenv} --yes", echo=True)
             
