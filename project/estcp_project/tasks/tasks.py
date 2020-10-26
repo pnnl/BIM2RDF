@@ -38,6 +38,8 @@ def set_dvc_repo(ctx):
     if not dir.is_dir():
         raise FileNotFoundError('not a directory or directory not found')
     ctx.run(f"dvc remote add --local sharefolder \"{dir}\" -f", echo=True)
+    # set sharfolder as default dvc repo
+    ctx.run(f"dvc remote default --local sharefolder", echo=True)
     sdvc = project_root_dir / 'data' / 'sample.dvc'
     # will not error if file in (local) cache but wrong remote
     ctx.run(f"dvc pull \"{project_root_dir /'data'/'sample.dvc'}\"", echo=True)
