@@ -2,7 +2,7 @@
 dvc:
     # on mac ...
     #share dir
-    dir: \\pnl\projects\ArmyReserve\ESTCP\Machine Learning\software-files\dont-touch\not-code-dvc-repo
+    dir: dir
 
 git: true # integrations
     #_: true

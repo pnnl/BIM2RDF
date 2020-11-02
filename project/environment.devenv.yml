@@ -1,4 +1,5 @@
-# so to not be included in devenvs that include this
+{%set project_name=  os.path.basename(os.path.abspath(os.path.join(root, '..')))  %}
+# copy/paste into your work dir and fill out where appropriate.
 {% set included_workdirs = ['project', ] %}
 {% set dev_req =     not is_included %}
 {% set run_req =         is_included %}
@@ -45,9 +46,8 @@ dependencies:
   - exec-wrappers=1.1.4   # [not is_included]
   # automation
   - invoke=1.4.1          # [not is_included]
-
-# project name could come from estcp.name file.
-# something like:
-# 1. find file with *.name in root
-# 2. set PROJECT_NAME=*
-name: {{'estcp-' + os.path.basename(root)}}
+includes:
+  {% for included in included_workdirs %}
+    - '{{root}}/../{{included}}/environment.devenv.yml'
+  {% endfor %}
+name: '{{project_name}}-{{os.path.basename(root)}}'

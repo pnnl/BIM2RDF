@@ -1,5 +1,5 @@
 from invoke import task, Collection
-from .. import project_root_dir
+from .. import project_root_dir, project_name
 import yaml
 from .. import work
 from pathlib import Path
@@ -99,8 +99,8 @@ def setup(ctx,):
     create_scripts_wrappers(ctx, work_dir='project')
     print('setting git hooks')
     set_git_hooks(ctx)
-    print('setting dvc repo')
-    set_dvc_repo(ctx)
+    #print('setting dvc repo')
+    #set_dvc_repo(ctx)
     #run_setup_tasks(ctx, work_dir='project') inf loop
     #make_devenv(ctx, work_dir='project') # doesn't make sense
 coll.collections['project'].collections['setup'].add_task(setup)
@@ -519,7 +519,7 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
     if wd not in (wd.name for wd in work.find_WorkDirs()):
         new_work_dir = True
         # best to do this from the project env
-        project_env = work.WorkDir(project_root_dir/'project').devenv_name  # hardcoding warning
+        project_env = work.WorkDir(project_root_dir/'project').devenv_name
         if cur_env_name !=  project_env:
             print("Change to project environment before creating a new workdir.")
             print(f"> conda activate {work.WorkDir(project_root_dir/'project').devenv_name}")
@@ -625,8 +625,9 @@ def reset(ctx, work_dir=cur_work_dir, hard=False):
     dep_envs = {work.WorkDir(dwd).devenv_name for dwd in deps}
     rem_envs = set(all_envs).intersection(dep_envs)
     assert(rem_envs)
+    project_env_name = work.WorkDir(project_root_dir/'project').devenv_name
     for wdenv in rem_envs:
-        if wdenv == 'estcp-project': continue # have to exclude project. hardcode name warning.
+        if wdenv == project_env_name: continue 
         if hard:
             from shutil import rmtree
             print(f'deleting env dir {all_envs[wdenv]}')
@@ -702,7 +703,7 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
             work_dir = pth.parts[0]
             if work_dir == 'notebooking' and (project_root_dir / pth).exists():
                 try:
-                    m = match(r"display_name: estcp-(.*)-(.*)", open(project_root_dir / pth).read())
+                    m = match(f"display_name: {project_name}-(.*)-(.*)", open(project_root_dir / pth).read())
                 except UnicodeDecodeError:
                     continue
                 if m:

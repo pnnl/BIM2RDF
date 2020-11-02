@@ -1,5 +1,5 @@
 from pathlib import Path
-from . import project_root
+from . import project_root, project_name
 import yaml
 
 
@@ -50,10 +50,9 @@ class WorkDir():
                 return n
         raise FileNotFoundError
 
-
     @property
     def devenv_name(self):
-        return 'estcp-'+self.name
+        return project_name+'-'+self.name
 
     def get_env_path(self): # not sure this is the place to put this. as it has less to do with 'dir'
         from subprocess import check_output
