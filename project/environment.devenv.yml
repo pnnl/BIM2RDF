@@ -40,7 +40,7 @@ dependencies:
   - git                   # [wrapped_exe]
   - pre-commit=2.7        # [wrapped_exe]
   # data/non-source file mgt.
-  - dvc=1.8               # [wrapped_exe]
+  - dvc=1.9               # [wrapped_exe]
   # env mgt.
   - deps=1.1.1            # [wrapped_exe]
   - exec-wrappers=1.1.4   # [not is_included]
