@@ -102,7 +102,7 @@ The tasks aid the following development process.
 
     Enter 'base' environment: `> conda activate base`.
     Then obtain source with
-    `> git clone https://stash.pnnl.gov/scm/usarml/workspace-code.git workspace`.
+    `> git clone https://repo.git prefix`.
     <br>
     The source was cloned into the 'workspace' directory even though it's called 'workspace-code' to emphasize that code and non-code will combine in the directory.
 
