@@ -28,6 +28,7 @@ environment:
   WORKDIR_PATH:  '{{root}}'                                       # [not is_included]
   PROJECTROOT:  '{{ os.path.abspath(os.path.join(root, '..')) }}' # [not is_included]
   PROJECT_ROOT: '{{ os.path.abspath(os.path.join(root, '..')) }}' # [not is_included]
+  PROJECT_NAME: '{{project_name}}'                                # [not is_included]
 dependencies:
   - pyprojroot=0.2.0 # minimal package so /something/ gets installed into dependent env
   # otherwise conda will not list the created env :/
