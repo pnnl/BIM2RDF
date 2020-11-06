@@ -47,7 +47,6 @@ dependencies:
   - exec-wrappers=1.1.4   # [keep_here]
   # automation
   - invoke=1.4.1          # [wrapped_exe]  # as 'project' exec
-  {% endif %}
 includes:
   {% for included in included_workdirs %}
     - '{{root}}/../{{included}}/environment.devenv.yml'
