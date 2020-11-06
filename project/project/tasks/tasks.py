@@ -22,7 +22,7 @@ coll.collections['work-dir'].add_collection(Collection('info'))
 
 config = yaml.safe_load((project_root_dir / 'project' / 'config.yml').open())
 
-@task
+@task # disabled part of setup tasks
 def set_dvc_repo(ctx):
     """
     Set sharefolder as (non- source code) DVC repository.
@@ -87,6 +87,8 @@ def set_git_hooks(ctx):
         ctx.run(f"pre-commit uninstall", echo=True)
         ctx.run(f"pre-commit uninstall    --hook-type     prepare-commit-msg", echo=True)
 coll.collections['project'].collections['setup'].add_task(set_git_hooks)
+
+
 
 @task(default=True)
 def setup(ctx,):
@@ -183,16 +185,98 @@ def _get_workdir_deps(ctx, WD):
 
 
 @task(help={'work-dir':get_cur_work_dir_help()})
-def work_dir_deps(ctx, work_dir=cur_work_dir):
+def work_dir_work_dir_deps(ctx, work_dir=cur_work_dir):
     """
-    lists dependencies of work dir
+    lists work dir dependencies of work dir
     """
     if work_dir not in (wd.name for wd in work.find_WorkDirs()):
         print('work dir not found')
         exit(1)
     for wdn in _get_workdir_deps(ctx, work.WorkDir(work_dir)):
         print(wdn)
+coll.collections['work-dir'].collections['info'].add_task(work_dir_work_dir_deps)
+
+
+@task(help={'work-dir': get_cur_work_dir_help()})
+def work_dir_deps(ctx, work_dir=cur_work_dir, pattern='.*'):
+    work_dirs = _get_workdir_deps(ctx, work.WorkDir(work_dir))
+    assert(work_dir in work_dirs)
+    devfile_deps = {wd: _get_work_dir_deps(wd, pattern) for wd in work_dirs}
+    # merging
+    deps = set()
+    pip_deps = set()
+    for wd in devfile_deps:
+        for dep in devfile_deps[wd]:
+            if isinstance(dep, str): deps.add(dep)
+            else:
+                for pipdep in dep['pip']:
+                    pip_deps.add(pipdep)
+    deps = list(deps)
+    if pip_deps: deps.append({'pip': list(pip_deps)})
+    import json
+    print(json.dumps(deps))
 coll.collections['work-dir'].collections['info'].add_task(work_dir_deps)
+
+
+def _get_work_dir_deps(work_dir, pattern):
+    pattern = f".*\[{pattern}\]"
+    # not comfortable with thie util. it gets into conda devenv's biz
+
+    # need the deps defined in the devenv file
+    _ = project_root_dir / work_dir / 'environment.devenv.yml'
+    _ = open(_)
+    #from jinja2 import Environment, BaseLoader
+    #import yaml
+    #_ = Environment(loader=BaseLoader()).from_string(_.read())
+    #_ = _.render()
+    #_ = yaml.safe_load(_)
+    #_ = _['dependencies']
+    # not a clean way to do this
+    _ = _.readlines()
+    for i, l in enumerate(_):
+        if l.startswith('dependencies:'):
+            break
+    _ = _[i+1:]
+    for i, l in enumerate(_):
+        if not l.strip().startswith('-') and l[0].isalpha():
+            break
+    # deps section lines
+    _ = _[:i]
+    # remove lines that dont look like items
+    _ = [l for l in _ if l.strip().startswith('-')]
+    from re import match
+    _ = [l for l in _ if match(pattern, l) or match(r'\s*-\s*pip:', l)]
+    devfile_deps = yaml.safe_load(''.join(_)) if _ else []
+    del l
+
+    def has(deps, sec='pip'):
+        for i, d in enumerate(deps):
+            if isinstance(d, dict):
+                if sec in d:
+                    return True, i
+        return False, None
+
+    def normalize(dep):
+        m = match("([a-z0-9\-\_]+)(.*)", dep)
+        name = m[1]
+        ver =  m[2]
+        return ''.join((name, ver))
+
+    if has(devfile_deps, 'pip')[0]:
+        pip_deps = devfile_deps[has(devfile_deps, 'pip')[1]]['pip']
+        pip_deps = pip_deps if pip_deps else []
+        devfile_deps.pop(has(devfile_deps, 'pip')[1])
+    else:
+        pip_deps = []
+    from re import match
+    pip_deps =   [normalize(d) for d in pip_deps     ]
+    conda_deps = [normalize(d) for d in devfile_deps ]
+
+    devfile_deps = conda_deps
+    if pip_deps:
+        devfile_deps.append({'pip': pip_deps})
+    return devfile_deps
+
 
 
 @task(help={'work-dir': get_cur_work_dir_help()})
@@ -226,6 +310,7 @@ def work_dir_deps_tree(ctx, work_dir=cur_work_dir, all_dirs=False):
     for wd in work_dirs:
         r(wd)
 coll.collections['project'].collections['info'].add_task(work_dir_deps_tree)
+
 
 
 
