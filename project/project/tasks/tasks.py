@@ -284,33 +284,18 @@ def work_dir_deps_tree(ctx, work_dir=cur_work_dir, all_dirs=False):
     """
     print dependency tree of work dir
     """
-    cache = {}
-    def __get_workdir_deps(ctx, parent):
-        if parent.name in cache:
-            ds = cache[parent.name]
-            return ds
-        else:
-            cache[parent.name] = _get_workdir_deps(ctx, parent)
-            return __get_workdir_deps(ctx, parent)
-
-    def r(parent, t=''):
-        print(t+parent.name)
-        t += '   |'
-        for child in __get_workdir_deps(ctx, parent):
-            if child == parent.name: continue
-            r(work.WorkDir(child), t=t)
-
     if all_dirs:
         work_dirs = (wd for wd in work.find_WorkDirs())
     else:
         if work_dir not in (wd.name for wd in work.find_WorkDirs()):
             print('work dir not found')
             exit(1)
-        work_dirs = (work.WorkDir(work_dir), )
-    for wd in work_dirs:
-        r(wd)
+        work_dirs = [work.WorkDir(work_dir), ]
+    
+    cmd = f"deps -pp "
+    for wd in work_dirs: cmd += f"-p {wd.dir} "
+    ctx.run(cmd, echo=False)
 coll.collections['project'].collections['info'].add_task(work_dir_deps_tree)
-
 
 
 
