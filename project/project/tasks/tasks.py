@@ -348,7 +348,15 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
     # so now the following doesn't pick up the wrapped exe. breaks out of recursion issues.
     create_wrapper(exe_pth, test=False).unlink()
     wpth = create_wrapper(exe_pth, test=test)
-    from shutil import copy2 as copyexe # attempt to copy all metadata (mainly keeping +x attrib)
+    def copyexe(src, dst):
+        def make_executable(path):
+            from os import stat, chmod
+            mode = stat(path).st_mode
+            mode |= (mode & 0o444) >> 2    # copy R bits to X
+            chmod(path, mode)
+        from shutil import copy
+        copy(src, dst)
+        make_executable(dst)
     from shutil import which
     assert(wpth.stem == exe_name)
     env_exec_pth = wpth.parent / f"{wd.name}-{exe_name}{wpth.suffix}"
