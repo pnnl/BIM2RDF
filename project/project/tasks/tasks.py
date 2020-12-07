@@ -515,7 +515,7 @@ def _get_setup_names(wd):
         },
     #iterable = ['setup_list']
 )
-def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
+def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workdir=True):
     """
     execute setup tasks for the workdir
     """
@@ -528,6 +528,9 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False):
     done = []
     for dwd in dep_work_dirs:
         if dwd in done: continue # possibly deduping
+        if work_dir != 'project' and dwd == 'project' and skip_project_workdir:
+            print('INFO: (re)-building project skipped.')
+            continue
         # 1. make the dev env
         if prompt:
             if input(f"create ({dwd}) env? [enter y for yes] ").lower().strip() == 'y':
