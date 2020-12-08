@@ -635,10 +635,10 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
     # check if devenv in run env includes. TODO
 
     # 6. check if in env
-    if wd.devenv_name != cur_env_name:
-        print(f'Activate environment:')
-        print(f'> conda activate {wd.devenv_name}')
-        exit(1)
+    #if wd.devenv_name != cur_env_name:
+    #    print(f'Activate environment:')
+    #    print(f'> conda activate {wd.devenv_name}')
+    #    exit(1)
 
     # 7. check if in dir
     #if _change_dir(wd):
