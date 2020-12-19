@@ -35,11 +35,11 @@ dependencies:
   # some of the below tools will be exposed via wrappers in wbin
   # ie, they will not be 'installed' in dependent envs (envs that include this)
   # keep python fixed
-  - python=3.7            # [keep_here]
+  - python=3.8            # [keep_here]
   # code mgt
   - gitpython=3.1         # [keep_here]
   - git                   # [wrapped_exe]
-  - pre-commit=2.7        # [wrapped_exe]
+  - pre-commit=2.9        # [wrapped_exe]
   # data/non-source file mgt.
   - dvc=1.9               # [wrapped_exe]
   # env mgt.
