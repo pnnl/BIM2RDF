@@ -89,16 +89,15 @@ def set_git_hooks(ctx):
 coll.collections['project'].collections['setup'].add_task(set_git_hooks)
 
 
-
 @task(default=True)
 def setup(ctx,):
     """All setup tasks"""
     if ' ' in str(project_root_dir):
         raise ValueError(f"Project directory: {project_root_dir} has spaces. Move to location w/o spaces.")
-    print('creating project wrappers')
-    create_project_wrappers(ctx)
     print('creating scripts wrappers')
     create_scripts_wrappers(ctx, work_dir='project')
+    print('creating project wrappers')
+    create_project_wrappers(ctx)
     print('setting git hooks')
     set_git_hooks(ctx)
     #print('setting dvc repo')
@@ -580,7 +579,7 @@ def _change_dir(wd):
     'prompt-setup': 'prompt setup tasks',
     }
 )
-def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
+def work_on(ctx, work_dir, prompt_setup=False, skip_project_workdir=True): # TODO rename work_on_check ?
     """
     Sets up an existing or new work dir.
     """
@@ -630,7 +629,7 @@ def work_on(ctx, work_dir, prompt_setup=False): # TODO rename work_on_check ?
        print('Minimal env detected. Make sure that this is intended.')
 
     # 5. run setup tasks
-    run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup)
+    run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup, skip_project_workdir=True)
 
     # check if devenv in run env includes. TODO
 
