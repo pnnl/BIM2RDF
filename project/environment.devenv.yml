@@ -40,8 +40,6 @@ dependencies:
   - gitpython=3.1         # [keep_here]
   - git                   # [wrapped_exe]
   - pre-commit=2.9        # [wrapped_exe]
-  # data/non-source file mgt.
-  - dvc=1.9               # [wrapped_exe]
   # env mgt.
   - deps=1.1.1            # [wrapped_exe]
   - exec-wrappers=1.1.4   # [keep_here]

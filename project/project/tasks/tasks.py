@@ -22,28 +22,6 @@ coll.collections['work-dir'].add_collection(Collection('info'))
 
 config = yaml.safe_load((project_root_dir / 'project' / 'config.yml').open())
 
-@task # disabled part of setup tasks
-def set_dvc_repo(ctx):
-    """
-    Set sharefolder as (non- source code) DVC repository.
-    """
-    # import json
-    # dir_from_config = (
-    #     ctx.run(f"dvc config --local core.remote sharefolder")
-    #     .stdout
-    #     .strip()
-    # )
-    # dir = json.loads(dir_from_config)['url'] if dir_from_config else dir
-    dir = Path(config['dvc']['dir'])
-    if not dir.is_dir():
-        raise FileNotFoundError('not a directory or directory not found')
-    ctx.run(f"dvc remote add --local sharefolder \"{dir}\" -f", echo=True)
-    # set sharfolder as default dvc repo
-    ctx.run(f"dvc remote default --local sharefolder", echo=True)
-    sdvc = project_root_dir / 'data' / 'sample.dvc'
-    # will not error if file in (local) cache but wrong remote
-    ctx.run(f"dvc pull \"{project_root_dir /'data'/'sample.dvc'}\"", echo=True)
-coll.collections['project'].collections['setup'].add_task(set_dvc_repo)
 
 
 @task
@@ -51,7 +29,7 @@ def create_project_wrappers(ctx, ):
     """
     Create wrappers around project tool executables.
     """
-    for exe in ['dvc', ]+['git', 'bash', 'pre-commit',]:
+    for exe in ['git', 'bash', 'pre-commit',]:
         create_exec_wrapper(ctx, exe, work_dir='project')
 coll.collections['project'].collections['setup'].add_task(create_project_wrappers)
 
@@ -100,8 +78,6 @@ def setup(ctx,):
     create_project_wrappers(ctx)
     print('setting git hooks')
     set_git_hooks(ctx)
-    #print('setting dvc repo')
-    #set_dvc_repo(ctx)
     #run_setup_tasks(ctx, work_dir='project') inf loop
     #make_devenv(ctx, work_dir='project') # doesn't make sense
 coll.collections['project'].collections['setup'].add_task(setup)
@@ -741,26 +717,7 @@ def del_envfile(wd):
 
 
 # TODO: reset work dir
-#@task TODO
-def dvc_run(ctx,  work_dir=cur_work_dir):
-    """
-    Executes .dvc files.
-    """
-    ...
-    wd = work_dir
-    if wd not in (wd.name for wd in work.find_WorkDirs()):
-        print('Work dir not found.')
-        exit(1)
-    wd = work.WorkDir(wd)
-    work_on(ctx, wd.dir)
-#ns.add_task(dvc_run)
 
-# run dvc conda run
-# task: reset/clean env
-# clean env
-# TODO feature: optionally print out shell cmds.
-
-# ok just do setup.py programmatically
 
 #
 coll.collections['project'].add_collection(Collection('_git'))
