@@ -23,7 +23,8 @@ includes:
 {% endfor %}
 {% endif %}
 
-dependencies:
+
+dependencies: []
   # fill out your deps.
   # if no dep is installed conda will not list the created env.
   #- sometestframework         # [dev_req]

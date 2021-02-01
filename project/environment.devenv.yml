@@ -12,6 +12,13 @@ channels:
 
 # 'internal' dependencies:
 {% set included_workdirs = [] %}
+{% if included_workdirs %}
+includes:
+{% for included in included_workdirs %}
+  - '{{root}}/../{{included}}/environment.devenv.yml'
+{% endfor %}
+{% endif %}
+
 
 dependencies:
   # fill out your deps
@@ -57,10 +64,4 @@ environment:
   PROJECT_ROOT: '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_NAME: '{{project_name}}'                                # [keep_here]
 
-{% if included_workdirs %}
-includes:
-{% for included in included_workdirs %}
-  - '{{root}}/../{{included}}/environment.devenv.yml'
-{% endfor %}
-{% endif %}
 
