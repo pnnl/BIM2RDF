@@ -1,21 +1,48 @@
+# copy/paste into your workdir and change where appropriate.
 {%set project_name=  os.path.basename(os.path.abspath(os.path.join(root, '..')))  %}
-# copy/paste into your work dir and fill out where appropriate.
-{% set included_workdirs = ['project', ] %}
+name: {{project_name}}-{{os.path.basename(root)}}
+
 {% set keep_here =     not is_included %}  # https://github.com/ESSS/conda-devenv/issues/120
 {% set dev_req =       keep_here %}
 {% set wrapped_exe =   keep_here %}
-{% set run_req =       True %}  # just annotation
+{% set run_req =       True %}  # serves as just annotation
 
 channels:
   - conda-forge
+
+# 'internal' dependencies:
+{% set included_workdirs = [] %}
+
+dependencies:
+  # fill out your deps
+  {% if 'notebooking' in included_workdirs %}
+  - ipykernel                  # [dev_req] 
+  # also can have irkernel
+  #- irkernel                  # [dev_req]
+  {% endif %}
+  - pyprojroot=0.2.0
+  # some of the below tools will be exposed via wrappers in wbin
+  # ie, they will not be 'installed' in dependent envs (envs that include this)
+  # keep python fixed
+  - python=3.8                # [keep_here]
+  # code mgt
+  - gitpython=3.1             # [keep_here]
+  - git                       # [wrapped_exe]
+  - pre-commit=2.10           # [wrapped_exe]
+  # env mgt.
+  - deps=1.1.1                # [wrapped_exe]
+  - exec-wrappers=1.1.4       # [keep_here]
+  # automation
+  - invoke=1.5.0              # [wrapped_exe]  # as 'project' exec
+
 environment:
-  # probably want to append PATH and PYTHONPATH in your env
+  # probably want to append to PATH and PYTHONPATH in your env
+  # see wrapped exec note in project/environment.devenv.yml
   PATH:
     - '{{root}}'
-    # adds all wrapped executables to path.
-    # makes the wrapped exes available in all envs that include project
+  # adds all wrapped executables to path.
     {% for maybe_dir in  os.scandir( os.path.abspath(os.path.join(root, '..')) )   %}
-    {% if maybe_dir.is_dir() %}
+    {% if maybe_dir.is_dir() and keep_here %}
     - {{ os.path.abspath(os.path.join(maybe_dir, "wbin")) }}
     {% endif %}
     {% endfor %}
@@ -29,24 +56,11 @@ environment:
   PROJECTROOT:  '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_ROOT: '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_NAME: '{{project_name}}'                                # [keep_here]
-dependencies:
-  - pyprojroot=0.2.0 # minimal package so /something/ gets installed into dependent env
-  # otherwise conda will not list the created env :/
-  # some of the below tools will be exposed via wrappers in wbin
-  # ie, they will not be 'installed' in dependent envs (envs that include this)
-  # keep python fixed
-  - python=3.8            # [keep_here]
-  # code mgt
-  - gitpython=3.1         # [keep_here]
-  - git                   # [wrapped_exe]
-  - pre-commit=2.9        # [wrapped_exe]
-  # env mgt.
-  - deps=1.1.1            # [wrapped_exe]
-  - exec-wrappers=1.1.4   # [keep_here]
-  # automation
-  - invoke=1.4.1          # [wrapped_exe]  # as 'project' exec
+
+{% if included_workdirs %}
 includes:
-  {% for included in included_workdirs %}
-    - '{{root}}/../{{included}}/environment.devenv.yml'
-  {% endfor %}
-name: '{{project_name}}-{{os.path.basename(root)}}'
+{% for included in included_workdirs %}
+  - '{{root}}/../{{included}}/environment.devenv.yml'
+{% endfor %}
+{% endif %}
+

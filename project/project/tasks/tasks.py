@@ -294,6 +294,7 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
     exe_name = exe_pth.stem
 
     def create_wrapper(exe_pth, test=True): # TODO rename exp_pth > exe_pth_or_name
+        if '_project-run-in' in str(exe_pth): breakpoint()
         exe_pth = Path(exe_pth)
         exe_name = exe_pth.stem
         exe_prefix_switch = f"-b {exe_pth.parent}" if exe_pth.parent.parts else ''
@@ -323,13 +324,14 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
     # so now the following doesn't pick up the wrapped exe. breaks out of recursion issues.
     create_wrapper(exe_pth, test=False).unlink()
     wpth = create_wrapper(exe_pth, test=test)
-    def copyexe(src, dst):
+    def copyexe(src, dst, ):
         def make_executable(path):
             from os import stat, chmod
             mode = stat(path).st_mode
             mode |= (mode & 0o444) >> 2    # copy R bits to X
             chmod(path, mode)
         from shutil import copy
+        if Path(dst).exists(): Path(dst).unlink()
         copy(src, dst)
         make_executable(dst)
     from shutil import which
@@ -490,7 +492,7 @@ def _get_setup_names(wd):
         },
     #iterable = ['setup_list']
 )
-def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workdir=True):
+def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workdir=False):
     """
     execute setup tasks for the workdir
     """
@@ -555,7 +557,7 @@ def _change_dir(wd):
     'prompt-setup': 'prompt setup tasks',
     }
 )
-def work_on(ctx, work_dir, prompt_setup=False, skip_project_workdir=True): # TODO rename work_on_check ?
+def work_on(ctx, work_dir, prompt_setup=False, skip_project_workdir=False): # TODO rename work_on_check ?
     """
     Sets up an existing or new work dir.
     """
@@ -597,7 +599,7 @@ def work_on(ctx, work_dir, prompt_setup=False, skip_project_workdir=True): # TOD
         new_work_dir = False
         wd = work.WorkDir(wd)
 
-    # 2. env creation
+    # 2. env yml creation
     minDevenv = \
        (open(wd.dir/'environment.devenv.yml')).read() \
        == wd.make_devenv()
@@ -605,7 +607,7 @@ def work_on(ctx, work_dir, prompt_setup=False, skip_project_workdir=True): # TOD
        print('Minimal env detected. Make sure that this is intended.')
 
     # 5. run setup tasks
-    run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup, skip_project_workdir=True)
+    run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup, skip_project_workdir=False)
 
     # check if devenv in run env includes. TODO
 

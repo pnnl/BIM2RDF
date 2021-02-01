@@ -1,20 +1,25 @@
+# copy/paste into your workdir and change where appropriate.
 {%set project_name=  os.path.basename(os.path.abspath(os.path.join(root, '..')))  %}
-# copy/paste into your work dir and fill out where appropriate.
+name: {{project_name}}-{{os.path.basename(root)}}
+
 {% set keep_here =     not is_included %}  # https://github.com/ESSS/conda-devenv/issues/120
 {% set dev_req =       keep_here %}
 {% set wrapped_exe =   keep_here %}
-{% set run_req =       True %}  # just annotation
+{% set run_req =       True %}  # serves as just annotation
 
-#                almost need 'project' but 'notebooking' is optional
-{% set included_workdirs = ['project', 'notebooking' , ] %}
+channels:
+  - conda-forge
+
+# 'internal' dependencies:
+{% set included_workdirs = [] %}
+{% if dev_req %}
+{{ included_workdirs.append('project') or "" }} # almost needed ("" is just a hack to not output None)
+{{ included_workdirs.append('notebooking') or "" }} # optional
+{% endif %}
 
 dependencies:
-  # fill out your deps
-  {% if 'notebooking' in included_workdirs %}
-  - ipykernel                  # [dev_req] 
-  # also can have irkernel
-  #- irkernel                  # [dev_req]
-  {% endif %}
+  # fill out your deps.
+  # if no dep is installed conda will not list the created env.
   #- sometestframework         # [dev_req]
   #- some analysis library     # [run_req]
 
@@ -23,6 +28,17 @@ environment:
   # see wrapped exec note in project/environment.devenv.yml
   PATH:
     - '{{root}}'
+    # adds all wrapped executables to path.
+    # {% for maybe_dir in  os.scandir( os.path.abspath(os.path.join(root, '..')) )   %}
+    # {% if maybe_dir.is_dir()  and keep_here %}
+    # - {{ os.path.abspath(os.path.join(maybe_dir, "wbin")) }}
+    # {% endif %}
+    # {% endfor %}
+    # adds included workdirs
+    {% for workdir in included_workdirs %}
+    - {{ os.path.abspath(os.path.join(root, '..', workdir, "wbin")) }}
+    {% endfor %}
+  
   PYTHONPATH:
     - '{{root}}'
   #                              don't define the following in envs that include this
@@ -34,9 +50,9 @@ environment:
   PROJECT_ROOT: '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_NAME: '{{project_name}}'                                # [keep_here]
 
+{% if included_workdirs %}
 includes:
 {% for included in included_workdirs %}
   - '{{root}}/../{{included}}/environment.devenv.yml'
 {% endfor %}
-
-name: {{project_name}}-{{os.path.basename(root)}}
+{% endif %}
