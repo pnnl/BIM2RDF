@@ -10,11 +10,17 @@ name: {{project_name}}-{{os.path.basename(root)}}
 channels:
   - conda-forge
 
-# 'internal' dependencies:
+# 'internal' dependencies: (sorry it looks ugly but dont know how else w/o a 'real' 'internal_deps' section)
 {% set included_workdirs = [] %}
 {% if dev_req %}
 {{ included_workdirs.append('project') or "" }} # almost needed ("" is just a hack to not output None)
 {{ included_workdirs.append('notebooking') or "" }} # optional
+{% endif %}
+{% if included_workdirs %}
+includes:
+{% for included in included_workdirs %}
+  - '{{root}}/../{{included}}/environment.devenv.yml'
+{% endfor %}
 {% endif %}
 
 dependencies:
@@ -50,9 +56,4 @@ environment:
   PROJECT_ROOT: '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_NAME: '{{project_name}}'                                # [keep_here]
 
-{% if included_workdirs %}
-includes:
-{% for included in included_workdirs %}
-  - '{{root}}/../{{included}}/environment.devenv.yml'
-{% endfor %}
-{% endif %}
+
