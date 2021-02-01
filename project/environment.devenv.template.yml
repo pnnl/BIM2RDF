@@ -56,5 +56,5 @@ environment:
   PROJECTROOT:  '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_ROOT: '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_NAME: '{{project_name}}'                                # [keep_here]
-
+  STAGE: local-dev  # vs. prod
 
