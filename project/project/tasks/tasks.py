@@ -607,7 +607,7 @@ def work_on(ctx, work_dir, prompt_setup=False, skip_project_workdir=False): # TO
        print('Minimal env detected. Make sure that this is intended.')
 
     # 5. run setup tasks
-    run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup, skip_project_workdir=False)
+    run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup, skip_project_workdir=skip_project_workdir)
 
     # check if devenv in run env includes. TODO
 
