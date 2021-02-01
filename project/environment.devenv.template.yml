@@ -7,8 +7,6 @@ name: {{project_name}}-{{os.path.basename(root)}}
 {% set wrapped_exe =   keep_here %}
 {% set run_req =       True %}  # serves as just annotation
 
-channels:
-  - conda-forge
 
 # 'internal' dependencies: (sorry it looks ugly but dont know how else w/o a 'real' 'internal_deps' section)
 {% set included_workdirs = [] %}
@@ -24,6 +22,8 @@ includes:
 {% endif %}
 
 
+channels:
+  - conda-forge
 dependencies: []
   # fill out your deps.
   # if no dep is installed conda will not list the created env.
