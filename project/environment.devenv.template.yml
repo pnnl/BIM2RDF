@@ -48,7 +48,8 @@ environment:
   
   PYTHONPATH:
     - '{{root}}'
-  #                              don't define the following in envs that include this
+  # don't define the following in envs that include this
+  # dooesnt make sense to have the following in envs that include this one
   WORK_DIR: '{{  os.path.basename(root) }}'                       # [keep_here]
   WORKDIR:  '{{  os.path.basename(root) }}'                       # [keep_here]
   WORK_DIR_PATH: '{{root}}'                                       # [keep_here]
@@ -56,5 +57,6 @@ environment:
   PROJECTROOT:  '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_ROOT: '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_NAME: '{{project_name}}'                                # [keep_here]
-  STAGE: local-dev  # vs. prod
+  # ...plus, cant merge this key in a env that includes it
+  MODE: local-dev  # vs. prod                                     # [keep_here]
 
