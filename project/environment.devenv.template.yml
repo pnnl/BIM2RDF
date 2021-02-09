@@ -8,17 +8,36 @@ name: {{project_name}}-{{os.path.basename(root)}}
 {% set run_req =       True %}  # serves as just annotation
 
 
-# 'internal' dependencies: (sorry it looks ugly but dont know how else w/o a 'real' 'internal_deps' section)
-{% set included_workdirs = [] %}
+# 'internal' dependency mgt. for includes: section
+{% set included_workdir_pths = [] %}
+{% set all_workdir_pths = [] %}
+{% macro append_workdir_name(workdir, to) -%}
+  {% set wdpth = os.path.abspath(os.path.join(root, '..', workdir))   %}
+  {%if os.path.exists(os.path.join(wdpth, 'environment.devenv.yml')) %}
+    {{ to.append(wdpth) or "" }} #"" is just a hack to not output None)
+  {% endif %}
+{%- endmacro %}
+{% for maybe_workdir in  os.scandir( os.path.abspath(os.path.join(root, '..')) )   %}
+      {{append_workdir_name(os.path.basename(maybe_workdir), all_workdir_pths)}}
+{% endfor %}
+
+
 {% if dev_req %}
-{{ included_workdirs.append('project') or "" }} # almost needed ("" is just a hack to not output None)
-{{ included_workdirs.append('notebooking') or "" }} # optional
+  {{append_workdir_name('project',     included_workdir_pths)}}  # almost needed
+  {{append_workdir_name('dvc',         included_workdir_pths)}}  # highly recommended
+  {{append_workdir_name('notebooking', included_workdir_pths)}}  # optional
 {% endif %}
+
+{% if run_req %}
+  ## append_workdir_name(aworkdir, included_workdir_pths)}} 
+{% endif %}
+
+
 {% if included_workdirs %}
 includes:
-{% for included in included_workdirs %}
-  - '{{root}}/../{{included}}/environment.devenv.yml'
-{% endfor %}
+  {% for included in included_workdirs %}
+  - {{(os.path.join(included, 'environment.devenv.yml'))}}
+  {% endfor %}
 {% endif %}
 
 
@@ -34,23 +53,30 @@ environment:
   # probably want to append to PATH and PYTHONPATH in your env
   # see wrapped exec note in project/environment.devenv.yml
   PATH:
-    - '{{root}}'
-    # self unwrapped bins before other bins
-    - '{{root}}/scripts/bin'
-    # adds all wrapped executables to path.
-    # {% for maybe_dir in  os.scandir( os.path.abspath(os.path.join(root, '..')) )   %}
-    # {% if maybe_dir.is_dir() and keep_here and os.path.basename(root)!=maybe_dir.name %}
-    # - {{ os.path.abspath(os.path.join(maybe_dir, "wbin")) }}
-    # {% endif %}
-    # {% endfor %}
+    - {{root}}
+    # self unwrapped bins before others
+    - {{os.path.join(root, 'scripts', 'bin')}}
+
+    #adds all wrapped executables to path. NOT RECOMMENDED. exception for 'project' env
+    {% if False %}
+    {% for workdir_pth in all_workdir_pths  %}
+    {% if  keep_here and os.path.basename(root)!=os.path.basename(workdir_pth) %}
+    - {{ os.path.join(workdir_pth, "wbin") }}
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
     # adds included workdir wrapped execs
-    {% for workdir in included_workdirs %}
-    {% if os.path.basename(root)!=workdir %}
-    - {{ os.path.abspath(os.path.join(root, '..', workdir, "wbin")) }}
+    {% for workdir_pth in included_workdir_pths %}
+    # ...but dont add self
+    {% if os.path.basename(root)!=os.path.basename(workdir_pth) 
+      and  (workdir_pth not in all_workdir_pths)
+    %}
+    - {{os.path.join(workdir_pth, "wbin")}}
     {% endif %}
     {% endfor %}
   PYTHONPATH:
-    - '{{root}}'
+    - {{root}}
   # don't define the following in envs that include this
   # dooesnt make sense to have the following in envs that include this one
   WORK_DIR: '{{  os.path.basename(root) }}'                       # [keep_here]
@@ -62,4 +88,3 @@ environment:
   PROJECT_NAME: '{{project_name}}'                                # [keep_here]
   # ...plus, cant merge this key in a env that includes it
   MODE: local-dev  # vs. prod                                     # [keep_here]
-
