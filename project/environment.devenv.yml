@@ -21,12 +21,6 @@ includes:
 
 
 dependencies:
-  # fill out your deps
-  {% if 'notebooking' in included_workdirs %}
-  - ipykernel                  # [dev_req] 
-  # also can have irkernel
-  #- irkernel                  # [dev_req]
-  {% endif %}
   - pyprojroot=0.2.0
   # some of the below tools will be exposed via wrappers in wbin
   # ie, they will not be 'installed' in dependent envs (envs that include this)
@@ -43,13 +37,14 @@ dependencies:
   - invoke=1.5.0              # [wrapped_exe]  # as 'project' exec
 
 environment:
+  GIT_PYTHON_REFRESH: quiet   # windows problem https://github.com/gitpython-developers/GitPython/issues/816
   # probably want to append to PATH and PYTHONPATH in your env
   # see wrapped exec note in project/environment.devenv.yml
   PATH:
-    - '{{root}}'
+    - {{root}}
     # self unwrapped bins before others
     - {{os.path.join(root, 'scripts', 'bin')}}
-  # adds all wrapped executables to path.
+    # adds all wrapped executables to path.
     {% for maybe_dir in  os.scandir( os.path.abspath(os.path.join(root, '..')) )   %}
     {% if maybe_dir.is_dir() and keep_here and os.path.basename(root)!=maybe_dir.name %}
     - {{ os.path.abspath(os.path.join(maybe_dir, "wbin")) }}
