@@ -47,9 +47,11 @@ environment:
   # see wrapped exec note in project/environment.devenv.yml
   PATH:
     - '{{root}}'
+    # self unwrapped bins before others
+    - {{os.path.join(root, 'scripts', 'bin')}}
   # adds all wrapped executables to path.
     {% for maybe_dir in  os.scandir( os.path.abspath(os.path.join(root, '..')) )   %}
-    {% if maybe_dir.is_dir() and keep_here %}
+    {% if maybe_dir.is_dir() and keep_here and os.path.basename(root)!=maybe_dir.name %}
     - {{ os.path.abspath(os.path.join(maybe_dir, "wbin")) }}
     {% endif %}
     {% endfor %}

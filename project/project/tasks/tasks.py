@@ -23,7 +23,6 @@ coll.collections['work-dir'].add_collection(Collection('info'))
 config = yaml.safe_load((project_root_dir / 'project' / 'config.yml').open())
 
 
-
 @task
 def create_project_wrappers(ctx, ):
     """
@@ -40,9 +39,8 @@ def set_git_hooks(ctx):
     """
     def inform_hookfile(hf):
         #https://github.com/pre-commit/pre-commit/issues/1329
-        get_exe_py = f"from shutil import which; print(which(\'project-python\'))"
-        exe_pth = ctx.run(f"{work.WorkDir('project').dir/'wbin'/'run-in'} python -c \"{get_exe_py}\"", hide='out').stdout.replace('\n', '')
-        if exe_pth=='None': raise Exception(f'{exe_name} exe not found')
+        from shutil import which
+        exe_pth = work.WorkDir('project').dir / 'wbin' / Path(which('project-python')).name
         uninformed_line = "INSTALL_PYTHON ="
         informed_line = f"INSTALL_PYTHON = \"{Path(exe_pth)}\""
         informed_line = informed_line.encode('unicode-escape').decode() + "\n"
@@ -155,19 +153,19 @@ def get_cur_work_dir_help():
     return f"Work directory."+cd
 
 
-def _get_workdir_deps(ctx, WD):
-    return [wdn for wdn in ctx.run(f"deps -p {WD.dir}", hide='out').stdout.split('\n') if wdn]
+def _get_workdir_deps(ctx, WD, reversed=True):
+    return [wdn for wdn in ctx.run(f"deps -p {WD.dir} {'--deps-reversed' if reversed else ''}", hide='out').stdout.split('\n') if wdn]
 
 
 @task(help={'work-dir':get_cur_work_dir_help()})
-def work_dir_work_dir_deps(ctx, work_dir=cur_work_dir):
+def work_dir_work_dir_deps(ctx, work_dir=cur_work_dir, reversed=True):
     """
     lists work dir dependencies of work dir
     """
     if work_dir not in (wd.name for wd in work.find_WorkDirs()):
         print('work dir not found')
         exit(1)
-    for wdn in _get_workdir_deps(ctx, work.WorkDir(work_dir)):
+    for wdn in _get_workdir_deps(ctx, work.WorkDir(work_dir), reversed=reversed):
         print(wdn)
 coll.collections['work-dir'].collections['info'].add_task(work_dir_work_dir_deps)
 
@@ -294,7 +292,6 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
     exe_name = exe_pth.stem
 
     def create_wrapper(exe_pth, test=True): # TODO rename exp_pth > exe_pth_or_name
-        if '_project-run-in' in str(exe_pth): breakpoint()
         exe_pth = Path(exe_pth)
         exe_name = exe_pth.stem
         exe_prefix_switch = f"-b {exe_pth.parent}" if exe_pth.parent.parts else ''
@@ -360,48 +357,40 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
     assert(sdir.exists())
     (sdir / 'bin').mkdir(exist_ok=True)
 
-    def make_cmd_script(cmds):
+    def make_cmd_script(cmds, type, iargs=1):
         # assuming simple case: just lines of cmds
         if isinstance(cmds, str):
             cmds = [cmds]
         cmds = [cmd.strip() for cmd in cmds]
         lines = []
         al = lambda ln: lines.append(ln)
-        #https://stackoverflow.com/questions/17510688/single-script-to-run-in-both-windows-batch-and-linux-bash/17623721#17623721
-        al('echo >/dev/null # >nul & GOTO WINDOWS & rem ^')
-        # ***********************************************************
-        # * NOTE: If you modify this content, be sure to remove carriage returns (\r)
-        # *       from the Linux part and leave them in together with the line feeds
-        # *       (\n) for the Windows part. In summary:
-        # *           New lines in Linux: \n
-        # *           New lines in Windows: \r\n
-        # ***********************************************************
-        # Do Linux Bash commands here... for example:
-        #StartDir="$(pwd)"
-        # Then, when all Linux commands are complete, end the script with 'exit'...
-        al('set -e')
-        for i, cmd in enumerate(cmds):
-            if not cmd.replace(' ', ''): continue
-            if i == 0:
-                # pass args to 1st cmd
-                al(f"{cmd} \"$@\"")
-            else:
-                al(cmd)
-        al('exit 0')
-        al('- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -')
-        al(':WINDOWS')
-        #'REM Do Windows CMD commands here... for example:
-        #SET StartDir=%cd%
-        cmds_line = ""
-        for i, cmd in enumerate(cmds):
-            if not cmd.replace(' ', ''): continue
-            if i == 0:
-                # pass args to 1st cmd
-                cmds_line += f"{cmd} %* && "
-            else:
-                cmds_line += f"{cmd} && "
-        al(cmds_line.strip('&&').strip('&& ')) # rem trailing &&
-        #REM Then, when all Windows commands are complete... the script is done.
+
+        if type=='bat':
+            al('@echo off')
+            for i, cmd in enumerate(cmds):
+                if not cmd.replace(' ', ''): continue
+                if i == iargs:
+                    # pass args to 1st cmd
+                    al(f"call {cmd} %* || goto :error")
+                else:
+                    al(f"{cmd} || goto: error")
+            al("goto :EOF")
+            al(":error")
+            al(r"exit /b %errorlevel%")
+        
+        elif type=='sh':
+            al('set -e')
+            for i, cmd in enumerate(cmds):
+                if not cmd.replace(' ', ''): continue
+                if i == iargs:
+                    # pass args to 1st cmd
+                    al(f"{cmd} \"$@\"")
+                else:
+                    al(cmd)
+        
+        else:
+            raise NotImplementedError(f"{type}")
+
         return tuple(lines)
 
     def chmod_px(pth):
@@ -409,12 +398,8 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         return pth.chmod(pth.stat().st_mode | stat.S_IEXEC)
 
     def write_sbin(sbin, lines):
-        lines = make_cmd_script(lines)
         lines = [ln.strip()+'\n' for  ln in lines]
-        if sbin.suffix == '.sh':
-            open(sbin, 'w', newline='\n').writelines(lines)
-        else:
-            open(sbin, 'w', ).writelines(lines)
+        open(sbin, 'w', ).writelines(lines)
         chmod_px(sbin)
 
     # .r, .sh, .py, .bat., .
@@ -426,43 +411,53 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
         sbin_sh =  sdir / 'bin' / f"{name}.sh"
         sbin_cmd =  sdir / 'bin' / f"{name}.cmd"
         sbin_name = sdir / 'bin' / name
-        sbins = (sbin_bat, sbin_name) # (win, linux)
+        from platform import system as platform
+        platform = platform().lower()
+        if 'windows' in platform:
+            sbin = sbin_bat
+        else:
+            sbin = sbin_name
 
         lines = open(script_pth).readlines()
+        
         if ext == 'cmdlines':
-            for sbin in sbins: write_sbin(
-                sbin,
-                # TODO:     get these from workdir env os.getenv. defined in environment.devenv.template.yml
-                #[f"cd {wd.dir}"]+
-                [
+            lines = ["cd ${WORK_DIR_PATH}"]+lines
+            lines = [
                      ln.replace("${WORK_DIR}",      str(wd.name))
                        .replace("${WORKDIR}",       str(wd.name))
                        .replace("${WORK_DIR_PATH}", str(wd.dir ))
                        .replace("${WORKDIR_PATH}",  str(wd.dir ))
                        .replace("${PROJECT_ROOT}",  str(project_root_dir   ))
                        .replace("${PROJECTROOT}",   str(project_root_dir   ))
+                       # TODO:     get these from workdir env os.getenv. defined in environment.devenv.template.yml
                 for ln in lines
                 if not ln.startswith('#')
                 ]
-                )
-            wpths = create_exec_wrapper(ctx, sbin_name,  work_dir=work_dir, test=True)
+            if sbin == sbin_bat:
+                lines = make_cmd_script(lines, 'bat')
+            else:
+                lines = make_cmd_script(lines, 'sh')
+            write_sbin(sbin, lines)
+            wpths = create_exec_wrapper(ctx, sbin,  work_dir=work_dir, test=True)
 
         elif ext == 'py':
             # prep
             lines = [f"python {script_pth.absolute()}"]
-            for sbin in sbins: write_sbin(sbin, lines)
-            wpths = create_exec_wrapper(ctx, sbin_name, work_dir=work_dir, test=True)
+            write_sbin(sbin, lines)
+            wpths = create_exec_wrapper(ctx, sbin, work_dir=work_dir, test=True)
 
         elif ext == 'bat':
             write_sbin(sbin_bat, lines)
             wpths = create_exec_wrapper(ctx, sbin_bat, work_dir=work_dir, test=True)
-            print('not recommended to create just .bat script. include corresponding .sh script.')
+            print('make sure to include corresponding .sh script.')
+
         elif ext == 'sh':
             write_sbin(sbin_name, lines)
             wpths = create_exec_wrapper(ctx, sbin_name, work_dir=work_dir, test=True)
-            print('not recommended to create just .sh script. include corresponding .bat script.')
+            print('make sure to include corresponding .bat script.')
+        
         else:
-            print(f'{script_pth} not processed.')
+            print(f'{script_pth} processing not implemented.')
 coll.collections['work-dir'].collections['action'].add_task(create_scripts_wrappers)
 
 
@@ -492,7 +487,7 @@ def _get_setup_names(wd):
         },
     #iterable = ['setup_list']
 )
-def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workdir=False):
+def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workdir=False, reversed=True):
     """
     execute setup tasks for the workdir
     """
@@ -500,7 +495,7 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workd
     wd = work.WorkDir(work_dir)
     import os
     # have to render the devenv first
-    dep_work_dirs = _get_workdir_deps(ctx, wd)
+    dep_work_dirs = _get_workdir_deps(ctx, wd, reversed=reversed)
     assert(dep_work_dirs) # should have at least project
     done = []
     for dwd in dep_work_dirs:
@@ -531,10 +526,10 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workd
             with ctx.cd(str(dWD.dir)):
                 if prompt:
                     if input(f"execute {asetup} for ({dWD.name})? [enter y for yes] ").lower().strip() == 'y':
-                        assert(ctx.run(f"{dWD.name}-{asetup}", echo=True).ok)
+                        assert(ctx.run(f"{dWD.dir / 'wbin' / asetup}", echo=True).ok)
                 else:
                     # asserts may not be needed b/c warn=False
-                    assert(    ctx.run(f"{dWD.name}-{asetup}", echo=True).ok)
+                    assert(    ctx.run(f"{dWD.dir / 'wbin' / asetup}", echo=True).ok)
         done.append(dWD.name)
     #ctx.run(f"conda run --cwd {wd.dir} -n {wd.env name} conda devenv", echo=True) # pyt=True does't work on windows
 coll.collections['work-dir'].collections['setup'].add_task(run_setup_tasks)
@@ -730,6 +725,8 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
     (ignore. internal task.) git commit hook for workdir tag
     Uses takes the first dir part to prepend
     """
+    commit_msg_file = project_root_dir / COMMIT_MSG_FILE
+    assert(commit_msg_file.exists())
     from re import match
     import git
     repo = git.Repo(project_root_dir)
@@ -756,13 +753,13 @@ def prepare_commit_msg_hook(ctx,  COMMIT_MSG_FILE): # could not use work_dir
 
     if work_dirs:
         tags = ""
-        message = open(COMMIT_MSG_FILE, 'r').read()
+        message = open(commit_msg_file, 'r').read()
         existing_tags = find_tags(message)
         for wd in work_dirs:
             if wd not in existing_tags:
                 tags += f"[{wd}]"
         message = f"{tags} " + message
-        cmf = open(COMMIT_MSG_FILE, 'w')
+        cmf = open(commit_msg_file, 'w')
         cmf.write(message)
         cmf.close()
 coll.collections['project'].collections['_git'].add_task(prepare_commit_msg_hook)
