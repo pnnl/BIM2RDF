@@ -65,5 +65,7 @@ environment:
   PROJECTROOT:  '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_ROOT: '{{ os.path.abspath(os.path.join(root, '..')) }}' # [keep_here]
   PROJECT_NAME: '{{project_name}}'                                # [keep_here]
-
+  # ...plus, cant merge this key in a env that includes it
+  MODE: local-dev  # vs. prod                                     # [keep_here]
+  
 
