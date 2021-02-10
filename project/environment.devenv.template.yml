@@ -23,9 +23,7 @@ name: {{project_name}}-{{os.path.basename(root)}}
 
 # just fill out this stuff here
 {% if dev_req %}
-  {{append_workdir_name('project',     included_workdir_pths)}}  # almost needed
-  {{append_workdir_name('dvc',         included_workdir_pths)}}  # highly recommended
-  {{append_workdir_name('notebooking', included_workdir_pths)}}  # optional
+  ## append_workdir_name('project',     included_workdir_pths)}}  # almost needed
 {% endif %}
 # ...and here
 {% if run_req %}
