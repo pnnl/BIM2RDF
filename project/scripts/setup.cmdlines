@@ -1,1 +1,2 @@
-inv project.setup
+cd ${WORKDIR_PATH}
+inv -r ${WORKDIR_PATH} project.setup ${*}

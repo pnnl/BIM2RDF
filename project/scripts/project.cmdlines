@@ -1,1 +1,2 @@
-invoke -r ${WORK_DIR_PATH}
+cd ${WORK_DIR_PATH}
+invoke -r ${WORK_DIR_PATH} ${*}
