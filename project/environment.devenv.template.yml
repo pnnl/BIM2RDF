@@ -21,21 +21,21 @@ name: {{project_name}}-{{os.path.basename(root)}}
       {{append_workdir_name(os.path.basename(maybe_workdir), all_workdir_pths)}}
 {% endfor %}
 
-
+# just fill out this stuff here
 {% if dev_req %}
   {{append_workdir_name('project',     included_workdir_pths)}}  # almost needed
   {{append_workdir_name('dvc',         included_workdir_pths)}}  # highly recommended
   {{append_workdir_name('notebooking', included_workdir_pths)}}  # optional
 {% endif %}
-
+# ...and here
 {% if run_req %}
   ## append_workdir_name(aworkdir, included_workdir_pths)}} 
 {% endif %}
 
 
-{% if included_workdirs %}
+{% if included_workdir_pths %}
 includes:
-  {% for included in included_workdirs %}
+  {% for included in included_workdir_pths %}
   - {{(os.path.join(included, 'environment.devenv.yml'))}}
   {% endfor %}
 {% endif %}
@@ -46,35 +46,35 @@ channels:
 dependencies: []
   # fill out your deps.
   # if no dep is installed conda will not list the created env.
+  # ValueError: Couldn't find directory of environment 'ds-template-test'
   #- sometestframework         # [dev_req]
   #- some analysis library     # [run_req]
 
 environment:
-  # probably want to append to PATH and PYTHONPATH in your env
-  # see wrapped exec note in project/environment.devenv.yml
   PATH:
-    - {{root}}
-    # self unwrapped bins before others
-    - {{os.path.join(root, 'scripts', 'bin')}}
-
     #adds all wrapped executables to path. NOT RECOMMENDED. exception for 'project' env
-    {% if False %}
+    {% set path_allworkdirs=False %}
+    {% if path_allworkdirs %}
     {% for workdir_pth in all_workdir_pths  %}
     {% if  keep_here and os.path.basename(root)!=os.path.basename(workdir_pth) %}
-    - {{ os.path.join(workdir_pth, "wbin") }}
+    - {{ os.path.join(workdir_pth, "wbin") }}                     # [keep_here]
     {% endif %}
     {% endfor %}
     {% endif %}
-
     # adds included workdir wrapped execs
     {% for workdir_pth in included_workdir_pths %}
     # ...but dont add self
     {% if os.path.basename(root)!=os.path.basename(workdir_pth) 
-      and  (workdir_pth not in all_workdir_pths)
+      and (workdir_pth not in all_workdir_pths if path_allworkdirs else True)
     %}
     - {{os.path.join(workdir_pth, "wbin")}}
     {% endif %}
     {% endfor %}
+    # append self dirs *after*
+    # self unwrapped bins before others
+    - {{os.path.join(root, 'scripts', 'bin')}}                    # [keep_here]
+    # probably want to append to PATH and PYTHONPATH in your env
+    - {{root}}
   PYTHONPATH:
     - {{root}}
   # don't define the following in envs that include this
