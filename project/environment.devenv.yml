@@ -64,7 +64,7 @@ environment:
   GIT_PYTHON_REFRESH: quiet   # windows problem https://github.com/gitpython-developers/GitPython/issues/816
   PATH:
     #adds all wrapped executables to path. NOT RECOMMENDED. exception for 'project' env
-    {% set path_allworkdirs=False %}
+    {% set path_allworkdirs=True %}
     {% if path_allworkdirs %}
     {% for workdir_pth in all_workdir_pths  %}
     {% if  keep_here and os.path.basename(root)!=os.path.basename(workdir_pth) %}
