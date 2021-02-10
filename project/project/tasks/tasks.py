@@ -153,12 +153,12 @@ def get_cur_work_dir_help():
     return f"Work directory."+cd
 
 
-def _get_workdir_deps(ctx, WD, reversed=True):
+def _get_workdir_deps(ctx, WD, reversed=False):
     return [wdn for wdn in ctx.run(f"deps -p {WD.dir} {'--deps-reversed' if reversed else ''}", hide='out').stdout.split('\n') if wdn]
 
 
 @task(help={'work-dir':get_cur_work_dir_help()})
-def work_dir_work_dir_deps(ctx, work_dir=cur_work_dir, reversed=True):
+def work_dir_work_dir_deps(ctx, work_dir=cur_work_dir, reversed=False):
     """
     lists work dir dependencies of work dir
     """
@@ -357,7 +357,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
     assert(sdir.exists())
     (sdir / 'bin').mkdir(exist_ok=True)
 
-    def make_cmd_script(cmds, type, iargs=1):
+    def _make_cmd_lines(cmds, type, ):
         # assuming simple case: just lines of cmds
         if isinstance(cmds, str):
             cmds = [cmds]
@@ -369,11 +369,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             al('@echo off')
             for i, cmd in enumerate(cmds):
                 if not cmd.replace(' ', ''): continue
-                if i == iargs:
-                    # pass args to 1st cmd
-                    al(f"call {cmd} %* || goto :error")
-                else:
-                    al(f"{cmd} || goto: error")
+                al(f"{cmd} || goto: error")
             al("goto :EOF")
             al(":error")
             al(r"exit /b %errorlevel%")
@@ -382,47 +378,39 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             al('set -e')
             for i, cmd in enumerate(cmds):
                 if not cmd.replace(' ', ''): continue
-                if i == iargs:
-                    # pass args to 1st cmd
-                    al(f"{cmd} \"$@\"")
-                else:
-                    al(cmd)
+                # pass args to 1st cmd
+                al(f"{cmd}")
         
         else:
             raise NotImplementedError(f"{type}")
 
         return tuple(lines)
 
-    def chmod_px(pth):
-        import stat
-        return pth.chmod(pth.stat().st_mode | stat.S_IEXEC)
+    def replace_args(ln, tgt): # copypaste to test
+        from re import findall, match
+        digits = "[0-9]+"
+        argpattern = f"(\${{{digits}}})"
+        for m in findall(argpattern, ln):
+            i = int(match( f"\${{({digits})}}" , m).groups()[0])
+            if tgt=='bat':
+                ln = ln.replace(m,  f"%{i}")
+            else:
+                assert(tgt=='sh')
+                ln = ln.replace(m,  f"${i}")
+        argpattern = "\${\*}"
+        m = findall(argpattern, ln)
+        if m:
+            assert(len(m)==1)
+            m = m[0]
+            if tgt=='bat':
+                ln = ln.replace(m, r"%*")
+            else:
+                assert(tgt=='sh')
+                ln = ln.replace(m, "$@")
+        return ln
 
-    def write_sbin(sbin, lines):
-        lines = [ln.strip()+'\n' for  ln in lines]
-        open(sbin, 'w', ).writelines(lines)
-        chmod_px(sbin)
-
-    # .r, .sh, .py, .bat., .
-    for script_pth in sdir.glob('*'):
-        if script_pth.is_dir(): continue
-        name = script_pth.stem
-        ext = script_pth.suffix[1:] if script_pth.suffix else None
-        sbin_bat = sdir / 'bin' / f"{name}.bat"
-        sbin_sh =  sdir / 'bin' / f"{name}.sh"
-        sbin_cmd =  sdir / 'bin' / f"{name}.cmd"
-        sbin_name = sdir / 'bin' / name
-        from platform import system as platform
-        platform = platform().lower()
-        if 'windows' in platform:
-            sbin = sbin_bat
-        else:
-            sbin = sbin_name
-
-        lines = open(script_pth).readlines()
-        
-        if ext == 'cmdlines':
-            lines = ["cd ${WORK_DIR_PATH}"]+lines
-            lines = [
+    def subs_envvars(lines):
+        lines = [
                      ln.replace("${WORK_DIR}",      str(wd.name))
                        .replace("${WORKDIR}",       str(wd.name))
                        .replace("${WORK_DIR_PATH}", str(wd.dir ))
@@ -433,27 +421,75 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
                 for ln in lines
                 if not ln.startswith('#')
                 ]
+        return lines
+
+    def process_cmdlines(cmds, type):
+        cmds = subs_envvars(cmds)
+        cmds = [replace_args(ln, type) for ln in cmds]
+        cmds = _make_cmd_lines(cmds, type)
+        return cmds
+
+
+    def chmod_px(pth):
+        import stat
+        return pth.chmod(pth.stat().st_mode | stat.S_IEXEC)
+
+    def write_sbin(sbin, lines):
+        lines = [ln.strip()+'\n' for  ln in lines]
+        open(sbin, 'w', ).writelines(lines)
+        chmod_px(sbin)
+        return sbin
+    def write_nsbin(sbin, lines):
+        sbin0 = sbin; del sbin
+        sbin0 = write_sbin(sbin0, lines)
+        sbin1 = sbin0.with_name(f"self-{sbin0.name}")
+        sbin1 = write_sbin(sbin1, lines)
+        return (sbin0, sbin1)
+
+    # .r, .sh, .py, .bat., .
+    for script_pth in sdir.glob('*'):
+        if script_pth.is_dir(): continue
+        name = script_pth.stem
+        ext = script_pth.suffix[1:] if script_pth.suffix else None
+        sbin_bat =  sdir / 'bin' / f"{name}.bat"
+        sbin_sh =   sdir / 'bin' / f"{name}.sh"
+        sbin_cmd =  sdir / 'bin' / f"{name}.cmd"
+        sbin_name = sdir / 'bin' / name
+        from platform import system as platform
+        platform = platform().lower()
+        if 'windows' in platform:
+            sbin = sbin_bat
+        else:
+            sbin = sbin_name
+
+        def create_wrappers(sbin, lines):
+            for _sbin in write_nsbin(sbin, lines):
+                wpths = create_exec_wrapper(ctx, _sbin,  work_dir=work_dir, test=True)
+        def create_cmdlines_wrappers(sbin, lines):
             if sbin == sbin_bat:
-                lines = make_cmd_script(lines, 'bat')
+                lines = process_cmdlines(lines, 'bat')
             else:
-                lines = make_cmd_script(lines, 'sh')
-            write_sbin(sbin, lines)
-            wpths = create_exec_wrapper(ctx, sbin,  work_dir=work_dir, test=True)
+                lines = process_cmdlines(lines, 'sh')
+            create_wrappers(sbin, lines)
+        
+        if ext == 'cmdlines':
+            lines = open(script_pth).readlines()
+            #lines = ["cd ${WORK_DIR_PATH}"]+lines
+            create_cmdlines_wrappers(sbin, lines)
 
         elif ext == 'py':
             # prep
-            lines = [f"python {script_pth.absolute()}"]
-            write_sbin(sbin, lines)
-            wpths = create_exec_wrapper(ctx, sbin, work_dir=work_dir, test=True)
+            lines = ["cd ${WORK_DIR_PATH}", f"python {script_pth.absolute()} ${{*}}",]
+            create_cmdlines_wrappers(sbin, lines)
 
         elif ext == 'bat':
-            write_sbin(sbin_bat, lines)
-            wpths = create_exec_wrapper(ctx, sbin_bat, work_dir=work_dir, test=True)
+            lines = ["cd ${WORK_DIR_PATH}", f"{script_pth.absolute()} ${{*}}",]
+            create_cmdlines_wrappers(sbin, lines)
             print('make sure to include corresponding .sh script.')
 
         elif ext == 'sh':
-            write_sbin(sbin_name, lines)
-            wpths = create_exec_wrapper(ctx, sbin_name, work_dir=work_dir, test=True)
+            lines = ["cd ${WORK_DIR_PATH}", f"sh {script_pth.absolute()} ${{*}}",]
+            create_cmdlines_wrappers(sbin, lines)
             print('make sure to include corresponding .bat script.')
         
         else:
@@ -487,7 +523,7 @@ def _get_setup_names(wd):
         },
     #iterable = ['setup_list']
 )
-def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workdir=False, reversed=True):
+def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workdir=False, reversed=False):
     """
     execute setup tasks for the workdir
     """
