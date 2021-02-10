@@ -463,8 +463,10 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             sbin = sbin_name
 
         def create_wrappers(sbin, lines):
-            for _sbin in write_nsbin(sbin, lines):
-                wpths = create_exec_wrapper(ctx, _sbin,  work_dir=work_dir, test=True)
+            sbins = write_nsbin(sbin, lines)
+            sbin = sbins[0]
+            assert('self-' not in str(sbin))
+            wpths = create_exec_wrapper(ctx, sbin,  work_dir=work_dir, test=True)
         def create_cmdlines_wrappers(sbin, lines):
             if sbin == sbin_bat:
                 lines = process_cmdlines(lines, 'bat')
