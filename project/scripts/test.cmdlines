@@ -1,5 +1,0 @@
-echo "one"
-echo ${1}
-echo "two"
-echo ${2}
-echo ${*}
