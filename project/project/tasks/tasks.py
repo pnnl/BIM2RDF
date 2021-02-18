@@ -377,6 +377,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             al('endlocal')
         
         elif type=='sh':
+            al("#!/bin/sh")
             al('set -e')
             for i, cmd in enumerate(cmds):
                 if not cmd.replace(' ', ''): continue
