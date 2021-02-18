@@ -51,14 +51,14 @@ dependencies: []
 environment:
   PATH:
     #adds all wrapped executables to path. NOT RECOMMENDED. exception for 'project' env
-    {% set path_allworkdirs=False %}
-    {% if path_allworkdirs %}
-    {% for workdir_pth in all_workdir_pths  %}
-    {% if  keep_here and os.path.basename(root)!=os.path.basename(workdir_pth) %}
-    - {{ os.path.join(workdir_pth, "wbin") }}                     # [keep_here]
-    {% endif %}
-    {% endfor %}
-    {% endif %}
+    # {% set path_allworkdirs=False %}
+    # {% if path_allworkdirs %}
+    # {% for workdir_pth in all_workdir_pths  %}
+    # {% if  keep_here and os.path.basename(root)!=os.path.basename(workdir_pth) %}
+    # - {{ os.path.join(workdir_pth, "wbin") }}                     # [keep_here]
+    # {% endif %}
+    # {% endfor %}
+    # {% endif %}
     # adds included workdir wrapped execs
     {% for workdir_pth in included_workdir_pths %}
     # ...but dont add self
