@@ -21,16 +21,6 @@ name: {{project_name}}-{{os.path.basename(root)}}
       {{append_workdir_name(os.path.basename(maybe_workdir), all_workdir_pths)}}
 {% endfor %}
 
-# just fill out this stuff here
-{% if dev_req %}
-  {{append_workdir_name('project',     included_workdir_pths)}}  # almost needed
-  {{append_workdir_name('dvc',         included_workdir_pths)}}  # highly recommended
-  {{append_workdir_name('notebooking', included_workdir_pths)}}  # optional
-{% endif %}
-# ...and here
-{% if run_req %}
-  ## append_workdir_name(aworkdir, included_workdir_pths)}} 
-{% endif %}
 
 
 {% if included_workdir_pths %}
