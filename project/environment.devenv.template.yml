@@ -50,6 +50,11 @@ dependencies: []
 
 environment:
   PATH:
+    # prioritize self paths (before others)
+    # probably want to append to PATH and PYTHONPATH in your env
+    - {{root}}
+    - {{os.path.join(root, 'scripts', 'bin')}}                    # [keep_here]
+
     #adds all wrapped executables to path. NOT RECOMMENDED. exception for 'project' env
     # {% set path_allworkdirs=False %}
     # {% if path_allworkdirs %}
@@ -68,11 +73,6 @@ environment:
     - {{os.path.join(workdir_pth, "wbin")}}
     {% endif %}
     {% endfor %}
-    # append self dirs *after*
-    # self unwrapped bins before others
-    - {{os.path.join(root, 'scripts', 'bin')}}                    # [keep_here]
-    # probably want to append to PATH and PYTHONPATH in your env
-    - {{root}}
   PYTHONPATH:
     - {{root}}
   # don't define the following in envs that include this
