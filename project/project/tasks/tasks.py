@@ -370,7 +370,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             al('setlocal')
             for i, cmd in enumerate(cmds):
                 if not cmd.replace(' ', ''): continue
-                al(f"{cmd} || goto: error")
+                al(f"call {cmd} || goto: error")
             al("goto :EOF")
             al(":error")
             al(r"exit /b %errorlevel%")
