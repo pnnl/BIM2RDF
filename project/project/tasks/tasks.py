@@ -371,7 +371,7 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             for i, cmd in enumerate(cmds):
                 if not cmd.replace(' ', ''): continue
                 al(f"call {cmd} || goto:error")
-            al("goto :EOF")
+            al("goto:EOF")
             al(":error")
             al(r"exit /b %errorlevel%")
             al('endlocal')
