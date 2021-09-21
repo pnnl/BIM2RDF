@@ -565,12 +565,18 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workd
         dWD = work.WorkDir(dwd)
         for asetup in  _get_setup_names(dWD):
             with ctx.cd(str(dWD.dir)):
+                if dWD.name != 'project':
+                    setup_cmd = f"{dWD.dir / 'wbin' / asetup}"
+                else:
+                    # as an exception, use unwrapped exec when dealing with the 'project' env
+                    # might create a problem if this program is executed from a wrapper
+                    setup_cmd = f"{dWD.dir / 'scripts' / 'bin' / asetup}"
                 if prompt:
                     if input(f"execute {asetup} for ({dWD.name})? [enter y for yes] ").lower().strip() == 'y':
-                        assert(ctx.run(f"{dWD.dir / 'wbin' / asetup}", echo=True).ok)
+                        assert(ctx.run(setup_cmd, echo=True).ok)
                 else:
                     # asserts may not be needed b/c warn=False
-                    assert(    ctx.run(f"{dWD.dir / 'wbin' / asetup}", echo=True).ok)
+                    assert(    ctx.run(setup_cmd, echo=True).ok)
         done.append(dWD.name)
     #ctx.run(f"conda run --cwd {wd.dir} -n {wd.env name} conda devenv", echo=True) # pyt=True does't work on windows
 coll.collections['work-dir'].collections['setup'].add_task(run_setup_tasks)
