@@ -674,6 +674,17 @@ coll.collections['work-dir'].collections['action'].add_task(work_on)
 coll.add_task(work_on)
 
 
+@task
+def work_on_deps_on(ctx, work_dir):
+    """set up workdirs that depend on a workdir. """
+    deps = set()
+    for wd in work.find_WorkDirs():
+        wdd = _get_workdir_deps(ctx, wd,)
+        if work_dir in wdd: deps.add(wd.name)
+    for wdn in deps:
+        work_on(ctx, wdn, skip_project_workdir=True)
+coll.collections['work-dir'].collections['action'].add_task(work_on_deps_on)
+coll.add_task(work_on_deps_on)
 
 
 # TODO: recreate is this followed by a workon
