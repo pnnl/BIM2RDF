@@ -507,12 +507,106 @@ def make_devenv(ctx, work_dir=cur_work_dir):
     """
     Create conda development environment.
     """
+    # my mamba use issue https://github.com/ESSS/conda-devenv/issues/109
     assert(work_dir)
     wd = work.WorkDir(work_dir)
     # asserts maybe aren't necessary b/c warn=False default
     # idk why this failure didnt exit nonzero!!
+    import os
+    import pathlib
+    prefix = pathlib.Path(os.environ['CONDA_PREFIX']).parent / wd.devenv_name
+    def delete_condadevenvactivation(): 
+        p = prefix / 'etc' / 'conda' 
+        _ = p / 'activate.d' 
+        _ = list(_.glob('devenv-vars*'))
+        if _: _[0].unlink(); 
+        _ = p / 'deactivate.d' 
+        _ = list(_.glob('devenv-vars*'))
+        if _: _[0].unlink()
+    #delete_condadevenvactivation()
+
     with ctx.cd(str(wd.dir)):
-        ctx.run("conda devenv", echo=True)
+        print('The devenv is:')
+        devenv = ctx.run("conda devenv --print-full", echo=False).stdout
+        try:
+            import yaml
+            devenv = yaml.safe_load(devenv)
+            en =    devenv['name']
+            from subprocess import run as sprun
+            existing_envs = sprun('conda env list --json', shell=True, text=True, capture_output=True)
+            import json
+            existing_envs = json.loads(existing_envs.stdout)['envs']
+            import pathlib
+            #existing_envs = frozenset(pathlib.Path(e).name for e in existing_envs)
+            #if en not in existing_envs:
+            _ = wd.dir / '_.devenv.yml' # https://github.com/ESSS/conda-devenv/issues/90
+            with open(_, 'w') as f: yaml.dump(
+                {
+                'channels': devenv['channels'],
+                'name': en,
+                'dependencies': ['curl'], # 'stub' dep just to create the env
+                'environment': devenv['environment'], # conda has 'variables' instead of environment
+                 }, f) 
+            ctx.run(f"conda devenv  --file {_}", echo=True) # --file doesnt work. this or conda create new if it doesnt exist
+            _.unlink()
+
+            if 'channels' in devenv:
+                channels =  devenv['channels']
+                channelss = '-c ' + ' -c '.join(channels)
+            else:
+                channelss = ''
+
+            deps =  devenv['dependencies']
+            depss = ' '.join(d.replace(' ', '') for d in deps if isinstance(d, str)) #for pip:installable
+            ctx.run(f"mamba install --yes --name {en} {channelss} {depss}", echo=True)
+            
+            # https://github.com/ESSS/conda-devenv/issues/126
+            # need updated exec-wrapper, and disable conda devenv activation
+            # envs =  devenv['environment']
+            # import pathlib
+            # for k in envs: # env vars
+            #     v = envs[k]
+            #     if isinstance(v, str):
+            #         envs[k] = v
+            #     else: # env var has parts
+            #         assert(isinstance(v, list))
+            #         import pathlib as pl
+            #         def_parts = [str(pl.Path(v)) if pl.Path(v).exists() else v for v in v]
+            #         from sys import platform
+            #         from os import pathsep
+            #         existing_parts = sprun(f"conda run -n {en} python -c \"import os; print(os.environ.get('{k}'))\"", shell=True, text=True, capture_output=True).stdout
+            #         existing_parts = '' if existing_parts.strip() == 'None' else existing_parts
+            #         existing_parts = [str(pl.Path(p)) if pl.Path(p).exists() else p for p in existing_parts.split(pathsep) ]
+            #         if k == 'PATH':
+            #             conda_paths = [prefix] + [prefix /p for p in ['Library/usr/bin', 'Library/bin', 'Scripts', 'bin'] ]
+            #         else:
+            #             conda_paths = []
+            #         # need an ordered set
+            #         from collections import OrderedDict
+            #         _ = OrderedDict.fromkeys(def_parts+conda_paths+existing_parts)
+            #         envs[k] = pathsep.join(str(p).strip() for p in _); del _
+            # envss = (f"{k}=\"{v}\"" for k,v in envs.items())
+            # envss = ' '.join(envss)
+            # ctx.run(f"conda env config vars set {envss} --name {en}", echo=True)
+            # idk why this doesnt work ^^^^ but below is probably safer but slow
+            #for k,v in envs.items():
+            #    ctx.run(f"conda env config vars set {k}=\"{v}\" --name {en}", echo=True)
+            #del k,v
+
+
+            other_deps = []
+            for d in deps:
+                if not isinstance(d, str):
+                    other_deps.append(d)
+            return other_deps
+                     
+        except:
+            #raise Exception('sort of error. must mamba.')
+            print('sort of error. didnt mamba.')
+            # for the remaining stuff even if mamba installed
+            ctx.run("conda devenv", echo=True)
+            return []
+
     #assert(ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True).stdout) # pyt=True does't work on windows
     #assert('command failed' not in ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True).stdout) # pyt=True does't work on windows
 coll.collections['work-dir'].collections['setup'].add_task(make_devenv)
@@ -547,9 +641,9 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workd
         # 1. make the dev env
         if prompt:
             if input(f"create ({dwd}) env? [enter y for yes] ").lower().strip() == 'y':
-                make_devenv(ctx, work_dir=dwd)
+               other_deps = make_devenv(ctx, work_dir=dwd)
         else:
-            make_devenv(    ctx, work_dir=dwd)
+            other_deps = make_devenv(    ctx, work_dir=dwd)
 
         # 2. make script wrappers
         create_exec_wrapper(    ctx, '_stub', work_dir=dwd)
@@ -561,8 +655,34 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workd
         else:
             make_wrappers()
 
-        # 3. exec setups
+        # 3. install 'other deps'
         dWD = work.WorkDir(dwd)
+        def iod(other_deps):
+            if dWD.name != 'project':
+                dep_pre = f"{dWD.dir / 'wbin' / 'run-in' }"
+            else:
+                # as an exception, use unwrapped exec when dealing with the 'project' env
+                # might create a problem if this program is executed from a wrapper
+                dep_pre = f"{dWD.dir / 'scripts' / 'bin' / 'run-in'}"
+            
+            with ctx.cd(str(wd.dir)):
+                for od in other_deps:
+                    assert(isinstance(od, dict))
+                    assert(len(od) == 1) # just one 'key' into other 'deps'
+                    installer = list(od.keys())[0]
+                    pkgs = od[installer]
+                    # why does conda devnv mess with this??
+                    pkgs = [p.replace(' ', '') for p in pkgs]
+                    if installer == 'pip':
+                        # use conda run or wrapper?
+                        #ctx.run(f"conda run --live-stream --name {dWD.env_name} ... ", echo=True)
+                        #                idk  pip on its own doesnt work
+                        ctx.run(f"{dep_pre} python -m {installer} install {' '.join(pkgs)}", echo=True)
+                    else:
+                        raise Exception("unrecognized 'other dep'")
+        iod(other_deps)
+
+        # 4. exec setups
         for asetup in  _get_setup_names(dWD):
             with ctx.cd(str(dWD.dir)):
                 if dWD.name != 'project':
