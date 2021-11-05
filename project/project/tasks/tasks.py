@@ -549,6 +549,7 @@ def make_devenv(ctx, work_dir=cur_work_dir):
                  }, f) 
             ctx.run(f"conda devenv  --file {_}", echo=True) # --file doesnt work. this or conda create new if it doesnt exist
             _.unlink()
+            (wd.dir / '_.yml' ).unlink()
 
             if 'channels' in devenv:
                 channels =  devenv['channels']
