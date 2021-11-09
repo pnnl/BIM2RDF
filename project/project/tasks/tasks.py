@@ -713,6 +713,31 @@ def _change_dir(wd):
 
 # TODO create recreate env task
 
+@task
+def run(ctx, work_dir=cur_work_dir,
+        glob='run*', exclude_glob=None,
+        skip_setup=True,
+        dry_run=False):
+    """runs run script"""
+    if not skip_setup: work_on(ctx, work_dir)
+    
+    from subprocess import Popen
+    wd = work.WorkDir(work_dir)
+    deps = (work.WorkDir(_) for _ in _get_workdir_deps(ctx, wd, reversed=False))
+    deps = frozenset(deps)
+    from itertools import chain
+    def finds(glob): return chain.from_iterable((r for r in (wd.dir / 'wbin').glob(glob)) for wd in deps)
+    includes = frozenset(finds(glob))
+    excludes = finds(exclude_glob) if exclude_glob else frozenset()
+    includes = includes - excludes
+    
+    if dry_run:
+        for r in includes: print(str(r))
+    else:
+        procs = [Popen(i) for i in includes]
+        for p in procs: p.wait()
+coll.collections['work-dir'].collections['action'].add_task(run)
+coll.add_task(run)
 
 @task(
     help={
@@ -720,7 +745,7 @@ def _change_dir(wd):
     'prompt-setup': 'prompt setup tasks',
     }
 )
-def work_on(ctx, work_dir, prompt_setup=False, skip_project_workdir=False): # TODO rename work_on_check ?
+def work_on(ctx, work_dir=cur_work_dir, prompt_setup=False, skip_project_workdir=False): # TODO rename work_on_check ?
     """
     Sets up an existing or new work dir.
     """
@@ -808,7 +833,8 @@ coll.collections['work-dir'].collections['action'].add_task(work_on_deps_on)
 coll.add_task(work_on_deps_on)
 
 
-# TODO: recreate is this followed by a workon
+# TODO: recreate is this followed by a workon. 
+# not used.# maybe remove b/c resest.py in root
 @task(help={
     'work-dir': get_cur_work_dir_help(),
     'hard': 'deletes env dirs (instead of asking conda to (nicely) remove them'})
