@@ -715,6 +715,7 @@ def _change_dir(wd):
 
 @task
 def run(ctx, work_dir=cur_work_dir,
+        parallel=True,
         glob='run*', exclude_glob=None,
         skip_setup=True,
         dry_run=False):
@@ -734,8 +735,11 @@ def run(ctx, work_dir=cur_work_dir,
     if dry_run:
         for r in includes: print(str(r))
     else:
-        procs = [Popen(i) for i in includes]
-        for p in procs: p.wait()
+        if parallel:
+            procs = [Popen(i) for i in includes]
+            for p in procs: p.wait()
+        else:
+            for r in includes: ctx.run(str(r), echo=True)
 coll.collections['work-dir'].collections['action'].add_task(run)
 coll.add_task(run)
 
