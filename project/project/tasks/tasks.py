@@ -1,3 +1,4 @@
+from unittest import skip
 from invoke import task, Collection
 from .. import project_root_dir, project_name
 import yaml
@@ -23,6 +24,113 @@ coll.collections['work-dir'].add_collection(Collection('info'))
 config = yaml.safe_load((project_root_dir / 'project' / 'config.yml').open())
 
 
+def _get_current_work_dir():
+    import os
+    _ = Path(os.curdir).absolute()
+    _ = _.relative_to(project_root_dir)
+    if len(_.parts) == 0:
+        return
+    else:
+        if _.parts[0] in (wd.name for wd in work.find_WorkDirs()):
+            return _.parts[0]
+        else:
+            return
+cur_work_dir = _get_current_work_dir()
+
+def get_cur_work_dir_help():
+    cd = ''
+    if cur_work_dir:
+        cd += f" Default: {cur_work_dir}"
+    return f"Work directory."+cd
+
+
+@task(
+    help={
+        'work-dir': "directory to work in a workdir",
+        'prompt-setup': 'prompt setup tasks',
+        'skip_setup': "skips executing setup scripts (effectively just installs dependencies)"})
+def work_on(ctx,
+        work_dir=cur_work_dir, skip_project_workdir=False,
+        skip_setup=False, prompt_setup=False, ): # TODO rename work_on_check ?
+    """
+    >> Sets up an existing or new work dir.
+    """
+    cur_branch = ctx.run('git rev-parse --abbrev-ref HEAD', hide='out').stdout.replace('\n','')
+    cur_env_name = get_current_conda_env()
+
+    def init_commit(wd):
+        ctx.run(f"conda run -n {work.WorkDir('project').devenv_name} git add {wd.dir}", echo=True)
+        ctx.run(f"conda run -n {work.WorkDir('project').devenv_name} git commit -m  \"initial placeholder commit\"", echo=True)
+
+    # best programmed with a state diagram. TODO
+
+    # 1. check work dir creation
+    if ' ' in work_dir:
+        raise ValueError(f"Work directory, {work_dir}, has spaces. Create work directory w/o spaces.")
+    wd = work_dir
+    if wd not in (wd.name for wd in work.find_WorkDirs()):
+        new_work_dir = True
+        # best to do this from the project env
+        project_env = work.WorkDir(project_root_dir/'project').devenv_name
+        if cur_env_name !=  project_env:
+            print("Change to project environment before creating a new workdir.")
+            print(f"> conda activate {work.WorkDir(project_root_dir/'project').devenv_name}")
+            exit(1)
+        # state of just creating a workdir
+        # if cur_branch != 'master':
+        #     if input(f"Current git branch is not 'master'. Enter 'Y' if  you're sure that you want to initialize the work dir in the '{cur_branch}' branch.").lower() == 'y':
+        #         wd = _create_WorkDir(ctx, wd)
+        #         init_commit(wd)
+        #     else:
+        #         print('Switch to master.')
+        #         print('> git checkout master')
+        #         exit(1)
+        #else:
+        wd = _create_WorkDir(ctx, wd)
+        #init_commit(wd)
+
+    else:
+        new_work_dir = False
+        wd = work.WorkDir(wd)
+
+    # 2. env yml creation
+    minDevenv = \
+       (open(wd.dir/'environment.devenv.yml')).read() \
+       == wd.make_env()
+    if minDevenv:
+       print('Minimal env detected. Make sure that this is intended.')
+
+    # 3 install deps (libs) .. but dont execute setup tasks
+    build(ctx, work_dir)
+
+
+    # 4. run setup tasks
+    if not skip_setup:
+        run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup, skip_project_workdir=skip_project_workdir)
+
+    # check if devenv in run env includes. TODO
+
+    # 6. check if in env
+    #if wd.devenv_name != cur_env_name:
+    #    print(f'Activate environment:')
+    #    print(f'> conda activate {wd.devenv_name}')
+    #    exit(1)
+
+    # 7. check if in dir
+    #if _change_dir(wd):
+    #    exit(1)
+
+    # 8. check if in a branch
+    if cur_branch in {'master', 'main'}:
+        print('Note: You many want to create a branch for your work.')
+
+    print('Ready to work!')
+    print(f'Activate environment:')
+    print(f'> conda activate {wd.devenv_name}')
+coll.collections['work-dir'].collections['setup'].add_task(work_on)
+coll.add_task(work_on)
+
+
 @task
 def create_project_wrappers(ctx, ):
     """
@@ -31,6 +139,7 @@ def create_project_wrappers(ctx, ):
     for exe in ['git', 'bash', 'pre-commit',]:
         create_exec_wrapper(ctx, exe, work_dir='project')
 coll.collections['project'].collections['setup'].add_task(create_project_wrappers)
+
 
 @task
 def set_git_hooks(ctx):
@@ -90,19 +199,6 @@ def get_current_conda_env():
         return dir.parts[-1]
 
 
-def _get_current_work_dir():
-    import os
-    _ = Path(os.curdir).absolute()
-    _ = _.relative_to(project_root_dir)
-    if len(_.parts) == 0:
-        return
-    else:
-        if _.parts[0] in (wd.name for wd in work.find_WorkDirs()):
-            return _.parts[0]
-        else:
-            return
-
-
 @task
 def project_root(ctx):
     print(project_root_dir)
@@ -143,14 +239,6 @@ def _create_WorkDir(ctx, dir):
         print('keep work directories flat')
     wd = work.WorkDir(dir)
     return wd
-
-
-cur_work_dir = _get_current_work_dir()
-def get_cur_work_dir_help():
-    cd = ''
-    if cur_work_dir:
-        cd += f" Default: {cur_work_dir}"
-    return f"Work directory."+cd
 
 
 def _get_workdir_deps(ctx, WD, reversed=False):
@@ -299,7 +387,10 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
         if not test:
             # overwrites
             ctx.run(f"create-wrappers -t conda {exe_prefix_switch} -f {exe_name} -d {wd.dir/'wbin'} --conda-env-dir {env_pth}", echo=True)
-            return Path(which(exe_name, path=str(wd.dir/'wbin')))  # Path doesn't work until py3.8
+            w = Path(which(exe_name, path=str(wd.dir/'wbin')))  # Path doesn't work until py3.8
+            import stat
+            w.chmod(w.stat().st_mode | stat.S_IEXEC) # do i have to do this?
+            return w
 
         if not exe_pth.parent.parts:
             get_exe_py = f"from shutil import which; print(which(\'{exe_name}\'))"
@@ -501,11 +592,38 @@ def create_scripts_wrappers(ctx, work_dir=cur_work_dir):
             print(f'{script_pth} processing not implemented.')
 coll.collections['work-dir'].collections['action'].add_task(create_scripts_wrappers)
 
+@task
+def build(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workdir=False, reversed=False):
+    """
+    execute all installation tasks for the workdir (plus workdirs that depend on it)
+    """
+    assert(work_dir)
+    wd = work.WorkDir(work_dir)
+    import os
+    # have to render the devenv first
+    dep_work_dirs = _get_workdir_deps(ctx, wd, reversed=reversed)
+    assert(dep_work_dirs) # should have at least project
+    done = []
+    for dwd in dep_work_dirs:
+        if dwd in done: continue # possibly deduping
+        if work_dir != 'project' and dwd == 'project' and skip_project_workdir:
+            print('INFO: (re)-building project skipped.')
+            continue
+        # 1. make the dev env
+        if prompt:
+            if input(f"create ({dwd}) env? [enter y for yes] ").lower().strip() == 'y':
+               other_deps = make_env(ctx, work_dir=dwd)
+        else:
+            other_deps = make_env(    ctx, work_dir=dwd)
+        dWD = work.WorkDir(dwd)
+        done.append(dWD.name)
+    #ctx.run(f"conda run --cwd {wd.dir} -n {wd.env name} conda devenv", echo=True) # pyt=True does't work on windows
+coll.collections['work-dir'].collections['setup'].add_task(build)
 
 @task
-def make_devenv(ctx, work_dir=cur_work_dir):
+def make_env(ctx, work_dir=cur_work_dir):
     """
-    Create conda development environment.
+    Create only specified (one) conda  environment.
     """
     # my mamba use issue https://github.com/ESSS/conda-devenv/issues/109
     assert(work_dir)
@@ -528,89 +646,78 @@ def make_devenv(ctx, work_dir=cur_work_dir):
     with ctx.cd(str(wd.dir)):
         print('The devenv is:')
         devenv = ctx.run("conda devenv --print-full", echo=False).stdout
+        import yaml
+        devenv = yaml.safe_load(devenv)
+        en =    devenv['name']
+        from subprocess import run as sprun
+        existing_envs = sprun('conda env list --json', shell=True, text=True, capture_output=True)
+        import json
+        existing_envs = json.loads(existing_envs.stdout)['envs']
+        import pathlib
+        #existing_envs = frozenset(pathlib.Path(e).name for e in existing_envs)
+        #if en not in existing_envs:
+        _ = wd.dir / '_.devenv.yml' # https://github.com/ESSS/conda-devenv/issues/90
+        with open(_, 'w') as f: yaml.dump(
+            {
+            'channels': devenv['channels'],
+            'name': en,
+            'dependencies': ['curl'], # 'stub' dep just to create the env
+            'environment': devenv['environment'], # conda has 'variables' instead of environment
+                }, f) 
+        ctx.run(f"conda devenv  --file {_}", echo=True) # --file doesnt work. this or conda create new if it doesnt exist
+        _.unlink()
+        (wd.dir / '_.yml' ).unlink()
+
+        if 'channels' in devenv:
+            channels =  devenv['channels']
+            channelss = '-c ' + ' -c '.join(channels)
+        else:
+            channelss = ''
+
+        deps =  devenv['dependencies']
+        depss = ' '.join(d.replace(' ', '') for d in deps if isinstance(d, str)) #for pip:installable
+        other_deps = []
+        for d in deps:
+            if not isinstance(d, str):
+                other_deps.append(d)
+        # https://github.com/ESSS/conda-devenv/issues/126
         try:
-            import yaml
-            devenv = yaml.safe_load(devenv)
-            en =    devenv['name']
-            from subprocess import run as sprun
-            existing_envs = sprun('conda env list --json', shell=True, text=True, capture_output=True)
-            import json
-            existing_envs = json.loads(existing_envs.stdout)['envs']
-            import pathlib
-            #existing_envs = frozenset(pathlib.Path(e).name for e in existing_envs)
-            #if en not in existing_envs:
-            _ = wd.dir / '_.devenv.yml' # https://github.com/ESSS/conda-devenv/issues/90
-            with open(_, 'w') as f: yaml.dump(
-                {
-                'channels': devenv['channels'],
-                'name': en,
-                'dependencies': ['curl'], # 'stub' dep just to create the env
-                'environment': devenv['environment'], # conda has 'variables' instead of environment
-                 }, f) 
-            ctx.run(f"conda devenv  --file {_}", echo=True) # --file doesnt work. this or conda create new if it doesnt exist
-            _.unlink()
-            (wd.dir / '_.yml' ).unlink()
-
-            if 'channels' in devenv:
-                channels =  devenv['channels']
-                channelss = '-c ' + ' -c '.join(channels)
-            else:
-                channelss = ''
-
-            deps =  devenv['dependencies']
-            depss = ' '.join(d.replace(' ', '') for d in deps if isinstance(d, str)) #for pip:installable
             ctx.run(f"mamba install --yes --name {en} {channelss} {depss}", echo=True)
-            
-            # https://github.com/ESSS/conda-devenv/issues/126
-            # need updated exec-wrapper, and disable conda devenv activation
-            # envs =  devenv['environment']
-            # import pathlib
-            # for k in envs: # env vars
-            #     v = envs[k]
-            #     if isinstance(v, str):
-            #         envs[k] = v
-            #     else: # env var has parts
-            #         assert(isinstance(v, list))
-            #         import pathlib as pl
-            #         def_parts = [str(pl.Path(v)) if pl.Path(v).exists() else v for v in v]
-            #         from sys import platform
-            #         from os import pathsep
-            #         existing_parts = sprun(f"conda run -n {en} python -c \"import os; print(os.environ.get('{k}'))\"", shell=True, text=True, capture_output=True).stdout
-            #         existing_parts = '' if existing_parts.strip() == 'None' else existing_parts
-            #         existing_parts = [str(pl.Path(p)) if pl.Path(p).exists() else p for p in existing_parts.split(pathsep) ]
-            #         if k == 'PATH':
-            #             conda_paths = [prefix] + [prefix /p for p in ['Library/usr/bin', 'Library/bin', 'Scripts', 'bin'] ]
-            #         else:
-            #             conda_paths = []
-            #         # need an ordered set
-            #         from collections import OrderedDict
-            #         _ = OrderedDict.fromkeys(def_parts+conda_paths+existing_parts)
-            #         envs[k] = pathsep.join(str(p).strip() for p in _); del _
-            # envss = (f"{k}=\"{v}\"" for k,v in envs.items())
-            # envss = ' '.join(envss)
-            # ctx.run(f"conda env config vars set {envss} --name {en}", echo=True)
-            # idk why this doesnt work ^^^^ but below is probably safer but slow
-            #for k,v in envs.items():
-            #    ctx.run(f"conda env config vars set {k}=\"{v}\" --name {en}", echo=True)
-            #del k,v
-
-
-            other_deps = []
-            for d in deps:
-                if not isinstance(d, str):
-                    other_deps.append(d)
-            return other_deps
-                     
         except:
             #raise Exception('sort of error. must mamba.')
-            print('sort of error. didnt mamba.')
+            print('WARNING: sort of error. didnt mamba.')
             # for the remaining stuff even if mamba installed
-            ctx.run("conda devenv", echo=True)
-            return []
+            ctx.run(f"conda install --yes --name {en} {channelss} {depss}", echo=True)
+        create_exec_wrapper(ctx, '_stub', work_dir=work_dir, test=False) # need that initial wrapper though
+        install_other_deps(ctx, wd, other_deps)
+coll.collections['work-dir'].collections['setup'].add_task(make_env)
 
-    #assert(ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True).stdout) # pyt=True does't work on windows
-    #assert('command failed' not in ctx.run(f"conda run --cwd {wd.dir} -n base conda devenv", echo=True).stdout) # pyt=True does't work on windows
-coll.collections['work-dir'].collections['setup'].add_task(make_devenv)
+
+def install_other_deps(ctx, WD, other_deps):
+    # 3. install 'other deps'
+    WD = work.WorkDir(WD) if isinstance(WD, str) else WD
+    if WD.name != 'project':
+        dep_pre = f"{WD.dir / 'wbin' / 'run-in' }"
+    else:
+        # as an exception, use unwrapped exec when dealing with the 'project' env
+        # might create a problem if this program is executed from a wrapper
+        dep_pre = f"{WD.dir / 'scripts' / 'bin' / 'run-in'}"
+    
+    with ctx.cd(str(WD.dir)):
+        for od in other_deps:
+            assert(isinstance(od, dict))
+            assert(len(od) == 1) # just one 'key' into other 'deps'
+            installer = list(od.keys())[0]
+            pkgs = od[installer]
+            # why does conda devnv mess with this??
+            pkgs = [p.replace(' ', '') for p in pkgs]
+            if installer == 'pip':
+                # use conda run or wrapper?
+                #ctx.run(f"conda run --live-stream --name {dWD.env_name} ... ", echo=True)
+                #                idk  pip on its own doesnt work
+                ctx.run(f"{dep_pre} python -m {installer} install  {' '.join(pkgs)}", echo=True)
+            else:
+                raise Exception("unrecognized 'other dep'")
 
 
 def _get_setup_names(wd):
@@ -625,11 +732,10 @@ def _get_setup_names(wd):
 )
 def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workdir=False, reversed=False):
     """
-    execute setup tasks for the workdir
+    execute all setup tasks for the workdir (plus workdirs that depend on it)
     """
     assert(work_dir)
     wd = work.WorkDir(work_dir)
-    import os
     # have to render the devenv first
     dep_work_dirs = _get_workdir_deps(ctx, wd, reversed=reversed)
     assert(dep_work_dirs) # should have at least project
@@ -639,12 +745,6 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workd
         if work_dir != 'project' and dwd == 'project' and skip_project_workdir:
             print('INFO: (re)-building project skipped.')
             continue
-        # 1. make the dev env
-        if prompt:
-            if input(f"create ({dwd}) env? [enter y for yes] ").lower().strip() == 'y':
-               other_deps = make_devenv(ctx, work_dir=dwd)
-        else:
-            other_deps = make_devenv(    ctx, work_dir=dwd)
 
         # 2. make script wrappers
         create_exec_wrapper(    ctx, '_stub', work_dir=dwd)
@@ -656,34 +756,8 @@ def run_setup_tasks(ctx, work_dir=cur_work_dir, prompt=False, skip_project_workd
         else:
             make_wrappers()
 
-        # 3. install 'other deps'
         dWD = work.WorkDir(dwd)
-        def iod(other_deps):
-            if dWD.name != 'project':
-                dep_pre = f"{dWD.dir / 'wbin' / 'run-in' }"
-            else:
-                # as an exception, use unwrapped exec when dealing with the 'project' env
-                # might create a problem if this program is executed from a wrapper
-                dep_pre = f"{dWD.dir / 'scripts' / 'bin' / 'run-in'}"
-            
-            with ctx.cd(str(wd.dir)):
-                for od in other_deps:
-                    assert(isinstance(od, dict))
-                    assert(len(od) == 1) # just one 'key' into other 'deps'
-                    installer = list(od.keys())[0]
-                    pkgs = od[installer]
-                    # why does conda devnv mess with this??
-                    pkgs = [p.replace(' ', '') for p in pkgs]
-                    if installer == 'pip':
-                        # use conda run or wrapper?
-                        #ctx.run(f"conda run --live-stream --name {dWD.env_name} ... ", echo=True)
-                        #                idk  pip on its own doesnt work
-                        ctx.run(f"{dep_pre} python -m {installer} install {' '.join(pkgs)}", echo=True)
-                    else:
-                        raise Exception("unrecognized 'other dep'")
-        iod(other_deps)
-
-        # 4. exec setups
+        # 3. exec setups
         for asetup in  _get_setup_names(dWD):
             with ctx.cd(str(dWD.dir)):
                 if dWD.name != 'project':
@@ -741,100 +815,18 @@ def run(ctx, work_dir=cur_work_dir,
         else:
             for r in includes: ctx.run(str(r), echo=True)
 coll.collections['work-dir'].collections['action'].add_task(run)
-coll.add_task(run)
-
-@task(
-    help={
-    'work-dir': "directory to work in a workdir",
-    'prompt-setup': 'prompt setup tasks',
-    }
-)
-def work_on(ctx, work_dir=cur_work_dir, prompt_setup=False, skip_project_workdir=False): # TODO rename work_on_check ?
-    """
-    Sets up an existing or new work dir.
-    """
-    cur_branch = ctx.run('git rev-parse --abbrev-ref HEAD', hide='out').stdout.replace('\n','')
-    cur_env_name = get_current_conda_env()
-
-    def init_commit(wd):
-        ctx.run(f"conda run -n {work.WorkDir('project').devenv_name} git add {wd.dir}", echo=True)
-        ctx.run(f"conda run -n {work.WorkDir('project').devenv_name} git commit -m  \"initial placeholder commit\"", echo=True)
-
-    # best programmed with a state diagram. TODO
-
-    # 1. check work dir creation
-    if ' ' in work_dir:
-        raise ValueError(f"Work directory, {work_dir}, has spaces. Create work directory w/o spaces.")
-    wd = work_dir
-    if wd not in (wd.name for wd in work.find_WorkDirs()):
-        new_work_dir = True
-        # best to do this from the project env
-        project_env = work.WorkDir(project_root_dir/'project').devenv_name
-        if cur_env_name !=  project_env:
-            print("Change to project environment before creating a new workdir.")
-            print(f"> conda activate {work.WorkDir(project_root_dir/'project').devenv_name}")
-            exit(1)
-        # state of just creating a workdir
-        # if cur_branch != 'master':
-        #     if input(f"Current git branch is not 'master'. Enter 'Y' if  you're sure that you want to initialize the work dir in the '{cur_branch}' branch.").lower() == 'y':
-        #         wd = _create_WorkDir(ctx, wd)
-        #         init_commit(wd)
-        #     else:
-        #         print('Switch to master.')
-        #         print('> git checkout master')
-        #         exit(1)
-        #else:
-        wd = _create_WorkDir(ctx, wd)
-        #init_commit(wd)
-
-    else:
-        new_work_dir = False
-        wd = work.WorkDir(wd)
-
-    # 2. env yml creation
-    minDevenv = \
-       (open(wd.dir/'environment.devenv.yml')).read() \
-       == wd.make_devenv()
-    if minDevenv:
-       print('Minimal env detected. Make sure that this is intended.')
-
-    # 5. run setup tasks
-    run_setup_tasks(ctx, work_dir=work_dir, prompt=prompt_setup, skip_project_workdir=skip_project_workdir)
-
-    # check if devenv in run env includes. TODO
-
-    # 6. check if in env
-    #if wd.devenv_name != cur_env_name:
-    #    print(f'Activate environment:')
-    #    print(f'> conda activate {wd.devenv_name}')
-    #    exit(1)
-
-    # 7. check if in dir
-    #if _change_dir(wd):
-    #    exit(1)
-
-    # 8. check if in a branch
-    if cur_branch in {'master', 'main'}:
-        print('Note: You many want to create a branch for your work.')
-
-    print('Ready to work!')
-    print(f'Activate environment:')
-    print(f'> conda activate {wd.devenv_name}')
-coll.collections['work-dir'].collections['action'].add_task(work_on)
-coll.add_task(work_on)
 
 
 @task
-def work_on_deps_on(ctx, work_dir):
+def work_on_deps_on(ctx, work_dir, skip_setup=False):
     """set up workdirs that depend on a workdir. """
     deps = set()
     for wd in work.find_WorkDirs():
         wdd = _get_workdir_deps(ctx, wd,)
         if work_dir in wdd: deps.add(wd.name)
     for wdn in deps:
-        work_on(ctx, wdn, skip_project_workdir=True)
+        work_on(ctx, wdn, skip_project_workdir=True, skip_setup=skip_setup)
 coll.collections['work-dir'].collections['action'].add_task(work_on_deps_on)
-coll.add_task(work_on_deps_on)
 
 
 # TODO: recreate is this followed by a workon. 
@@ -902,8 +894,7 @@ def reset(ctx, work_dir=cur_work_dir, hard=False):
         del_envfile(dep)
     work_on(ctx, wd.name)
     print('Deactivate then reactivate your environment.')
-coll.collections['work-dir'].collections['action'].add_task(reset)
-coll.add_task(reset)
+coll.collections['work-dir'].collections['setup'].add_task(reset)
 
 
 def del_wrappers(wd):
