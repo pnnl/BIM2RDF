@@ -1,4 +1,3 @@
-from unittest import skip
 from invoke import task, Collection
 from .. import project_root_dir, project_name
 import yaml
@@ -641,7 +640,7 @@ def make_env(ctx, work_dir=cur_work_dir):
         _ = p / 'deactivate.d' 
         _ = list(_.glob('devenv-vars*'))
         if _: _[0].unlink()
-    #delete_condadevenvactivation()
+#delete_condadevenvactivation()
 
     with ctx.cd(str(wd.dir)):
         print('The devenv is:')
@@ -683,12 +682,14 @@ def make_env(ctx, work_dir=cur_work_dir):
         # https://github.com/ESSS/conda-devenv/issues/126
         try:
             ctx.run(f"mamba install --yes --name {en} {channelss} {depss}", echo=True)
+            pass
         except:
             #raise Exception('sort of error. must mamba.')
             print('WARNING: sort of error. didnt mamba.')
             # for the remaining stuff even if mamba installed
             ctx.run(f"conda install --yes --name {en} {channelss} {depss}", echo=True)
-        create_exec_wrapper(ctx, '_stub', work_dir=work_dir, test=False) # need that initial wrapper though
+        create_exec_wrapper(ctx, '_stub', work_dir=work_dir, test=False) # 
+        create_scripts_wrappers(ctx, work_dir=work_dir)
         install_other_deps(ctx, wd, other_deps)
 coll.collections['work-dir'].collections['setup'].add_task(make_env)
 
@@ -706,16 +707,18 @@ def install_other_deps(ctx, WD, other_deps):
     with ctx.cd(str(WD.dir)):
         for od in other_deps:
             assert(isinstance(od, dict))
-            assert(len(od) == 1) # just one 'key' into other 'deps'
             installer = list(od.keys())[0]
-            pkgs = od[installer]
-            # why does conda devnv mess with this??
-            pkgs = [p.replace(' ', '') for p in pkgs]
+            specs = od[installer]
             if installer == 'pip':
+                # why does conda devnv mess with this??
+                pkgs = [p.replace(' ', '') for p in specs]
                 # use conda run or wrapper?
                 #ctx.run(f"conda run --live-stream --name {dWD.env_name} ... ", echo=True)
                 #                idk  pip on its own doesnt work
                 ctx.run(f"{dep_pre} python -m {installer} install  {' '.join(pkgs)}", echo=True)
+            elif installer == 'cmd':
+                for spec in specs:
+                    ctx.run(f"{dep_pre} {spec}", echo=True)
             else:
                 raise Exception("unrecognized 'other dep'")
 
