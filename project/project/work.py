@@ -68,13 +68,13 @@ class WorkDir():
         return None
 
 
-    def make_devenv(self,
+    def make_env(self,
                     name='self.devenv_name',
                     include_work_dirs=[]):
         return open(project_root / 'project'/ 'environment.devenv.template.yml').read()
 
     def make_devenv_file(self, *args, **kwargs):
-        dev_env = self.make_devenv(*args, **kwargs)
+        dev_env = self.make_env(*args, **kwargs)
         f = open(self.dir / 'environment.devenv.yml', 'w')
         f.write(dev_env)
         f.close()
