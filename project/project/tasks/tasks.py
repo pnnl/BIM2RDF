@@ -674,7 +674,7 @@ def make_env(ctx, work_dir=cur_work_dir):
             channelss = ''
 
         deps =  devenv['dependencies']
-        depss = ' '.join(d.replace(' ', '') for d in deps if isinstance(d, str)) #for pip:installable
+        depss = ' '.join('"'+d.replace(' ', '')+'"' for d in deps if isinstance(d, str)) #for pip:installable
         other_deps = []
         for d in deps:
             if not isinstance(d, str):
