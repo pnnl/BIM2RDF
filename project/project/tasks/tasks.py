@@ -1,5 +1,5 @@
 from invoke import task, Collection
-from .. import project_root_dir, project_name
+from .. import project_root_dir, project_name, cur_work_dir
 import yaml
 from .. import work
 from pathlib import Path
@@ -23,18 +23,6 @@ coll.collections['work-dir'].add_collection(Collection('info'))
 config = yaml.safe_load((project_root_dir / 'project' / 'config.yml').open())
 
 
-def _get_current_work_dir():
-    import os
-    _ = Path(os.curdir).absolute()
-    _ = _.relative_to(project_root_dir)
-    if len(_.parts) == 0:
-        return
-    else:
-        if _.parts[0] in (wd.name for wd in work.find_WorkDirs()):
-            return _.parts[0]
-        else:
-            return
-cur_work_dir = _get_current_work_dir()
 
 def get_cur_work_dir_help():
     cd = ''
