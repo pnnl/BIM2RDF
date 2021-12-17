@@ -49,7 +49,7 @@ dependencies: []
   #- some analysis library     # [run_req]
 
 environment:
-  HOME: {{root}}
+  HOME: {{root}}              # [keep_here]
   PATH:
     # prioritize self paths (before others)
     # probably want to append to PATH and PYTHONPATH in your env

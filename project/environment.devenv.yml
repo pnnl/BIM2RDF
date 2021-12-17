@@ -51,7 +51,7 @@ dependencies:
   - invoke=1.5.0              # [wrapped_exe]  # as 'project' exec
 
 environment:
-  HOME: {{root}}
+  HOME: {{root}}            # [keep_here]
   GIT_PYTHON_REFRESH: quiet   # windows problem https://github.com/gitpython-developers/GitPython/issues/816
   PATH:
     #adds all wrapped executables to path. NOT RECOMMENDED. exception for 'project' env
