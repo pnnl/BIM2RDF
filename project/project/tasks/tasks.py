@@ -1,5 +1,6 @@
 from invoke import task, Collection
 from .. import project_root_dir, project_name, cur_work_dir
+cur_work_dir = cur_work_dir.name if cur_work_dir else None
 import yaml
 from .. import work
 from pathlib import Path
@@ -362,7 +363,7 @@ def create_exec_wrapper(ctx, exe='_stub',  work_dir=cur_work_dir, test=True): #T
     """
     exe_pth = Path(exe)
     if work_dir not in (wd.name for wd in work.find_WorkDirs()):
-        print('work dir not found')
+        print('work dir not found.')
         exit(1)
     wd = work.WorkDir(project_root_dir / work_dir)
     env_pth = wd.get_env_path()
