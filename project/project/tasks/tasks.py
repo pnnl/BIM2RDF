@@ -201,6 +201,11 @@ def work_dir_list(ctx):
 coll.collections['project'].collections['info'].add_task(work_dir_list)
 
 
+def _get_current_work_dir():
+    from . import cur_work_dir
+    return cur_work_dir.name if cur_work_dir else None
+
+
 @task
 def current_work_dir(ctx):
     cd = _get_current_work_dir()
