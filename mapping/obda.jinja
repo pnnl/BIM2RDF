@@ -1,0 +1,14 @@
+[PrefixDeclaration] {% for pfx, iri in prefixes.items() %}
+{{pfx}}:        {{iri}} {% endfor %}
+
+
+[MappingDeclaration] @collection [[
+
+{% for map in maps %}
+mappingId   {{map['id']}}
+target      {{map['target'].replace('\n', ' ') }}
+source      {{map['source'].replace('\n', ' ') }}
+{% endfor %}
+
+]]
+

@@ -1,0 +1,3 @@
+cd ${WORKDIR_PATH}
+git config pull.ff only
+inv -r ${WORKDIR_PATH} project.setup ${*}
