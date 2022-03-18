@@ -53,6 +53,7 @@ dependencies:
   - openjdk                     # need java for ontop
   - cmd:                        # [run_req]
     - python scripts/install.py # [run_req] ontop cli
+  - invoke                      # [run_req]
   # dev
   - mypy                        # [dev_req]
   - ipython                     # [dev_req]
