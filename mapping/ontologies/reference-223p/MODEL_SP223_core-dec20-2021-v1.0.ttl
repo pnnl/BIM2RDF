@@ -1,0 +1,1780 @@
+# imports: http://www.w3.org/ns/shacl#
+
+@prefix : <http://www.example.org/223p#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix fn: <http://www.w3.org/2005/xpath-functions#> .
+@prefix mc: <http://www.linkedmodel.org/owl/schema/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix sp: <http://spinrdf.org/sp#> .
+@prefix afn: <http://jena.hpl.hp.com/ARQ/function#> .
+@prefix all: <http://data.ashrae.org/standard223/model/all#> .
+@prefix arg: <http://spinrdf.org/arg#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sdo: <http://schema.org#> .
+@prefix sou: <http://qudt.org/vocab/sou/> .
+@prefix spl: <http://spinrdf.org/spl#> .
+@prefix swa: <http://topbraid.org/swa#> .
+@prefix tag: <https://brickschema.org/schema/BrickTag#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix enum: <http://data.ashrae.org/standard223/1.0/vocab/enumeration#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix qkdv: <http://qudt.org/vocab/dimensionvector/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix role: <http://data.ashrae.org/standard223/1.0/vocab/role#> .
+@prefix s223: <http://data.ashrae.org/standard223#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sosa: <http://www.w3.org/ns/sosa#> .
+@prefix spif: <http://spinrdf.org/spif#> .
+@prefix spin: <http://spinrdf.org/spin#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix tosh: <http://topbraid.org/tosh#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix voaf: <http://purl.org/vocommons/voaf#> .
+@prefix voag: <http://voag.linkedmodel.org/schema/voag#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix dtype: <http://www.linkedmodel.org/schema/dtype#> .
+@prefix shacl: <http://data.ashrae.org/standard223/1.0/extension/function/shacl#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix vs223: <http://data.ashrae.org/standard223/validation/schema#> .
+@prefix domain: <http://data.ashrae.org/standard223/1.0/vocab/domain#> .
+@prefix prefix: <http://qudt.org/2.1/vocab/prefix/> .
+@prefix qudtqk: <http://qudt.org/vocab/quantitykind/> .
+@prefix schema: <http://schema.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix graphql: <http://datashapes.org/graphql#> .
+@prefix imports: <http://qudt.org/2.1/schema/extensions/imports#> .
+@prefix constant: <http://qudt.org/vocab/constant/> .
+@prefix settings: <http://data.ashrae.org/standard223/extensions/settings#> .
+@prefix functions: <http://qudt.org/2.1/schema/extensions/functions#> .
+@prefix qudt.type: <http://qudt.org/vocab/type/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix creativecommons: <http://creativecommons.org/ns#> .
+@base <http://www.example.org/223p> .
+
+<http://www.example.org/223p> rdf:type owl:Ontology .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://data.ashrae.org/standard223#contains
+s223:contains rdf:type owl:AnnotationProperty ;
+              s223:inverseOf s223:isContainedIn ;
+              rdfs:label "contains" .
+
+
+###  http://data.ashrae.org/standard223#hasActuatorPosition
+s223:hasActuatorPosition rdfs:label "Actuator Position" ;
+                         rdf:type owl:AnnotationProperty ;
+                         rdfs:subPropertyOf s223:hasProperty .
+
+
+###  http://data.ashrae.org/standard223#hasDevice
+s223:hasDevice rdf:type owl:AnnotationProperty ;
+               rdfs:subPropertyOf s223:contains .
+
+
+###  http://data.ashrae.org/standard223#hasInletPressure
+s223:hasInletPressure rdfs:label "Inlet Pressure" ;
+                      rdf:type owl:AnnotationProperty ;
+                      rdfs:subPropertyOf s223:hasProperty .
+
+
+###  http://data.ashrae.org/standard223#hasJunction
+s223:hasJunction rdfs:label "has junction" ;
+                 rdf:type owl:AnnotationProperty ;
+                 rdfs:subPropertyOf s223:contains .
+
+
+###  http://data.ashrae.org/standard223#hasMaxActuatorTorque
+s223:hasMaxActuatorTorque rdfs:label "Maximum torque for the actuator" ;
+                          rdf:type owl:AnnotationProperty ;
+                          rdfs:subPropertyOf s223:hasProperty .
+
+
+###  http://data.ashrae.org/standard223#hasOutletPressure
+s223:hasOutletPressure rdfs:label "Outlet Pressure" ;
+                       rdf:type owl:AnnotationProperty ;
+                       rdfs:subPropertyOf s223:hasProperty .
+
+
+###  http://data.ashrae.org/standard223#hasProperty
+s223:hasProperty rdf:type owl:AnnotationProperty ;
+                 rdfs:label "has Property" .
+
+
+###  http://data.ashrae.org/standard223#hasSubSystem
+s223:hasSubSystem rdf:type owl:AnnotationProperty ;
+                  rdfs:subPropertyOf s223:contains .
+
+
+###  http://data.ashrae.org/standard223#hasTemperature
+s223:hasTemperature rdfs:label "hasTemperature" ;
+                    rdf:type owl:AnnotationProperty ;
+                    rdfs:subPropertyOf s223:hasProperty .
+
+
+###  http://data.ashrae.org/standard223#inverseOf
+s223:inverseOf rdf:type owl:AnnotationProperty ;
+               rdfs:label "inverse of" .
+
+
+###  http://data.ashrae.org/standard223#isContainedIn
+s223:isContainedIn rdf:type owl:AnnotationProperty ;
+                   s223:inverseOf s223:contains ;
+                   rdfs:label "is contained in" .
+
+
+###  http://data.ashrae.org/standard223#isDeviceOf
+s223:isDeviceOf s223:inverseOf s223:hasDevice ;
+                rdfs:label "is device of" ;
+                rdf:type owl:AnnotationProperty ;
+                rdfs:subPropertyOf s223:isContainedIn ;
+                rdfs:domain s223:Device .
+
+
+###  http://data.ashrae.org/standard223#isSubSystemOf
+s223:isSubSystemOf rdf:type owl:AnnotationProperty ;
+                   rdfs:subPropertyOf s223:isContainedIn .
+
+
+###  http://www.w3.org/ns/shacl#and
+sh:and rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#class
+sh:class rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#datatype
+sh:datatype rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#description
+sh:description rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#hasValue
+sh:hasValue rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#in
+sh:in rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#inversePath
+sh:inversePath rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#maxCount
+sh:maxCount rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#message
+sh:message rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#minCount
+sh:minCount rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#name
+sh:name rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#node
+sh:node rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#not
+sh:not rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#or
+sh:or rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#path
+sh:path rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#property
+sh:property rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#qualifiedMaxCount
+sh:qualifiedMaxCount rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#qualifiedValueShape
+sh:qualifiedValueShape rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#severity
+sh:severity rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/ns/shacl#xone
+sh:xone rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://data.ashrae.org/standard223#connectedAt
+s223:connectedAt rdf:type owl:ObjectProperty ;
+                 rdfs:domain s223:Connection ;
+                 rdfs:range s223:ConnectionPoint ;
+                 rdfs:label "connected at" .
+
+
+###  http://data.ashrae.org/standard223#connectedFrom
+s223:connectedFrom rdf:type owl:ObjectProperty ;
+                   rdfs:domain s223:Device ;
+                   rdfs:range s223:Device ;
+                   rdfs:label "connected from" .
+
+
+###  http://data.ashrae.org/standard223#connectedThrough
+s223:connectedThrough rdf:type owl:ObjectProperty ;
+                      rdfs:domain s223:Device ;
+                      rdfs:range s223:Connection ;
+                      rdfs:label "connected through" .
+
+
+###  http://data.ashrae.org/standard223#connectedTo
+s223:connectedTo rdf:type owl:ObjectProperty ;
+                 rdfs:domain s223:Device ;
+                 rdfs:range s223:Device ;
+                 rdfs:label "connected to" .
+
+
+###  http://data.ashrae.org/standard223#connectsThrough
+s223:connectsThrough rdf:type owl:ObjectProperty ;
+                     rdfs:domain s223:ConnectionPoint ;
+                     rdfs:range s223:Connection ;
+                     s223:inverseOf s223:connectsAt ;
+                     rdfs:label "connects through" .
+
+
+###  http://data.ashrae.org/standard223#connectsTo
+s223:connectsTo rdf:type owl:ObjectProperty ;
+                rdfs:domain s223:Connection ;
+                rdfs:range s223:Device ;
+                rdfs:label "connects to" .
+
+
+###  http://data.ashrae.org/standard223#hasDevice
+s223:hasDevice rdf:type owl:ObjectProperty ;
+               rdfs:domain s223:System ;
+               rdfs:range s223:Device .
+
+
+###  http://data.ashrae.org/standard223#hasSubSystem
+s223:hasSubSystem rdf:type owl:ObjectProperty ;
+                  rdfs:domain s223:System ;
+                  rdfs:range s223:System .
+
+
+###  http://data.ashrae.org/standard223#isSubSystemOf
+s223:isSubSystemOf rdf:type owl:ObjectProperty ;
+                   rdfs:domain s223:System ;
+                   rdfs:range s223:System .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://data.ashrae.org/standard223#abstract
+s223:abstract rdf:type owl:DatatypeProperty ;
+              rdfs:range xsd:boolean ;
+              rdfs:label "abstract" .
+
+
+###  http://data.ashrae.org/standard223#commandedState
+s223:commandedState rdf:type owl:DatatypeProperty ;
+                    rdfs:range xsd:boolean ;
+                    rdfs:label "commanded state" .
+
+
+###  http://data.ashrae.org/standard223#hasDamperPosition
+s223:hasDamperPosition rdf:type owl:DatatypeProperty ;
+                       rdfs:range xsd:decimal ;
+                       rdfs:label "has damper position" .
+
+
+###  http://data.ashrae.org/standard223#hasTimestamp
+s223:hasTimestamp rdf:type owl:DatatypeProperty ;
+                  rdfs:range xsd:dateTime ;
+                  rdfs:label "has timestamp" .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://data.ashrae.org/standard223#ActuatableProperty
+s223:ActuatableProperty rdf:type owl:Class ;
+                        rdfs:subClassOf s223:Property .
+
+
+###  http://data.ashrae.org/standard223#BidirectionalConnectionPoint
+s223:BidirectionalConnectionPoint rdf:type owl:Class ;
+                                  rdfs:subClassOf s223:ConnectionPoint .
+
+
+###  http://data.ashrae.org/standard223#BidirectionalSystemConnectionPoint
+s223:BidirectionalSystemConnectionPoint rdf:type owl:Class ;
+                                        rdfs:subClassOf s223:SystemConnectionPoint .
+
+
+###  http://data.ashrae.org/standard223#BidirectionalZoneConnectionPoint
+s223:BidirectionalZoneConnectionPoint rdf:type owl:Class ;
+                                      rdfs:subClassOf s223:ZoneConnectionPoint .
+
+
+###  http://data.ashrae.org/standard223#Class
+s223:Class rdf:type owl:Class ;
+           rdfs:subClassOf rdfs:Class .
+
+
+###  http://data.ashrae.org/standard223#Concept
+s223:Concept rdf:type owl:Class ;
+             rdfs:subClassOf rdfs:Resource .
+
+
+###  http://data.ashrae.org/standard223#Connectable
+s223:Connectable rdf:type owl:Class ;
+                 rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#Connection
+s223:Connection rdf:type owl:Class ;
+                rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#ConnectionPoint
+s223:ConnectionPoint rdf:type owl:Class ;
+                     rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#Context
+s223:Context rdf:type owl:Class ;
+             rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#Deadband
+s223:Deadband rdf:type owl:Class ;
+              rdfs:subClassOf s223:SetpointAspect .
+
+
+###  http://data.ashrae.org/standard223#Device
+s223:Device rdf:type owl:Class .
+
+
+###  http://data.ashrae.org/standard223#DiffPress
+s223:DiffPress rdf:type owl:Class ;
+               rdfs:subClassOf s223:DifferentialSensor .
+
+
+###  http://data.ashrae.org/standard223#DifferentialSensor
+s223:DifferentialSensor rdf:type owl:Class .
+
+
+###  http://data.ashrae.org/standard223#Direction
+s223:Direction rdf:type owl:Class ;
+               rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#DischargeContext
+s223:DischargeContext rdf:type owl:Class ;
+                      rdfs:subClassOf s223:Context .
+
+
+###  http://data.ashrae.org/standard223#Domain
+s223:Domain rdf:type owl:Class ;
+            rdfs:subClassOf s223:Concept ,
+                            <http://www.w3.org/ns/sosa/Procedure> .
+
+
+###  http://data.ashrae.org/standard223#DomainSpace
+s223:DomainSpace rdf:type owl:Class ;
+                 rdfs:subClassOf s223:Connectable .
+
+
+###  http://data.ashrae.org/standard223#Duct
+s223:Duct rdf:type owl:Class ;
+          rdfs:subClassOf s223:Connection .
+
+
+###  http://data.ashrae.org/standard223#Effectiveness
+s223:Effectiveness rdf:type owl:Class ;
+                   rdfs:subClassOf s223:SetpointAspect .
+
+
+###  http://data.ashrae.org/standard223#Enumerable
+s223:Enumerable rdf:type owl:Class ;
+                rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#EnumeratedActuatableProperty
+s223:EnumeratedActuatableProperty rdf:type owl:Class ;
+                                  rdfs:subClassOf s223:ActuatableProperty ,
+                                                  s223:Enumerable ,
+                                                  s223:NonQuantifiableProperty .
+
+
+###  http://data.ashrae.org/standard223#EnumeratedObservableProperty
+s223:EnumeratedObservableProperty rdf:type owl:Class ;
+                                  rdfs:subClassOf s223:Enumerable ,
+                                                  s223:NonQuantifiableProperty ,
+                                                  s223:ObservableProperty .
+
+
+###  http://data.ashrae.org/standard223#EnumerationKind
+s223:EnumerationKind rdf:type owl:Class ;
+                     rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#EnumerationValue
+s223:EnumerationValue rdf:type owl:Class ;
+                      rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#ExhaustContext
+s223:ExhaustContext rdf:type owl:Class ;
+                    rdfs:subClassOf s223:Context .
+
+
+###  http://data.ashrae.org/standard223#ExternalSource
+s223:ExternalSource rdf:type owl:Class ;
+                    rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#InletConnectionPoint
+s223:InletConnectionPoint rdf:type owl:Class ;
+                          rdfs:subClassOf s223:ConnectionPoint .
+
+
+###  http://data.ashrae.org/standard223#InletSystemConnectionPoint
+s223:InletSystemConnectionPoint rdf:type owl:Class ;
+                                rdfs:subClassOf s223:SystemConnectionPoint .
+
+
+###  http://data.ashrae.org/standard223#InletZoneConnectionPoint
+s223:InletZoneConnectionPoint rdf:type owl:Class ;
+                              rdfs:subClassOf s223:ZoneConnectionPoint .
+
+
+###  http://data.ashrae.org/standard223#Junction
+s223:Junction rdf:type owl:Class ;
+              rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#NonQuantifiableProperty
+s223:NonQuantifiableProperty rdf:type owl:Class ;
+                             rdfs:subClassOf s223:Property .
+
+
+###  http://data.ashrae.org/standard223#ObservableProperty
+s223:ObservableProperty rdf:type owl:Class ;
+                        rdfs:subClassOf s223:Property .
+
+
+###  http://data.ashrae.org/standard223#Occupancy
+s223:Occupancy rdf:type owl:Class ;
+               rdfs:subClassOf s223:Enumerable ,
+                               s223:SetpointAspect .
+
+
+###  http://data.ashrae.org/standard223#OutletConnectionPoint
+s223:OutletConnectionPoint rdf:type owl:Class ;
+                           rdfs:subClassOf s223:ConnectionPoint .
+
+
+###  http://data.ashrae.org/standard223#OutletSystemConnectionPoint
+s223:OutletSystemConnectionPoint rdf:type owl:Class ;
+                                 rdfs:subClassOf s223:SystemConnectionPoint .
+
+
+###  http://data.ashrae.org/standard223#OutletZoneConnectionPoint
+s223:OutletZoneConnectionPoint rdf:type owl:Class ;
+                               rdfs:subClassOf s223:ZoneConnectionPoint .
+
+
+###  http://data.ashrae.org/standard223#PhysicalSpace
+s223:PhysicalSpace rdf:type owl:Class ;
+                   rdfs:subClassOf s223:Connectable .
+
+
+###  http://data.ashrae.org/standard223#Pipe
+s223:Pipe rdf:type owl:Class ;
+          rdfs:subClassOf s223:Connection .
+
+
+###  http://data.ashrae.org/standard223#Property
+s223:Property rdf:type owl:Class ;
+              rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#QuantifiableActuatableProperty
+s223:QuantifiableActuatableProperty rdf:type owl:Class ;
+                                    rdfs:subClassOf s223:ActuatableProperty ,
+                                                    s223:QuantifiableProperty .
+
+
+###  http://data.ashrae.org/standard223#QuantifiableObservableProperty
+s223:QuantifiableObservableProperty rdf:type owl:Class ;
+                                    rdfs:subClassOf s223:ObservableProperty ,
+                                                    s223:QuantifiableProperty .
+
+
+###  http://data.ashrae.org/standard223#QuantifiableProperty
+s223:QuantifiableProperty rdf:type owl:Class ;
+                          rdfs:subClassOf s223:Property ,
+                                          qudt:Quantity .
+
+
+###  http://data.ashrae.org/standard223#ReturnContext
+s223:ReturnContext rdf:type owl:Class ;
+                   rdfs:subClassOf s223:Context .
+
+
+###  http://data.ashrae.org/standard223#Role
+s223:Role rdf:type owl:Class ;
+          rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#Segment
+s223:Segment rdf:type owl:Class ;
+             rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#Setpoint
+s223:Setpoint rdf:type owl:Class ;
+              rdfs:subClassOf s223:Property ,
+                              qudt:Quantity .
+
+
+###  http://data.ashrae.org/standard223#SetpointAspect
+s223:SetpointAspect rdf:type owl:Class ;
+                    rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#State
+s223:State rdf:type owl:Class ;
+           rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#SupplyContext
+s223:SupplyContext rdf:type owl:Class ;
+                   rdfs:subClassOf s223:Context .
+
+
+###  http://data.ashrae.org/standard223#SymmetricProperty
+s223:SymmetricProperty rdf:type owl:Class ;
+                       rdfs:subClassOf rdf:Property .
+
+
+###  http://data.ashrae.org/standard223#System
+s223:System rdf:type owl:Class ;
+            rdfs:subClassOf s223:Concept ,
+                            brick:System .
+
+
+###  http://data.ashrae.org/standard223#SystemConnectionPoint
+s223:SystemConnectionPoint rdf:type owl:Class ;
+                           rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#Zone
+s223:Zone rdf:type owl:Class ;
+          rdfs:subClassOf s223:Concept .
+
+
+###  http://data.ashrae.org/standard223#ZoneConnectionPoint
+s223:ZoneConnectionPoint rdf:type owl:Class ;
+                         rdfs:subClassOf s223:Concept .
+
+
+###  http://qudt.org/schema/qudt/Quantity
+qudt:Quantity rdf:type owl:Class .
+
+
+###  http://www.w3.org/1999/02/22-rdf-syntax-ns#Property
+rdf:Property rdf:type owl:Class .
+
+
+###  http://www.w3.org/2000/01/rdf-schema#Class
+rdfs:Class rdf:type owl:Class .
+
+
+###  http://www.w3.org/2000/01/rdf-schema#Resource
+rdfs:Resource rdf:type owl:Class .
+
+
+###  http://www.w3.org/ns/shacl#NodeShape
+sh:NodeShape rdf:type owl:Class .
+
+
+###  http://www.w3.org/ns/shacl#PropertyShape
+sh:PropertyShape rdf:type owl:Class .
+
+
+###  http://www.w3.org/ns/sosa/Procedure
+<http://www.w3.org/ns/sosa/Procedure> rdf:type owl:Class .
+
+
+###  https://brickschema.org/schema/Brick#System
+brick:System rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://data.ashrae.org/standard223#ActuatableProperty
+s223:ActuatableProperty rdf:type owl:NamedIndividual ,
+                                 s223:Class ,
+                                 sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Bidirectional
+s223:Bidirectional rdf:type owl:NamedIndividual ,
+                            s223:Direction ;
+                   rdfs:comment "One of a set of terms used to describe the direction of flow of ConnectionPoint instances." ;
+                   rdfs:label "Bidirectional" .
+
+
+###  http://data.ashrae.org/standard223#BidirectionalConnectionPoint
+s223:BidirectionalConnectionPoint rdf:type owl:NamedIndividual ,
+                                           s223:Class ,
+                                           sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#BidirectionalSystemConnectionPoint
+s223:BidirectionalSystemConnectionPoint rdf:type owl:NamedIndividual ,
+                                                 s223:Class ,
+                                                 sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#BidirectionalZoneConnectionPoint
+s223:BidirectionalZoneConnectionPoint rdf:type owl:NamedIndividual ,
+                                               s223:Class ,
+                                               sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Class
+s223:Class rdf:type owl:NamedIndividual ,
+                    sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Concept
+s223:Concept rdf:type owl:NamedIndividual ,
+                      s223:Class ,
+                      sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Connectable
+s223:Connectable rdf:type owl:NamedIndividual ,
+                          s223:Class ,
+                          sh:NodeShape ;
+                 s223:abstract "true"^^xsd:boolean .
+
+
+###  http://data.ashrae.org/standard223#Connection
+s223:Connection rdf:type owl:NamedIndividual ,
+                         s223:Class ,
+                         sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#ConnectionPoint
+s223:ConnectionPoint rdf:type owl:NamedIndividual ,
+                              s223:Class ,
+                              sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Context
+s223:Context rdf:type owl:NamedIndividual ,
+                      s223:Class ,
+                      sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#ContextualRole
+s223:ContextualRole rdf:type owl:NamedIndividual ,
+                             sh:NodeShape ;
+                    rdfs:comment "A ContextualRole is a role where the role value is only meaningful in a specified context, such as from a particular perspective (relativeTo) or only under certain conditions (inState). The ContextualRole instance must have at least one of these contexts, but may have several." ;
+                    sh:or [ ] ;
+sh:property [ sh:class s223:Role ;
+              sh:minCount 1 ;
+              sh:path s223:hasRole
+            ] .
+
+
+###  http://data.ashrae.org/standard223#Deadband
+s223:Deadband rdf:type owl:NamedIndividual ,
+                       s223:Class ,
+                       sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#DiffPress
+s223:DiffPress rdf:type owl:NamedIndividual ,
+                        s223:Class ,
+                        sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Direction
+s223:Direction rdf:type owl:NamedIndividual ,
+                        s223:Class ,
+                        sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#DischargeContext
+s223:DischargeContext rdf:type owl:NamedIndividual ,
+                               s223:Class .
+
+
+###  http://data.ashrae.org/standard223#Domain
+s223:Domain rdf:type owl:NamedIndividual ,
+                     s223:Class ,
+                     sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#DomainSpace
+s223:DomainSpace rdf:type owl:NamedIndividual ,
+                          s223:Class ,
+                          sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Duct
+s223:Duct rdf:type owl:NamedIndividual ,
+                   s223:Class ,
+                   sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Effectiveness
+s223:Effectiveness rdf:type owl:NamedIndividual ,
+                            s223:Class ,
+                            sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Enumerable
+s223:Enumerable rdf:type owl:NamedIndividual ,
+                         s223:Class ,
+                         sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#EnumeratedActuatableProperty
+s223:EnumeratedActuatableProperty rdf:type owl:NamedIndividual ,
+                                           s223:Class ,
+                                           sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#EnumeratedObservableProperty
+s223:EnumeratedObservableProperty rdf:type owl:NamedIndividual ,
+                                           s223:Class ,
+                                           sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#EnumerationKind
+s223:EnumerationKind rdf:type owl:NamedIndividual ,
+                              s223:Class ,
+                              sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#EnumerationValue
+s223:EnumerationValue rdf:type owl:NamedIndividual ,
+                               s223:Class ,
+                               sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#ExhaustContext
+s223:ExhaustContext rdf:type owl:NamedIndividual ,
+                             s223:Class .
+
+
+###  http://data.ashrae.org/standard223#ExternalSource
+s223:ExternalSource rdf:type owl:NamedIndividual ,
+                             s223:Class ,
+                             sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Inlet
+s223:Inlet rdf:type owl:NamedIndividual ,
+                    s223:Direction ;
+           rdfs:comment "One member of the enumerated valid values to characterize the hasDirection property. It is an instance of the Direction class."@en ;
+           rdfs:label "Entrée"@fr ,
+                      "Inlet"@en .
+
+
+###  http://data.ashrae.org/standard223#InletConnectionPoint
+s223:InletConnectionPoint rdf:type owl:NamedIndividual ,
+                                   s223:Class ,
+                                   sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#InletSystemConnectionPoint
+s223:InletSystemConnectionPoint rdf:type owl:NamedIndividual ,
+                                         s223:Class ,
+                                         sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#InletZoneConnectionPoint
+s223:InletZoneConnectionPoint rdf:type owl:NamedIndividual ,
+                                       s223:Class ,
+                                       sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Junction
+s223:Junction rdf:type owl:NamedIndividual ,
+                       s223:Class ,
+                       sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#NonQuantifiableProperty
+s223:NonQuantifiableProperty rdf:type owl:NamedIndividual ,
+                                      s223:Class ,
+                                      sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#ObservableProperty
+s223:ObservableProperty rdf:type owl:NamedIndividual ,
+                                 s223:Class ,
+                                 sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Occupancy
+s223:Occupancy rdf:type owl:NamedIndividual ,
+                        s223:Class ,
+                        sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Outlet
+s223:Outlet rdf:type owl:NamedIndividual ,
+                     s223:Direction ;
+            rdfs:comment "One member of the enumerated valid values to characterize the hasDirection property. It is an instance of the Direction class."@en ;
+            rdfs:label "Outlet"@en ,
+                       "Sortie"@fr .
+
+
+###  http://data.ashrae.org/standard223#OutletConnectionPoint
+s223:OutletConnectionPoint rdf:type owl:NamedIndividual ,
+                                    s223:Class ,
+                                    sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#OutletSystemConnectionPoint
+s223:OutletSystemConnectionPoint rdf:type owl:NamedIndividual ,
+                                          s223:Class ,
+                                          sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#OutletZoneConnectionPoint
+s223:OutletZoneConnectionPoint rdf:type owl:NamedIndividual ,
+                                        s223:Class ,
+                                        sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#PhysicalSpace
+s223:PhysicalSpace rdf:type owl:NamedIndividual ,
+                            s223:Class ,
+                            sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Pipe
+s223:Pipe rdf:type owl:NamedIndividual ,
+                   s223:Class ,
+                   sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Property
+s223:Property rdf:type owl:NamedIndividual ,
+                       s223:Class ,
+                       sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#QuantifiableActuatableProperty
+s223:QuantifiableActuatableProperty rdf:type owl:NamedIndividual ,
+                                             s223:Class ,
+                                             sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#QuantifiableObservableProperty
+s223:QuantifiableObservableProperty rdf:type owl:NamedIndividual ,
+                                             s223:Class ,
+                                             sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#QuantifiableProperty
+s223:QuantifiableProperty rdf:type owl:NamedIndividual ,
+                                   s223:Class ,
+                                   sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#ReturnContext
+s223:ReturnContext rdf:type owl:NamedIndividual ,
+                            s223:Class .
+
+
+###  http://data.ashrae.org/standard223#Role
+s223:Role rdf:type owl:NamedIndividual ,
+                   s223:Class ,
+                   sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Segment
+s223:Segment rdf:type owl:NamedIndividual ,
+                      s223:Class ,
+                      sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Setpoint
+s223:Setpoint rdf:type owl:NamedIndividual ,
+                       s223:Class ,
+                       sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#SetpointAspect
+s223:SetpointAspect rdf:type owl:NamedIndividual ,
+                             s223:Class ,
+                             sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#State
+s223:State rdf:type owl:NamedIndividual ,
+                    s223:Class ,
+                    sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#SupplyContext
+s223:SupplyContext rdf:type owl:NamedIndividual ,
+                            s223:Class .
+
+
+###  http://data.ashrae.org/standard223#SymmetricProperty
+s223:SymmetricProperty rdf:type owl:NamedIndividual ,
+                                s223:Class ,
+                                sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#System
+s223:System rdf:type owl:NamedIndividual ,
+                     s223:Class ,
+                     sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#SystemConnectionPoint
+s223:SystemConnectionPoint rdf:type owl:NamedIndividual ,
+                                    s223:Class ,
+                                    sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#Zone
+s223:Zone rdf:type owl:NamedIndividual ,
+                   s223:Class ,
+                   sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#ZoneConnectionPoint
+s223:ZoneConnectionPoint rdf:type owl:NamedIndividual ,
+                                  s223:Class ,
+                                  sh:NodeShape .
+
+
+###  http://data.ashrae.org/standard223#cnx
+s223:cnx rdf:type owl:NamedIndividual ,
+                  s223:SymmetricProperty ;
+         rdfs:comment "The cnx property is a symmetric property used to associate adjacent entities in an HVAC circuit (comprised of Device-ConnectionPoint-Connection-ConnectionPoint-Device sequences)" ;
+         rdfs:label "cnx" .
+
+
+###  http://data.ashrae.org/standard223#connected
+s223:connected rdf:type owl:NamedIndividual ,
+                        s223:SymmetricProperty ;
+               rdfs:label "connected" .
+
+
+###  http://data.ashrae.org/standard223#hasContextualRoleShape
+s223:hasContextualRoleShape rdf:type owl:NamedIndividual ,
+                                     sh:PropertyShape ;
+                            rdfs:label "has Contextual Role Shape" ;
+                            sh:node s223:ContextualRole ;
+                            sh:path s223:hasContextualRole .
+
+
+###  http://data.ashrae.org/standard223#hasPropertyShape
+s223:hasPropertyShape rdf:type owl:NamedIndividual ,
+                               sh:PropertyShape ;
+                      rdfs:label "has Property Shape" ;
+                      sh:class s223:Property ;
+                      sh:path s223:hasProperty .
+
+
+###  http://data.ashrae.org/standard223#lnx
+s223:lnx rdf:type owl:NamedIndividual ,
+                  s223:SymmetricProperty ;
+         rdfs:comment "The lnx property is a symmetric property associating adjacent entities in a Segment-Junction Network." ;
+         rdfs:label "lnx" .
+
+
+###  http://data.ashrae.org/standard223#systemConnected
+s223:systemConnected rdf:type owl:NamedIndividual ,
+                              s223:SymmetricProperty ;
+                     rdfs:label "System CP Connected" .
+
+
+###  http://data.ashrae.org/standard223#zoneConnected
+s223:zoneConnected rdf:type owl:NamedIndividual ,
+                            s223:SymmetricProperty ;
+                   rdfs:label "Zone CP Connected" .
+
+
+[ sh:hasValue enum:Water-HotWater
+] .
+
+[ sh:property [ sh:class s223:State ;
+                 sh:minCount 1 ;
+                 sh:path s223:inState
+               ]
+ ] .
+
+[ sh:property [ sh:class s223:Device ;
+                 sh:minCount 1 ;
+                 sh:path s223:relativeTo
+               ]
+ ] .
+
+[ sh:hasValue s223:Outlet
+ ] .
+
+[ sh:hasValue s223:Inlet
+ ] .
+
+[ sh:hasValue s223:Bidirectional
+ ] .
+
+[ sh:hasValue enum:Water-ChilledWater
+ ] .
+
+[ sh:hasValue enum:Substance-Air
+ ] .
+
+[ sh:hasValue s223:Bidirectional
+ ] .
+
+[ sh:hasValue s223:Inlet
+ ] .
+
+[ sh:hasValue s223:Outlet
+ ] .
+
+[ sh:class s223:System
+ ] .
+
+[ sh:class s223:Junction
+ ] .
+
+[ sh:class s223:Device
+ ] .
+
+[ sh:property [ rdf:type sh:PropertyShape ;
+                 sh:maxCount 0 ;
+                 sh:path s223:hasExternalDataSource
+               ]
+ ] .
+
+[ sh:and [ ]
+] .
+
+[ sh:property [ rdf:type sh:PropertyShape ;
+                 sh:maxCount 0 ;
+                 sh:path s223:hasValue
+               ]
+ ] .
+
+[ sh:minCount 1 ;
+   sh:path qudt:hasQuantityKind
+ ] .
+
+[ sh:class s223:Zone
+ ] .
+
+[ sh:class s223:DomainSpace
+ ] .
+
+[ sh:class s223:ConnectionPoint
+ ] .
+
+[ sh:property [ rdf:type sh:PropertyShape ;
+                 sh:class s223:ExternalSource ;
+                 sh:description "Used to provide a pointer of any kind to a data source containing a simple value. Either s223:hasExternalDataSource or s223:hasSimpleValue is populated, but not both." ;
+                 sh:minCount 1 ;
+                 sh:path s223:hasExternalDataSource
+               ]
+ ] .
+
+[ sh:property [ rdf:type sh:PropertyShape ;
+                 sh:minCount 1 ;
+                 sh:path s223:hasValue
+               ]
+ ] .
+
+[ sh:class s223:SystemConnectionPoint
+ ] .
+
+[ sh:class s223:Junction
+ ] .
+
+[ sh:class s223:ConnectionPoint
+ ] .
+
+[ sh:class s223:SystemConnectionPoint
+ ] .
+
+[ sh:hasValue enum:Substance-Air
+ ] .
+
+[ sh:hasValue enum:Water-HotWater
+ ] .
+
+[ sh:hasValue enum:Water-ChilledWater
+ ] .
+
+[ sh:class s223:ZoneConnectionPoint
+ ] .
+
+[ sh:class s223:ConnectionPoint
+ ] .
+
+[ sh:class s223:Junction
+ ] .
+
+[ sh:minCount 1 ;
+   sh:path qudt:unit
+ ] .
+
+[ sh:class s223:ConnectionPoint
+ ] .
+
+[ sh:class s223:Junction
+ ] .
+
+[ sh:class s223:ConnectionPoint
+ ] .
+
+[ sh:class s223:ZoneConnectionPoint
+ ] .
+
+[ sh:hasValue s223:Bidirectional
+ ] .
+
+[ sh:hasValue s223:Inlet
+ ] .
+
+[ sh:hasValue s223:Outlet
+ ] .
+
+#################################################################
+#    Annotations
+#################################################################
+
+s223:ActuatableProperty rdfs:comment "This class describes non-numeric actuator/control settings, such as the state of a switch (\"on\" or \"off\")" ;
+                         rdfs:label "actuatable property" .
+
+
+s223:BidirectionalConnectionPoint sh:property [ rdf:type sh:PropertyShape ;
+                                                sh:hasValue s223:Bidirectional ;
+                                                sh:path s223:hasDirection
+                                              ] ;
+                                  rdfs:label "Bidirectional Connection Point" ;
+                                  rdfs:comment "A predefined subClassOf ConnectionPoint for which the hasDirection property has the value s223:Bidirectional." .
+
+
+s223:BidirectionalSystemConnectionPoint rdfs:comment "This class is analogous to the BidirectionalConnectionPoint class, but for SystemConnectionPoints." ;
+                                        rdfs:label "Bidirectional System Connection Point" ;
+                                        sh:property [ rdf:type sh:PropertyShape ;
+                                                      sh:hasValue s223:Bidirectional ;
+                                                      sh:path s223:hasDirection
+                                                    ] .
+
+
+s223:BidirectionalZoneConnectionPoint rdfs:comment "This class is analogous to the BidirectionalConnectionPoint class, but for ZoneConnectionPoints." ;
+                                      sh:property [ rdf:type sh:PropertyShape ;
+                                                    sh:hasValue s223:Bidirectional ;
+                                                    sh:path s223:hasDirection
+                                                  ] ;
+                                      rdfs:label "Bidirectional Zone Connection Point" .
+
+
+s223:Class rdfs:label "Class" .
+
+
+s223:Concept rdfs:label "Root concept for standard 223" ;
+             sh:not [ rdf:type sh:PropertyShape ;
+                      sh:hasValue "true"^^xsd:boolean ;
+                      sh:message "You cannot have an instance of an abstract class" ;
+                      sh:path [ ]
+             ] ;
+rdfs:comment "This is the superclass of all classes defined in the 223 standard." ;
+sh:property [ sh:path s223:cnx
+            ] ,
+            [ sh:path s223:hasProperty
+            ] ,
+            [ sh:path rdfs:label
+            ] .
+
+
+s223:Connectable sh:property [ sh:class s223:Connection ;
+                               sh:name "DeviceToConnectionShape" ;
+                               sh:path s223:connectedThrough
+                             ] ;
+                 rdfs:comment "Connectable is an abstract class that represents a thing (a Device, DomainSpace or PhysicalSpace) that can be connected via ConnectionPoints and Connections." ;
+                 sh:property [ sh:class s223:ConnectionPoint ;
+                               sh:name "DeviceToConnectionPointShape" ;
+                               sh:path s223:hasConnectionPoint
+                             ] ,
+                             [ sh:class s223:Connectable ;
+                               sh:name "SymmetricConnectableToConnectableShape" ;
+                               sh:path s223:connected
+                             ] ;
+                 rdfs:label "Connectable" ;
+                 sh:property [ sh:class s223:Connectable ;
+                               sh:name "ConnectableToConnectableShape" ;
+                               sh:path s223:connectedTo
+                             ] .
+
+
+s223:Connection sh:property s223:hasContextualRoleShape ,
+                            [ sh:class s223:ConnectionPoint ;
+                              sh:path s223:connectsAt
+                            ] ;
+                rdfs:comment """A Connection usually corresponds to a physical pipe or duct or even a circuit, used to convey some Substance (Air, Water, Electricity).
+All Connections have 2 or more ConnectionPoints that are followed by either a Device, DomainSpace or a PhysicalSpace.
+A Connection may contain branches or intersections. These are modeled using Segment and Junction.""" ;
+                sh:property [ sh:class s223:Connectable ;
+                              sh:name "ConnectionToDownstreamConnectableShape" ;
+                              sh:path s223:connectsTo
+                            ] ,
+                            [ sh:class s223:Device ;
+                              sh:path s223:suppliesTo
+                            ] ;
+                rdfs:label "Connection" ;
+                sh:property [ sh:maxCount 1 ;
+                              sh:name "Connection substance" ;
+                              sh:or [ ] ;
+                            sh:path s223:hasSubstance
+                ] ,
+[ sh:class s223:Connectable ;
+  sh:name "ConnectionToUpstreamConnectableShape" ;
+  sh:path s223:connectsFrom
+] ,
+s223:hasPropertyShape ,
+[ sh:class s223:Device ;
+  sh:path s223:returnsTo
+] ,
+[ sh:class s223:Role ;
+  sh:path s223:hasRole
+] .
+
+
+s223:ConnectionPoint sh:property s223:hasPropertyShape ;
+                     rdfs:label "ConnectionPoint" ;
+                     sh:property [ sh:maxCount 1 ;
+                                   sh:name "ConnectionPoint substance" ;
+                                   sh:or [ ] ;
+                                 sh:path s223:hasSubstance
+                     ] ;
+rdfs:comment """A connection point belongs to exactly one Device, DomainSpace or PhysicalSpace. Any Device, DomainSpace or PhysicalSpace connectedThrough a Connection is connected at one of its connection points to that connection. 
+ConnectionPoint has explicit subClasses when the hasDirection value is Inlet or Outlet.""" ;
+sh:property [ sh:maxCount 1 ;
+              sh:name "ConnectionPoint direction" ;
+              sh:or [ ] ;
+            sh:path s223:hasDirection
+] ,
+[ sh:class s223:Connection ;
+  sh:maxCount 1 ;
+  sh:message "This ConnectionPoint must be associated with exactly 1 Connection." ;
+  sh:minCount 1 ;
+  sh:name "ConnectionPointToConnectionShape" ;
+  sh:path s223:connectsThrough ;
+  sh:severity sh:Info
+] ,
+[ sh:class s223:Connectable ;
+  sh:maxCount 1 ;
+  sh:name "ConnectionPointToDeviceShape" ;
+  sh:path s223:isConnectionPointOf
+] .
+
+
+s223:Context sh:property [ rdf:type sh:PropertyShape ;
+                           sh:class s223:System ;
+                           sh:minCount 1 ;
+                           sh:path s223:relativeTo
+                         ] ;
+             rdfs:comment "The Context class is used to clarify the perspective to be taken when interpreting a given property." ;
+             rdfs:label "Context" .
+
+
+s223:Deadband rdfs:label "Deadband" .
+
+
+s223:DiffPress rdfs:label "Diff press" .
+
+
+s223:Direction rdfs:comment "This class has enumerated instances of Bidirectional, Inlet and Outlet used to qualify ConnectionPoints." ;
+               rdfs:label "Direction" .
+
+
+s223:DischargeContext rdfs:label "Discharge Context" .
+
+
+s223:Domain sh:property [ sh:class s223:Role ;
+                          sh:path s223:hasRole
+                        ] ;
+            rdfs:comment "This class has an enumerated set of valid instances, used to distinguish different collections of objects as belonging to one or more domains, such as lighting or HVAC." ;
+            rdfs:label "Root domain" .
+
+
+s223:DomainSpace rdfs:comment "A DomainSpace is an atomic subdivision (or component) of a Zone and is associated with a Domain such as Lighting, Heating, etc. Physical spaces can contain Domain spaces." ;
+                 sh:property [ sh:class s223:Domain ;
+                               sh:maxCount 1 ;
+                               sh:minCount 1 ;
+                               sh:path s223:hasDomain
+                             ] ,
+                             s223:hasPropertyShape ;
+                 rdfs:label "Space" .
+
+
+s223:Duct sh:property [ rdf:type sh:PropertyShape ;
+                        sh:in [ ] ;
+                      sh:maxCount 1 ;
+                      sh:name "substance" ;
+                      sh:path s223:hasSubstance
+          ] ;
+rdfs:comment "A predefined subClassOf Connection typically used to convey air in a building." ;
+rdfs:label "Duct" .
+
+
+s223:Effectiveness rdfs:label "Effectiveness" .
+
+
+s223:Enumerable sh:property [ sh:class s223:EnumerationKind ;
+                              sh:maxCount 1 ;
+                              sh:minCount 1 ;
+                              sh:path s223:hasEnumerationKind
+                            ] ;
+                rdfs:label "Enumerable" .
+
+
+s223:EnumeratedActuatableProperty rdfs:label "Enumerated actuatable property" .
+
+
+s223:EnumeratedObservableProperty rdfs:label "Enumerated observable property" .
+
+
+s223:EnumerationKind sh:property [ sh:class s223:EnumerationKind ;
+                                   sh:path s223:includes
+                                 ] ,
+                                 [ sh:class s223:EnumerationValue ;
+                                   sh:path s223:hasMember
+                                 ] ;
+                     rdfs:label "Enumeration kind" .
+
+
+s223:EnumerationValue rdfs:label "Enumeration value" ;
+                      sh:property [ sh:maxCount 1 ;
+                                    sh:message "An EnumerationValue must be a memeber of an EnumerationKind " ;
+                                    sh:minCount 1 ;
+                                    sh:path [ sh:inversePath s223:hasMember
+                                            ]
+                                  ] .
+
+
+s223:ExhaustContext rdfs:label "Exhaust Context" .
+
+
+s223:ExternalSource rdfs:label "External source" .
+
+
+s223:InletConnectionPoint sh:property [ rdf:type sh:PropertyShape ;
+                                        sh:hasValue s223:Inlet ;
+                                        sh:path s223:hasDirection
+                                      ] ;
+                          rdfs:label "Inlet Connection Point" ;
+                          rdfs:comment "A predefined subClassOf ConnectionPoint which has the direction of Inlet." .
+
+
+s223:InletSystemConnectionPoint sh:property [ rdf:type sh:PropertyShape ;
+                                              sh:hasValue s223:Inlet ;
+                                              sh:path s223:hasDirection
+                                            ] ;
+                                rdfs:label "Inlet System Connection Point" ;
+                                rdfs:comment "This class is analogous to the InletConnectionPoint class, but for SystemConnectionPoints." .
+
+
+s223:InletZoneConnectionPoint rdfs:comment "This class is analogous to the InletConnectionPoint class, but for ZoneConnectionPoints." ;
+                              rdfs:label "Inlet Zone Connection Point" ;
+                              sh:property [ rdf:type sh:PropertyShape ;
+                                            sh:hasValue s223:Inlet ;
+                                            sh:path s223:hasDirection
+                                          ] .
+
+
+s223:Junction sh:property [ sh:class s223:Segment ;
+                            sh:message "Junction is missing one or more Segments" ;
+                            sh:minCount 2 ;
+                            sh:path s223:lnx ;
+                            sh:severity sh:Info
+                          ] ;
+              rdfs:label "Junction" ;
+              rdfs:comment "A Junction is used to join two or more Segments together. This might be where a duct splits or joins, or it might be where a Segment inside one System is joined to a Segment connecting to something outside that System." .
+
+
+s223:NonQuantifiableProperty rdfs:label "NonQuantifiableProperty" .
+
+
+s223:ObservableProperty rdfs:label "observable property" ;
+                        rdfs:comment "This class describes non-numeric observations or readings, such as the state of an alarm detector." .
+
+
+s223:Occupancy rdfs:label "Occupancy" .
+
+
+s223:OutletConnectionPoint rdfs:comment "A predefined subClassOf ConnectionPoint which has the direction of Outlet." ;
+                           rdfs:label "Outlet Connection Point" ;
+                           sh:property [ rdf:type sh:PropertyShape ;
+                                         sh:hasValue s223:Outlet ;
+                                         sh:path s223:hasDirection
+                                       ] .
+
+
+s223:OutletSystemConnectionPoint rdfs:label "Outlet System Connection Point" ;
+                                 sh:property [ rdf:type sh:PropertyShape ;
+                                               sh:hasValue s223:Outlet ;
+                                               sh:path s223:hasDirection
+                                             ] ;
+                                 rdfs:comment "This class is analogous to the OutletConnectionPoint class, but for SystemConnectionPoints." .
+
+
+s223:OutletZoneConnectionPoint sh:property [ rdf:type sh:PropertyShape ;
+                                             sh:hasValue s223:Outlet ;
+                                             sh:path s223:hasDirection
+                                           ] ;
+                               rdfs:label "Outlet Zone Connection Point" ;
+                               rdfs:comment "This class is analogous to the OutletConnectionPoint class, but for ZoneConnectionPoints." .
+
+
+s223:PhysicalSpace rdfs:comment "A PhysicalSpace is an architectural concept that can represent a room, a collection of rooms such as a floor, a part of a room, or any space that might not even be thought of as a room, such as a patio space." ;
+                   sh:property [ sh:class s223:DomainSpace ;
+                                 sh:path s223:encloses
+                               ] ;
+                   rdfs:label "Physical space" ;
+                   sh:property [ sh:class s223:PhysicalSpace ;
+                                 sh:path s223:contains
+                               ] .
+
+
+s223:Pipe rdfs:label "Pipe" ;
+          sh:property [ rdf:type sh:PropertyShape ;
+                        sh:in [ ] ;
+                      sh:maxCount 1 ;
+                      sh:name "substance" ;
+                      sh:path s223:hasSubstance
+          ] ;
+rdfs:comment "A predefined subClassOf Connection typically used to convey a liquid or compressed gas in a building." .
+
+
+s223:Property rdfs:comment """An attribute, quality, or characteristic of a feature of interest.
+
+The Property class is the parent of all 6 variations of a property, which are:
+ActuatableProperty - such as the setting of a switch
+ObservableProperty - such as the state of an alarm detector
+NonQuantifiableProperty - such as the color of a device
+QuantifiableProperty - such as a maximum power rating
+QuantifiableActuatableProperty - such as a numerical setpoint
+QuantifiableObservableProperty - such as a temperature reading
+
+A QuantifiableProperty (or subClass thereof) must always be associated with a Unit and a QuantityKind, either explicitly from the Property, or through the associated Value. If the Unit is defined, the SHACL reasoner (if invoked) will figure out and assert the QuantityKind (the most general version).""" ;
+              rdfs:label "Property" ;
+              sh:xone [ ] ;
+sh:property [ sh:path s223:hasValue
+            ] .
+
+
+s223:QuantifiableActuatableProperty rdfs:comment "This class is for quantifiable values that are specified for an object (System, Device, etc.), such as a setpoint." ;
+                                    rdfs:label "Quantifiable Actuatable Property" .
+
+
+s223:QuantifiableObservableProperty rdfs:comment "This class is for measured (observed) properties that have numerical values, such as a temperature reading." ;
+                                    rdfs:label "Quantifiable Observable Property" .
+
+
+s223:QuantifiableProperty sh:property [ sh:class s223:Setpoint ;
+                                        sh:path s223:hasSetpoint
+                                      ] ,
+                                      [ sh:datatype xsd:decimal ;
+                                        sh:path s223:hasValue
+                                      ] ;
+                          rdfs:label "Quantifiable Property" ;
+                          rdfs:comment "This class is for quantifiable values that describe an object (System, Device, etc.) that are typically static. That is, they are neither measured nor specified in the course of operations." ;
+                          sh:or [ ] .
+
+
+s223:ReturnContext rdfs:label "Return Context" .
+
+
+s223:Role rdfs:label "Role" ;
+          rdfs:comment "The Role is used to characterize the (possibly changing) function a Device or Connection is playing, such as Heating or Cooling or Supply." .
+
+
+s223:Segment sh:property [ sh:maxCount 2 ;
+                           sh:message "Segment is missing one or both endpoints (Junction or ConnectionPoint)" ;
+                           sh:minCount 2 ;
+                           sh:or [ ] ;
+                         sh:path s223:lnx ;
+                         sh:qualifiedMaxCount 1 ;
+                         sh:qualifiedValueShape [ sh:class s223:ConnectionPoint
+                                                ] ;
+                         sh:severity sh:Warning
+             ] ;
+rdfs:comment "When necessary, a Connection may be subdivided into a network of Segments, joined at Junctions. This can be useful for identifying a segment of a duct before a split, for example." ;
+rdfs:label "Segment" .
+
+
+s223:Setpoint sh:property [ sh:class s223:EnumerationValue ;
+                            sh:path s223:hasAspect
+                          ] ,
+                          [ sh:datatype xsd:decimal ;
+                            sh:path s223:hasDeadband
+                          ] ,
+                          [ sh:datatype xsd:decimal ;
+                            sh:path s223:hasValue
+                          ] ;
+              rdfs:label "Setpoint" .
+
+
+s223:SetpointAspect rdfs:label "SetpointAspect" .
+
+
+s223:State rdfs:label "State" .
+
+
+s223:SupplyContext rdfs:label "Supply Context" .
+
+
+s223:SymmetricProperty rdfs:label "Symmetric property" .
+
+
+s223:System rdfs:comment """A System is a logical grouping of Devices for some functional or system reason, such as a \"chilled water system, or HVAC system\"
+A System is distinguished from a Device by the fact that you typically have to install and configure a System, while you might just install and use a Device.""" ;
+            rdfs:label "System" ;
+            sh:property s223:hasPropertyShape ,
+                        [ sh:class s223:Zone ;
+                          sh:path s223:serves
+                        ] ,
+                        [ sh:class s223:SystemConnectionPoint ;
+                          sh:name "SystemtoSystemConnectionPointShape" ;
+                          sh:path s223:hasSystemConnectionPoint
+                        ] ,
+                        [ sh:class s223:Role ;
+                          sh:path s223:hasRole
+                        ] ,
+                        s223:hasContextualRoleShape ,
+                        [ rdf:type sh:PropertyShape ;
+                          sh:minCount 0 ;
+                          sh:name "system contains shape" ;
+                          sh:or [ ] ;
+                        sh:path s223:contains
+            ] .
+
+
+s223:SystemConnectionPoint sh:property [ sh:maxCount 1 ;
+                                         sh:minCount 1 ;
+                                         sh:or [ ] ;
+                                       sh:path s223:mapsTo
+                           ] ,
+[ sh:maxCount 1 ;
+  sh:name "ConnectionPoint direction" ;
+  sh:or [ ] ;
+sh:path s223:hasDirection
+] ,
+[ sh:or [ ] ;
+sh:path s223:systemConnected
+] ;
+rdfs:label "SystemConnectionPoint" ;
+rdfs:comment "This is analogous to a ConnectionPoint, but for a System rather than a Device." .
+
+
+s223:Zone sh:property [ sh:or [ ] ;
+                      sh:path s223:contains
+          ] ;
+rdfs:label "Zone" ;
+sh:property [ sh:class s223:Domain ;
+              sh:maxCount 1 ;
+              sh:minCount 1 ;
+              sh:path s223:hasDomain
+            ] ,
+            s223:hasPropertyShape ;
+rdfs:comment "A Zone represents a collection of Spaces to identify a domain of control, such as a Lighting Zone." .
+
+
+s223:ZoneConnectionPoint rdfs:label "ZoneConnectionPoint" ;
+                         sh:property [ sh:maxCount 1 ;
+                                       sh:minCount 1 ;
+                                       sh:or [ ] ;
+                                     sh:path s223:mapsTo
+                         ] ,
+[ sh:or [ ] ;
+sh:path s223:zoneConnected
+] ;
+rdfs:comment "This is analogous to a ConnectionPoint, but for a Zone rather than a Device." ;
+sh:property [ sh:maxCount 1 ;
+              sh:name "ConnectionPoint direction" ;
+              sh:or [ ] ;
+            sh:path s223:hasDirection
+] .
+
+
+s223:actuatesProperty s223:inverseOf s223:isActuatedBy ;
+                      rdfs:label "actuates Property" .
+
+
+s223:connectsAt s223:inverseOf s223:connectsThrough ;
+                rdfs:label "connects at" .
+
+
+s223:connectsFrom rdfs:label "connects from" .
+
+
+s223:electricConsumption rdfs:label "Electric Consumption" .
+
+
+s223:encloses rdfs:label "encloses" .
+
+
+s223:hasAspect rdfs:label "has aspect" .
+
+
+s223:hasBrickReference rdfs:label "has Brick reference" .
+
+
+s223:hasConnectionPoint rdfs:label "has connection point" ;
+                        s223:inverseOf s223:isConnectionPointOf .
+
+
+s223:hasContextualRole rdfs:label "has Contextual Role" .
+
+
+s223:hasDeadband rdfs:label "has deadband" .
+
+
+s223:hasDevice s223:inverseOf s223:isDeviceOf ;
+               rdfs:label "has device" .
+
+
+s223:hasDirection rdfs:label "has Direction" .
+
+
+s223:hasDomain rdfs:label "has domain" .
+
+
+s223:hasEnumerationKind rdfs:label "has enumeration kind" .
+
+
+s223:hasExternalDataSource rdfs:label "has external data source" .
+
+
+s223:hasFunctionInput rdfs:label "has function input" .
+
+
+s223:hasLocation rdfs:label "has location" .
+
+
+s223:hasMeasurementLocation rdfs:label "has measurement location" .
+
+
+s223:hasMember rdfs:label "has member" .
+
+
+s223:hasRole rdfs:label "has role" .
+
+
+s223:hasSetpoint rdfs:label "has setpoint" .
+
+
+s223:hasSimpleValue rdfs:label "has Simple Value" ;
+                    rdfs:comment "hasSimpleValue is used to contain a fixed value that is part of a 223 model, rather than a computed, measured, or externally derived variable." .
+
+
+s223:hasSubSystem rdfs:label "has sub system" ;
+                  s223:inverseOf s223:isSubSystemOf .
+
+
+s223:hasSubstance rdfs:label "Substance" .
+
+
+s223:hasSystemConnectionPoint rdfs:label "hasSystemConnectionPoint" .
+
+
+s223:hasValue rdfs:label "hasValue" ;
+              s223:inverseOf s223:isValueOf .
+
+
+s223:inContextOf rdfs:label "in context of" .
+
+
+s223:inState rdfs:label "in State" .
+
+
+s223:includes rdfs:label "includes" .
+
+
+s223:isActuatedBy s223:inverseOf s223:actuatesProperty ;
+                  rdfs:label "isActuatedBy" .
+
+
+s223:isConnectionPointOf s223:inverseOf s223:hasConnectionPoint ;
+                         rdfs:label "is connection point of" .
+
+
+s223:isObservedBy rdfs:label "is observed by" ;
+                  s223:inverseOf s223:observesProperty .
+
+
+s223:isSubSystemOf s223:inverseOf s223:hasSubSystem ;
+                   rdfs:label "is sub system of" .
+
+
+s223:isValueOf rdfs:label "isValueOf" ;
+               s223:inverseOf s223:hasValue .
+
+
+s223:mapsTo rdfs:label "mapsTo" .
+
+
+s223:observesProperty rdfs:label "observes property" ;
+                      s223:inverseOf s223:isObservedBy .
+
+
+s223:relativeTo rdfs:label "relative to" .
+
+
+s223:returnsTo rdfs:label "returns to" .
+
+
+s223:serves rdfs:label "serves" .
+
+
+s223:suppliesTo rdfs:label "supplies to" .
+
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

@@ -1,0 +1,332 @@
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix enum: <http://data.ashrae.org/standard223/1.0/vocab/enumeration#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix s223: <http://data.ashrae.org/standard223#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix spin: <http://spinrdf.org/spin#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+s223:Actuator
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Actuator" ;
+  rdfs:subClassOf s223:Device ;
+  sh:property [
+      sh:path s223:actuatesProperty ;
+      sh:class s223:ActuatableProperty ;
+    ] ;
+.
+s223:Chiller
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Chiller" ;
+  rdfs:subClassOf s223:Device ;
+.
+s223:Coil
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Coil" ;
+  rdfs:subClassOf s223:HeatExchanger ;
+.
+s223:CoolingCoil
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Cooling coil" ;
+  rdfs:subClassOf s223:Coil ;
+.
+s223:Damper
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Damper" ;
+  rdfs:subClassOf s223:Device ;
+  sh:property [
+      a sh:PropertyShape ;
+      sh:path s223:hasConnectionPoint ;
+      sh:class s223:ConnectionPoint ;
+      sh:minCount 2 ;
+      sh:name "Air inlet point" ;
+    ] ;
+.
+s223:Device
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:comment "A Device is normally a physical entity that one might buy from a vendor - a tangible object designed to accomplish a specific task." ;
+  rdfs:label "Device" ;
+  rdfs:subClassOf s223:Connectable ;
+  sh:property s223:hasContextualRoleShape ;
+  sh:property s223:hasPropertyShape ;
+  sh:property [
+      a sh:PropertyShape ;
+      sh:path s223:contains ;
+      sh:class s223:Device ;
+      sh:minCount 0 ;
+      sh:name "device contains shape" ;
+    ] ;
+  sh:property [
+      sh:path s223:commandedState ;
+      sh:description "The commanded state of a device" ;
+      sh:maxCount 1 ;
+      sh:minCount 0 ;
+      sh:name "commanded State" ;
+    ] ;
+  sh:property [
+      sh:path s223:hasLocation ;
+      sh:class s223:PhysicalSpace ;
+    ] ;
+  sh:property [
+      sh:path s223:hasRole ;
+      sh:class s223:Role ;
+    ] ;
+.
+s223:DifferentialSensor
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Differential sensor" ;
+  rdfs:subClassOf s223:Sensor ;
+  sh:property [
+      sh:path s223:hasMeasurementLocation ;
+      sh:maxCount 2 ;
+      sh:minCount 2 ;
+    ] ;
+.
+s223:Economizer
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Economizer" ;
+  rdfs:subClassOf s223:Device ;
+.
+s223:Fan
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Fan" ;
+  rdfs:subClassOf s223:FlowDevice ;
+  rdfs:subClassOf brick:Fan ;
+  sh:property [
+      a sh:PropertyShape ;
+      sh:path s223:hasConnectionPoint ;
+      sh:class s223:ConnectionPoint ;
+      sh:minCount 2 ;
+      sh:name "Air inlet point" ;
+    ] ;
+.
+s223:FinnedHeatExchanger
+  a s223:Class ;
+  rdfs:label "Finned heat exchanger" ;
+  rdfs:subClassOf s223:HeatExchanger ;
+.
+s223:FlowDevice
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Flow Device" ;
+  rdfs:subClassOf s223:Device ;
+  sh:property [
+      a sh:PropertyShape ;
+      sh:path s223:electricConsumption ;
+      sh:class s223:QuantifiableProperty ;
+      sh:minCount 0 ;
+      sh:name "electric consumption shape" ;
+    ] ;
+  sh:property [
+      a sh:PropertyShape ;
+      sh:path s223:hasConnectionPoint ;
+      sh:class s223:ConnectionPoint ;
+      sh:minCount 2 ;
+      sh:name "Inlet or Outlet point property" ;
+      sh:severity sh:Info ;
+    ] ;
+  sh:property [
+      a sh:PropertyShape ;
+      sh:path s223:hasOutletPressure ;
+      sh:class s223:QuantifiableProperty ;
+      sh:minCount 0 ;
+      sh:name "outlet pressure shape" ;
+    ] ;
+  sh:property [
+      a sh:PropertyShape ;
+      sh:path s223:hasSubstance ;
+      sh:in (
+          enum:Substance-Air
+          enum:Substance-Water
+          enum:Substance-Glycol
+        ) ;
+      sh:maxCount 1 ;
+      sh:name "substance" ;
+    ] ;
+.
+s223:FlowSensor
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Flow sensor" ;
+  rdfs:subClassOf s223:Sensor ;
+.
+s223:HeatExchanger
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Heat exchanger" ;
+  rdfs:subClassOf s223:Device ;
+.
+s223:HeatingCoil
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Heating coil" ;
+  rdfs:subClassOf s223:Coil ;
+.
+s223:HumiditySensor
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Humidity sensor" ;
+  rdfs:subClassOf s223:Sensor ;
+.
+s223:Luminaire
+  a s223:Class ;
+  rdfs:label "Luminaire" ;
+  rdfs:subClassOf s223:Device ;
+.
+s223:ManualDamper
+  a s223:Class ;
+  rdfs:label "Manual damper" ;
+  rdfs:subClassOf s223:Damper ;
+.
+s223:Manual_Valve
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Manual Valve" ;
+  rdfs:subClassOf s223:Valve ;
+.
+s223:MororizedThreeWayValve
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Mororized three way valve" ;
+  rdfs:subClassOf s223:Motorized_Valve ;
+.
+s223:MotorizedDamper
+  a s223:Class ;
+  rdfs:label "Motorized damper" ;
+  rdfs:subClassOf s223:Damper ;
+.
+s223:MotorizedTwoWayValve
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Motorized two way valve" ;
+  rdfs:subClassOf s223:Motorized_Valve ;
+.
+s223:Motorized_Valve
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Motorized Valve" ;
+  rdfs:subClassOf s223:Valve ;
+.
+s223:PlateHeatExchanger
+  a s223:Class ;
+  rdfs:label "Plate heat exchanger" ;
+  rdfs:subClassOf s223:HeatExchanger ;
+.
+s223:PressureSensor
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Pressure sensor" ;
+  rdfs:subClassOf s223:Sensor ;
+.
+s223:Pump
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Pump" ;
+  rdfs:subClassOf s223:FlowDevice ;
+  rdfs:subClassOf brick:Pump ;
+.
+s223:Sensor
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:comment "A Sensor produces an ObservableProperty (which may or may not be quantifiable. For example, it might just sense an alarm state, or occupancy. But usually it will produce a number, in which case it is associated with a QuantifiableObservableProperty)." ;
+  rdfs:label "Sensor" ;
+  rdfs:subClassOf s223:Device ;
+  sh:property [
+      sh:path s223:hasMeasurementLocation ;
+      sh:or (
+          [
+            sh:class s223:Device ;
+          ]
+          [
+            sh:class s223:Connection ;
+          ]
+          [
+            sh:class s223:Segment ;
+          ]
+          [
+            sh:class s223:ConnectionPoint ;
+          ]
+          [
+            sh:class s223:DomainSpace ;
+          ]
+        ) ;
+    ] ;
+  sh:property [
+      sh:path s223:observesProperty ;
+      sh:class s223:ObservableProperty ;
+      sh:maxCount 1 ;
+    ] ;
+.
+s223:ShellTubeHeatExchanger
+  a s223:Class ;
+  rdfs:label "Shell tube heat exchanger" ;
+  rdfs:subClassOf s223:HeatExchanger ;
+.
+s223:StorageTank
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Storage tank" ;
+  rdfs:subClassOf s223:Device ;
+.
+s223:TemperatureSensor
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Temp sensor" ;
+  rdfs:subClassOf s223:Sensor ;
+.
+s223:ThreeWayValve
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Three way valve" ;
+  rdfs:subClassOf s223:Manual_Valve ;
+.
+s223:TwoWayValve
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Two way valve" ;
+  rdfs:subClassOf s223:Manual_Valve ;
+.
+s223:VAV
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "VAV" ;
+  rdfs:subClassOf s223:Device ;
+.
+s223:VFD
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "VFD" ;
+  rdfs:subClassOf s223:Device ;
+.
+s223:Valve
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Valve" ;
+  rdfs:subClassOf s223:Device ;
+.
+s223:VirtualSensor
+  a s223:Class ;
+  a sh:NodeShape ;
+  rdfs:label "Virtual sensor" ;
+  rdfs:subClassOf s223:Sensor ;
+  sh:property [
+      sh:path s223:hasFunctionInput ;
+      sh:class s223:Property ;
+    ] ;
+  sh:property [
+      sh:path s223:hasMeasurementLocation ;
+      sh:maxCount 0 ;
+    ] ;
+.
