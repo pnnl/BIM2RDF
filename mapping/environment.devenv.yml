@@ -55,6 +55,8 @@ dependencies:
     - python scripts/install.py # [run_req] ontop cli
   # dev
   - mypy                        # [dev_req]
+  - ipython                     # [dev_req]
+  - ipykernel                   # [dev_req]
 
 
 environment:
