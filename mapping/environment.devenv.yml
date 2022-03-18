@@ -50,6 +50,7 @@ dependencies:
   - rdflib
   - jinja2
   - python
+  - openjdk                     # need java for ontop
   - cmd:
     - python scripts/install.py # ontop cli
 
