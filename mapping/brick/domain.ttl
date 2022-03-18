@@ -1,0 +1,51 @@
+# I. BRICK 'MODS'
+
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+
+# ratedpowerinput
+brick:ratedPowerInput a brick:EntityProperty ;
+    rdfs:range brick:PowerShape ;
+    skos:definition "The rated power input of the entity" .
+
+brick:PowerShape a owl:Class,
+    sh:NodeShape ;
+    sh:property [ a sh:PropertyShape ;
+            sh:in ( unit:BAR-L-PER-SEC unit:BAR-M3-PER-SEC unit:BTU_IT-PER-HR unit:BTU_IT-PER-SEC unit:ERG-PER-SEC unit:FT-LB_F-PER-HR unit:FT-LB_F-PER-MIN unit:FT-LB_F-PER-SEC unit:GigaW unit:HP unit:HP-PER-M unit:HP-PER-V unit:HP_Boiler unit:HP_Brake unit:HP_Electric unit:HP_Metric unit:J-PER-HR unit:J-PER-SEC unit:KiloCAL-PER-MIN unit:KiloCAL-PER-SEC unit:KiloW unit:MegaJ-PER-SEC unit:MegaPA-L-PER-SEC unit:MegaPA-M3-PER-SEC unit:MegaW unit:MicroW unit:MilliBAR-L-PER-SEC unit:MilliBAR-M3-PER-SEC unit:MilliW unit:NanoW unit:PA-L-PER-SEC unit:PA-M3-PER-SEC unit:PSI-IN3-PER-SEC unit:PSI-M3-PER-SEC unit:PSI-YD3-PER-SEC unit:PicoW unit:PlanckPower unit:TON_FG unit:TeraW unit:W ) ;
+            sh:minCount 1 ;
+            sh:path brick:hasUnit ].
+
+# color temp
+brick:CorrectedColorTemperature a brick:EntityProperty ;
+    rdfs:range brick:CorrectedColorTemperatureShape ;
+    skos:definition "corrected color temperature" .
+
+brick:CorrectedColorTemperatureShape a owl:Class,
+    sh:NodeShape;
+    sh:property [a sh:PropertyShape;
+            sh:in (unit:K);
+            sh:minCount 1;
+            sh:path brick:hasUnit].
+
+# luminous flux
+# there is luminous_flux 'quantity'(not property) in brick!
+brick:LuminousFlux a brick:EntityProperty ;
+    rdfs:range brick:LuminousFluxShape ;
+    skos:definition "luminous flux" .
+
+brick:LuminousFluxShape a owl:Class,
+    sh:NodeShape;
+    sh:property [a sh:PropertyShape;
+            sh:in (unit:LM);
+            sh:minCount 1;
+            sh:path brick:hasUnit].
+
+
+# SPECIFICS
+@prefix bdg: <http://example.org/building/> .
