@@ -47,12 +47,14 @@ dependencies:
   # ValueError: Couldn't find directory of environment 'ds-template-test'
   #- sometestframework         # [dev_req]
   #- some analysis library     # [run_req]
-  - rdflib
-  - jinja2
-  - python
+  - rdflib                      # [run_req]
+  - jinja2                      # [run_req]
+  - python                      # [run_req]
   - openjdk                     # need java for ontop
-  - cmd:
-    - python scripts/install.py # ontop cli
+  - cmd:                        # [run_req]
+    - python scripts/install.py # [run_req] ontop cli
+  # dev
+  - mypy                        # [dev_req]
 
 
 environment:
