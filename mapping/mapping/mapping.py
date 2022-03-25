@@ -1,6 +1,5 @@
+from . import mapping_dir
 from pathlib import Path
-mapping_dir = Path(__file__).parent.parent
-assert(mapping_dir.name == 'mapping')
 from . import schema as s
 
 from typing import Iterator, Callable
@@ -176,13 +175,13 @@ class SQLRDFMap(s.SQLRDFMap):
 
     @classmethod
     def from_name(cls, name: str) -> Callable[[str, Properties], 'SQLRDFMap']:
-        def o(bdg: str):
-            _: s.Graph = OntologyCustomization.from_name(name)(bdg).graph + Ontology.from_name(name).graph
+        def o(bdg: str) -> s.Graph:
+            _ = OntologyCustomization.from_name(name)(bdg).graph
+            _ = _ + Ontology.from_name(name).graph
             return _
         m = Mapping.from_name(name)
         return partial(cls, mapping=m,)
         return lambda bdg, prop: cls(o(bdg), m, prop)
-
         
 
     def write(self, workspace: Path=get_workspace(),
