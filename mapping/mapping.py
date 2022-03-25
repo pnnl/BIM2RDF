@@ -39,12 +39,11 @@ class DBProperties:
         if not has_constraint(tbl_schema):
             return tbl_schema
         else:
-            parts = [part for part in tbl_schema.split()
+            parts = [part for part in tbl_schema.split(',')
                     if not has_constraint(part)]
             tbl_schema = ','.join(parts)
             tbl_schema += ')'
             return tbl_schema
-
 
 
     def lines(self):
