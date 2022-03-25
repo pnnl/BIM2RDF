@@ -1,6 +1,7 @@
 from attrs import frozen as dataclass
 from rdflib import Graph
 from collections.abc import Mapping
+from typing import Any
 
 @dataclass
 class DBProperties:
@@ -32,5 +33,5 @@ class OntologyCustomization:
 @dataclass
 class SQLRDFMap:
     ontology: Graph # not necessarily the ontology above
-    mapping: Mapping
+    mapping: Mapping[str, Any]
     properties: Properties
