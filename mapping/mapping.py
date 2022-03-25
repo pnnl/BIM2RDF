@@ -1,11 +1,8 @@
-from pathlib import WindowsPath, Path
-import sqlite3
-from turtle import st
-
-mapping_dir = Path(__file__).parent
+from pathlib import Path
+mapping_dir = Path(__file__).parent.parent
 assert(mapping_dir.name == 'mapping')
+from . import schema as s
 
-from attrs import frozen as dataclass
 from typing import Iterator, Callable
 from functools import partial
 
@@ -13,12 +10,7 @@ def properties_lines(d: dict) -> Iterator[str]:
     for k,v in d.items():
         yield f"{k}={str(v).lower() if isinstance(v, bool) else v}"
 
-@dataclass
-class DBProperties:
-    name: str
-    url: str
-    driver: str
-    user: str
+class DBProperties(s.DBProperties):
 
     @classmethod
     def sqlite(cls, file: Path) -> 'DBProperties':
@@ -73,9 +65,7 @@ class DBProperties:
         return properties_lines(_)
 
 
-@dataclass
-class OntopProperties:
-    inferDefaultDatatype: bool
+class OntopProperties(s.OntopProperties):
 
     def lines(self):
         from attrs import asdict
@@ -83,10 +73,7 @@ class OntopProperties:
         return properties_lines(_)
 
 
-@dataclass  
-class Properties:
-    jdbc:   DBProperties
-    ontop:  OntopProperties
+class Properties(s.Properties):
 
     def lines(self) -> Iterator[str]:
         from attrs import asdict
@@ -100,16 +87,16 @@ class Properties:
     def path(self, dir: Path,  name='sql') -> Path:
         return dir / f"{name}.properties"
 
-class Mapping(dict):
+class Mapping(s.Mapping):
 
     @classmethod
     def from_yamlfile(cls, path: Path) -> 'Mapping':
         import yaml
-        return yaml.safe_load(open(path))
+        return cls(yaml.safe_load(open(path)))
 
     @classmethod
     def from_name(cls, name) -> 'Mapping':
-        return cls.from_yamlfile(mapping_dir / name)
+        return cls(cls.from_yamlfile(mapping_dir / name))
         
     def make_obda(maps: dict):
         from jinja2 import Environment, FileSystemLoader#, select_autoescape
@@ -147,11 +134,8 @@ def get_workspace(loc: Path= mapping_dir / 'work') -> Path:
     return loc
 
 
-import rdflib
-@dataclass
-class Ontology:
-    name: str
-    graph: rdflib.Graph
+
+class Ontology(s.Ontology):
     
     @classmethod
     def from_name(cls, onto_name) -> 'Ontology':
@@ -167,21 +151,19 @@ class Ontology:
         return dir / f"{name}.ttl"
 
 
-@dataclass
-class OntologyCustomization:
-    building: str
-    ontology: Ontology
+class OntologyCustomization(s.OntologyCustomization):
 
     @classmethod
     def from_name(cls, name: str) -> Callable[[str], 'OntologyCustomization']:
         return partial(cls, ontology=Ontology.from_name(name))
+
     
     @property
-    def graph(self) -> rdflib.Graph:
+    def graph(self) -> s.Graph:
         def turtle_soup(loc):
-            g = rdflib.Graph()
+            g = s.Graph()
             for f in (f for f in ( loc ).iterdir() if f.suffix == '.ttl'):
-                g += rdflib.Graph().parse(f)
+                g += s.Graph().parse(f)
             return g
         # do something with building TODO
         return turtle_soup( mapping_dir / self.ontology.name )
@@ -190,20 +172,17 @@ class OntologyCustomization:
         self.graph.serialize(file, format='turtle')
         
 
-@dataclass
-class SQLRDFMap:
-    ontology: rdflib.Graph # not necessarily the ontology above
-    mapping: Mapping
-    properties: Properties
+class SQLRDFMap(s.SQLRDFMap):
 
     @classmethod
     def from_name(cls, name: str) -> Callable[[str, Properties], 'SQLRDFMap']:
-        o = lambda bdg: OntologyCustomization.from_name(name)(bdg).graph + Ontology.from_name(name)
+        def o(bdg: str):
+            _: s.Graph = OntologyCustomization.from_name(name)(bdg).graph + Ontology.from_name(name).graph
+            return _
         m = Mapping.from_name(name)
         return partial(cls, mapping=m,)
         return lambda bdg, prop: cls(o(bdg), m, prop)
 
-    
         
 
     def write(self, workspace: Path=get_workspace(),
