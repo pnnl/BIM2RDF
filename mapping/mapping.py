@@ -1,4 +1,5 @@
 from pathlib import WindowsPath, Path
+import sqlite3
 
 mapping_dir = Path(__file__).parent
 assert(mapping_dir.name == 'mapping')
@@ -20,29 +21,48 @@ class DBProperties:
 
     @classmethod
     def sqlite(cls, file: Path) -> 'DBProperties':
-        return cls('sqldb', f"jdbc:sqlite:{file}", 'org.sqlite.JDBC', 'user')
+        assert(file.is_file())
+        stripped = file.parent / (file.stem  + '_stripped' + file.suffix )
+        if stripped.exists(): stripped.unlink()
+        import sqlite3
+        con = sqlite3.connect(stripped)
+        cur = con.cursor()
+        for line in cls.constraint_stripper(file):
+            cur.execute(line)
+        # test
+        con.commit()
+        con.execute("SELECT name FROM sqlite_schema WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
+        return cls('sqldb', f"jdbc:sqlite:{stripped}", 'org.sqlite.JDBC', 'user')
 
-    @staticmethod
-    def strip_contraints(sqlitedb: str | Path )-> Path: # hack
+    @classmethod
+    def constraint_stripper(cls, sqlitedb: str | Path )-> Iterator[str]: # hack
         import sqlite3
         src = sqlite3.connect(str(sqlitedb))
         table_query = """\
         SELECT name FROM sqlite_schema WHERE type ='table' AND name NOT LIKE 'sqlite_%';
         """
         tables = src.execute(table_query)
-        def table_schema(tbl: str) -> str:
-            return f"SELECT sql FROM sqlite_master WHERE name='{tbl}';"
+        #def table_schema(tbl: str) -> str:
+        #    return f"SELECT sql FROM sqlite_master WHERE name='{tbl}';"
+        for line in src.iterdump():
+            if 'create table' in line.lower():
+                line = cls.strip_constraint(line)
+            yield line
     
     @staticmethod
     def strip_constraint(tbl_schema: str) -> str:
-        has_constraint = lambda s: 'constraint' in s.lower()
+        # todo: inelegant
+        has_constraint = lambda s: ('constraint "' in s.lower()) #or ('primary key' in s.lower())
         if not has_constraint(tbl_schema):
             return tbl_schema
         else:
-            parts = [part for part in tbl_schema.split(',')
-                    if not has_constraint(part)]
+            parts = []
+            for part in tbl_schema.split(','):
+                if not has_constraint(part): parts.append(part)
+                else: break # expecting contraints to be last
             tbl_schema = ','.join(parts)
             tbl_schema += ')'
+            assert(not has_constraint(tbl_schema))
             return tbl_schema
 
 
