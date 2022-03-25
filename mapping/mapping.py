@@ -27,6 +27,7 @@ class DBProperties:
         import sqlite3
         con = sqlite3.connect(stripped)
         cur = con.cursor()
+        # for some reason, ontop didnt like sqlite constraints
         for line in cls.constraint_stripper(file):
             cur.execute(line)
         # test
