@@ -21,6 +21,18 @@ def get(name: str):
     import rdflib
     g = rdflib.Graph()
     for n, f in groups(): g += rdflib.Graph().parse(f)
+    if 'brick' in name.lower(): g = fix_brick(g)
+    return g
+
+
+def fix_brick(g):
+    # https://github.com/BrickSchema/Brick/issues/308
+    from rdflib import OWL as owl
+    from rdflib import RDF as rdf
+    from rdflib import URIRef
+    v=URIRef('https://brickschema.org/schema/Brick#value')
+    #g.remove( (v, rdf.type, owl.DatatypeProperty) )
+    g.remove( (v, rdf.type, owl.ObjectProperty) )
     return g
 
 

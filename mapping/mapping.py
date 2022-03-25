@@ -1,79 +1,216 @@
+from pathlib import WindowsPath, Path
+
+mapping_dir = Path(__file__).parent
+assert(mapping_dir.name == 'mapping')
+
+from attrs import frozen as dataclass
+from typing import Iterator, Callable
+from functools import partial
+
+def properties_lines(d: dict) -> Iterator[str]:
+    for k,v in d.items():
+        yield f"{k}={str(v).lower() if isinstance(v, bool) else v}"
+
+@dataclass
+class DBProperties:
+    name: str
+    url: str
+    driver: str
+    user: str
+
+    @classmethod
+    def sqlite(cls, file: Path) -> 'DBProperties':
+        return cls('sqldb', f"jdbc:sqlite:{file}", 'org.sqlite.JDBC', 'user')
+
+    @staticmethod
+    def strip_contraints(sqlitedb: str | Path )-> Path: # hack
+        import sqlite3
+        src = sqlite3.connect(str(sqlitedb))
+        table_query = """\
+        SELECT name FROM sqlite_schema WHERE type ='table' AND name NOT LIKE 'sqlite_%';
+        """
+        tables = src.execute(table_query)
+        def table_schema(tbl: str) -> str:
+            return f"SELECT sql FROM sqlite_master WHERE name='{tbl}';"
+    
+    @staticmethod
+    def strip_constraint(tbl_schema: str) -> str:
+        has_constraint = lambda s: 'constraint' in s.lower()
+        if not has_constraint(tbl_schema):
+            return tbl_schema
+        else:
+            parts = [part for part in tbl_schema.split()
+                    if not has_constraint(part)]
+            tbl_schema = ','.join(parts)
+            tbl_schema += ')'
+            return tbl_schema
 
 
-#%%
-def get_obda():
-    from jinja2 import Environment, FileSystemLoader#, select_autoescape
-    env = Environment(loader=FileSystemLoader('.'))
-    import yaml
-    mapping = yaml.safe_load(open('mapping.yaml'))
 
-    def strip_comments(lines):
-        lines = lines.split('\n')
-        o = ""
-        for ln in lines:
-            o += ln.split('#', 1)[0]
-            o += ' ' # need a lil space sometimes
-        return o
-    for map in mapping['maps']:
-        map['target'] = strip_comments(map['target'])
-        map['source'] = strip_comments(map['source'])
-    return env.get_template('obda.jinja').render(**mapping)
-
-def sqlmap(onto='ontology', fn='mapped'):
-    from pathlib import Path
-    from shutil import which
-    ontop = Path(which('ontop')).absolute()
-    from subprocess import run
-    # ontop materialize ^
-    # --properties sqldb.properties ^
-    # -m mapping.obda ^
-    # -t Brick.ttl ^
-    # --disable-reasoning ^
-    # -f turtle ^
-    # -o mapping
-    o = Path('.') / f'{fn}.ttl'
-    m = Path('.') / 'mapping.obda'
-    assert(m.exists())
-    onto = Path('.') / f'{onto}.ttl' if not onto.endswith('.ttl') else onto
-    assert(onto.exists())
-    p = Path('.') / 'sqldb.properties'
-    assert(p.exists())
-    if o.exists():
-        o.unlink()
-    import yaml
-    r = run([
-        ontop, 'materialize',
-        '--properties', str(p),
-        '-m', str(m),
-        '-t', str(onto),
-        '--disable-reasoning',
-        '-f', 'turtle',
-        '-o', fn,
-        '--db-password', 'sdfsdffsd' 
-    ], cwd=Path('.'),
-    shell=False, check=True, 
-    )
-    assert(o.exists())
-    return o
+    def lines(self):
+        from attrs import asdict
+        _ = asdict(self)
+        return properties_lines(_)
 
 
-def do():
-    from graph import get_223p, export
-    import rdflib
-    b = get_223p()
-    m = rdflib.Graph().parse('mapping.ttl')
-    # TODO fig out importing graphs
-    #for p,u in tuple(m.namespaces()): doesnt work. ontop complians
-    #    if 'qudt' in str(u): m.parse(u)
-    o = b+m
-    export(o, 'ontology')
-    from mapping import get_obda
-    open('mapping.obda', 'w').write(get_obda())
-    m = sqlmap('ontology')
-    m = rdflib.Graph().parse(m)
-    g = m+o
-    return export(g)
+@dataclass
+class OntopProperties:
+    inferDefaultDatatype: bool
+
+    def lines(self):
+        from attrs import asdict
+        _ = asdict(self)
+        return properties_lines(_)
 
 
-if __name__ == '__main__':
-    do()
+@dataclass  
+class Properties:
+    jdbc:   DBProperties
+    ontop:  OntopProperties
+
+    def lines(self) -> Iterator[str]:
+        from attrs import asdict
+        for k,v in asdict(self, recurse=False).items():
+            for line in v.lines():
+                yield f"{k}.{line}" # just prefix
+
+    def write(self, file):
+        file.writelines(self.lines())
+
+    def path(self, dir: Path,  name='sql') -> Path:
+        return dir / f"{name}.properties"
+
+class Mapping(dict):
+
+    @classmethod
+    def from_yamlfile(cls, path: Path) -> 'Mapping':
+        import yaml
+        return yaml.safe_load(open(path))
+
+    @classmethod
+    def from_name(cls, name) -> 'Mapping':
+        return cls.from_yamlfile(mapping_dir / name)
+        
+    def make_obda(maps: dict):
+        from jinja2 import Environment, FileSystemLoader#, select_autoescape
+        env = Environment(loader=FileSystemLoader(mapping_dir))
+
+        def strip_comments(lines):
+            lines = lines.split('\n')
+            o = ""
+            for ln in lines:
+                o += ln.split('#', 1)[0]
+                o += ' ' # need a lil space sometimes
+            return o
+        for map in maps['maps']:
+            map['target'] = strip_comments(map['target'])
+            map['source'] = strip_comments(map['source'])
+        return env.get_template('obda.jinja').render(**maps)
+
+    
+    def write(self, file):
+        _ = self.make_obda()
+        file.writelines(file)
+
+    
+    def path(self, dir: Path,  name='maps') -> Path:
+        return dir / f"{name}.obda"
+
+
+def get_workspace(loc: WindowsPath=mapping_dir / 'work') -> WindowsPath:
+    if not loc.exists():
+        loc.mkdir()
+    else:
+        from shutil import rmtree
+        rmtree(loc)
+        loc.mkdir()
+    return loc
+
+
+
+import rdflib
+@dataclass
+class Ontology:
+    name: str
+    graph: rdflib.Graph
+    
+    @classmethod
+    def from_name(cls, onto_name) -> 'Ontology':
+        from ontologies import get
+        _ =  get(onto_name)
+        _ = cls(onto_name, _)
+        return _
+
+    def write(self, file):
+        self.graph.serialize(file, format='turtle')
+    
+    def path(self, dir: Path,  name='onto'):
+        return dir / f"{name}.ttl"
+
+
+@dataclass
+class OntologyCustomization:
+    building: str
+    ontolgy: Ontology
+
+    @classmethod
+    def from_name(cls, name: str) -> Callable[[Ontology], 'OntologyCustomization']:
+        return partial(cls, building=Ontology.from_name(name))
+        #return lambda b: cls(b,  Ontology.from_name(name))
+    
+    @property
+    def graph(self) -> rdflib.Graph:
+        def turtle_soup(loc):
+            g = rdflib.Graph()
+            for f in (f for f in ( loc ).iterdir() if f.suffix == '.ttl'):
+                g += rdflib.Graph().parse(f)
+            return g
+        # do something with building TODO
+        return turtle_soup( mapping_dir / self.ontolgy.name )
+        
+
+@dataclass
+class SQLRDFMap:
+    ontology: rdflib.Graph # not necessarily the ontology above
+    mapping: Mapping
+    properties: Properties
+
+    @classmethod
+    def from_name(cls, name: str):
+        from functools import partial
+        o = lambda bdg: OntologyCustomization.from_name(name)(bdg).graph + Ontology.from_name(name)
+        m = Mapping.from_name(name)
+        #return lambda 
+        
+
+    def write(self, workspace: Path=get_workspace(), out='mapped') -> Path:
+        w = workspace
+        from shutil import which
+        _ = which('ontop')
+        if _:
+            ontop = Path(_).absolute()
+            del _
+        else:
+            raise RuntimeError('ontop exe not found')
+        out =           w / f'{out}.ttl'
+        for fio in {self.ontology.path(w), self.mapping.path(w), self.sql.path(w), out}:
+            if f.exists(): f.unlink()
+            del f
+        from subprocess import run
+        r = run([
+            ontop, 'materialize',
+            '-t',                   str(self.ontology.path(w)),
+            '-m',                   str(self.mapping.path(w)),
+            '--properties',         str(self.sql.path(w)),
+            '-o',                   str(out),
+            '--disable-reasoning',
+            '-f', 'turtle',
+            '--db-password', 'sdfsdffsd' 
+        ], cwd=w,
+        shell=False, check=True,
+        )
+        assert(out.exists())
+        return out
+
+
+

@@ -11,3 +11,5 @@ def dl_brick() -> rdflib.Graph:
         urlretrieve(src, dst)
     return rdflib.Graph().parse(dst)
 
+
+

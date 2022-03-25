@@ -54,10 +54,14 @@ dependencies:
   - cmd:                        # [run_req]
     - python scripts/install.py # [run_req] ontop cli
   - invoke                      # [run_req]
+  - pyyaml                      # [run_req]
+  - attrs                       # [run_req]
   # dev
   - mypy                        # [dev_req]
   - ipython                     # [dev_req]
   - ipykernel                   # [dev_req]
+  - pip                         # [dev_req]
+    - types-PyYAML              # [dev_req]
 
 
 environment:
