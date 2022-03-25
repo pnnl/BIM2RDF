@@ -1,5 +1,6 @@
 from pathlib import WindowsPath, Path
 import sqlite3
+from turtle import st
 
 mapping_dir = Path(__file__).parent
 assert(mapping_dir.name == 'mapping')
@@ -169,12 +170,11 @@ class Ontology:
 @dataclass
 class OntologyCustomization:
     building: str
-    ontolgy: Ontology
+    ontology: Ontology
 
     @classmethod
-    def from_name(cls, name: str) -> Callable[[Ontology], 'OntologyCustomization']:
-        return partial(cls, building=Ontology.from_name(name))
-        #return lambda b: cls(b,  Ontology.from_name(name))
+    def from_name(cls, name: str) -> Callable[[str], 'OntologyCustomization']:
+        return partial(cls, ontology=Ontology.from_name(name))
     
     @property
     def graph(self) -> rdflib.Graph:
@@ -184,7 +184,10 @@ class OntologyCustomization:
                 g += rdflib.Graph().parse(f)
             return g
         # do something with building TODO
-        return turtle_soup( mapping_dir / self.ontolgy.name )
+        return turtle_soup( mapping_dir / self.ontology.name )
+
+    def write(self, file):
+        self.graph.serialize(file, format='turtle')
         
 
 @dataclass
@@ -194,14 +197,19 @@ class SQLRDFMap:
     properties: Properties
 
     @classmethod
-    def from_name(cls, name: str):
-        from functools import partial
+    def from_name(cls, name: str) -> Callable[[str, Properties], 'SQLRDFMap']:
         o = lambda bdg: OntologyCustomization.from_name(name)(bdg).graph + Ontology.from_name(name)
         m = Mapping.from_name(name)
-        #return lambda 
+        return partial(cls, mapping=m,)
+        return lambda bdg, prop: cls(o(bdg), m, prop)
+
+    
         
 
-    def write(self, workspace: Path=get_workspace(), out='mapped') -> Path:
+    def write(self, workspace: Path=get_workspace(),
+                # just names
+                ontology = 'ontology', mapping = 'maps', properties = 'sql',
+                out='mapped') -> Path:
         w = workspace
         from shutil import which
         _ = which('ontop')
@@ -210,25 +218,32 @@ class SQLRDFMap:
             del _
         else:
             raise RuntimeError('ontop exe not found')
+        ontology =      w / f"{ontology}.ttl"
+        mapping =       w / f"{mapping}.obda"
+        properties =    w / f"{properties}.properties"
         out =           w / f'{out}.ttl'
-        for fio in {self.ontology.path(w), self.mapping.path(w), self.sql.path(w), out}:
-            if f.exists(): f.unlink()
-            del f
+        # clear
+        for fio in {ontology, mapping, properties, out}:
+            if fio.exists(): fio.unlink()
+            del fio
+        # write
+        self.ontology.serialize(ontology)
+        self.mapping.write(open(mapping, 'w'))
+        self.properties.write(open(properties, 'w'))
         from subprocess import run
         r = run([
             ontop, 'materialize',
-            '-t',                   str(self.ontology.path(w)),
-            '-m',                   str(self.mapping.path(w)),
-            '--properties',         str(self.sql.path(w)),
+            '-t',                   str(ontology),
+            '-m',                   str(mapping),
+            '--properties',         str(properties),
             '-o',                   str(out),
             '--disable-reasoning',
             '-f', 'turtle',
             '--db-password', 'sdfsdffsd' 
-        ], cwd=w,
+        ],  cwd=w,
         shell=False, check=True,
         )
         assert(out.exists())
         return out
-
 
 
