@@ -66,7 +66,6 @@ class DBProperties:
             assert(not has_constraint(tbl_schema))
             return tbl_schema
 
-
     def lines(self):
         from attrs import asdict
         _ = asdict(self)
@@ -137,7 +136,7 @@ class Mapping(dict):
         return dir / f"{name}.obda"
 
 
-def get_workspace(loc: WindowsPath=mapping_dir / 'work') -> WindowsPath:
+def get_workspace(loc: Path= mapping_dir / 'work') -> Path:
     if not loc.exists():
         loc.mkdir()
     else:
@@ -145,7 +144,6 @@ def get_workspace(loc: WindowsPath=mapping_dir / 'work') -> WindowsPath:
         rmtree(loc)
         loc.mkdir()
     return loc
-
 
 
 import rdflib
