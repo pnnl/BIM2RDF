@@ -81,14 +81,14 @@ URI = NewType('URI', str)
 Prefixes = Mapping[str, URI]
 
 SQL = NewType('SQL', str)
-TTL = NewType('TTL', str)
+templatedTTL = NewType('TTL', str)
 class Map(Base):
     @abstractfield
     def id(self)            -> str: ...
     @abstractfield
     def source(self)        -> SQL: ...
     @abstractfield
-    def target(self)        -> TTL: ...
+    def target(self)        -> templatedTTL: ...
 
 
 class Mapping(Base):
