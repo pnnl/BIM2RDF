@@ -1,7 +1,7 @@
 from attrs import frozen as dataclass
 from rdflib import Graph
 from collections.abc import Mapping 
-from typing import Any, Callable, TypeVar, Generic
+from typing import Any, Callable, NewType, TypeVar, Generic, Sequence
 from abc import ABC, abstractmethod, abstractclassmethod
 
 
@@ -21,11 +21,13 @@ class Construtor(Generic[T], ABC):
 @dataclass # looks like i have to put this here
 class Base(Construtor): pass
 
+
 class DBProperties(Base):
     @abstractfield
     def name(self)          -> str: ...
     @abstractfield
-    def url(self)           -> str: ...
+    def url(self)           -> str:
+        """it's called a url but not a web url"""
     @abstractfield
     def driver(self)        -> str: ...
     @abstractfield
@@ -75,12 +77,45 @@ class Ontology(Base):
     @abstractmethod
     def graph(self)         -> Graph: ...
 
+URI = NewType('URI', str)
+Prefixes = Mapping[str, URI]
+
+SQL = NewType('SQL', str)
+TTL = NewType('TTL', str)
+class Map(Base):
+    @abstractfield
+    def id(self)            -> str: ...
+    @abstractfield
+    def source(self)        -> SQL: ...
+    @abstractfield
+    def target(self)        -> TTL: ...
+
+
+class Mapping(Base):
+    @abstractfield
+    def prefixes(self)      -> Prefixes | None: ...
+    @abstractfield
+    def maps(self)          -> Sequence[Map]: ...
+    
 
 class SQLRDFMap(Base):
     @abstractfield
     def ontology(self)      -> Ontology: ...
     @abstractfield
-    def mapping(self)       -> Mapping[str, Any]: ... # todo typeddict for further
+    def mapping(self)       -> Mapping: ...
     @abstractfield
     def properties(self)    -> Properties: ...
 
+
+
+if __name__ == '__main__':
+    class TestAbs(Base):
+        @abstractfield
+        def attr(self): ...
+    @dataclass
+    class TestImpl(TestAbs):
+        attr: int
+        @classmethod
+        def make(cls):
+            return cls(5)
+    TestImpl.make()
