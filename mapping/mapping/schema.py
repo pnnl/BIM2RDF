@@ -146,21 +146,22 @@ class SQLRDFMapping(Base):
         """represents 'input'"""
 
     @overload
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def writer(part: 'Ontology',    dir: Dir)   -> 'OntologyWriting': ...
+    def writer(cls, part: 'Ontology',    dir: Dir)   -> 'OntologyWriting': ...
     @overload
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def writer(part: 'Mapping',     dir: Dir)   -> 'MappingWriting': ...
+    def writer(cls, part: 'Mapping',     dir: Dir)   -> 'MappingWriting': ...
+    #https://github.com/python/mypy/issues/11488
     @overload
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def writer(part: 'Properties',  dir: Dir)   -> 'PropertiesWriting': ...
+    def writer(cls, part: 'Properties',  dir: Dir)   -> 'PropertiesWriting': ...
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def writer(part: 'Ontology' | 'Mapping' | 'Properties', dir: Dir) -> 'SQLRDFMapPartWriting':
+    def writer(cls, part: 'Ontology' | 'Mapping' | 'Properties', dir: Dir) -> 'SQLRDFMapPartWriting':
         ...
 
     @abstractmethod
