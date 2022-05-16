@@ -27,25 +27,45 @@ class Construtor(Generic[T], ABC):
 #    @abstractclassmethod
 #    def s(cls, *p, **k) -> Iterable[T]: ...
 
+class Str(Generic[T], ABC):
+    @abstractmethod
+    def __str__(self) -> str: ...
+
 #@dataclass # looks like i have to put this here
 class Base(Construtor, ): pass
 
+def is_property_name(s: str) -> bool: return s.startswith('jdbc.')
+class DBPropertyName(str, Phantom, predicate=is_property_name): ...
+def is_property(s: str) -> bool: return '=' in s
+class PropertyStr(str, Phantom , predicate=is_property): ...
 
-class DBProperties(Base):
+class DBProperty(Base, Str):
+    @property
+    @abstractmethod
+    def name(self,)         -> DBPropertyName: ...
+    @property
+    @abstractmethod
+    def value(self,)        -> str: ...
+    
+    @abstractmethod
+    def __str__(self)       -> PropertyStr: ...
+
+
+class DBProperties(Base, Str):
     """ontop db config"""
     @property
     @abstractmethod
-    def name(self)          -> str: ...
+    def name(self)          -> DBProperty: ...
     @property
     @abstractmethod
-    def url(self)           -> str:
+    def url(self)           -> DBProperty:
         """it's called a url but not a web url"""
     @property
     @abstractmethod
-    def driver(self)        -> str: ...
+    def driver(self)        -> DBProperty: ...
     @property
     @abstractmethod
-    def user(self)          -> str: ...
+    def user(self)          -> DBProperty: ...
 
 
 #@dataclass
@@ -54,14 +74,14 @@ class DBProperties(Base):
     #name: int # can but is it typechecked?
 #DBPropertiesImpl('sdf')
 
-class OntopProperties(Base):
+class OntopProperties(Base, Str):
     """ontop config"""
     @property
     @abstractmethod
     def inferDefaultDatatype(self) \
                             -> bool: ...
 
-class Properties(Base):
+class Properties(Base, Str):
     @property
     @abstractmethod
     def jdbc(self)          -> DBProperties: ...
@@ -161,7 +181,7 @@ class SQLRDFMapping(Base):
 
     @classmethod
     @abstractmethod
-    def writer(cls, part: 'Ontology' | 'Mapping' | 'Properties', dir: Dir) -> 'SQLRDFMapPartWriting':
+    def writer(cls, part: Ontology | Mapping | Properties, dir: Dir) -> 'SQLRDFMapPartWriting':
         ...
 
     @abstractmethod

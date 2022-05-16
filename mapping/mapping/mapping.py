@@ -1,19 +1,65 @@
+from multiprocessing.sharedctypes import Value
+from phantom import Predicate
 from . import mapping_dir
+from typing import Iterator, Callable
 from pathlib import Path
+from phantom.base import Phantom
 from . import schema as s
 
-from typing import Iterator, Callable
-from functools import partial
+
+def is_sqldb(file: Path):
+    import sqlite3
+    con = sqlite3.connect(file)
+    try:
+        con.execute("SELECT name FROM sqlite_schema WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
+        return True
+    except:
+        return False
+class SQLiteDB(Path, Phantom, predicate=is_sqldb): ...
+
 
 def properties_lines(d: dict) -> Iterator[str]:
     for k,v in d.items():
         yield f"{k}={str(v).lower() if isinstance(v, bool) else v}"
 
+def is_path(s: str) -> bool: return Path(s).exists()
+class PathStr(str, Phantom, predicate=is_path): ...
+
+
+class ShortName(str, Phantom, predicate=lambda s: 'jdbc' not in s): ...
+
+# implementations
+
+from attrs import frozen as dataclass
+
+@dataclass
+class DBProperty(s.DBProperty):
+    name:   s.DBPropertyName
+    value:  str
+    @classmethod
+    def make(cls, *p, **k): return cls._make(p[0], p[1])
+    @classmethod
+    def _make(cls, short_name: ShortName, value: str) -> 'DBProperty':
+        return cls(s.DBPropertyName(f"jdbc.{short_name}"), value)
+
+    def __str__(self) -> s.PropertyStr:
+        return s.PropertyStr(f"{self.name}={self.value}")
+
+
+@dataclass
 class DBProperties(s.DBProperties):
+    name:   DBProperty
+    url:    DBProperty
+    driver: DBProperty
+    user:   DBProperty
+    
+    @classmethod
+    # *p, **k pleases mypy
+    def make(cls, *p, **k) -> 'DBProperties':
+        return cls.sqlite(*p, **k)
 
     @classmethod
-    def sqlite(cls, file: Path) -> 'DBProperties':
-        assert(file.is_file())
+    def sqlite(cls, file: SQLiteDB) -> 'DBProperties':
         stripped = file.parent / (file.stem  + '_stripped' + file.suffix )
         if stripped.exists(): stripped.unlink()
         import sqlite3
@@ -22,13 +68,17 @@ class DBProperties(s.DBProperties):
         # for some reason, ontop didnt like sqlite constraints
         for line in cls.constraint_stripper(file):
             cur.execute(line)
-        # test
         con.commit()
-        con.execute("SELECT name FROM sqlite_schema WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
-        return cls('sqldb', f"jdbc:sqlite:{stripped}", 'org.sqlite.JDBC', 'user')
+        return cls(
+            name =      DBProperty.make(ShortName('name'),      'sqldb'),
+            url =       DBProperty.make(ShortName('url'),       f"jdbc:sqlite:{stripped}"),
+            driver =    DBProperty.make(ShortName('driver'),    'org.sqlite.JDBC'),
+            user =      DBProperty.make(ShortName('user'),      'user'))
+
 
     @classmethod
-    def constraint_stripper(cls, sqlitedb: str | Path )-> Iterator[str]: # hack
+    def constraint_stripper(cls, sqlitedb: PathStr | Path )-> Iterator[str]:
+        # hack
         import sqlite3
         src = sqlite3.connect(str(sqlitedb))
         table_query = """\
@@ -61,10 +111,13 @@ class DBProperties(s.DBProperties):
     def lines(self):
         from attrs import asdict
         _ = asdict(self)
+        _ = {k:v['value'] for k,v in _.items()}
         return properties_lines(_)
 
+    def __str__(self) -> str:
+        return '\n'.join(self.lines())
 
-class OntopProperties(s.OntopProperties):
+class OntopProperties:#(s.OntopProperties):
 
     def lines(self):
         from attrs import asdict
@@ -72,7 +125,7 @@ class OntopProperties(s.OntopProperties):
         return properties_lines(_)
 
 
-class Properties(s.Properties):
+class Properties:#(s.Properties):
 
     def lines(self) -> Iterator[str]:
         from attrs import asdict
@@ -86,18 +139,18 @@ class Properties(s.Properties):
     def path(self, dir: Path,  name='sql') -> Path:
         return dir / f"{name}.properties"
 
-class Mapping(s.Mapping):
+class Mapping:#(dict, s.Mapping,):
 
     @classmethod
     def from_yamlfile(cls, path: Path) -> 'Mapping':
         import yaml
-        return cls(yaml.safe_load(open(path)))
+        return cls(**yaml.safe_load(open(path)))
 
     @classmethod
     def from_name(cls, name) -> 'Mapping':
-        return cls(cls.from_yamlfile(mapping_dir / name))
+        return cls(**cls.from_yamlfile(mapping_dir / name))
         
-    def make_obda(maps: dict):
+    def make_obda(self: dict) -> str:
         from jinja2 import Environment, FileSystemLoader#, select_autoescape
         env = Environment(loader=FileSystemLoader(mapping_dir))
 
@@ -108,10 +161,10 @@ class Mapping(s.Mapping):
                 o += ln.split('#', 1)[0]
                 o += ' ' # need a lil space sometimes
             return o
-        for map in maps['maps']:
+        for map in self['maps']:
             map['target'] = strip_comments(map['target'])
             map['source'] = strip_comments(map['source'])
-        return env.get_template('obda.jinja').render(**maps)
+        return env.get_template('obda.jinja').render(**self)
 
     
     def write(self, file):
@@ -134,7 +187,7 @@ def get_workspace(loc: Path= mapping_dir / 'work') -> Path:
 
 
 
-class Ontology(s.Ontology):
+class Ontology:#(s.Ontology):
     
     @classmethod
     def from_name(cls, onto_name) -> 'Ontology':
@@ -149,8 +202,7 @@ class Ontology(s.Ontology):
     def path(self, dir: Path,  name='onto'):
         return dir / f"{name}.ttl"
 
-
-class OntologyCustomization(s.OntologyCustomization):
+class OntologyCustomization:#(s.OntologyCustomization):
 
     @classmethod
     def from_name(cls, name: str) -> Callable[[str], 'OntologyCustomization']:
@@ -171,7 +223,7 @@ class OntologyCustomization(s.OntologyCustomization):
         self.graph.serialize(file, format='turtle')
         
 
-class SQLRDFMap(s.SQLRDFMap):
+class SQLRDFMap:#(s.SQLRDFMap):
 
     @classmethod
     def from_name(cls, name: str) -> Callable[[str, Properties], 'SQLRDFMap']:
@@ -183,7 +235,6 @@ class SQLRDFMap(s.SQLRDFMap):
         return partial(cls, mapping=m,)
         return lambda bdg, prop: cls(o(bdg), m, prop)
         
-
     def write(self, workspace: Path=get_workspace(),
                 # just names
                 ontology = 'ontology', mapping = 'maps', properties = 'sql',
@@ -205,9 +256,10 @@ class SQLRDFMap(s.SQLRDFMap):
             if fio.exists(): fio.unlink()
             del fio
         # write
-        self.ontology.serialize(ontology)
-        self.mapping.write(open(mapping, 'w'))
-        self.properties.write(open(properties, 'w'))
+        self.ontology.serialize(    ontology)
+        self.mapping.write(open(    mapping, 'w'))
+        self.properties.write(open( properties, 'w'))
+        #return {'ontology', ontology, 'mapping': mapping, }
         from subprocess import run
         r = run([
             ontop, 'materialize',
