@@ -3,7 +3,8 @@
 #%autoreload 2
 import mapping.mapping as m
 from pathlib import Path
-_ = m.DBProperties.make(Path('test.sqlite'))
+#_ = m.DBProperties.make(Path('test.sqlite'))
+_ = m.OntopProperties.make()
 print( str(_) )
 
 # import mapping as m

@@ -48,6 +48,7 @@ class DBProperty(s.DBProperty):
 
 @dataclass
 class DBProperties(s.DBProperties):
+    """implementation is specific to sqlite case"""
     name:   DBProperty
     url:    DBProperty
     driver: DBProperty
@@ -60,6 +61,8 @@ class DBProperties(s.DBProperties):
 
     @classmethod
     def sqlite(cls, file: SQLiteDB) -> 'DBProperties':
+        # need to create a stripped version to a file
+        # bc the mapping program needs starts separately
         stripped = file.parent / (file.stem  + '_stripped' + file.suffix )
         if stripped.exists(): stripped.unlink()
         import sqlite3
@@ -77,7 +80,7 @@ class DBProperties(s.DBProperties):
 
 
     @classmethod
-    def constraint_stripper(cls, sqlitedb: PathStr | Path )-> Iterator[str]:
+    def constraint_stripper(cls, sqlitedb: PathStr | Path) -> Iterator[str]:
         # hack
         import sqlite3
         src = sqlite3.connect(str(sqlitedb))
@@ -116,14 +119,21 @@ class DBProperties(s.DBProperties):
 
     def __str__(self) -> str:
         return '\n'.join(self.lines())
+@dataclass
+class OntopProperties(s.OntopProperties):
+    inferDefaultDatatype: bool
 
-class OntopProperties:#(s.OntopProperties):
+    @classmethod
+    def make(cls, *a, **k) -> 'OntopProperties':
+        return cls(True)
 
     def lines(self):
         from attrs import asdict
         _ = asdict(self)
         return properties_lines(_)
-
+    
+    def __str__(self) -> str:
+        return '\n'.join(self.lines())
 
 class Properties:#(s.Properties):
 
