@@ -2,6 +2,7 @@ from multiprocessing.sharedctypes import Value
 from phantom import Predicate
 from . import mapping_dir
 from typing import Iterator, Callable
+from typing import overload
 from pathlib import Path
 from phantom.base import Phantom
 from . import schema as s
@@ -135,7 +136,9 @@ class OntopProperties(s.OntopProperties):
     def __str__(self) -> str:
         return '\n'.join(self.lines())
 
-class Properties:#(s.Properties):
+class Properties(s.Properties):
+    db:     DBProperties
+    ontop:  OntopProperties
 
     def lines(self) -> Iterator[str]:
         from attrs import asdict
@@ -149,18 +152,71 @@ class Properties:#(s.Properties):
     def path(self, dir: Path,  name='sql') -> Path:
         return dir / f"{name}.properties"
 
-class Mapping:#(dict, s.Mapping,):
+
+
+@dataclass
+class Map(s.Map):
+    id:     s.KeyStr
+    source: s.SQL
+    target: s.templatedTTL
 
     @classmethod
-    def from_yamlfile(cls, path: Path) -> 'Mapping':
+    def make(cls, *p, **k) -> 'Map':
+        return cls(id=k['id'], source=k['source'], target=k['target'])
+
+
+def is_yaml(path: Path) -> bool:
+    import yaml
+    try:
+        yaml.safe_load(open(path))
+        return True
+    except:
+        return False    
+class YamlFile(Path, Phantom, predicate=is_yaml): ...
+
+@dataclass
+class SQLRDFMap(s.SQLRDFMap):
+    prefixes:   s.Prefixes | None
+    maps:       s.Maps
+
+    @classmethod
+    def from_dict(cls, d: dict) -> 'SQLRDFMap':
+        prefixes = d['prefixes'] if 'prefixes' in d else None
+        prefixes = {s.KeyStr(k):s.URI(v) for k,v in prefixes.items()} if prefixes else None
+        maps = d['maps'] if 'maps' in d else []
+        maps = [Map.make(id=m['id'], source=m['source'], target=m['target']) for m in maps]
+        return cls(prefixes=prefixes, maps=maps)
+
+    @classmethod
+    def from_yamlfile(cls, path: YamlFile) -> 'SQLRDFMap':
         import yaml
-        return cls(**yaml.safe_load(open(path)))
+        return cls.from_dict(yaml.safe_load(open(path)))
 
     @classmethod
-    def from_name(cls, name) -> 'Mapping':
-        return cls(**cls.from_yamlfile(mapping_dir / name))
+    def from_name(cls, name: str) -> 'SQLRDFMap':
+        return cls.from_yamlfile( YamlFile(mapping_dir / name / 'maps.yaml') )
+
+    @overload
+    @classmethod
+    def _make(cls, i: dict) -> 'SQLRDFMap': ...
+    @overload
+    @classmethod
+    def _make(cls, i: YamlFile) -> 'SQLRDFMap': ...
+    @overload
+    @classmethod
+    def _make(cls, i: str) -> 'SQLRDFMap': ...
+
+    @classmethod
+    def _make(cls, i: dict | YamlFile | str) -> 'SQLRDFMap':
+        if      isinstance(i, dict):        return cls.from_dict(       i)
+        elif    isinstance(i, YamlFile):    return cls.from_yamlfile(   i)
+        elif    isinstance(i, str):         return cls.from_name(       i)
+        else:   raise TypeError
+
+    @classmethod
+    def make(cls, *p, **k) -> 'SQLRDFMap': return cls._make(*p, **k)
         
-    def make_obda(self: dict) -> str:
+    def make_obda(self) -> str:
         from jinja2 import Environment, FileSystemLoader#, select_autoescape
         env = Environment(loader=FileSystemLoader(mapping_dir))
 
@@ -171,16 +227,19 @@ class Mapping:#(dict, s.Mapping,):
                 o += ln.split('#', 1)[0]
                 o += ' ' # need a lil space sometimes
             return o
-        for map in self['maps']:
-            map['target'] = strip_comments(map['target'])
-            map['source'] = strip_comments(map['source'])
-        return env.get_template('obda.jinja').render(**self)
+        from attr import asdict
+        d = asdict(self)
+        for map in self.maps:
+            d['target'] = strip_comments(map.target)
+            d['source'] = strip_comments(map.source)
+        return env.get_template('obda.jinja').render(**d)
 
+    def __str__(self) -> str:
+        return self.make_obda()
     
-    def write(self, file):
+    def write(self, file: Path):
         _ = self.make_obda()
-        file.writelines(file)
-
+        file.write_text(_)
     
     def path(self, dir: Path,  name='maps') -> Path:
         return dir / f"{name}.obda"
@@ -194,7 +253,6 @@ def get_workspace(loc: Path= mapping_dir / 'work') -> Path:
         rmtree(loc)
         loc.mkdir()
     return loc
-
 
 
 class Ontology:#(s.Ontology):
@@ -233,7 +291,7 @@ class OntologyCustomization:#(s.OntologyCustomization):
         self.graph.serialize(file, format='turtle')
         
 
-class SQLRDFMap:#(s.SQLRDFMap):
+class _SQLRDFMap:#(s.SQLRDFMap):
 
     @classmethod
     def from_name(cls, name: str) -> Callable[[str, Properties], 'SQLRDFMap']:

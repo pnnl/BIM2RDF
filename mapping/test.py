@@ -3,9 +3,15 @@
 #%autoreload 2
 import mapping.mapping as m
 from pathlib import Path
+
 #_ = m.DBProperties.make(Path('test.sqlite'))
-_ = m.OntopProperties.make()
-print( str(_) )
+#_ = m.OntopProperties.make()
+#_ = m.Mapping.make()
+_ = m.SQLRDFMap.make('reference-223p')
+#from attr import asdict
+#_ = asdict(_)
+print(  _  )
+#print( str(_) )
 
 # import mapping as m
 # s = """CREATE TABLE "Wires" ("Id" integer, "TypeId" integer, "PhaseCreated" integer, "PhaseDemolished" integer, "DesignOption" integer, "CircuitDescription" wvarchar(255), "CircuitLoadName" wvarchar(255), "NumberofConductors" integer, "TickMarks" wvarchar(255), "Panel" wvarchar(255), "Circuits" wvarchar(255), "Type" wvarchar(255), "HotConductors" integer, "NeutralConductors" integer, "GroundConductors" integer, "WireSize" wvarchar(255), "IfcGUID" wvarchar(255), "Comments" wvarchar(255), "Mark" wvarchar(255), CONSTRAINT "CWires" PRIMARY KEY ("Id"))"""

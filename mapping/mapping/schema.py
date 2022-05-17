@@ -1,7 +1,8 @@
 from collections.abc import Mapping
 from typing import Literal, NewType, TypeVar, Generic, Sequence
 from typing import overload
-from abc import ABC, abstractmethod # abstractXmethod: use @X(abstractXmethod)
+from abc import ABC, abstractmethod
+from phantom import Predicate # abstractXmethod: use @X(abstractXmethod)
 from phantom.base import Phantom
 #from rdflib import Graph
 # or so that i don't even have to have rdflib specifically?
@@ -119,7 +120,8 @@ class Ontology(Base):
     def graph(self)         -> Graph: ...
 
 
-URI =                       NewType('URI', str)
+def is_uri(s: str) -> bool: return s.startswith('http://') or s.startswith('https://')
+class URI(str, Phantom, predicate=is_uri): ...
 KeyStr =                    NewType('KeyStr', str) # no spaces in str?
 Prefixes =                  Mapping[KeyStr, URI]
 
@@ -136,14 +138,17 @@ class Map(Base):
     @abstractmethod
     def target(self)        -> templatedTTL: ...
 
+def nonzeroseq(m: Sequence[Map]) -> bool: return True if len(m) else False
+class Maps(Sequence[Map], Phantom, predicate=nonzeroseq): ...
 
-class SQLRDFMap(Base):
+class SQLRDFMap(Base, Str):
+    """represents the obda file"""
     @property
     @abstractmethod
     def prefixes(self)      -> Prefixes | None: ...
     @property
     @abstractmethod
-    def maps(self)          -> Sequence[Map]: ...
+    def maps(self)          -> Maps: ...
 
 
 from pathlib import Path
