@@ -1,7 +1,6 @@
-from multiprocessing.sharedctypes import Value
-from phantom import Predicate
+from rdflib import Graph
 from . import mapping_dir
-from typing import Iterator, Callable
+from typing import Iterator, Generator, Callable
 from typing import overload
 from pathlib import Path
 from phantom.base import Phantom
@@ -26,19 +25,18 @@ def properties_lines(d: dict) -> Iterator[str]:
 def is_path(s: str) -> bool: return Path(s).exists()
 class PathStr(str, Phantom, predicate=is_path): ...
 
-
-class ShortName(str, Phantom, predicate=lambda s: 'jdbc' not in s): ...
+class ShortName(str, Phantom, predicate=lambda n: not s.DBPropertyName.__predicate__(n) ): ...
 
 # implementations
-
 from attrs import frozen as dataclass
 
 @dataclass
 class DBProperty(s.DBProperty):
     name:   s.DBPropertyName
     value:  str
+
     @classmethod
-    def make(cls, *p, **k): return cls._make(p[0], p[1])
+    def make_unvalidated(cls, *p, **k): return cls._make(p[0], p[1])
     @classmethod
     def _make(cls, short_name: ShortName, value: str) -> 'DBProperty':
         return cls(s.DBPropertyName(f"jdbc.{short_name}"), value)
@@ -57,7 +55,7 @@ class DBProperties(s.DBProperties):
     
     @classmethod
     # *p, **k pleases mypy
-    def make(cls, *p, **k) -> 'DBProperties':
+    def make_unvalidated(cls, *p, **k) -> 'DBProperties':
         return cls.sqlite(*p, **k)
 
     @classmethod
@@ -125,7 +123,7 @@ class OntopProperties(s.OntopProperties):
     inferDefaultDatatype: bool
 
     @classmethod
-    def make(cls, *a, **k) -> 'OntopProperties':
+    def make_unvalidated(cls, *a, **k) -> 'OntopProperties':
         return cls(True)
 
     def lines(self):
@@ -136,6 +134,7 @@ class OntopProperties(s.OntopProperties):
     def __str__(self) -> str:
         return '\n'.join(self.lines())
 
+@dataclass
 class Properties(s.Properties):
     db:     DBProperties
     ontop:  OntopProperties
@@ -153,7 +152,6 @@ class Properties(s.Properties):
         return dir / f"{name}.properties"
 
 
-
 @dataclass
 class Map(s.Map):
     id:     s.KeyStr
@@ -161,7 +159,7 @@ class Map(s.Map):
     target: s.templatedTTL
 
     @classmethod
-    def make(cls, *p, **k) -> 'Map':
+    def make_unvalidated(cls, *p, **k) -> 'Map':
         return cls(id=k['id'], source=k['source'], target=k['target'])
 
 
@@ -214,7 +212,7 @@ class SQLRDFMap(s.SQLRDFMap):
         else:   raise TypeError
 
     @classmethod
-    def make(cls, *p, **k) -> 'SQLRDFMap': return cls._make(*p, **k)
+    def make_unvalidated(cls, *p, **k) -> 'SQLRDFMap': return cls._make(*p, **k)
         
     def make_obda(self) -> str:
         from jinja2 import Environment, FileSystemLoader#, select_autoescape
@@ -237,12 +235,6 @@ class SQLRDFMap(s.SQLRDFMap):
     def __str__(self) -> str:
         return self.make_obda()
     
-    def write(self, file: Path):
-        _ = self.make_obda()
-        file.write_text(_)
-    
-    def path(self, dir: Path,  name='maps') -> Path:
-        return dir / f"{name}.obda"
 
 
 def get_workspace(loc: Path= mapping_dir / 'work') -> Path:
@@ -255,43 +247,103 @@ def get_workspace(loc: Path= mapping_dir / 'work') -> Path:
     return loc
 
 
-class Ontology:#(s.Ontology):
-    
-    @classmethod
-    def from_name(cls, onto_name) -> 'Ontology':
+@dataclass
+class OntologyBase(s.OntologyBase):
+    name:   str
+    @property
+    def graph(self):
         from ontologies import get
-        _ =  get(onto_name)
-        _ = cls(onto_name, _)
-        return _
+        return get(self.name)
 
-    def write(self, file):
-        self.graph.serialize(file, format='turtle')
-    
-    def path(self, dir: Path,  name='onto'):
-        return dir / f"{name}.ttl"
-
-class OntologyCustomization:#(s.OntologyCustomization):
 
     @classmethod
-    def from_name(cls, name: str) -> Callable[[str], 'OntologyCustomization']:
-        return partial(cls, ontology=Ontology.from_name(name))
+    def make_unvalidated(cls, *p, **k)  -> 'OntologyBase':
+        return cls.from_name(p[0])
+    
+    @classmethod
+    def from_name(cls, onto_name: str)  -> 'OntologyBase':
+        return cls(onto_name)
 
+    @classmethod
+    def s(cls, *p, **k) -> Generator['OntologyBase', None, None]:
+        from ontologies import names
+        for n in names: yield cls.from_name(n)
+    #def write(self, file):
+        #self.graph.serialize(file, format='turtle')
+    
+    #def path(self, dir: Path,  name='onto'):
+    #    return dir / f"{name}.ttl"
+
+
+@dataclass
+class Building(s.Building):
+    name:   str
+
+    @classmethod
+    def make_unvalidated(cls, *p, **k) -> 'Building':
+        return cls(name=p[0])
+
+    def uri(self, prefix: str = 'example.com') -> s.URI:
+        return s.URI(f"http://{prefix}/{self.name}")
+
+
+@dataclass
+class OntologyCustomization(s.OntologyCustomization):
+    base:               OntologyBase
+    building:           Building
+    building_prefix:    str
+
+    @classmethod
+    def make_unvalidated(cls, *p, **k) ->                 'OntologyCustomization':
+        return cls.from_customizations(*p, **k)
+
+    @classmethod
+    def from_customizations(cls, bdg: Building | str, name: str, building_prefix='example.com') ->   'OntologyCustomization':
+        return cls(
+            base =              OntologyBase.from_name(name),
+            building =          bdg if isinstance(bdg, Building) else Building.make(str),
+            building_prefix =   building_prefix)
     
     @property
-    def graph(self) -> s.Graph:
-        def turtle_soup(loc):
+    def graph(self) -> Graph:
+        def turtle_soup(loc: Path):
             g = s.Graph()
             for f in (f for f in ( loc ).iterdir() if f.suffix == '.ttl'):
                 g += s.Graph().parse(f)
             return g
-        # do something with building TODO
-        return turtle_soup( mapping_dir / self.ontology.name )
+        cstm = turtle_soup(mapping_dir / self.base.name)
+        # SPECIFICS
+        #@prefix bdg: <http://example.org/building/> .
+        _ = cstm.namespace_manager.bind('bdg', self.building)
+        return _
+
+
+@dataclass
+class Ontology(s.Ontology):
+    base:           OntologyBase
+    customization:  OntologyCustomization
+    def validate(self) -> bool:
+        return self.base == self.customization.base
+    
+    @classmethod
+    def make_unvalidated(cls, *p, **k) -> 'Ontology':
+        return cls.from_customizations(*p, **k)
+
+    @classmethod
+    def from_customizations(cls, *p, **k):
+        c = OntologyCustomization.from_customizations(*p, **k)
+        b = c.base
+        return cls(b, c)
+    
+    @property
+    def graph(self) -> s.Graph:
+        return self.base.graph + self.customization.graph
 
     def write(self, file):
         self.graph.serialize(file, format='turtle')
-        
 
-class _SQLRDFMap:#(s.SQLRDFMap):
+
+class SQLRDFMapping(s.SQLRDFMapping):
 
     @classmethod
     def from_name(cls, name: str) -> Callable[[str, Properties], 'SQLRDFMap']:
@@ -345,3 +397,9 @@ class _SQLRDFMap:#(s.SQLRDFMap):
         return out
 
 
+    #def write(self, file: Path):
+        #_ = self.make_obda()
+        #file.write_text(_)
+    
+    #def path(self, dir: Path,  name='maps') -> Path:
+    #    return dir / f"{name}.obda"

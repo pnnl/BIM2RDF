@@ -4,13 +4,17 @@
 import mapping.mapping as m
 from pathlib import Path
 
+
 #_ = m.DBProperties.make(Path('test.sqlite'))
 #_ = m.OntopProperties.make()
 #_ = m.Mapping.make()
-_ = m.SQLRDFMap.make('reference-223p')
+#_ = m.SQLRDFMap.make('reference-223p')
 #from attr import asdict
 #_ = asdict(_)
-print(  _  )
+_ = (  m.OntologyBase.s()  )
+_ = list(_)
+print(_)
+
 #print( str(_) )
 
 # import mapping as m

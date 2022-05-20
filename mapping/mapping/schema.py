@@ -1,12 +1,15 @@
 from collections.abc import Mapping
-from typing import Literal, NewType, TypeVar, Generic, Sequence
+from typing import Iterator, Literal, NewType, TypeVar, Generic, Sequence, Iterable
 from typing import overload
-from abc import ABC, abstractmethod
-from phantom import Predicate # abstractXmethod: use @X(abstractXmethod)
+from abc import ABC, abstractmethod # abstractXmethod: use @X(abstractXmethod)
+# or just use protocols?
 from phantom.base import Phantom
-#from rdflib import Graph
+from rdflib import Graph
 # or so that i don't even have to have rdflib specifically?
-Graph = TypeVar('Graph')
+#Graph = TypeVar('Graph')
+
+# learnings: zope.interface
+
 
 #def abstractfield(f: Callable):
 #    _ = abstractmethod(f)
@@ -18,22 +21,45 @@ Graph = TypeVar('Graph')
 # for mypy to work
 
 
-T = TypeVar('T')
+T = TypeVar('T',)
 class Construtor(Generic[T], ABC): 
     @classmethod
     @abstractmethod
     def make(cls, *p, **k) -> T: ...
 
-#class s(Generic[T], ABC):
-#    @abstractclassmethod
-#    def s(cls, *p, **k) -> Iterable[T]: ...
+
+class ClassIterator(Generic[T], ABC):
+    @classmethod
+    @abstractmethod
+    def s(cls, *p, **k) -> Iterable[T]: ...
+
+
+class Validation(Generic[T], ABC):
+    @abstractmethod
+    def validate(self) -> bool:
+        """arbitrary validations. mainly want to assert invariants."""
+
+#V = TypeVar('V', bound='ValidatedConstruction')
+class ValidatedConstruction(Validation[T], Construtor[T],):
+    @classmethod
+    def make(cls, *p, **k) -> T:
+        m: T = cls.make_unvalidated(*p, **k)
+        if m.validate(): return m
+        else: raise TypeError
+
+    @classmethod
+    @abstractmethod
+    def make_unvalidated(cls, *p, **k) -> T: ...
+
+
 
 class Str(Generic[T], ABC):
     @abstractmethod
     def __str__(self) -> str: ...
 
-#@dataclass # looks like i have to put this here
-class Base(Construtor, ): pass
+#class Fantom(Phantom, abstract=True):...
+
+class Base(ValidatedConstruction): ...
 
 def is_property_name(s: str) -> bool: return s.startswith('jdbc.')
 class DBPropertyName(str, Phantom, predicate=is_property_name): ...
@@ -50,6 +76,8 @@ class DBProperty(Base, Str):
     
     @abstractmethod
     def __str__(self)       -> PropertyStr: ...
+
+    def validate(self) -> bool: return True
 
 
 class DBProperties(Base, Str):
@@ -68,6 +96,7 @@ class DBProperties(Base, Str):
     @abstractmethod
     def user(self)          -> DBProperty: ...
 
+    def validate(self) -> bool: return True
 
 #@dataclass
 #class DBPropertiesImpl(DBProperties):
@@ -81,6 +110,9 @@ class OntopProperties(Base, Str):
     @abstractmethod
     def inferDefaultDatatype(self) \
                             -> bool: ...
+    
+    def validate(self) -> bool: return True
+
 
 class Properties(Base, Str):
     @property
@@ -90,7 +122,10 @@ class Properties(Base, Str):
     @abstractmethod
     def ontop(self)         -> OntopProperties: ...
 
-class OntologyBase(Base):
+    def validate(self) -> bool: return True
+
+
+class OntologyBase(Base, ClassIterator):
     @property
     @abstractmethod
     def name(self)          -> str: ...
@@ -98,28 +133,49 @@ class OntologyBase(Base):
     @abstractmethod
     def graph(self)         -> Graph: ...
 
+    def validate(self) -> bool:
+        return self.name in {ob.name for ob in self.__class__.s()}
+
+
+class Building(Base):
+    @property
+    @abstractmethod
+    def name(self)              -> str: ...
+    @abstractmethod
+    def uri(self, prefix: str)  -> 'URI': ...
+
+    def validate(self) -> bool: return True
+
 
 class OntologyCustomization(Base):
     @property
     @abstractmethod
-    def building(self)      ->  str: ...
+    def building(self)      ->  Building: ...
     @property
     @abstractmethod
     def base(self)          ->  OntologyBase: ...
+    @property
+    def graph(self)         ->  Graph: ...
 
-class Ontology(Base):
+    def validate(self) -> bool: return True
+
+
+class Ontology(Base, ClassIterator):
     @property
     @abstractmethod
     def base(self)          -> OntologyBase: ...
     @property
     @abstractmethod
-    def customization(self) -> OntologyCustomization: ...
+    def customization(self) -> OntologyCustomization | None: ...
 
     @property
     @abstractmethod
     def graph(self)         -> Graph: ...
 
+    def validate(self) -> bool: return True
 
+
+# 
 def is_uri(s: str) -> bool: return s.startswith('http://') or s.startswith('https://')
 class URI(str, Phantom, predicate=is_uri): ...
 KeyStr =                    NewType('KeyStr', str) # no spaces in str?
@@ -127,7 +183,7 @@ Prefixes =                  Mapping[KeyStr, URI]
 
 SQL =                       NewType('SQL', str)
 templatedTTL =              NewType('templatedTTL', str)
-class Map(Base):
+class Map(Base, ClassIterator):
     @property
     @abstractmethod
     def id(self)            -> KeyStr: ...
@@ -138,8 +194,13 @@ class Map(Base):
     @abstractmethod
     def target(self)        -> templatedTTL: ...
 
+    def validate(self) -> bool: return True
+
+
+
 def nonzeroseq(m: Sequence[Map]) -> bool: return True if len(m) else False
 class Maps(Sequence[Map], Phantom, predicate=nonzeroseq): ...
+
 
 class SQLRDFMap(Base, Str):
     """represents the obda file"""
@@ -206,8 +267,8 @@ class SQLRDFMapPartWriting(ABC):
     @abstractmethod
     def name(self)           -> str: ...
     
-    @abstractmethod
-    def str(self)           -> str: ...
+    #@abstractmethod
+    #def str(self)           -> str: ...
     @abstractmethod
     def write(self,
             dir: Dir)       -> None: ...
