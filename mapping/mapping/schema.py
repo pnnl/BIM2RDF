@@ -1,6 +1,7 @@
 from collections.abc import Mapping
-from typing import Iterator, Literal, NewType, TypeVar, Generic, Sequence, Iterable
+from typing import Literal, NewType, TypeVar, Generic, Sequence, Iterable
 from typing import overload
+from typing import final
 from abc import ABC, abstractmethod # abstractXmethod: use @X(abstractXmethod)
 # or just use protocols?
 from phantom.base import Phantom
@@ -43,13 +44,13 @@ class Validation(Generic[T], ABC):
 class ValidatedConstruction(Validation[T], Construtor[T],):
     @classmethod
     def make(cls, *p, **k) -> T:
-        m: T = cls.make_unvalidated(*p, **k)
+        m: T = cls._make_unvalidated(*p, **k)
         if m.validate(): return m
         else: raise TypeError
 
     @classmethod
     @abstractmethod
-    def make_unvalidated(cls, *p, **k) -> T: ...
+    def _make_unvalidated(cls, *p, **k) -> T: ...
 
 
 
@@ -77,6 +78,7 @@ class DBProperty(Base, Str):
     @abstractmethod
     def __str__(self)       -> PropertyStr: ...
 
+    @final
     def validate(self) -> bool: return True
 
 
@@ -96,6 +98,7 @@ class DBProperties(Base, Str):
     @abstractmethod
     def user(self)          -> DBProperty: ...
 
+    @final
     def validate(self) -> bool: return True
 
 #@dataclass
@@ -111,17 +114,19 @@ class OntopProperties(Base, Str):
     def inferDefaultDatatype(self) \
                             -> bool: ...
     
+    @final
     def validate(self) -> bool: return True
 
 
 class Properties(Base, Str):
     @property
     @abstractmethod
-    def jdbc(self)          -> DBProperties: ...
+    def db(self)            -> DBProperties: ...
     @property
     @abstractmethod
     def ontop(self)         -> OntopProperties: ...
 
+    @final
     def validate(self) -> bool: return True
 
 
@@ -133,6 +138,7 @@ class OntologyBase(Base, ClassIterator):
     @abstractmethod
     def graph(self)         -> Graph: ...
 
+    @final
     def validate(self) -> bool:
         return self.name in {ob.name for ob in self.__class__.s()}
 
@@ -144,10 +150,11 @@ class Building(Base):
     @abstractmethod
     def uri(self, prefix: str)  -> 'URI': ...
 
+    @final
     def validate(self) -> bool: return True
 
 
-class OntologyCustomization(Base):
+class OntologyCustomization(Base,):
     @property
     @abstractmethod
     def building(self)      ->  Building: ...
@@ -157,22 +164,25 @@ class OntologyCustomization(Base):
     @property
     def graph(self)         ->  Graph: ...
 
+    @final
     def validate(self) -> bool: return True
 
 
-class Ontology(Base, ClassIterator):
+class Ontology(Base,):
     @property
     @abstractmethod
     def base(self)          -> OntologyBase: ...
     @property
     @abstractmethod
-    def customization(self) -> OntologyCustomization | None: ...
+    def customization(self) -> OntologyCustomization: ...
 
     @property
     @abstractmethod
     def graph(self)         -> Graph: ...
 
-    def validate(self) -> bool: return True
+    @final
+    def validate(self) -> bool:
+        return self.base == self.customization.base
 
 
 # 
@@ -183,7 +193,7 @@ Prefixes =                  Mapping[KeyStr, URI]
 
 SQL =                       NewType('SQL', str)
 templatedTTL =              NewType('templatedTTL', str)
-class Map(Base, ClassIterator):
+class Map(Base,):
     @property
     @abstractmethod
     def id(self)            -> KeyStr: ...
@@ -194,6 +204,7 @@ class Map(Base, ClassIterator):
     @abstractmethod
     def target(self)        -> templatedTTL: ...
 
+    @final
     def validate(self) -> bool: return True
 
 
@@ -211,6 +222,9 @@ class SQLRDFMap(Base, Str):
     @abstractmethod
     def maps(self)          -> Maps: ...
 
+    @final
+    def validate(self) -> bool: return True
+
 
 from pathlib import Path
 # maybe .exists and empty iterdir
@@ -218,41 +232,46 @@ from pathlib import Path
 def is_dir(p: Path) -> bool: return p.is_dir()
 class Dir(Path, Phantom, predicate=is_dir): ...
 
-class SQLRDFMapping(Base):
+class SQLRDFMapping(Base, ):
     """ related to the mapping 'action' """
     @property
     @abstractmethod
     def ontology(self)      -> Ontology: ...
     @property
     @abstractmethod
-    def mapping(self)       -> Mapping: ...
+    def mapping(self)       -> SQLRDFMap: ...
     @property
     @abstractmethod
     def properties(self)    -> Properties:
         """represents 'input'"""
 
+    @final
+    def validate(self) -> bool: return True
+
+
     @overload
     @classmethod
     @abstractmethod
-    def writer(cls, part: 'Ontology',    dir: Dir)   -> 'OntologyWriting': ...
+    def writer(cls, part: Ontology,    dir: Dir)   -> 'OntologyWriting': ...
     @overload
     @classmethod
     @abstractmethod
-    def writer(cls, part: 'Mapping',     dir: Dir)   -> 'MappingWriting': ...
+    def writer(cls, part: SQLRDFMap,     dir: Dir)   -> 'MappingWriting': ...
     #https://github.com/python/mypy/issues/11488
     @overload
     @classmethod
     @abstractmethod
-    def writer(cls, part: 'Properties',  dir: Dir)   -> 'PropertiesWriting': ...
+    def writer(cls, part: Properties,  dir: Dir)   -> 'PropertiesWriting': ...
 
     @classmethod
     @abstractmethod
-    def writer(cls, part: Ontology | Mapping | Properties, dir: Dir) -> 'SQLRDFMapPartWriting':
+    def writer(cls, part: Ontology | SQLRDFMap | Properties, dir: Dir) -> 'SQLRDFMapPartWriting':
         ...
 
     @abstractmethod
     def map(self)           -> None: # could be success/fail
         """the 'do' """
+
 
 #FileExt = N*ewType('FileExt', str) # 'suffix' starts w/ .
 FileExt = str

@@ -1,19 +1,23 @@
 #%%
 #%load_ext autoreload
 #%autoreload 2
-import mapping.mapping as m
+#from mapping import mapping_dir
+#test_dir = 
 from pathlib import Path
+import mapping.mapping as m
+
+test_dir = Path(__file__).parent
 
 
+sr = m.SQLRDFMapping.from_args('test', 'brick', m.SQLiteDB(test_dir / 'test.sqlite') )
+
+sr.ontology.graph
 #_ = m.DBProperties.make(Path('test.sqlite'))
 #_ = m.OntopProperties.make()
 #_ = m.Mapping.make()
 #_ = m.SQLRDFMap.make('reference-223p')
 #from attr import asdict
 #_ = asdict(_)
-_ = (  m.OntologyBase.s()  )
-_ = list(_)
-print(_)
 
 #print( str(_) )
 

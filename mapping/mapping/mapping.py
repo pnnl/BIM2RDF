@@ -1,6 +1,6 @@
 from rdflib import Graph
 from . import mapping_dir
-from typing import Iterator, Generator, Callable
+from typing import Iterator, Generator, Tuple
 from typing import overload
 from pathlib import Path
 from phantom.base import Phantom
@@ -36,7 +36,7 @@ class DBProperty(s.DBProperty):
     value:  str
 
     @classmethod
-    def make_unvalidated(cls, *p, **k): return cls._make(p[0], p[1])
+    def _make_unvalidated(cls, *p, **k): return cls._make(p[0], p[1])
     @classmethod
     def _make(cls, short_name: ShortName, value: str) -> 'DBProperty':
         return cls(s.DBPropertyName(f"jdbc.{short_name}"), value)
@@ -55,7 +55,7 @@ class DBProperties(s.DBProperties):
     
     @classmethod
     # *p, **k pleases mypy
-    def make_unvalidated(cls, *p, **k) -> 'DBProperties':
+    def _make_unvalidated(cls, *p, **k) -> 'DBProperties':
         return cls.sqlite(*p, **k)
 
     @classmethod
@@ -77,9 +77,8 @@ class DBProperties(s.DBProperties):
             driver =    DBProperty.make(ShortName('driver'),    'org.sqlite.JDBC'),
             user =      DBProperty.make(ShortName('user'),      'user'))
 
-
     @classmethod
-    def constraint_stripper(cls, sqlitedb: PathStr | Path) -> Iterator[str]:
+    def constraint_stripper(cls, sqlitedb: SQLiteDB) -> Iterator[str]:
         # hack
         import sqlite3
         src = sqlite3.connect(str(sqlitedb))
@@ -118,15 +117,16 @@ class DBProperties(s.DBProperties):
 
     def __str__(self) -> str:
         return '\n'.join(self.lines())
+
 @dataclass
 class OntopProperties(s.OntopProperties):
     inferDefaultDatatype: bool
 
     @classmethod
-    def make_unvalidated(cls, *a, **k) -> 'OntopProperties':
+    def _make_unvalidated(cls, *a, **k) -> 'OntopProperties':
         return cls(True)
 
-    def lines(self):
+    def lines(self) -> Iterator[str]:
         from attrs import asdict
         _ = asdict(self)
         return properties_lines(_)
@@ -139,17 +139,31 @@ class Properties(s.Properties):
     db:     DBProperties
     ontop:  OntopProperties
 
+    @classmethod
+    def _make_unvalidated(cls, *p, **k) -> 'Properties':
+        return cls.from_sqlite(*p, *k)
+
+    @classmethod
+    def from_sqlite(cls, sqlite: SQLiteDB) -> 'Properties':
+        d = DBProperties.make(sqlite)
+        o = OntopProperties.make()
+        return cls(d, o)
+
+
     def lines(self) -> Iterator[str]:
         from attrs import asdict
         for k,v in asdict(self, recurse=False).items():
             for line in v.lines():
                 yield f"{k}.{line}" # just prefix
 
-    def write(self, file):
-        file.writelines(self.lines())
+    def __str__(self):
+        return '\n'.join(self.lines())
 
-    def path(self, dir: Path,  name='sql') -> Path:
-        return dir / f"{name}.properties"
+    #def write(self, file: Path):
+     #   file.write_text('\n'.join(self.lines()))
+
+    #def path(self, dir: Path,  name='sql') -> Path:
+    #    return dir / f"{name}.properties"
 
 
 @dataclass
@@ -159,9 +173,9 @@ class Map(s.Map):
     target: s.templatedTTL
 
     @classmethod
-    def make_unvalidated(cls, *p, **k) -> 'Map':
+    def _make_unvalidated(cls, *p, **k) -> 'Map':
         return cls(id=k['id'], source=k['source'], target=k['target'])
-
+    
 
 def is_yaml(path: Path) -> bool:
     import yaml
@@ -171,6 +185,7 @@ def is_yaml(path: Path) -> bool:
     except:
         return False    
 class YamlFile(Path, Phantom, predicate=is_yaml): ...
+
 
 @dataclass
 class SQLRDFMap(s.SQLRDFMap):
@@ -196,13 +211,13 @@ class SQLRDFMap(s.SQLRDFMap):
 
     @overload
     @classmethod
-    def _make(cls, i: dict) -> 'SQLRDFMap': ...
+    def _make(cls, i: dict)     -> 'SQLRDFMap': ...
     @overload
     @classmethod
     def _make(cls, i: YamlFile) -> 'SQLRDFMap': ...
     @overload
     @classmethod
-    def _make(cls, i: str) -> 'SQLRDFMap': ...
+    def _make(cls, i: str)      -> 'SQLRDFMap': ...
 
     @classmethod
     def _make(cls, i: dict | YamlFile | str) -> 'SQLRDFMap':
@@ -212,7 +227,7 @@ class SQLRDFMap(s.SQLRDFMap):
         else:   raise TypeError
 
     @classmethod
-    def make_unvalidated(cls, *p, **k) -> 'SQLRDFMap': return cls._make(*p, **k)
+    def _make_unvalidated(cls, *p, **k) -> 'SQLRDFMap': return cls._make(*p, **k)
         
     def make_obda(self) -> str:
         from jinja2 import Environment, FileSystemLoader#, select_autoescape
@@ -257,7 +272,7 @@ class OntologyBase(s.OntologyBase):
 
 
     @classmethod
-    def make_unvalidated(cls, *p, **k)  -> 'OntologyBase':
+    def _make_unvalidated(cls, *p, **k)  -> 'OntologyBase':
         return cls.from_name(p[0])
     
     @classmethod
@@ -280,7 +295,7 @@ class Building(s.Building):
     name:   str
 
     @classmethod
-    def make_unvalidated(cls, *p, **k) -> 'Building':
+    def _make_unvalidated(cls, *p, **k) -> 'Building':
         return cls(name=p[0])
 
     def uri(self, prefix: str = 'example.com') -> s.URI:
@@ -294,14 +309,14 @@ class OntologyCustomization(s.OntologyCustomization):
     building_prefix:    str
 
     @classmethod
-    def make_unvalidated(cls, *p, **k) ->                 'OntologyCustomization':
+    def _make_unvalidated(cls, *p, **k) ->                 'OntologyCustomization':
         return cls.from_customizations(*p, **k)
 
     @classmethod
     def from_customizations(cls, bdg: Building | str, name: str, building_prefix='example.com') ->   'OntologyCustomization':
         return cls(
             base =              OntologyBase.from_name(name),
-            building =          bdg if isinstance(bdg, Building) else Building.make(str),
+            building =          bdg if isinstance(bdg, Building) else Building.make(bdg),
             building_prefix =   building_prefix)
     
     @property
@@ -314,23 +329,21 @@ class OntologyCustomization(s.OntologyCustomization):
         cstm = turtle_soup(mapping_dir / self.base.name)
         # SPECIFICS
         #@prefix bdg: <http://example.org/building/> .
-        _ = cstm.namespace_manager.bind('bdg', self.building)
-        return _
+        cstm.namespace_manager.bind('bdg', self.building.uri(self.building_prefix) )
+        return cstm
 
 
 @dataclass
 class Ontology(s.Ontology):
     base:           OntologyBase
     customization:  OntologyCustomization
-    def validate(self) -> bool:
-        return self.base == self.customization.base
     
     @classmethod
-    def make_unvalidated(cls, *p, **k) -> 'Ontology':
+    def _make_unvalidated(cls, *p, **k) -> 'Ontology':
         return cls.from_customizations(*p, **k)
 
     @classmethod
-    def from_customizations(cls, *p, **k):
+    def from_customizations(cls, *p, **k) -> 'Ontology':
         c = OntologyCustomization.from_customizations(*p, **k)
         b = c.base
         return cls(b, c)
@@ -339,22 +352,66 @@ class Ontology(s.Ontology):
     def graph(self) -> s.Graph:
         return self.base.graph + self.customization.graph
 
-    def write(self, file):
-        self.graph.serialize(file, format='turtle')
+    
 
+    #def write(self, file):
+    #    self.graph.serialize(file, format='turtle')
 
+@dataclass
 class SQLRDFMapping(s.SQLRDFMapping):
+    ontology:   Ontology
+    mapping:    SQLRDFMap
+    properties: Properties
 
     @classmethod
-    def from_name(cls, name: str) -> Callable[[str, Properties], 'SQLRDFMap']:
-        def o(bdg: str) -> s.Graph:
-            _ = OntologyCustomization.from_name(name)(bdg).graph
-            _ = _ + Ontology.from_name(name).graph
-            return _
-        m = Mapping.from_name(name)
-        return partial(cls, mapping=m,)
-        return lambda bdg, prop: cls(o(bdg), m, prop)
-        
+    def _make_unvalidated(cls, *p, **k) -> 'SQLRDFMapping':
+        return cls.from_args(*p, **k)
+
+    @classmethod
+    def from_args(cls, 
+            bdg:                    Building | str,
+            customization_name:     str,
+            db:                     SQLiteDB,
+            ) ->                    'SQLRDFMapping':
+        return cls(
+            *cls.from_customizations(bdg, customization_name),
+            cls.from_sqlite(db))
+
+    @classmethod
+    def from_customizations(cls, bdg: Building | str, name: str) -> Tuple[Ontology, SQLRDFMap]:
+        o = Ontology.from_customizations(bdg, name)
+        m = SQLRDFMap.from_name(o.base.name)
+        return o, m
+
+    @classmethod
+    def from_sqlite(cls, db: SQLiteDB) -> Properties:
+        return Properties.from_sqlite(db)
+
+    @overload
+    @classmethod
+    def writer(cls, part: Ontology,    dir: s.Dir)      -> 'OntologyWriting':
+        raise NotImplementedError
+    @overload
+    @classmethod
+    def writer(cls, part: SQLRDFMap,     dir: s.Dir)    -> 'MappingWriting':
+        raise NotImplementedError
+    #https://github.com/python/mypy/issues/11488
+    @overload
+    @classmethod
+    def writer(cls, part: Properties,  dir: s.Dir)      -> 'PropertiesWriting':
+        raise NotImplementedError
+    @classmethod
+    def writer(cls, part: Ontology | SQLRDFMap | Properties, dir: s.Dir) \
+                                                        -> 'SQLRDFMapPartWriting':
+        raise NotImplementedError
+    
+    def map(self)           -> None: # could be success/fail
+        """the 'do' """
+        raise NotImplementedError
+
+
+
+class todo:
     def write(self, workspace: Path=get_workspace(),
                 # just names
                 ontology = 'ontology', mapping = 'maps', properties = 'sql',
