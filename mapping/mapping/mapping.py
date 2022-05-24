@@ -73,7 +73,7 @@ class DBProperties(s.DBProperties):
         con.commit()
         return cls(
             name =      DBProperty.make(ShortName('name'),      'sqldb'),
-            url =       DBProperty.make(ShortName('url'),       f"jdbc:sqlite:{stripped.as_posix()}"),
+            url =       DBProperty.make(ShortName('url'),       f"jdbc:sqlite:{stripped.name}"),
             driver =    DBProperty.make(ShortName('driver'),    'org.sqlite.JDBC'),
             user =      DBProperty.make(ShortName('user'),      'user'))
 
