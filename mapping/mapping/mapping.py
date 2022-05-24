@@ -1,6 +1,6 @@
 from rdflib import Graph
 from . import mapping_dir
-from typing import Iterator, Generator, Tuple
+from typing import Iterator, Generator, Tuple, Literal, Union
 from typing import overload
 from pathlib import Path
 from phantom.base import Phantom
@@ -73,7 +73,7 @@ class DBProperties(s.DBProperties):
         con.commit()
         return cls(
             name =      DBProperty.make(ShortName('name'),      'sqldb'),
-            url =       DBProperty.make(ShortName('url'),       f"jdbc:sqlite:{stripped}"),
+            url =       DBProperty.make(ShortName('url'),       f"jdbc:sqlite:{stripped.as_posix()}"),
             driver =    DBProperty.make(ShortName('driver'),    'org.sqlite.JDBC'),
             user =      DBProperty.make(ShortName('user'),      'user'))
 
@@ -136,7 +136,7 @@ class OntopProperties(s.OntopProperties):
 
 @dataclass
 class Properties(s.Properties):
-    db:     DBProperties
+    jdbc:     DBProperties
     ontop:  OntopProperties
 
     @classmethod
@@ -158,12 +158,6 @@ class Properties(s.Properties):
 
     def __str__(self):
         return '\n'.join(self.lines())
-
-    #def write(self, file: Path):
-     #   file.write_text('\n'.join(self.lines()))
-
-    #def path(self, dir: Path,  name='sql') -> Path:
-    #    return dir / f"{name}.properties"
 
 
 @dataclass
@@ -239,13 +233,15 @@ class SQLRDFMap(s.SQLRDFMap):
             for ln in lines:
                 o += ln.split('#', 1)[0]
                 o += ' ' # need a lil space sometimes
+            assert('#' not in o)
             return o
         from attr import asdict
         d = asdict(self)
-        for map in self.maps:
-            d['target'] = strip_comments(map.target)
-            d['source'] = strip_comments(map.source)
-        return env.get_template('obda.jinja').render(**d)
+        for map in d['maps']:
+            map['target'] = strip_comments(map['target'])
+            map['source'] = strip_comments(map['source'])
+        _ =  env.get_template('obda.jinja').render(**d)
+        return _
 
     def __str__(self) -> str:
         return self.make_obda()
@@ -283,11 +279,6 @@ class OntologyBase(s.OntologyBase):
     def s(cls, *p, **k) -> Generator['OntologyBase', None, None]:
         from ontologies import names
         for n in names: yield cls.from_name(n)
-    #def write(self, file):
-        #self.graph.serialize(file, format='turtle')
-    
-    #def path(self, dir: Path,  name='onto'):
-    #    return dir / f"{name}.ttl"
 
 
 @dataclass
@@ -352,8 +343,6 @@ class Ontology(s.Ontology):
     def graph(self) -> s.Graph:
         return self.base.graph + self.customization.graph
 
-    
-
     #def write(self, file):
     #    self.graph.serialize(file, format='turtle')
 
@@ -387,36 +376,28 @@ class SQLRDFMapping(s.SQLRDFMapping):
     def from_sqlite(cls, db: SQLiteDB) -> Properties:
         return Properties.from_sqlite(db)
 
+
+    @overload 
+    def writer(self, part: Ontology,)       -> 'OntologyWriting':   ...
     @overload
-    @classmethod
-    def writer(cls, part: Ontology,    dir: s.Dir)      -> 'OntologyWriting':
-        raise NotImplementedError
+    def writer(self, part: SQLRDFMap,)      -> 'MappingWriting':    ...
     @overload
-    @classmethod
-    def writer(cls, part: SQLRDFMap,     dir: s.Dir)    -> 'MappingWriting':
-        raise NotImplementedError
-    #https://github.com/python/mypy/issues/11488
-    @overload
-    @classmethod
-    def writer(cls, part: Properties,  dir: s.Dir)      -> 'PropertiesWriting':
-        raise NotImplementedError
-    @classmethod
-    def writer(cls, part: Ontology | SQLRDFMap | Properties, dir: s.Dir) \
-                                                        -> 'SQLRDFMapPartWriting':
-        raise NotImplementedError
+    def writer(self, part: Properties, )    -> 'PropertiesWriting': ...
+    def writer(self, part: Ontology | SQLRDFMap | Properties,) \
+            -> Union['OntologyWriting', 'MappingWriting', 'PropertiesWriting']:
+        if      isinstance(part, Ontology):     return OntologyWriting.make(    part)
+        elif    isinstance(part, SQLRDFMap):    return MappingWriting.make(     part)
+        elif    isinstance(part, Properties):   return PropertiesWriting.make(  part)
+        else:   raise NotImplementedError
     
-    def map(self)           -> None: # could be success/fail
+
+    def map(self, dir: s.Dir)           -> s.ttlFile:
         """the 'do' """
-        raise NotImplementedError
-
-
-
-class todo:
-    def write(self, workspace: Path=get_workspace(),
-                # just names
-                ontology = 'ontology', mapping = 'maps', properties = 'sql',
-                out='mapped') -> Path:
-        w = workspace
+        ow = self.writer(self.ontology   )#.write(    dir)
+        mw = self.writer(self.mapping    )#.write(    dir)
+        pw = self.writer(self.properties )#.write(    dir)
+        out = s.ttlFile(dir / 'mapped.ttl')
+        
         from shutil import which
         _ = which('ontop')
         if _:
@@ -424,39 +405,83 @@ class todo:
             del _
         else:
             raise RuntimeError('ontop exe not found')
-        ontology =      w / f"{ontology}.ttl"
-        mapping =       w / f"{mapping}.obda"
-        properties =    w / f"{properties}.properties"
-        out =           w / f'{out}.ttl'
-        # clear
-        for fio in {ontology, mapping, properties, out}:
-            if fio.exists(): fio.unlink()
-            del fio
-        # write
-        self.ontology.serialize(    ontology)
-        self.mapping.write(open(    mapping, 'w'))
-        self.properties.write(open( properties, 'w'))
-        #return {'ontology', ontology, 'mapping': mapping, }
+
         from subprocess import run
         r = run([
             ontop, 'materialize',
-            '-t',                   str(ontology),
-            '-m',                   str(mapping),
-            '--properties',         str(properties),
+            '-t',                   str(ow.write(dir)),
+            '-m',                   str(mw.write(dir)),
+            '--properties',         str(pw.write(dir)),
             '-o',                   str(out),
             '--disable-reasoning',
             '-f', 'turtle',
             '--db-password', 'sdfsdffsd' 
-        ],  cwd=w,
+        ],  cwd=dir,
         shell=False, check=True,
+        text=True,
         )
         assert(out.exists())
         return out
 
 
-    #def write(self, file: Path):
-        #_ = self.make_obda()
-        #file.write_text(_)
+from typing import Protocol
+class hasPathing(Protocol):
+    @property
+    def name(self)      -> str: ...
+    @property
+    def file_ext(self)  -> str: ...
+class Writing(hasPathing):
+    def path(self, dir: s.Dir) -> Path:
+        return dir / f"{self.name}.{self.file_ext}"
+
+@dataclass
+class OntologyWriting(Writing, s.OntologyWriting):
+    ontology: Ontology
+    @property
+    def file_ext(self) ->   Literal['ttl']:      return 'ttl'
+    @property
+    def name(self) ->       Literal['ontology']: return 'ontology'
+
+    @classmethod
+    def _make_unvalidated(cls, *p, **k) -> 'OntologyWriting':
+        return cls(p[0])
+
+    def write(self, dir: s.Dir) -> s.Path:
+        self.ontology.graph.serialize(self.path(dir), format='turtle')
+        return self.path(dir)
+
+
+@dataclass
+class MappingWriting(Writing, s.MappingWriting):
+    mapping: SQLRDFMap
+    @property
+    def file_ext(self) ->   Literal['obda']:    return 'obda'
+    @property
+    def name(self) ->       Literal['maps']:    return 'maps'
+
+    @classmethod
+    def _make_unvalidated(cls, *p, **k) -> 'MappingWriting':
+        return cls(p[0])
     
-    #def path(self, dir: Path,  name='maps') -> Path:
-    #    return dir / f"{name}.obda"
+    def write(self, dir: s.Dir) -> s.Path:
+        self.path(dir).write_text(str(self.mapping))
+        return self.path(dir)
+
+
+@dataclass
+class PropertiesWriting(Writing, s.PropertiesWriting):
+    properties: Properties
+    @property
+    def file_ext(self) ->   Literal['properties']:  return 'properties'
+    @property
+    def name(self) ->       Literal['sql']:         return 'sql'
+
+    @classmethod
+    def _make_unvalidated(cls, *p, **k) -> 'PropertiesWriting':
+        return cls(p[0])
+
+    def write(self, dir: s.Dir) -> s.Path:
+        self.path(dir).write_text(str(self.properties))
+        return self.path(dir)
+
+

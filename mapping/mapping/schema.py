@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Literal, NewType, TypeVar, Generic, Sequence, Iterable
+from typing import Literal, NewType, TypeVar, Generic, Sequence, Iterable, Union
 from typing import overload
 from typing import final
 from abc import ABC, abstractmethod # abstractXmethod: use @X(abstractXmethod)
@@ -23,7 +23,8 @@ from rdflib import Graph
 
 
 T = TypeVar('T',)
-class Construtor(Generic[T], ABC): 
+class Construtor(Generic[T], ABC):
+    # How to force using .make instead of __init__?
     @classmethod
     @abstractmethod
     def make(cls, *p, **k) -> T: ...
@@ -121,7 +122,7 @@ class OntopProperties(Base, Str):
 class Properties(Base, Str):
     @property
     @abstractmethod
-    def db(self)            -> DBProperties: ...
+    def jdbc(self)          -> DBProperties: ...
     @property
     @abstractmethod
     def ontop(self)         -> OntopProperties: ...
@@ -231,6 +232,8 @@ from pathlib import Path
 
 def is_dir(p: Path) -> bool: return p.is_dir()
 class Dir(Path, Phantom, predicate=is_dir): ...
+def is_ttl(p: Path): return p.suffix == '.ttl'
+class ttlFile(Path, Phantom, predicate=is_ttl): ...
 
 class SQLRDFMapping(Base, ):
     """ related to the mapping 'action' """
@@ -247,38 +250,34 @@ class SQLRDFMapping(Base, ):
 
     @final
     def validate(self) -> bool: return True
+    
 
+    # couldnt get the spec| impl slit to work.
+    # but the individual writer maps might as well be an imlementation detail
+    # @overload 
+    # @abstractmethod
+    # def writer(self, part: Ontology,    dir: Dir)   -> 'OntologyWriting': ...
+    # @overload
+    # @abstractmethod
+    # def writer(self, part: SQLRDFMap,     dir: Dir)   -> 'MappingWriting': ...
+    # #https://github.com/python/mypy/issues/11488
+    # @overload
+    # @abstractmethod
+    # def writer(self, part: Properties,  dir: Dir)   -> 'PropertiesWriting': ...
 
-    @overload
-    @classmethod
     @abstractmethod
-    def writer(cls, part: Ontology,    dir: Dir)   -> 'OntologyWriting': ...
-    @overload
-    @classmethod
-    @abstractmethod
-    def writer(cls, part: SQLRDFMap,     dir: Dir)   -> 'MappingWriting': ...
-    #https://github.com/python/mypy/issues/11488
-    @overload
-    @classmethod
-    @abstractmethod
-    def writer(cls, part: Properties,  dir: Dir)   -> 'PropertiesWriting': ...
-
-    @classmethod
-    @abstractmethod
-    def writer(cls, part: Ontology | SQLRDFMap | Properties, dir: Dir) -> 'SQLRDFMapPartWriting':
+    def writer(self, part: Ontology | SQLRDFMap | Properties, ) \
+            -> Union['OntologyWriting', 'MappingWriting', 'PropertiesWriting']: #'SQLRDFMapPartWriting':
         ...
 
     @abstractmethod
-    def map(self)           -> None: # could be success/fail
+    def map(self, dir: Dir) -> ttlFile: 
         """the 'do' """
 
 
 #FileExt = N*ewType('FileExt', str) # 'suffix' starts w/ .
 FileExt = str
 class SQLRDFMapPartWriting(ABC):
-    @property
-    @abstractmethod
-    def of(self)            -> Ontology | SQLRDFMap | Properties: ...
     @property
     @abstractmethod
     def file_ext(self)      -> FileExt: ...
@@ -288,14 +287,17 @@ class SQLRDFMapPartWriting(ABC):
     
     #@abstractmethod
     #def str(self)           -> str: ...
+    
+
     @abstractmethod
     def write(self,
-            dir: Dir)       -> None: ...
+            dir: Dir)       -> Path: ...
+
 
 class OntologyWriting(Base, SQLRDFMapPartWriting,):
     @property
     @abstractmethod
-    def of(self)            -> Ontology: ...           # learning: mypy: must be one of onto, sqlrdfmap, properties
+    def ontology(self)      -> Ontology: ...
     @property
     @abstractmethod
     def file_ext(self)      -> Literal['ttl']: ...     # learning: we're in type land.
@@ -309,20 +311,26 @@ class OntologyWriting(Base, SQLRDFMapPartWriting,):
     @property
     @abstractmethod
     def name(self)          -> Literal['ontology']: ...
+
+    def validate(self) -> bool: return True
+
 class MappingWriting(Base, SQLRDFMapPartWriting):
     @property
     @abstractmethod
-    def of(self)            -> SQLRDFMap: ...
+    def mapping(self)       -> SQLRDFMap: ...
     @property
     @abstractmethod
     def file_ext(self)      -> Literal['obda']: ...
     @property
     @abstractmethod
     def name(self)          -> Literal['maps']: ...
+
+    def validate(self) -> bool: return True
+
 class PropertiesWriting(Base, SQLRDFMapPartWriting):
     @property
     @abstractmethod
-    def of(self)            -> Properties: ...
+    def properties(self)    -> Properties: ...
     @property
     @abstractmethod
     def file_ext(self)      -> Literal['properties']: ...
@@ -330,6 +338,7 @@ class PropertiesWriting(Base, SQLRDFMapPartWriting):
     @abstractmethod
     def name(self)          -> Literal['sql']: ...
 
+    def validate(self) -> bool: return True
 
 # but i want error if not implemented
 # from classes import typeclass, AssociatedType
