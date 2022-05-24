@@ -409,9 +409,9 @@ class SQLRDFMapping(s.SQLRDFMapping):
         from subprocess import run
         r = run([
             ontop, 'materialize',
-            '-t',                   str(ow.write(dir)),
-            '-m',                   str(mw.write(dir)),
-            '--properties',         str(pw.write(dir)),
+            '-t',                   str(ow.write(dir).name),
+            '-m',                   str(mw.write(dir).name),
+            '--properties',         str(pw.write(dir).name),
             '-o',                   str(out),
             '--disable-reasoning',
             '-f', 'turtle',
@@ -433,6 +433,7 @@ class hasPathing(Protocol):
 class Writing(hasPathing):
     def path(self, dir: s.Dir) -> Path:
         return dir / f"{self.name}.{self.file_ext}"
+
 
 @dataclass
 class OntologyWriting(Writing, s.OntologyWriting):
