@@ -79,7 +79,7 @@ class DBProperties(s.DBProperties):
 
     @classmethod
     def constraint_stripper(cls, sqlitedb: SQLiteDB) -> Iterator[str]:
-        # hack
+        # hack: for some reason ontop doesnt work if sqlite has constraints
         import sqlite3
         src = sqlite3.connect(str(sqlitedb))
         table_query = """\
@@ -96,7 +96,7 @@ class DBProperties(s.DBProperties):
     @staticmethod
     def strip_constraint(tbl_schema: str) -> str:
         # todo: inelegant
-        has_constraint = lambda s: ('constraint "' in s.lower()) #or ('primary key' in s.lower())
+        has_constraint = lambda s: ('constraint "' in s.lower()) or ('primary key' in s.lower())
         if not has_constraint(tbl_schema):
             return tbl_schema
         else:
@@ -140,11 +140,11 @@ class Properties(s.Properties):
     ontop:  OntopProperties
 
     @classmethod
-    def _make_unvalidated(cls, *p, **k) -> 'Properties':
+    def _make_unvalidated(cls, *p, **k)     -> 'Properties':
         return cls.from_sqlite(*p, *k)
 
     @classmethod
-    def from_sqlite(cls, sqlite: SQLiteDB) -> 'Properties':
+    def from_sqlite(cls, sqlite: SQLiteDB)  -> 'Properties':
         d = DBProperties.make(sqlite)
         o = OntopProperties.make()
         return cls(d, o)
