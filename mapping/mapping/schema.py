@@ -1,6 +1,5 @@
 from collections.abc import Mapping
 from typing import Literal, NewType, TypeVar, Generic, Sequence, Iterable, Union
-from typing import overload
 from typing import final
 from abc import ABC, abstractmethod # abstractXmethod: use @X(abstractXmethod)
 # or just use protocols?
