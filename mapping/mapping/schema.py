@@ -1,5 +1,6 @@
-from collections.abc import Mapping
-from typing import Literal, NewType, TypeVar, Generic, Sequence, Iterable, Union
+from typing import Type, TypeVar, Generic, NewType
+from typing import Callable
+from typing import Literal, Sequence, Iterable, Union, Mapping
 from typing import final
 from abc import ABC, abstractmethod # abstractXmethod: use @X(abstractXmethod)
 # or just use protocols?
@@ -9,6 +10,7 @@ from rdflib import Graph
 #Graph = TypeVar('Graph')
 
 # learnings: zope.interface
+
 
 
 #def abstractfield(f: Callable):
@@ -22,7 +24,7 @@ from rdflib import Graph
 
 
 T = TypeVar('T',)
-class Construtor(Generic[T], ABC):
+class Constructor(Generic[T], ABC):
     # How to force using .make instead of __init__?
     @classmethod
     @abstractmethod
@@ -40,27 +42,37 @@ class Validation(Generic[T], ABC):
     def validate(self) -> bool:
         """arbitrary validations. mainly want to assert invariants."""
 
-#V = TypeVar('V', bound='ValidatedConstruction')
-class ValidatedConstruction(Validation[T], Construtor[T],):
+
+class ValidatedConstruction(Generic[T], ABC):
+    @final
     @classmethod
-    def make(cls, *p, **k) -> T:
-        m: T = cls._make_unvalidated(*p, **k)
-        if m.validate(): return m
+    def make(cls,*p, **k) -> T:
+        _ = cls._make_unvalidated(cls, *p, **k)
+        if _.validate(): return _
         else: raise TypeError
+
+    #@classmethod
+    #def __init_subclass__(cls):
+        #cls
+    def __new__(cls, *p, **k):# -> T:#??
+        # this is to not allow cls() w/o validation
+        _ = super().__new__(cls,)
+        if _.validate(): return _
+        else: raise TypeError
+
 
     @classmethod
     @abstractmethod
     def _make_unvalidated(cls, *p, **k) -> T: ...
 
 
+class Base(ValidatedConstruction): ...
 
 class Str(Generic[T], ABC):
     @abstractmethod
     def __str__(self) -> str: ...
 
-#class Fantom(Phantom, abstract=True):...
 
-class Base(ValidatedConstruction): ...
 
 def is_property_name(s: str) -> bool: return s.startswith('jdbc.')
 class DBPropertyName(str, Phantom, predicate=is_property_name): ...
@@ -79,7 +91,8 @@ class DBProperty(Base, Str):
     def __str__(self)       -> PropertyStr: ...
 
     @final
-    def validate(self) -> bool: return True
+    def validate(self) -> bool:
+        return True
 
 
 class DBProperties(Base, Str):
@@ -143,10 +156,15 @@ class OntologyBase(Base, ClassIterator):
         return self.name in {ob.name for ob in self.__class__.s()}
 
 
-class Building(Base):
+class Graphs(ABC):
+    @abstractmethod
+    def graph(self)         -> Graph: ...
+
+
+class Building(Base, ):
     @property
     @abstractmethod
-    def name(self)              -> str: ...
+    def name(self)              ->  str: ...
     @abstractmethod
     def uri(self, prefix: str)  -> 'URI': ...
 
@@ -154,21 +172,22 @@ class Building(Base):
     def validate(self) -> bool: return True
 
 
-class OntologyCustomization(Base,):
-    @property
-    @abstractmethod
-    def building(self)      ->  Building: ...
+class OntologyCustomization(Base, Graphs):
+    """'variables'"""
     @property
     @abstractmethod
     def base(self)          ->  OntologyBase: ...
+
     @property
     def graph(self)         ->  Graph: ...
+    
 
     @final
-    def validate(self) -> bool: return True
+    def validate(self) -> bool:
+        return True
 
 
-class Ontology(Base,):
+class Ontology(Base, Graphs):
     @property
     @abstractmethod
     def base(self)          -> OntologyBase: ...
@@ -190,6 +209,10 @@ def is_uri(s: str) -> bool: return s.startswith('http://') or s.startswith('http
 class URI(str, Phantom, predicate=is_uri): ...
 KeyStr =                    NewType('KeyStr', str) # no spaces in str?
 Prefixes =                  Mapping[KeyStr, URI]
+class Prefix(Prefixes):
+    @final
+    def validate(self) -> bool:
+        return len(self) == 1
 
 SQL =                       NewType('SQL', str)
 templatedTTL =              NewType('templatedTTL', str)
@@ -208,9 +231,21 @@ class Map(Base,):
     def validate(self) -> bool: return True
 
 
-
 def nonzeroseq(m: Sequence[Map]) -> bool: return True if len(m) else False
 class Maps(Sequence[Map], Phantom, predicate=nonzeroseq): ...
+
+
+class MappingCallouts(Base,):
+    """things we might care about in the mapping file"""
+    @property
+    @abstractmethod
+    def prefix(self)        -> Prefix: ...
+    @property
+    @abstractmethod
+    def building(self)      -> Building: ...
+
+    @final
+    def validate(self) -> bool: return True
 
 
 class SQLRDFMap(Base, Str):
@@ -221,9 +256,26 @@ class SQLRDFMap(Base, Str):
     @property
     @abstractmethod
     def maps(self)          -> Maps: ...
+    
+    #customizations:
+    @property
+    def callouts(self)      -> MappingCallouts | None: ...
+    
 
     @final
-    def validate(self) -> bool: return True
+    def validate(self) -> bool:
+        def bdg_in_prefixes(bdg: Building, prefixes: Prefixes) -> bool:
+            for ns, uri in prefixes.items():
+                if uri.endswith(bdg.name):
+                    return True
+            return False
+        def pfx_in_prefixes(pfx: Prefix, prefixes: Prefixes) -> bool:
+            if list(pfx.keys())[0] in prefixes: return True
+            return False
+        if self.callouts:
+            if not self.prefixes: return False
+            else: return bdg_in_prefixes(self.callouts.building, self.prefixes) and pfx_in_prefixes(self.callouts.prefix, self.prefixes)
+        return False
 
 
 from pathlib import Path
@@ -248,8 +300,8 @@ class SQLRDFMapping(Base, ):
         """represents 'input'"""
 
     @final
-    def validate(self) -> bool: return True
-    
+    def validate(self) -> bool:
+        return True
 
     # couldnt get the spec| impl slit to work.
     # but the individual writer maps might as well be an imlementation detail
