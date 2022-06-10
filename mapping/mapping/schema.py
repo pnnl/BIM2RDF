@@ -12,7 +12,6 @@ from rdflib import Graph
 # learnings: zope.interface
 
 
-
 #def abstractfield(f: Callable):
 #    _ = abstractmethod(f)
 #    _ = property(_)
@@ -24,12 +23,6 @@ from rdflib import Graph
 
 
 T = TypeVar('T',)
-class Constructor(Generic[T], ABC):
-    # How to force using .make instead of __init__?
-    @classmethod
-    @abstractmethod
-    def make(cls, *p, **k) -> T: ...
-
 
 class ClassIterator(Generic[T], ABC):
     @classmethod
@@ -43,34 +36,20 @@ class Validation(Generic[T], ABC):
         """arbitrary validations. mainly want to assert invariants."""
 
 
-class ValidatedConstruction(Generic[T], ABC):
+class Construction(Generic[T], ABC):
+    @classmethod
+    def __init_subclass__(cls, validate=True):
+        if not validate: cls.validate = lambda cls: True
+
     @final
-    @classmethod
-    def make(cls,*p, **k) -> T:
-        _ = cls._make_unvalidated(cls, *p, **k)
-        if _.validate(): return _
-        else: raise TypeError
-
-    #@classmethod
-    #def __init_subclass__(cls):
-        #cls
-    def __new__(cls, *p, **k):# -> T:#??
+    def __new__(cls, *p, **k):# *p, **k):# -> T:#??
         # this is to not allow cls() w/o validation
-        _ = super().__new__(cls,)
+        _ = super().__new__(cls)
         if _.validate(): return _
         else: raise TypeError
 
 
-    @classmethod
-    @abstractmethod
-    def _make_unvalidated(cls, *p, **k) -> T: ...
-
-
-class Base(ValidatedConstruction): ...
-
-class Str(Generic[T], ABC):
-    @abstractmethod
-    def __str__(self) -> str: ...
+class Base(Construction): ...
 
 
 
@@ -79,7 +58,7 @@ class DBPropertyName(str, Phantom, predicate=is_property_name): ...
 def is_property(s: str) -> bool: return '=' in s
 class PropertyStr(str, Phantom , predicate=is_property): ...
 
-class DBProperty(Base, Str):
+class DBProperty(Base, ):
     @property
     @abstractmethod
     def name(self,)         -> DBPropertyName: ...
@@ -95,7 +74,7 @@ class DBProperty(Base, Str):
         return True
 
 
-class DBProperties(Base, Str):
+class DBProperties(Base, ):
     """ontop db config"""
     @property
     @abstractmethod
@@ -114,13 +93,8 @@ class DBProperties(Base, Str):
     @final
     def validate(self) -> bool: return True
 
-#@dataclass
-#class DBPropertiesImpl(DBProperties):
-    #notname: str #cant instantiate
-    #name: int # can but is it typechecked?
-#DBPropertiesImpl('sdf')
 
-class OntopProperties(Base, Str):
+class OntopProperties(Base, ):
     """ontop config"""
     @property
     @abstractmethod
@@ -131,7 +105,7 @@ class OntopProperties(Base, Str):
     def validate(self) -> bool: return True
 
 
-class Properties(Base, Str):
+class Properties(Base, ):
     @property
     @abstractmethod
     def jdbc(self)          -> DBProperties: ...
@@ -248,7 +222,7 @@ class MappingCallouts(Base,):
     def validate(self) -> bool: return True
 
 
-class SQLRDFMap(Base, Str):
+class SQLRDFMap(Base, ):
     """represents the obda file"""
     @property
     @abstractmethod
