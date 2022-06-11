@@ -184,7 +184,10 @@ class Ontology(Base, Graphs):
 
 
 # 
-def is_uri(s: str) -> bool: return s.startswith('http://') or s.startswith('https://')
+def is_uri(s: str) -> bool:
+    return (s.startswith('http://')     or  \
+            s.startswith('https://') )  and \
+            ('\\' not in s)
 class URI(str, Phantom, predicate=is_uri): ...
 def is_keystr(s: str) -> bool: return not (' ' in s)
 class KeyStr(str, Phantom, predicate=is_keystr): ...
@@ -234,7 +237,11 @@ class MappingCallouts(Base,):
     def building(self)      -> Building: ...
 
     @final
-    def validate(self) -> bool: return True
+    def validate(self) -> bool:
+        if not self.prefix.uri.endswith(self.building.name):
+            return False
+        else:
+            return True
 
 
 class SQLRDFMap(Base, ):
