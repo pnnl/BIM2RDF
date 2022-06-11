@@ -210,21 +210,50 @@ class MappingCallouts(s.MappingCallouts):
     prefix:     Prefix
     building:   Building
 
+    @classmethod
+    def make(cls, p: Prefix, b: Building) -> 'MappingCallouts':
+        if p.uri.endswith(b.name):  return cls(p, b)
+        else:
+            return cls(
+                        Prefix(
+                            s.KeyStr(p.name),
+                            s.URI(p.uri + b.name) if p.uri.endswith('/') \
+                            else s.URI(f"{p.uri}/{b.name}")),
+                        b)
+
 
 @dataclass
 class SQLRDFMap(s.SQLRDFMap):
     prefixes:   s.Prefixes | None
     maps:       s.Maps
 
-    #@from_callouts?
+    @overload
     @classmethod
-    def from_customizations(cls, i: dict | YamlFile | str,  bdg: Building | str, prefix=Prefix(s.KeyStr('pnnl'), s.URI('http://example.com')  ), ) -> 'SQLRDFMap':
-        co = MappingCallouts(prefix, Building.make(bdg))
-        self: SQLRDFMap = cls.make(i)
-        if not (self.callouts == co):
+    def _make(cls, i: dict)     -> 'SQLRDFMap': ...
+    @overload
+    @classmethod
+    def _make(cls, i: YamlFile) -> 'SQLRDFMap': ...
+    @overload
+    @classmethod
+    def _make(cls, i: str)      -> 'SQLRDFMap': ...
+
+    @classmethod
+    def _make(cls, i: dict | YamlFile | str) -> 'SQLRDFMap':
+        if      isinstance(i, dict):        return cls.from_dict(       i)
+        elif    isinstance(i, YamlFile):    return cls.from_yamlfile(   i)
+        elif    isinstance(i, str):         return cls.from_name(       i)
+        else:   raise TypeError
+
+    @classmethod
+    def make(cls,
+        i: dict | YamlFile | str,
+        callouts: MappingCallouts | None = MappingCallouts.make(prefix, Building('unnamed') )) -> 'SQLRDFMap':
+        self: SQLRDFMap = cls._make(i)
+        if not callouts: return self
+        if not (self.callouts == callouts):
             #from attrs import evolve
             pfxs =  dict(self.prefixes) if self.prefixes else dict()
-            pfxs.update({co.prefix.name: co.prefix.uri})
+            pfxs.update({callouts.prefix.name: callouts.prefix.uri})
             return cls(pfxs, self.maps)
         else:
             return self
@@ -258,22 +287,6 @@ class SQLRDFMap(s.SQLRDFMap):
     def from_name(cls, name: str) -> 'SQLRDFMap':
         return cls.from_yamlfile( YamlFile(mapping_dir / name / 'maps.yaml') )
 
-    @overload
-    @classmethod
-    def make(cls, i: dict)     -> 'SQLRDFMap': ...
-    @overload
-    @classmethod
-    def make(cls, i: YamlFile) -> 'SQLRDFMap': ...
-    @overload
-    @classmethod
-    def make(cls, i: str)      -> 'SQLRDFMap': ...
-
-    @classmethod
-    def make(cls, i: dict | YamlFile | str) -> 'SQLRDFMap':
-        if      isinstance(i, dict):        return cls.from_dict(       i)
-        elif    isinstance(i, YamlFile):    return cls.from_yamlfile(   i)
-        elif    isinstance(i, str):         return cls.from_name(       i)
-        else:   raise TypeError
         
     def make_obda(self) -> str:
         from jinja2 import Environment, FileSystemLoader#, select_autoescape
