@@ -47,5 +47,3 @@ brick:LuminousFluxShape a owl:Class,
             sh:path brick:hasUnit].
 
 
-# SPECIFICS
-@prefix bdg: <http://example.org/building/> .

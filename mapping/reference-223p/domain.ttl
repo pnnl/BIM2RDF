@@ -47,8 +47,3 @@ s223x:Room a s223:PhysicalSpace.
 
 
 
-
-
-# SPECIFICS
-@prefix bdg: <http://example.org/building/> .
-

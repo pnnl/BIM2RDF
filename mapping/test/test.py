@@ -9,7 +9,8 @@ import mapping.mapping as m
 test_dir = Path(__file__).parent
 
 
-sr = m.SQLRDFMapping.from_args('test', 'brick', m.SQLiteDB(test_dir / 'test.sqlite') )
+sr = m.SQLRDFMapping.make('test', 'reference-223p', m.SQLiteDB(test_dir / 'test.sqlite'),   )
+
 
 sr.map(test_dir)
 

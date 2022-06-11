@@ -8,12 +8,12 @@ prefixes:
   unit:     http://qudt.org/vocab/unit/
   qudt:     http://qudt.org/schema/qudt/
   s223x:    http://example.org/s223x/
-  bdg:      http://example.org/building/
+  pnnl:     http://example.org/building/unnamed   # named in processing
 
 maps:
   - id: luminaire types
     target: |
-      bdg:LuminaireType/{TypeMark}          # keeping id as a 'name'
+      pnnl:LuminaireType/{TypeMark}          # keeping id as a 'name'
         rdfs:label      {TypeMark};
         rdfs:subClassOf s223:Luminaire.
     source:
