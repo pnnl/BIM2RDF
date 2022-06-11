@@ -3,6 +3,7 @@ from typing import Callable
 from typing import Literal, Sequence, Iterable,  Mapping
 from typing import final
 from abc import ABC, abstractmethod # abstractXmethod: use @X(abstractXmethod)
+from phantom import Predicate 
 # or just use protocols?
 from phantom.base import Phantom
 from rdflib import Graph
@@ -49,7 +50,7 @@ class Construction(Generic[T], Validation[T]):
     # this is actually an implementation detail
     # but i didn't know how to have a generic post_init
     def __attrs_post_init__(self):
-        self.validate()
+        if not self.validate(): raise TypeError(f'{self} invalid')
 
 
 Base = Construction 
@@ -185,12 +186,22 @@ class Ontology(Base, Graphs):
 # 
 def is_uri(s: str) -> bool: return s.startswith('http://') or s.startswith('https://')
 class URI(str, Phantom, predicate=is_uri): ...
-KeyStr =                    NewType('KeyStr', str) # no spaces in str?
-Prefixes =                  Mapping[KeyStr, URI]
-class Prefix(Prefixes):
+def is_keystr(s: str) -> bool: return not (' ' in s)
+class KeyStr(str, Phantom, predicate=is_keystr): ...
+
+class Prefix(Base):
+    @property
+    @abstractmethod
+    def name(self)             -> KeyStr: ...
+    @property
+    @abstractmethod
+    def uri(self)              -> URI: ...
+
     @final
-    def validate(self) -> bool:
-        return len(self) == 1
+    def validate(self) -> bool: return True
+
+Prefixes =                  Mapping[KeyStr, URI]
+
 
 SQL =                       NewType('SQL', str)
 templatedTTL =              NewType('templatedTTL', str)
@@ -248,11 +259,20 @@ class SQLRDFMap(Base, ):
                     return True
             return False
         def pfx_in_prefixes(pfx: Prefix, prefixes: Prefixes) -> bool:
-            if list(pfx.keys())[0] in prefixes: return True
+            if pfx.name in prefixes: return True
             return False
+        def pfx_in_map_targets(pfx: Prefix, maps: Maps) -> bool:
+            if not maps:                                    return False
+            if all((pfx.name in m.target) for m in maps):   return True
+            else:                                           return False
         if self.callouts:
-            if not self.prefixes: return False
-            else: return bdg_in_prefixes(self.callouts.building, self.prefixes) and pfx_in_prefixes(self.callouts.prefix, self.prefixes)
+            if not self.prefixes:
+                return False
+            else:
+                return \
+                bdg_in_prefixes(    self.callouts.building, self.prefixes)  and \
+                pfx_in_prefixes(    self.callouts.prefix,   self.prefixes)  and\
+                pfx_in_map_targets( self.callouts.prefix,   self.maps)
         return False
 
 
