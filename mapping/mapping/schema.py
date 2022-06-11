@@ -1,6 +1,6 @@
 from typing import Type, TypeVar, Generic, NewType
 from typing import Callable
-from typing import Literal, Sequence, Iterable, Union, Mapping
+from typing import Literal, Sequence, Iterable,  Mapping
 from typing import final
 from abc import ABC, abstractmethod # abstractXmethod: use @X(abstractXmethod)
 # or just use protocols?
@@ -33,24 +33,27 @@ class ClassIterator(Generic[T], ABC):
 class Validation(Generic[T], ABC):
     @abstractmethod
     def validate(self) -> bool:
-        """arbitrary validations. mainly want to assert invariants."""
+       """arbitrary validations. mainly want to assert invariants."""
 
 
-class Construction(Generic[T], ABC):
-    @classmethod
-    def __init_subclass__(cls, validate=True):
-        if not validate: cls.validate = lambda cls: True
+class Construction(Generic[T], Validation[T]):
 
     @final
-    def __new__(cls, *p, **k):# *p, **k):# -> T:#??
-        # this is to not allow cls() w/o validation
-        _ = super().__new__(cls)
-        if _.validate(): return _
-        else: raise TypeError
+    @classmethod
+    def __init_subclass__(cls, *p, validate=True, **k):
+        super().__init_subclass__(*p, **k)
+        if not validate:    cls.validate = lambda cls: True
+        #else:               cls.validate = super().validate
+        # todo also make sure it's the same name
+
+    # this is actually an implementation detail
+    # but i didn't know how to have a generic post_init
+    def __attrs_post_init__(self):
+        self.validate()
 
 
-class Base(Construction): ...
-
+Base = Construction 
+#class Base(Construction): ... 
 
 
 def is_property_name(s: str) -> bool: return s.startswith('jdbc.')
@@ -127,7 +130,8 @@ class OntologyBase(Base, ClassIterator):
 
     @final
     def validate(self) -> bool:
-        return self.name in {ob.name for ob in self.__class__.s()}
+        return True
+        #return self.name in {ob.name for ob in self.__class__.s()}
 
 
 class Graphs(ABC):
@@ -292,7 +296,7 @@ class SQLRDFMapping(Base, ):
 
     @abstractmethod
     def writer(self, part: Ontology | SQLRDFMap | Properties, ) \
-            -> Union['OntologyWriting', 'MappingWriting', 'PropertiesWriting']: #'SQLRDFMapPartWriting':
+            -> 'OntologyWriting | MappingWriting | PropertiesWriting': #'SQLRDFMapPartWriting':
         ...
 
     @abstractmethod
