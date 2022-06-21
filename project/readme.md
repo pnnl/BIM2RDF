@@ -106,15 +106,7 @@ The tasks aid the following development process.
     <br>
     The source was cloned into the 'workspace' directory even though it's called 'workspace-code' to emphasize that code and non-code will combine in the directory.
 
-1. **Configure**
-
-    The only required configuration is setting the DVC repository in the project [configuration file](./project/config.yml).
-    This repo is on the shared drive at \\\pnl\slash\slash\slash, so check that you can access it.
-    Optionally, make this folder available offline for better performance (Windows feature). <br>
-
-    > Do not modify this directory (yourself)!
-
-0. **Bootstrap**
+1. **Bootstrap**
 
     Executing [bootstrap.sh](./bootstrap.sh) and [bootstrap.bat](./bootstrap.bat) for Mac/Linux and Windows, respectively, will initialize the project.
 
