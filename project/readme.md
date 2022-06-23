@@ -10,6 +10,9 @@ In addition, execution environments and workflow tasks are managed as well.
 
 ## Structure
 
+![image](https://user-images.githubusercontent.com/3588248/175333804-f3d5bf61-9e05-4073-948e-fbf09702ba89.png)
+
+
 The workflow manages a 'work directory' (workdir) concept: some separated-out unit of work.
 It could be a module/library or a one-off experiment.
 To keep things as simple as possible, workdirs are the folders directly under the root of the workspace.
