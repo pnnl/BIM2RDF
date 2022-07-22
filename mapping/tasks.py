@@ -1,5 +1,4 @@
 from invoke import task
-from ontologies import get
 
 
 @task
@@ -9,6 +8,15 @@ def get_ontologies(ctx):
 
 
 
+
+from pathlib import Path
+from project import activated_workdir
+
 @task
-def clean(what):
-    pass
+def map(ctx, bdg, ontology, db_file=activated_workdir / 'work' /'db.sqlite'):
+    from pathlib import Path
+    import mapping.mapping as m
+
+    sr = m.SQLRDFMapping.make((bdg, ontology, m.SQLiteDB( db_file) , ))
+    sr.map(db_file.parent)
+
