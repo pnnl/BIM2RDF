@@ -1,3 +1,1 @@
-todo:
-* check input tables.
-* run mypy --strict
+`cd` to this directory and use `inv` to run program.
