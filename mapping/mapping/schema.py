@@ -1,9 +1,5 @@
-from typing import Type, TypeVar, Generic, NewType
-from typing import Callable
-from typing import Literal, Sequence, Iterable,  Mapping
-from typing import final
-from abc import ABC, abstractmethod # abstractXmethod: use @X(abstractXmethod)
-from phantom import Predicate 
+from typing import Literal, Sequence, Mapping
+from typing import NewType
 # or just use protocols?
 from phantom.base import Phantom
 from rdflib import Graph
@@ -12,49 +8,10 @@ from rdflib import Graph
 
 # learnings: zope.interface
 
+from typing import final
+from .meta import ABC
+from abc import abstractmethod
 
-#def abstractfield(f: Callable):
-#    _ = abstractmethod(f)
-#    _ = property(_)
-#    return _
-# need to use
-#@property
-#@abstractmethod
-# for mypy to work
-
-
-T = TypeVar('T',)
-
-class ClassIterator(Generic[T], ABC):
-    @classmethod
-    @abstractmethod
-    def s(cls, *p, **k) -> Iterable[T]: ...
-
-
-class Validation(Generic[T], ABC):
-    @abstractmethod
-    def validate(self) -> bool:
-       """arbitrary validations. mainly want to assert invariants."""
-
-
-class Construction(Generic[T], Validation[T]):
-
-    @final
-    @classmethod
-    def __init_subclass__(cls, *p, validate=True, **k):
-        super().__init_subclass__(*p, **k)
-        if not validate:    cls.validate = lambda cls: True
-        #else:               cls.validate = super().validate
-        # todo also make sure it's the same name
-
-    # this is actually an implementation detail
-    # but i didn't know how to have a generic post_init
-    def __attrs_post_init__(self):
-        if not self.validate(): raise TypeError(f'{self} invalid')
-
-
-Base = Construction 
-#class Base(Construction): ... 
 
 
 def is_property_name(s: str) -> bool: return s.startswith('jdbc.')
@@ -62,7 +19,7 @@ class DBPropertyName(str, Phantom, predicate=is_property_name): ...
 def is_property(s: str) -> bool: return '=' in s
 class PropertyStr(str, Phantom , predicate=is_property): ...
 
-class DBProperty(Base, ):
+class DBProperty(ABC):
     @property
     @abstractmethod
     def name(self,)         -> DBPropertyName: ...
@@ -78,7 +35,7 @@ class DBProperty(Base, ):
         return True
 
 
-class DBProperties(Base, ):
+class DBProperties(ABC):
     """ontop db config"""
     @property
     @abstractmethod
@@ -98,7 +55,7 @@ class DBProperties(Base, ):
     def validate(self) -> bool: return True
 
 
-class OntopProperties(Base, ):
+class OntopProperties(ABC):
     """ontop config"""
     @property
     @abstractmethod
@@ -109,7 +66,7 @@ class OntopProperties(Base, ):
     def validate(self) -> bool: return True
 
 
-class Properties(Base, ):
+class Properties(ABC):
     @property
     @abstractmethod
     def jdbc(self)          -> DBProperties: ...
@@ -121,7 +78,7 @@ class Properties(Base, ):
     def validate(self) -> bool: return True
 
 
-class OntologyBase(Base, ClassIterator):
+class OntologyBase(ABC):
     @property
     @abstractmethod
     def name(self)          -> str: ...
@@ -135,12 +92,12 @@ class OntologyBase(Base, ClassIterator):
         #return self.name in {ob.name for ob in self.__class__.s()}
 
 
-class Graphs(ABC):
+class Graphs:
     @abstractmethod
     def graph(self)         -> Graph: ...
 
 
-class Building(Base, ):
+class Building(ABC):
     @property
     @abstractmethod
     def name(self)              ->  str: ...
@@ -151,7 +108,7 @@ class Building(Base, ):
     def validate(self) -> bool: return True
 
 
-class OntologyCustomization(Base, Graphs):
+class OntologyCustomization(Graphs, ABC):
     """'variables'"""
     @property
     @abstractmethod
@@ -166,7 +123,7 @@ class OntologyCustomization(Base, Graphs):
         return True
 
 
-class Ontology(Base, Graphs):
+class Ontology(Graphs, ABC):
     @property
     @abstractmethod
     def base(self)          -> OntologyBase: ...
@@ -192,7 +149,7 @@ class URI(str, Phantom, predicate=is_uri): ...
 def is_keystr(s: str) -> bool: return not (' ' in s)
 class KeyStr(str, Phantom, predicate=is_keystr): ...
 
-class Prefix(Base):
+class Prefix(ABC):
     @property
     @abstractmethod
     def name(self)             -> KeyStr: ...
@@ -208,7 +165,7 @@ Prefixes =                  Mapping[KeyStr, URI]
 
 SQL =                       NewType('SQL', str)
 templatedTTL =              NewType('templatedTTL', str)
-class Map(Base,):
+class Map(ABC):
     @property
     @abstractmethod
     def id(self)            -> KeyStr: ...
@@ -227,7 +184,7 @@ def nonzeroseq(m: Sequence[Map]) -> bool: return True if len(m) else False
 class Maps(Sequence[Map], Phantom, predicate=nonzeroseq): ...
 
 
-class MappingCallouts(Base,):
+class MappingCallouts(ABC):
     """things we might care about in the mapping file"""
     @property
     @abstractmethod
@@ -244,7 +201,7 @@ class MappingCallouts(Base,):
             return True
 
 
-class SQLRDFMap(Base, ):
+class SQLRDFMap(ABC):
     """represents the obda file"""
     @property
     @abstractmethod
@@ -291,7 +248,7 @@ class Dir(Path, Phantom, predicate=is_dir): ...
 def is_ttl(p: Path): return p.suffix == '.ttl'
 class ttlFile(Path, Phantom, predicate=is_ttl): ...
 
-class SQLRDFMapping(Base, ):
+class SQLRDFMapping(ABC):
     """ related to the mapping 'action' """
     @property
     @abstractmethod
@@ -343,14 +300,15 @@ class SQLRDFMapPartWriting(ABC):
     
     #@abstractmethod
     #def str(self)           -> str: ...
-    
 
     @abstractmethod
     def write(self,
             dir: Dir)       -> Path: ...
 
+    def validate(self) -> bool:
+        return True
 
-class OntologyWriting(Base, SQLRDFMapPartWriting,):
+class OntologyWriting(SQLRDFMapPartWriting, ABC):
     @property
     @abstractmethod
     def ontology(self)      -> Ontology: ...
@@ -368,9 +326,10 @@ class OntologyWriting(Base, SQLRDFMapPartWriting,):
     @abstractmethod
     def name(self)          -> Literal['ontology']: ...
 
-    def validate(self) -> bool: return True
+    def validate(self) -> bool:
+        return True
 
-class MappingWriting(Base, SQLRDFMapPartWriting):
+class MappingWriting( SQLRDFMapPartWriting, ABC):
     @property
     @abstractmethod
     def mapping(self)       -> SQLRDFMap: ...
@@ -383,7 +342,7 @@ class MappingWriting(Base, SQLRDFMapPartWriting):
 
     def validate(self) -> bool: return True
 
-class PropertiesWriting(Base, SQLRDFMapPartWriting):
+class PropertiesWriting(SQLRDFMapPartWriting, ABC):
     @property
     @abstractmethod
     def properties(self)    -> Properties: ...

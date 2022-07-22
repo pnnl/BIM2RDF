@@ -36,7 +36,8 @@ class DBProperty(s.DBProperty, ):
     value:  str
 
     @classmethod
-    def make(cls, short_name: ShortName, value: str) -> 'DBProperty':
+    def make(cls, frm: Tuple[ShortName, str]) -> 'DBProperty':
+        short_name, value = frm
         return cls(s.DBPropertyName(f"jdbc.{short_name}"), value)
 
     def __str__(self) -> s.PropertyStr:
@@ -69,10 +70,10 @@ class DBProperties(s.DBProperties):
             cur.execute(line)
         con.commit()
         return cls(
-            name =      DBProperty.make(ShortName('name'),      'sqldb'),
-            url =       DBProperty.make(ShortName('url'),       f"jdbc:sqlite:{stripped.name}"),
-            driver =    DBProperty.make(ShortName('driver'),    'org.sqlite.JDBC'),
-            user =      DBProperty.make(ShortName('user'),      'user'))
+            name =      DBProperty.make((ShortName('name'),      'sqldb')),
+            url =       DBProperty.make((ShortName('url'),       f"jdbc:sqlite:{stripped.name}")),
+            driver =    DBProperty.make((ShortName('driver'),    'org.sqlite.JDBC')),
+            user =      DBProperty.make((ShortName('user'),      'user')))
 
     @classmethod
     def constraint_stripper(cls, sqlitedb: SQLiteDB) -> Iterator[str]:
@@ -121,7 +122,7 @@ class OntopProperties(s.OntopProperties):
     inferDefaultDatatype: bool
 
     @classmethod
-    def make(cls,) -> 'OntopProperties':
+    def make(cls, frm=None) -> 'OntopProperties':
         return cls(True)
 
     def lines(self) -> Iterator[str]:
@@ -201,8 +202,12 @@ class Building(s.Building):
 class Prefix(s.Prefix):
     name:   s.KeyStr
     uri:    s.URI
+    @classmethod
+    def make(cls, frm='Prefix'):
+        return frm
 
-prefix = Prefix(s.KeyStr('pnnl'), s.URI('http://example.com/'))
+
+prefix = Prefix.make(Prefix(s.KeyStr('pnnl'), s.URI('http://example.com/')))
 
 
 @dataclass
@@ -211,7 +216,8 @@ class MappingCallouts(s.MappingCallouts):
     building:   Building
 
     @classmethod
-    def make(cls, p: Prefix, b: Building) -> 'MappingCallouts':
+    def make(cls, frm=Tuple[Prefix, Building], ) -> 'MappingCallouts':
+        p, b = frm
         if p.uri.endswith(b.name):  return cls(p, b)
         else:
             return cls(
@@ -247,7 +253,7 @@ class SQLRDFMap(s.SQLRDFMap):
     @classmethod
     def make(cls,
         i: dict | YamlFile | str,
-        callouts: MappingCallouts | None = MappingCallouts.make(prefix, Building('unnamed') )) -> 'SQLRDFMap':
+        callouts: MappingCallouts | None = MappingCallouts.make( (prefix, Building('unnamed') )) ) -> 'SQLRDFMap':
         self: SQLRDFMap = cls._make(i)
         if not callouts: return self
         if not (self.callouts == callouts):
@@ -276,6 +282,7 @@ class SQLRDFMap(s.SQLRDFMap):
         prefixes = {s.KeyStr(k):s.URI(v) for k,v in prefixes.items()} if prefixes else None
         maps = d['maps'] if 'maps' in d else []
         maps = [Map.make(id=m['id'], source=m['source'], target=m['target']) for m in maps]
+        # TODO put through s.Map?
         return cls(prefixes=prefixes, maps=maps)
 
     @classmethod
@@ -332,6 +339,9 @@ class OntologyBase(s.OntologyBase):
         from ontologies import get
         return get(self.name)
 
+    @classmethod
+    def make(cls, frm: str):
+        return cls(frm)
 
     @classmethod
     def s(cls, *p, **k) -> Generator['OntologyBase', None, None]:
@@ -345,14 +355,15 @@ class OntologyCustomization(s.OntologyCustomization):
 
     @overload
     @classmethod
-    def make(cls, name: str, /)                -> 'OntologyCustomization': ...
+    def make(cls, frm: str, /)                -> 'OntologyCustomization': ...
     @overload
     @classmethod
-    def make(cls, base: OntologyBase, /)       -> 'OntologyCustomization': ...
+    def make(cls, frm: OntologyBase, /)       -> 'OntologyCustomization': ...
     @classmethod
-    def make(cls, i: str | OntologyBase )   -> 'OntologyCustomization':
-        if      isinstance(i, str): return cls( OntologyBase(i) )
-        else:                       return cls(i)
+    def make(cls, frm: str | OntologyBase )   -> 'OntologyCustomization':
+        if      isinstance(frm, str):   return cls( OntologyBase.make(frm) )
+        else:                           return cls(frm)
+    
     
     @property
     def graph(self) -> Graph:
@@ -371,8 +382,8 @@ class Ontology(s.Ontology):
     customization:  OntologyCustomization
     
     @classmethod
-    def make(cls, name: str, /)             -> 'Ontology':
-        oc = OntologyCustomization.make(name)
+    def make(cls, frm: str, /)             -> 'Ontology':
+        oc = OntologyCustomization.make(frm)
         return cls(oc.base, oc)
     
     @property
@@ -389,10 +400,12 @@ class SQLRDFMapping(s.SQLRDFMapping):
 
     @classmethod
     def make(cls, 
-            bdg:                    Building | str,
-            customization_name:     str,
-            db:                     SQLiteDB,
+              frm: Tuple[
+                    Building | str,
+                    str,
+                    SQLiteDB],
             ) ->                    'SQLRDFMapping':
+        bdg, customization_name, db = frm
         return cls(
             *cls.from_customizations(bdg, customization_name),
             cls.from_sqlite(db))
@@ -467,7 +480,7 @@ class Writing(hasPathing):
 
 
 @dataclass
-class OntologyWriting(Writing, s.OntologyWriting):
+class OntologyWriting(s.OntologyWriting, Writing):
     ontology: Ontology
     @property
     def file_ext(self) ->   Literal['ttl']:      return 'ttl'
@@ -484,7 +497,7 @@ class OntologyWriting(Writing, s.OntologyWriting):
 
 
 @dataclass
-class MappingWriting(Writing, s.MappingWriting):
+class MappingWriting(s.MappingWriting, Writing):
     mapping: SQLRDFMap
     @property
     def file_ext(self) ->   Literal['obda']:    return 'obda'
@@ -501,7 +514,7 @@ class MappingWriting(Writing, s.MappingWriting):
 
 
 @dataclass
-class PropertiesWriting(Writing, s.PropertiesWriting):
+class PropertiesWriting(s.PropertiesWriting, Writing):
     properties: Properties
     @property
     def file_ext(self) ->   Literal['properties']:  return 'properties'
