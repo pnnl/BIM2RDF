@@ -246,11 +246,13 @@ class SQLRDFMap(s.SQLRDFMap):
     def _make(cls, i: str)      -> 'SQLRDFMap': ...
 
     @classmethod
-    def _make(cls, i: dict | YamlFile | str) -> 'SQLRDFMap':
-        if      isinstance(i, dict):        return cls.from_dict(       i)
+    def _make(cls, i: 'dict | YamlFile | str| SQLRDFMap') -> 'SQLRDFMap':
+        if      isinstance(i, SQLRDFMap):   return i
+        elif    isinstance(i, dict):        return cls.from_dict(       i)
         elif    isinstance(i, YamlFile):    return cls.from_yamlfile(   i)
         elif    isinstance(i, str):         return cls.from_name(       i)
-        else:   raise TypeError
+        else:
+            raise TypeError
 
     @classmethod
     def make(cls,

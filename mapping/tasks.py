@@ -24,6 +24,11 @@ def map(ctx,
     db_file = m.SQLiteDB(db_file)
     # bdg
     if not building: building = db_file.stem
+    # map
+    if map_file:
+        map_file = Path(map_file)
+        if not map_file.exists(): raise FileNotFoundError('map file doesnt exist')
+        map_file = m.SQLRDFMap.make(map_file)
     #             Building | Any,
     #             Ontology | Any,
     #             SQLRDFMap | Any,
