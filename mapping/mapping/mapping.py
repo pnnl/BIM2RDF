@@ -431,6 +431,7 @@ class SQLRDFMapping(s.SQLRDFMapping):
 
     def map(self, dir: s.Dir)           -> s.ttlFile:
         """the 'do' """
+        dir = dir.absolute()
         ow = self.writer(self.ontology   )#.write(    dir)
         mw = self.writer(self.mapping    )#.write(    dir)
         pw = self.writer(self.properties )#.write(    dir)
@@ -450,7 +451,7 @@ class SQLRDFMapping(s.SQLRDFMapping):
             '-t',                   str(ow.write(dir).name),
             '-m',                   str(mw.write(dir).name),
             '--properties',         str(pw.write(dir).name),
-            '-o',                   str(out),
+            '-o',                   str(out),  # todo inconsistant
             '--disable-reasoning',
             '-f', 'turtle',
             '--db-password', 'sdfsdffsd' 
