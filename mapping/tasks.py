@@ -19,8 +19,9 @@ def map(ctx,
         ):
     import mapping.mapping as m
     # db
-    db_file = m.SQLiteDB(db_file)
+    db_file = Path(db_file)
     if not db_file.exists(): raise FileNotFoundError('db file doesnt exist')
+    db_file = m.SQLiteDB(db_file)
     # bdg
     if not building: building = db_file.stem
     #             Building | Any,
