@@ -470,7 +470,7 @@ class hasPathing(Protocol):
     def file_ext(self)  -> str: ...
 class Writing(hasPathing):
     def path(self, dir: s.Dir) -> Path:
-        return dir / f"{self.name}.{self.file_ext}"
+        return dir.absolute() / f"{self.name}.{self.file_ext}"
 
 
 @dataclass
