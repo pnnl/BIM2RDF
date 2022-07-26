@@ -6,12 +6,12 @@
 from pathlib import Path
 import mapping.mapping as m
 
+
+
 test_dir = Path(__file__).parent
 
 
-sr = m.SQLRDFMapping.make('test', 'reference-223p', m.SQLiteDB(test_dir / 'test.sqlite'),   )
-
-
+sr = m.SQLRDFMapping.make(('test', 'reference-223p', None, m.SQLiteDB(test_dir / 'test.sqlite'),   ))
 sr.map(test_dir)
 
 #_ = m.DBProperties.make(Path('test.sqlite'))

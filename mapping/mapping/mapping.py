@@ -1,6 +1,6 @@
 from rdflib import Graph
 from . import mapping_dir
-from typing import Iterator, Generator, Tuple, Literal, Union
+from typing import Any, Iterator, Generator, Tuple, Literal, Union
 from typing import overload
 from pathlib import Path
 from phantom.base import Phantom
@@ -53,7 +53,8 @@ class DBProperties(s.DBProperties):
     user:   DBProperty
     
     @classmethod
-    def make(cls, file: SQLiteDB) -> 'DBProperties':
+    def make(cls, file: SQLiteDB| Path) -> 'DBProperties':
+        if isinstance(file, Path): file = SQLiteDB(file)
         return cls.sqlite(file)
 
     @classmethod
@@ -141,6 +142,7 @@ class Properties(s.Properties):
 
     @classmethod
     def make(cls, sqlite: SQLiteDB)     -> 'Properties':
+        if isinstance(sqlite, Path): sqlite = SQLiteDB(sqlite)
         return cls.from_sqlite(sqlite)
 
     @classmethod
@@ -382,7 +384,8 @@ class Ontology(s.Ontology):
     customization:  OntologyCustomization
     
     @classmethod
-    def make(cls, frm: str, /)             -> 'Ontology':
+    def make(cls, frm: 'str | Ontology', /)             -> 'Ontology':
+        if isinstance(frm, Ontology): return frm
         oc = OntologyCustomization.make(frm)
         return cls(oc.base, oc)
     
@@ -397,28 +400,19 @@ class SQLRDFMapping(s.SQLRDFMapping):
     mapping:    SQLRDFMap
     properties: Properties
 
-
     @classmethod
-    def make(cls, 
-              frm: Tuple[
-                    Building | str,
-                    str,
-                    SQLiteDB],
-            ) ->                    'SQLRDFMapping':
-        bdg, customization_name, db = frm
-        return cls(
-            *cls.from_customizations(bdg, customization_name),
-            cls.from_sqlite(db))
-
-    @classmethod
-    def from_customizations(cls, bdg: Building | str, name: str) -> Tuple[Ontology, SQLRDFMap]:
-        o = Ontology.make(name)
-        m = SQLRDFMap.from_name(o.base.name)
-        return o, m
-
-    @classmethod
-    def from_sqlite(cls, db: SQLiteDB) -> Properties:
-        return Properties.from_sqlite(db)
+    def make(cls, frm : Tuple[
+                Building | Any,
+                Ontology | Any,
+                SQLRDFMap | Any,
+                SQLiteDB | Any,
+                ]):
+        b, o, m, d = frm
+        p = Properties.make(d); del d
+        o = Ontology.make(o)
+        callouts = MappingCallouts.make( (prefix, Building('unnamed') if not b else Building.make(b)  )  )
+        m = SQLRDFMap.make(m, callouts=callouts) if m else SQLRDFMap.make(o.base.name, callouts=callouts) # a 'default'
+        return cls(o, m, p)
 
 
     @overload 
