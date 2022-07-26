@@ -15,7 +15,7 @@ from project import activated_workdir
 def map(ctx, ontology, bdg=None,  db_file=str(activated_workdir / 'work' /'db.sqlite')):
     # db
     db_file = Path(db_file)
-    if not db_file.exists(): raise ValueError('db file doesnt exist')
+    if not db_file.exists(): raise FileNotFoundError('db file doesnt exist')
     # bdg
     if not bdg: bdg = db_file.stem
 
