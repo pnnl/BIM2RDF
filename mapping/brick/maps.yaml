@@ -6,12 +6,12 @@ prefixes:
   skos:     http://www.w3.org/2004/02/skos/core#
   unit:     http://qudt.org/vocab/unit/
   brick:    https://brickschema.org/schema/Brick#
-  bdg:      http://example.org/building/
+  pnnl:     http://example.org/building/unnamed   # named in processing
 
 maps:
   - id: luminaire types
     target: |
-      bdg:LuminaireType/{TypeMark}          # keeping id as a 'name'
+      pnnl:LuminaireType/{TypeMark}          # keeping id as a 'name'
         rdfs:label      {TypeMark};
         rdf:type        owl:Class;          # ...since it's a class
         rdfs:subClassOf brick:Luminaire;
@@ -27,19 +27,19 @@ maps:
 
   - id: luminaire instances
     target: |
-      bdg:Luminaire/{Id}
+      pnnl:Luminaire/{Id}
         rdfs:label                        {Id};
-        a                                 bdg:LuminaireType/{TypeMark};
-        brick:ratedPowerInput             bdg:Luminaire/{Id}/Power;
-        brick:CorrectedColorTemperature   bdg:Luminaire/{Id}/ColorTemperature;
-        brick:LuminousFlux                bdg:Luminaire/{Id}/LuminousFlux.
-      bdg:Luminaire/{Id}/Power
+        a                                 pnnl:LuminaireType/{TypeMark};
+        brick:ratedPowerInput             pnnl:Luminaire/{Id}/Power;
+        brick:CorrectedColorTemperature   pnnl:Luminaire/{Id}/ColorTemperature;
+        brick:LuminousFlux                pnnl:Luminaire/{Id}/LuminousFlux.
+      pnnl:Luminaire/{Id}/Power
         brick:value   {Wattage};
         brick:hasUnit unit:W.
-      bdg:Luminaire/{Id}/ColorTemperature
+      pnnl:Luminaire/{Id}/ColorTemperature
         brick:value   {CorrectedColorTemperature};
         brick:hasUnit unit:K.
-      bdg:Luminaire/{Id}/LuminousFlux
+      pnnl:Luminaire/{Id}/LuminousFlux
         brick:value   {LuminousFlux};
         brick:hasUnit unit:LM.
     source: |
@@ -65,11 +65,11 @@ maps:
     # graphdb doesn't like blank nodes
     # https://docs.brickschema.org/metadata/entity-properties.html
     target: |
-      bdg:Room/{Id}
+      pnnl:Room/{Id}
         rdfs:label      {Number};
         a               brick:{RoomType};
-        brick:grossArea bdg:Room/{Id}/Area.
-      bdg:Room/{Id}/Area
+        brick:grossArea pnnl:Room/{Id}/Area.
+      pnnl:Room/{Id}/Area
         brick:value     {Area}; # no need to convert area value since it's a float in the db
         brick:hasUnit   unit:M2. 
     source: |
@@ -99,7 +99,7 @@ maps:
 
   - id: floor instances
     target: |
-      bdg:Floor/{Id}
+      pnnl:Floor/{Id}
         rdfs:label  {Name};
         a           brick:Floor . 
     source:
@@ -111,8 +111,8 @@ maps:
  
   - id: level-room
     target: |
-      bdg:Floor/{LevelIdentifier}
-        brick:hasPart bdg:Room/{RoomsIdentifier} .
+      pnnl:Floor/{LevelIdentifier}
+        brick:hasPart pnnl:Room/{RoomsIdentifier} .
     source:
       select
         Levels.Id as LevelIdentifier,
@@ -124,8 +124,8 @@ maps:
           Levels.Id=Rooms.Level
 
   - id: luminaire-room
-    target: bdg:Luminaire/{LuminaireIdentifier}
-              brick:hasLocation bdg:Room/{RoomIdentifier} .
+    target: pnnl:Luminaire/{LuminaireIdentifier}
+              brick:hasLocation pnnl:Room/{RoomIdentifier} .
     source: |
       select
         LightingFixtures.Id as LuminaireIdentifier,
@@ -139,11 +139,11 @@ maps:
 
   - id: lighting zones
     target:
-      bdg:LightingControlZone/{LightingControlZoneID}
+      pnnl:LightingControlZone/{LightingControlZoneID}
         rdfs:label  {LightingControlZoneID};
         a           brick:Lighting_Zone.
-      bdg:Luminaire/{Id}
-        brick:feeds bdg:LightingControlZone/{LightingControlZoneID}.
+      pnnl:Luminaire/{Id}
+        brick:feeds pnnl:LightingControlZone/{LightingControlZoneID}.
     source:
       select
         Id,
@@ -153,7 +153,7 @@ maps:
   
   - id: hvac zones
     target:
-      bdg:HVACZone/{Id}
+      pnnl:HVACZone/{Id}
         rdfs:label  {Name};
         a           brick:HVAC_Zone.
     source: |
@@ -169,8 +169,8 @@ maps:
 
   - id: hvac zones - rooms
     target:
-      bdg:HVACZone/{HVACZoneId}
-        brick:hasPart       bdg:Room/{RoomId}.
+      pnnl:HVACZone/{HVACZoneId}
+        brick:hasPart       pnnl:Room/{RoomId}.
     source:
       select
         HVACZones.Id    as  HVACZoneId,
