@@ -199,6 +199,12 @@ class Building(s.Building):
 
     def uri(self, domain: str  = 'example.com') -> s.URI:
         return s.URI(f"http://{domain}/{self.name}")
+
+    def prefix(self, domain: str = 'example.com') -> s.URI:
+        _ = self.uri(domain)
+        _ = _ + '/' if not _.endswith('/') else ''
+        return s.URI(_)
+
     
 @dataclass
 class Prefix(s.Prefix):
@@ -220,13 +226,13 @@ class MappingCallouts(s.MappingCallouts):
     @classmethod
     def make(cls, frm=Tuple[Prefix, Building], ) -> 'MappingCallouts':
         p, b = frm
-        if p.uri.endswith(b.name):  return cls(p, b)
+        if p.uri.endswith(b.name) or p.uri[:-1].endswith(b.name):  return cls(p, b)
         else:
             return cls(
                         Prefix(
                             s.KeyStr(p.name),
-                            s.URI(p.uri + b.name) if p.uri.endswith('/') \
-                            else s.URI(f"{p.uri}/{b.name}")),
+                            s.URI(p.uri + b.name + '/') if p.uri.endswith('/') \
+                            else s.URI(f"{p.uri}/{b.name}/")),
                         b)
 
 

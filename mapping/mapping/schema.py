@@ -195,7 +195,7 @@ class MappingCallouts(ABC):
 
     @final
     def validate(self) -> bool:
-        if not self.prefix.uri.endswith(self.building.name):
+        if not self.prefix.uri[:-1].endswith(self.building.name):
             return False
         else:
             return True
