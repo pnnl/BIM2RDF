@@ -8,7 +8,7 @@ prefixes:
   unit:     http://qudt.org/vocab/unit/
   qudt:     http://qudt.org/schema/qudt/
   s223x:    http://example.org/s223x/
-  pnnl:     http://example.org/building/unnamed   # named in processing
+  pnnl:     http://example.org/building/unnamed/   # named in processing
 
 maps:
   - id: luminaire types

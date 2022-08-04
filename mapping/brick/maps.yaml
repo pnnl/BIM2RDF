@@ -6,7 +6,7 @@ prefixes:
   skos:     http://www.w3.org/2004/02/skos/core#
   unit:     http://qudt.org/vocab/unit/
   brick:    https://brickschema.org/schema/Brick#
-  pnnl:     http://example.org/building/unnamed   # named in processing
+  pnnl:     http://example.org/building/unnamed/   # named in processing
 
 maps:
   - id: luminaire types
