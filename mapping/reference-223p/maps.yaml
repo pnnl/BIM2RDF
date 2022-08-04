@@ -24,152 +24,152 @@ maps:
         LightingFixtureTypes
       where TypeMark is not NULL
 
-  # - id: luminaire instances
-  #   target: |
-  #     bdg:Luminaire/{Id}
-  #       rdfs:label                        {Id};
-  #       a                                 bdg:LuminaireType/{TypeMark};
-  #       s223x:ratedPowerInput             bdg:Luminaire/{Id}/Power;
-  #       s223x:CorrectedColorTemperature   bdg:Luminaire/{Id}/ColorTemperature;
-  #       qudt:LuminousFlux                 bdg:Luminaire/{Id}/LuminousFlux.
-  #     bdg:Luminaire/{Id}/Power
-  #       qudt:value   {Wattage};
-  #       qudt:hasUnit unit:W.
-  #     bdg:Luminaire/{Id}/ColorTemperature
-  #       qudt:value   {CorrectedColorTemperature};
-  #       qudt:hasUnit unit:K.
-  #     bdg:Luminaire/{Id}/LuminousFlux
-  #      qudt:value   {LuminousFlux};
-  #      qudt:hasUnit unit:LM.
-  #   source: |
-  #     select
-  #       LightingFixtures.Id                           as Id,
-  #       LightingFixtureTypes.TypeMark                 as TypeMark,
-  #       LightingFixtureTypes.Wattage                  as Wattage,
-  #       LightingFixtureTypes.InitialColorTemperature  as CorrectedColorTemperature,
-  #       LightingFixtureTypes.LuminousFlux             as LuminousFlux
-  #     from
-  #       LightingFixtures
-  #     inner join
-  #       LightingFixtureTypes
-  #       on
-  #         LightingFixtureTypes.Id=LightingFixtures.TypeId
+  - id: luminaire instances
+    target: |
+      pnnl:Luminaire/{Id}
+        rdfs:label                        {Id};
+        a                                 pnnl:LuminaireType/{TypeMark};
+        s223x:ratedPowerInput             pnnl:Luminaire/{Id}/Power;
+        s223x:CorrectedColorTemperature   pnnl:Luminaire/{Id}/ColorTemperature;
+        qudt:LuminousFlux                 pnnl:Luminaire/{Id}/LuminousFlux.
+      pnnl:Luminaire/{Id}/Power
+        qudt:value   {Wattage};
+        qudt:hasUnit unit:W.
+      pnnl:Luminaire/{Id}/ColorTemperature
+        qudt:value   {CorrectedColorTemperature};
+        qudt:hasUnit unit:K.
+      pnnl:Luminaire/{Id}/LuminousFlux
+       qudt:value   {LuminousFlux};
+       qudt:hasUnit unit:LM.
+    source: |
+      select
+        LightingFixtures.Id                           as Id,
+        LightingFixtureTypes.TypeMark                 as TypeMark,
+        LightingFixtureTypes.Wattage                  as Wattage,
+        LightingFixtureTypes.InitialColorTemperature  as CorrectedColorTemperature,
+        LightingFixtureTypes.LuminousFlux             as LuminousFlux
+      from
+        LightingFixtures
+      inner join
+        LightingFixtureTypes
+        on
+          LightingFixtureTypes.Id=LightingFixtures.TypeId
   
 
-  # - id: room instances
-  #   #blank node issues
-  #   #https://github.com/ontop/ontop/issues/372
-  #   #https://github.com/ontop/ontop/issues/303
-  #   # graphdb doesn't like blank nodes
-  #   # https://docs.brickschema.org/metadata/entity-properties.html
-  #   target: |
-  #     s223x:{RoomType}  a   s223x:Room.
-  #     bdg:Room/{Id}
-  #       rdfs:label      {Number};
-  #       a               s223x:{RoomType};
-  #       s223x:GrossArea bdg:Room/{Id}/Area.
-  #     bdg:Room/{Id}/Area
-  #       qudt:value     {Area}; # no need to convert area value since it's a float in the db
-  #       qudt:hasUnit   unit:M2. 
-  #   source: |
-  #     select
-  #       Id,
-  #       Number,
-  #       replace(Name, ' ', '_')
-  #       as RoomType,
-  #       Area
-  #     from
-  #       Rooms
+  - id: room instances
+    #blank node issues
+    #https://github.com/ontop/ontop/issues/372
+    #https://github.com/ontop/ontop/issues/303
+    # graphdb doesn't like blank nodes
+    # https://docs.brickschema.org/metadata/entity-properties.html
+    target: |
+      s223x:{RoomType}  a   s223x:Room.
+      pnnl:Room/{Id}
+        rdfs:label      {Number};
+        a               s223x:{RoomType};
+        s223x:GrossArea pnnl:Room/{Id}/Area.
+      pnnl:Room/{Id}/Area
+        qudt:value     {Area}; # no need to convert area value since it's a float in the db
+        qudt:hasUnit   unit:M2. 
+    source: |
+      select
+        Id,
+        Number,
+        replace(Name, ' ', '_')
+        as RoomType,
+        Area
+      from
+        Rooms
   
 
-  # - id: floor instances
-  #   target: |
-  #     bdg:Floor/{Id}
-  #       rdfs:label  {Name};
-  #       a           s223x:Floor .
-  #   source:
-  #     select
-  #       Id,
-  #       Name
-  #     from
-  #       Levels
+  - id: floor instances
+    target: |
+      pnnl:Floor/{Id}
+        rdfs:label  {Name};
+        a           s223x:Floor .
+    source:
+      select
+        Id,
+        Name
+      from
+        Levels
  
-  # - id: level-room
-  #   target: |
-  #     bdg:Floor/{LevelIdentifier}
-  #     # physicalspaces contain. domainspaces enclose
-  #       s223:contains bdg:Room/{RoomsIdentifier} .
-  #   source:
-  #     select
-  #       Levels.Id as LevelIdentifier,
-  #       Rooms.Id  as RoomsIdentifier
-  #     from Levels
-  #       inner join
-  #         Rooms
-  #       on
-  #         Levels.Id=Rooms.Level
+  - id: level-room
+    target: |
+      pnnl:Floor/{LevelIdentifier}
+      # physicalspaces contain. domainspaces enclose
+        s223:contains pnnl:Room/{RoomsIdentifier} .
+    source:
+      select
+        Levels.Id as LevelIdentifier,
+        Rooms.Id  as RoomsIdentifier
+      from Levels
+        inner join
+          Rooms
+        on
+          Levels.Id=Rooms.Level
 
-  # - id: luminaire-room # physical relation
-  #   target: bdg:Luminaire/{LuminaireIdentifier}
-  #             s223:hasLocation bdg:Room/{RoomIdentifier} .
-  #   source: |
-  #     select
-  #       LightingFixtures.Id as LuminaireIdentifier,
-  #       Rooms.Id            as RoomIdentifier
-  #     from
-  #       LightingFixtures
-  #     inner join
-  #       Rooms
-  #       on
-  #         LightingFixtures.LuminaireRoomParameter=Rooms.Number
+  - id: luminaire-room # physical relation
+    target: pnnl:Luminaire/{LuminaireIdentifier}
+              s223:hasLocation pnnl:Room/{RoomIdentifier} .
+    source: |
+      select
+        LightingFixtures.Id as LuminaireIdentifier,
+        Rooms.Id            as RoomIdentifier
+      from
+        LightingFixtures
+      inner join
+        Rooms
+        on
+          LightingFixtures.LuminaireRoomParameter=Rooms.Number
 
 
-# #physical spcs can contain domainspaces
-#   - id: lighting zones   # control relation. physcial spc (room) 'encloses' lightingzone
-#     target:
-#       bdg:Room/{RoomIdentifier} 
-#         s223:encloses bdg:LightingControlZone/{LightingControlZoneID}.
-#       bdg:LightingControlZone/{LightingControlZoneID}
-#         rdfs:label  {LightingControlZoneID};
-#         a           s223x:LightingSpace.
-#     source:
-#       select
-#         Rooms.Id as RoomIdentifier,
-#         substring(LightingControlZoneID, 1, 5) as LightingControlZoneID
-#       from
-#         LightingFixtures
-#       inner join
-#         Rooms
-#         on
-#           LightingFixtures.LuminaireRoomParameter=Rooms.Number
+#physical spcs can contain domainspaces
+  - id: lighting zones   # control relation. physcial spc (room) 'encloses' lightingzone
+    target:
+      pnnl:Room/{RoomIdentifier} 
+        s223:encloses pnnl:LightingControlZone/{LightingControlZoneID}.
+      pnnl:LightingControlZone/{LightingControlZoneID}
+        rdfs:label  {LightingControlZoneID};
+        a           s223x:LightingSpace.
+    source:
+      select
+        Rooms.Id as RoomIdentifier,
+        substring(LightingControlZoneID, 1, 5) as LightingControlZoneID
+      from
+        LightingFixtures
+      inner join
+        Rooms
+        on
+          LightingFixtures.LuminaireRoomParameter=Rooms.Number
   
-  # - id: hvac zones
-  #   target:
-  #     bdg:HVACZone/{Id}
-  #       rdfs:label  {Name};
-  #       a           brick:HVAC_Zone.
-  #   source: |
-  #     select # really want ' select distinct' here
-  #       HVACZones.Id    as Id,
-  #       HVACZones.Name  as Name
-  #     from
-  #       HVACZones
-  #     inner join
-  #       Rooms
-  #       on
-  #         Rooms.ThermalZonetoRoom=HVACZones.Name
+  - id: hvac zones
+    target:
+      pnnl:HVACZone/{Id}
+        rdfs:label  {Name};
+        a           brick:HVAC_Zone.
+    source: |
+      select # really want ' select distinct' here
+        HVACZones.Id    as Id,
+        HVACZones.Name  as Name
+      from
+        HVACZones
+      inner join
+        Rooms
+        on
+          Rooms.ThermalZonetoRoom=HVACZones.Name
 
-  # - id: hvac zones - rooms
-  #   target:
-  #     bdg:HVACZone/{HVACZoneId}
-  #       brick:hasPart       bdg:Room/{RoomId}.
-  #   source:
-  #     select
-  #       HVACZones.Id    as  HVACZoneId,
-  #       Rooms.Id        as  RoomId
-  #     from
-  #       HVACZones
-  #     inner join
-  #       Rooms
-  #       on
-  #         HVACZones.Name=Rooms.ThermalZonetoRoom 
+  - id: hvac zones - rooms
+    target:
+      pnnl:HVACZone/{HVACZoneId}
+        brick:hasPart       pnnl:Room/{RoomId}.
+    source:
+      select
+        HVACZones.Id    as  HVACZoneId,
+        Rooms.Id        as  RoomId
+      from
+        HVACZones
+      inner join
+        Rooms
+        on
+          HVACZones.Name=Rooms.ThermalZonetoRoom 
