@@ -1,0 +1,119 @@
+---
+prefixes:
+  owl:      http://www.w3.org/2002/07/owl#
+  rdf:      http://www.w3.org/1999/02/22-rdf-syntax-ns#
+  rdfs:     http://www.w3.org/2000/01/rdf-schema#
+  skos:     http://www.w3.org/2004/02/skos/core#
+  unit:     http://qudt.org/vocab/unit/
+  brick:    https://brickschema.org/schema/Brick#
+  pnnl:     http://example.org/building/unnamed/   # named in processing
+
+maps:
+  - id: luminaire types
+    target: |
+      pnnl:LuminaireType/{TypeMark}          # keeping id as a 'name'
+        rdfs:label      {TypeMark};
+        rdf:type        owl:Class;          # ...since it's a class
+        rdfs:subClassOf brick:Luminaire;
+        skos:definition {Description}@en.
+    source:
+      # could not do select unique but only unique triples were created
+      select
+        Id,
+        TypeMark,
+        Description
+      from
+        LightingFixtureTypes
+
+  - id: luminaire instances
+    target: |
+      pnnl:Luminaire/{Id}
+        rdfs:label                        {Id};
+        a                                 pnnl:LuminaireType/{TypeMark};
+        brick:ratedPowerInput             pnnl:Luminaire/{Id}/Power;
+        brick:CorrectedColorTemperature   pnnl:Luminaire/{Id}/ColorTemperature;
+        brick:LuminousFlux                pnnl:Luminaire/{Id}/LuminousFlux.
+      pnnl:Luminaire/{Id}/Power
+        brick:value   {Wattage};
+        brick:hasUnit unit:W.
+      pnnl:Luminaire/{Id}/ColorTemperature
+        brick:value   {CorrectedColorTemperature};
+        brick:hasUnit unit:K.
+      pnnl:Luminaire/{Id}/LuminousFlux
+        brick:value   {LuminousFlux};
+        brick:hasUnit unit:LM.
+    source: |
+      select
+        LightingFixtures.Id                           as Id,
+        LightingFixtureTypes.TypeMark                 as TypeMark,
+        LightingFixtureTypes.Wattage                  as Wattage,
+        LightingFixtureTypes.InitialColorTemperature  as CorrectedColorTemperature,
+        LightingFixtureTypes.LuminousFlux             as LuminousFlux
+      from
+        LightingFixtures
+      inner join
+        LightingFixtureTypes
+        on
+          LightingFixtureTypes.Id=LightingFixtures.TypeId
+  
+
+
+ 
+  
+
+
+  - id: floor instances
+    target: |
+      pnnl:Floor/{Id}
+        rdfs:label  {Name};
+        a           brick:Floor . 
+    source:
+      select
+        Id,
+        Name
+      from
+        Levels
+ 
+  - id: level-room
+    target: |
+      pnnl:Floor/{LevelIdentifier}
+        brick:hasPart pnnl:Room/{RoomsIdentifier} .
+    source:
+      select
+        Levels.Id as LevelIdentifier,
+        Rooms.Id  as RoomsIdentifier
+      from Levels
+        inner join
+          Rooms
+        on
+          Levels.Id=Rooms.Level
+
+  - id: luminaire-room
+    target: pnnl:Luminaire/{LuminaireIdentifier}
+              brick:hasLocation pnnl:Room/{RoomIdentifier} .
+    source: |
+      select
+        LightingFixtures.Id as LuminaireIdentifier,
+        Rooms.Id            as RoomIdentifier
+      from
+        LightingFixtures
+      inner join
+        Rooms
+        on
+          LightingFixtures.LuminaireRoomParameter=Rooms.Number
+
+  - id: lighting zones
+    target:
+      pnnl:LightingControlZone/{LightingControlZoneID}
+        rdfs:label  {LightingControlZoneID};
+        a           brick:Lighting_Zone.
+      pnnl:Luminaire/{Id}
+        brick:feeds pnnl:LightingControlZone/{LightingControlZoneID}.
+    source:
+      select
+        Id,
+        LightingControlZoneID
+      from
+        LightingFixtures
+  
+ 
