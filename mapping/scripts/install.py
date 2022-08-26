@@ -21,9 +21,10 @@ def download_ontop(ver = '4.2.1'):
 
 
 def download_sqlite_driver(ver='3.39.2.1'):
-    fn = f"sqlite-jdbc-{ver}.jar"
+    nm = "sqlite-jdbc"
+    fn = f"{nm}-{ver}.jar"
     url = f"https://github.com/xerial/sqlite-jdbc/releases/download/{ver}/{fn}"
-    dst = ontop_loc / 'jdbc' / fn
+    dst = ontop_loc / 'jdbc' / (nm+'.jar')
     
     if dst.exists(): (dst).unlink()
     print('dowloading sqlite driver')
