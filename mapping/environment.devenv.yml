@@ -28,6 +28,7 @@ name: {{project_name}}-{{os.path.basename(root)}}
 # ...and here
 {% if run_req %}
   {{append_workdir_name('project', included_workdir_pths)}}
+  {{append_workdir_name('dvc', included_workdir_pths)}}
 {% endif %}
 
 
