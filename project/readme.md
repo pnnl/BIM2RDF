@@ -32,6 +32,7 @@ They are specified in the 'includes' section, a directive to include _other_ dev
 External dependencies are specified as a list under the 'dependencies' section.
 These are 'normal' conda dependency specifications except that some can be excluded from being installed in an environment which includes the environment file in which they are defined.
 This is useful to exclude devlopment tools (like test frameworks and code linters) from being installed in an dependent environment.
+In addition to conda-supported 'pip'-type dependencies, a special 'cmd' type dependency allows for executing arbitrary (installation) commands.
 
 
 ## Scripts
@@ -39,6 +40,8 @@ This is useful to exclude devlopment tools (like test frameworks and code linter
 Script files placed in the 'scripts' directory will be processed to produce wrapped executables.
 Currently, .py, .bat, and .sh scripts are supported in addition to a special .cmdlines.
 Scripts beginning with 'setup' will be processed and executed as part of an automated setup process.
+However, setup scripts should be limited to light-weight tasks such as configuration (not installation).
+
 
 ## Process
 
