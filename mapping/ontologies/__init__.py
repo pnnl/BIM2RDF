@@ -15,7 +15,7 @@ def groups():
 
 names = frozenset(n for n, _ in groups())
 
-from phantom.base import Phantom
+from phantom import Phantom
 def is_name(nm: str) -> bool: return nm in names
 class Name(str, Phantom, predicate=is_name): ...
 

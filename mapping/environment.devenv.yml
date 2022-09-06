@@ -60,9 +60,9 @@ dependencies:
   - mypy                        # [dev_req]
   - ipython                     # [dev_req]
   - ipykernel                   # [dev_req]
-  - pip:                         # [dev_req or run_req]
+  - pip:                        # [dev_req or run_req]
     - types-PyYAML              # [dev_req]
-    - phantom-types             # [run_req]
+    - phantom-types==0.17.1     # [run_req]
 
 
 environment:
