@@ -3,7 +3,7 @@ from . import mapping_dir
 from typing import Any, Iterator, Generator, Tuple, Literal, Union
 from typing import overload
 from pathlib import Path
-from phantom.base import Phantom
+from phantom import Phantom
 from . import schema as s
 
 
