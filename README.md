@@ -1,4 +1,6 @@
-# hydraconda
+# hydraconda pitch
+technical: [readme](./project/readme.md)
+
 
 # NEED
 Computation-based research is often messy, non-linear, and highly exploratory. At the same time, there is a need for developed code to be reproducible for scientific integrity and to aid  collaboration. Furthermore, long-term maintainability of computation-based projects benefit from modularization.
