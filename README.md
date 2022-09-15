@@ -23,6 +23,7 @@ The benefit of the approach derives from the ability to have multiple, yet relat
 * **Accommodates heterogeneous computation**. By managing executables in environments, there is no technical reason to insist on having one computation system. For example, R and Python can be in the same or different environments; the focus is on establishing a certain functionality in an environment regardless of the execution system.
 * **Lightweight modularization**. Code modularization can be addressed as a matter of just configuration instead of having to worry about creating a 'library' (for distribution). A project can advance by modularizing code as needed.
 * **Easy deployments to cloud**. Since the organization is reproducible, tapping into cloud resources uses the same code as local execution.
+
 In general, the above benefits translate into higher productivity, scientific integrity, and collaboration especially for long-running projects. In a way, each project can assemble and establish its own 'platform' using external resources (like cloud) and/or proprietary tools only as needed.
 
  
