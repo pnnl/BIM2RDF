@@ -711,7 +711,14 @@ def install_other_deps(ctx, WD, other_deps):
                 #                idk  pip on its own doesnt work
                 ctx.run(f"{dep_pre} python -m {installer} install  {' '.join(pkgs)}", echo=True)
             elif installer == 'cmd':
+                # https://github.com/ESSS/conda-devenv/issues/152
+                from re import sub
                 for spec in specs:
+                    spec = spec.split(' ')
+                    spec = list(spec)
+                    # replaced "(something unique)exe" -> "exe"
+                    spec[0] = sub(r'X.*X', '', spec[0])
+                    spec = ' '.join(spec)
                     ctx.run(f"{dep_pre} {spec}", echo=True)
             else:
                 raise Exception("unrecognized 'other dep'")
