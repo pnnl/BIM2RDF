@@ -717,7 +717,7 @@ def install_other_deps(ctx, WD, other_deps):
                     spec = spec.split(' ')
                     spec = list(spec)
                     # replaced "(something unique)exe" -> "exe"
-                    spec[0] = sub(r'X.*X', '', spec[0])
+                    spec[0] = sub(r'X.*?X', '', spec[0], 1)
                     spec = ' '.join(spec)
                     ctx.run(f"{dep_pre} {spec}", echo=True)
             else:
