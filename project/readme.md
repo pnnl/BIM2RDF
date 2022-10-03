@@ -10,6 +10,9 @@ In addition, execution environments and workflow tasks are managed as well.
 
 ## Structure
 
+![image](https://user-images.githubusercontent.com/3588248/175333804-f3d5bf61-9e05-4073-948e-fbf09702ba89.png)
+
+
 The workflow manages a 'work directory' (workdir) concept: some separated-out unit of work.
 It could be a module/library or a one-off experiment.
 To keep things as simple as possible, workdirs are the folders directly under the root of the workspace.
@@ -29,6 +32,7 @@ They are specified in the 'includes' section, a directive to include _other_ dev
 External dependencies are specified as a list under the 'dependencies' section.
 These are 'normal' conda dependency specifications except that some can be excluded from being installed in an environment which includes the environment file in which they are defined.
 This is useful to exclude devlopment tools (like test frameworks and code linters) from being installed in an dependent environment.
+In addition to conda-supported 'pip'-type dependencies, a special 'cmd' type dependency allows for executing arbitrary (installation) commands.
 
 
 ## Scripts
@@ -36,6 +40,8 @@ This is useful to exclude devlopment tools (like test frameworks and code linter
 Script files placed in the 'scripts' directory will be processed to produce wrapped executables.
 Currently, .py, .bat, and .sh scripts are supported in addition to a special .cmdlines.
 Scripts beginning with 'setup' will be processed and executed as part of an automated setup process.
+However, setup scripts should be limited to light-weight tasks such as configuration (not installation).
+
 
 ## Process
 
@@ -106,15 +112,7 @@ The tasks aid the following development process.
     <br>
     The source was cloned into the 'workspace' directory even though it's called 'workspace-code' to emphasize that code and non-code will combine in the directory.
 
-1. **Configure**
-
-    The only required configuration is setting the DVC repository in the project [configuration file](./project/config.yml).
-    This repo is on the shared drive at \\\pnl\slash\slash\slash, so check that you can access it.
-    Optionally, make this folder available offline for better performance (Windows feature). <br>
-
-    > Do not modify this directory (yourself)!
-
-0. **Bootstrap**
+1. **Bootstrap**
 
     Executing [bootstrap.sh](./bootstrap.sh) and [bootstrap.bat](./bootstrap.bat) for Mac/Linux and Windows, respectively, will initialize the project.
 
