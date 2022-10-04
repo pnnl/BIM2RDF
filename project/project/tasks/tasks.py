@@ -689,6 +689,11 @@ coll.collections['work-dir'].collections['setup'].add_task(make_env)
 
 
 def install_other_deps(ctx, WD, other_deps):
+    if not other_deps: return
+    assert(isinstance(other_deps, list))
+    other_deps = other_deps[0]
+    assert(isinstance(other_deps, dict))
+
     # 3. install 'other deps'
     WD = work.WorkDir(WD) if isinstance(WD, str) else WD
     if WD.name != 'project':
@@ -699,10 +704,7 @@ def install_other_deps(ctx, WD, other_deps):
         dep_pre = f"{WD.dir / 'scripts' / 'bin' / 'run-in'}"
     
     with ctx.cd(str(WD.dir)):
-        for od in other_deps:
-            assert(isinstance(od, dict))
-            installer = list(od.keys())[0]
-            specs = od[installer]
+        for installer, specs in other_deps.items():
             if installer == 'pip':
                 # why does conda devnv mess with this??
                 pkgs = [p.replace(' ', '') for p in specs]
