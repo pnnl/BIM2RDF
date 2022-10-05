@@ -3,7 +3,7 @@ Where 'work' happens. Refer to `dvc` (which just wraps the `inv` commands).
 
 Basic use:
 <br>
-From [this](..) directory,
+From [this](../) directory,
 <br>
 fill in [`params.yaml`](../params.yaml),
 <br>
