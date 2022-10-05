@@ -1,6 +1,6 @@
 Where 'work' happens. Refer to `dvc` (which just wraps the `inv` commands).
 
-Basic use: Fill in params.yaml, then just `dvc repro`.
+Basic use: Fill in [`params.yaml`](../params.yaml), then just `dvc repro`.
 
 
 ---
