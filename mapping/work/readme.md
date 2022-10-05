@@ -1,4 +1,7 @@
+Where 'work' happens. Refer to `dvc` (which just wraps the `inv` commands).
 
-where 'work' happens. refer to dvc and the 'inv' cmd.
+Basic use: Fill in params.yaml, then just `dvc repro`.
 
-could be its own env-level "workdir", mapping-work, since its it just needs the 'core' and dvc
+
+---
+dev note: could be its own env-level "workdir", mapping-work, since its it just needs the 'core' and dvc.
