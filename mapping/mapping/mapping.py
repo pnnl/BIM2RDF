@@ -3,7 +3,7 @@ from . import mapping_dir
 from typing import Any, Iterator, Generator, Tuple, Literal, Union
 from typing import overload
 from pathlib import Path
-from phantom.base import Phantom
+from phantom import Phantom
 from . import schema as s
 
 
@@ -53,12 +53,12 @@ class DBProperties(s.DBProperties):
     user:   DBProperty
     
     @classmethod
-    def make(cls, file: SQLiteDB| Path) -> 'DBProperties':
+    def make(cls, file: SQLiteDB| Path, ) -> 'DBProperties':
         if isinstance(file, Path): file = SQLiteDB(file)
-        return cls.sqlite(file)
+        return cls.sqlite(file, )
 
     @classmethod
-    def sqlite(cls, file: SQLiteDB) -> 'DBProperties':
+    def sqlite(cls, file: SQLiteDB, ) -> 'DBProperties':
         # need to create a stripped version to a file
         # bc the mapping program needs starts separately
         stripped = file.parent / (file.stem  + '_stripped' + file.suffix )

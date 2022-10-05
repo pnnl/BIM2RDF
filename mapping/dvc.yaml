@@ -1,0 +1,11 @@
+stages:
+# use foreach? param sweep discussion https://github.com/iterative/dvc/pull/8187
+  map:   
+    cmd: mapping-run-in inv map --db-file ../input/buildings/${building} --map-file ../input/mappings/${ontology}/${building}/maps.yaml  --ontology ${ontology}
+    wdir: work/output
+    #deps:
+      #- ontology dir
+      #- data file
+      #- map file   # maybe have a map file with nothing '{}' to mark using a 'ref' mapping file
+    #outs: # the whole dir or just the ttl file?
+    #  - work/${ontology}/${building}/

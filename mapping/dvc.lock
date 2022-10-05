@@ -1,0 +1,5 @@
+schema: '2.0'
+stages:
+  map:
+    cmd: mapping-run-in inv map --db-file ../input/buildings/proto-medoffice --map-file
+      ../input/mappings/brick/proto-medoffice/maps.yaml  --ontology brick
