@@ -6,10 +6,10 @@ stages:
     cmd: mapping-run-in inv map --db-file ../input/buildings/${building} --map-file ../input/mappings/${ontology}/${building}/maps.yaml  --ontology ${ontology}
     wdir: work/output
     deps:
-      - ../input/buildings/${building}
-      - ../input/mappings/${ontology}/${building}/maps.yaml
+      - ../input/buildings/${building}                        # TODO: make sure it's the same as map-file above
+      - ../input/mappings/${ontology}/${building}/maps.yaml   # ditto
       - ../../ontologies/${ontology}
-    outs: # the whole dir or just the ttl file?
+    outs:
       - mapped.ttl
       - log
 
