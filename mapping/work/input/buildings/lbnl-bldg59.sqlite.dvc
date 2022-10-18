@@ -1,4 +1,4 @@
 outs:
 - md5: 7d7dce9bd9ec9eef047b0a829561da83
   size: 2682880
-  path: lbnl-bldg59
+  path: lbnl-bldg59.sqlite
