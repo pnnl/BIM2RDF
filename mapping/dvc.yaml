@@ -1,12 +1,15 @@
-
-
 stages:
+# or just have it as a manual cmd?
 # use foreach? param sweep discussion https://github.com/iterative/dvc/pull/8187
+  #data:
+  #  cmd: dvc pull ../input/buildings/${building}.sqlite                       # TODO: make sure it's the same as map-file above
+  #  wdir: work/output
+
   map:
-    cmd: mapping-run-in inv map --db-file ../input/buildings/${building} --map-file ../input/mappings/${ontology}/${building}/maps.yaml  --ontology ${ontology}
+    cmd: mapping-run-in inv map --db-file ../input/buildings/${building}.sqlite --map-file ../input/mappings/${ontology}/${building}/maps.yaml  --ontology ${ontology}
     wdir: work/output
     deps:
-      - ../input/buildings/${building}                        # TODO: make sure it's the same as map-file above
+      - ../input/buildings/${building}.sqlite                        # TODO: make sure it's the same as map-file above
       - ../input/mappings/${ontology}/${building}/maps.yaml   # ditto
       - ../../ontologies/${ontology}
     outs:
