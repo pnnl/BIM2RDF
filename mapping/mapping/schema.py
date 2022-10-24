@@ -1,7 +1,7 @@
 from typing import Literal, Sequence, Mapping
 from typing import NewType
 # or just use protocols?
-from phantom.base import Phantom
+from phantom import Phantom
 from rdflib import Graph
 # or so that i don't even have to have rdflib specifically?
 #Graph = TypeVar('Graph')

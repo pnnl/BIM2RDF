@@ -1,0 +1,3 @@
+cd ${WORKDIR_PATH}
+#dvc init --subdir -f just committed a .dvc stub instead
+inv -r ../dvc setup

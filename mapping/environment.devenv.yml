@@ -28,6 +28,7 @@ name: {{project_name}}-{{os.path.basename(root)}}
 # ...and here
 {% if run_req %}
   {{append_workdir_name('project', included_workdir_pths)}}
+  {{ append_workdir_name('dvc', included_workdir_pths)}}
 {% endif %}
 
 
@@ -60,7 +61,8 @@ dependencies:
   - mypy                        # [dev_req]
   - ipython                     # [dev_req]
   - ipykernel                   # [dev_req]
-  - pip:                         # [dev_req or run_req]
+  - pip                         # [dev_req or run_req]
+  - pip:                        # [dev_req or run_req]
     - types-PyYAML              # [dev_req]
     - phantom-types             # [run_req]
 
