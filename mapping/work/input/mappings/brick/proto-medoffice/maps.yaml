@@ -58,7 +58,42 @@ maps:
   
 
 
- 
+  - id: room instances
+    #blank node issues
+    #https://github.com/ontop/ontop/issues/372
+    #https://github.com/ontop/ontop/issues/303
+    # graphdb doesn't like blank nodes
+    # https://docs.brickschema.org/metadata/entity-properties.html
+    target: |
+      pnnl:Room/{Id}
+        rdfs:label      {Number};
+        a               brick:{RoomType};
+        brick:grossArea pnnl:Room/{Id}/Area.
+      pnnl:Room/{Id}/Area
+        brick:value     {Area}; # no need to convert area value since it's a float in the db
+        brick:hasUnit   unit:M2. 
+    source: |
+      select
+        Id,
+        Number,
+        replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(Name, #ugly
+        'Open Office',          'Open_Office'),
+        'Private Office',       'Private_Office'),
+        'Corridor',             'Hallway'),
+        'Conference Room',      'Conference_Room'),
+        'Stair',                'Staircase'),
+        'Lobby',                'Lobby'),
+        'Restroom',             'Restroom'),
+        'Mechanical',           'Mechanical_Room'),
+        'Lounge',               'Lounge'),
+        'Food Prep/Dining',     'Office_Kitchen'),
+        'Classroom',            'Library'),
+        'Storage/IT',           'Telecom_Room'), # this replacement...
+        'Storage',              'Storage_Room')  # ...before this one
+        as RoomType,
+        Area
+      from
+        Rooms
   
 
 
