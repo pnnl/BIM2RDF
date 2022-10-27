@@ -12,13 +12,13 @@ stages:
       md5: 433fdd076c6058a8153cbb8ea22ebe70
       size: 2306048
     - path: ../input/mappings/brick/proto-medoffice/maps.yaml
-      md5: 2da1c313eac08c2f291c8b752a8ba99d
-      size: 3559
+      md5: b138c9edc545dcbc83a36f228c3d5ebf
+      size: 5046
     outs:
     - path: log
       md5: 70420ddd9aa84859a6ceb0f01733100c.dir
       size: 0
       nfiles: 1
     - path: mapped.ttl
-      md5: 72646c4e85013d482a36e0e4a26428fe
-      size: 1630478
+      md5: 8550273359000692616534088923f780
+      size: 1701475
