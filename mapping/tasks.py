@@ -10,7 +10,27 @@ def get_ontologies(ctx):
 from pathlib import Path
 
 
+@task  # TODO create graphdb task ns
+def update_repo(ctx):
+    config={
+        'rep:repositoryID': "pnnl"}
+    from graphdb.graphdb import repo_config, host, bot_user, bot_password
+    import requests
+    ids = {_['id'] for _ in requests.get(f"{host}/rest/repositories", auth=(bot_user, bot_password ) ).json()}
+    if config['rep:repositoryID'] not in ids:
+        from getpass import getpass
+        _ = requests.post(
+                f"{host}/rest/repositories", auth=(input('user: '), getpass('password: ') ) ,  # auth=(bot_user, bot_password), manual
+                files=[
+                    ('config', repo_config(config).serialize(format='turtle')) ],)
+        assert(_.ok)
 
+    
+def init(): #TODO
+    ...
+    # getontos and create_repo
+
+    
 @task
 def map(ctx,
         ontology, map_file = None, # (Path.cwd() / 'maps.yaml' ),
