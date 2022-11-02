@@ -16,14 +16,14 @@ from pathlib import Path
 def update_repo(ctx):
     config={
         'rep:repositoryID': "pnnl"}
-    from graphdb.graphdb import repo_config, host, bot_user, get_bot_password
+    from graphdb.graphdb import repo_config, url, bot_user, get_bot_password
     import requests
-    ids = {_['id'] for _ in requests.get(f"{host}/rest/repositories", auth=(bot_user, get_bot_password() ) ).json()}
+    ids = {_['id'] for _ in requests.get(f"{url}/rest/repositories", auth=(bot_user, get_bot_password() ) ).json()}
 
     def args():
         from getpass import getpass
         return (
-                (f"{host}/rest/repositories",),
+                (f"{url}/rest/repositories",),
                 {   'auth':(input('user: '), getpass('password: ') ) ,  # auth=(bot_user, bot_password), manual
                     'files':[('config', repo_config(config).serialize(format='turtle')) ],})
     if config['rep:repositoryID'] not in ids:
@@ -39,11 +39,11 @@ ns.collections['graphdb'].add_task(update_repo)
 
 
 
-    
 def init(): #TODO
     ...
     # getontos and create_repo
 
+    
     
 @task
 def map(ctx,
