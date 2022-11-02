@@ -16,9 +16,9 @@ from pathlib import Path
 def update_repo(ctx):
     config={
         'rep:repositoryID': "pnnl"}
-    from graphdb.graphdb import repo_config, host, bot_user, bot_password
+    from graphdb.graphdb import repo_config, host, bot_user, get_bot_password
     import requests
-    ids = {_['id'] for _ in requests.get(f"{host}/rest/repositories", auth=(bot_user, bot_password ) ).json()}
+    ids = {_['id'] for _ in requests.get(f"{host}/rest/repositories", auth=(bot_user, get_bot_password() ) ).json()}
 
     def args():
         from getpass import getpass
