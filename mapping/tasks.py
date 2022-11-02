@@ -17,13 +17,23 @@ def update_repo(ctx):
     from graphdb.graphdb import repo_config, host, bot_user, bot_password
     import requests
     ids = {_['id'] for _ in requests.get(f"{host}/rest/repositories", auth=(bot_user, bot_password ) ).json()}
-    if config['rep:repositoryID'] not in ids:
+
+    def args():
         from getpass import getpass
-        _ = requests.post(
-                f"{host}/rest/repositories", auth=(input('user: '), getpass('password: ') ) ,  # auth=(bot_user, bot_password), manual
-                files=[
-                    ('config', repo_config(config).serialize(format='turtle')) ],)
+        return (
+                (f"{host}/rest/repositories",),
+                {   'auth':(input('user: '), getpass('password: ') ) ,  # auth=(bot_user, bot_password), manual
+                    'files':[('config', repo_config(config).serialize(format='turtle')) ],})
+    if config['rep:repositoryID'] not in ids:
+        p, k = args()
+        _ = getattr(requests, 'post')(*p, **k)
         assert(_.ok)
+    else:
+        raise NotImplementedError('repo update case')
+        p, k = args()
+        _ = getattr(requests, 'post')(*p, **k) # should be put??
+        assert(_.ok)
+
 
     
 def init(): #TODO
