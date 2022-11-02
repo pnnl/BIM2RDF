@@ -1,16 +1,18 @@
-from invoke import task
+from invoke import task, Collection
 
+ns = Collection()
+ns.add_collection(Collection('graphdb'))
 
 @task
 def get_ontologies(ctx):
     from ontologies import init
     init()
-
+ns.add_task(get_ontologies)
 
 from pathlib import Path
 
 
-@task  # TODO create graphdb task ns
+@task 
 def update_repo(ctx):
     config={
         'rep:repositoryID': "pnnl"}
@@ -33,6 +35,8 @@ def update_repo(ctx):
         p, k = args()
         _ = getattr(requests, 'post')(*p, **k) # should be put??
         assert(_.ok)
+ns.collections['graphdb'].add_task(update_repo)
+
 
 
     
@@ -80,4 +84,4 @@ def map(ctx,
 
     sr = m.SQLRDFMapping.make((building, ontology, map_file, db_file))
     sr.map(work_dir)
-
+ns.add_task(map)
