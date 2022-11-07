@@ -40,6 +40,23 @@ def update_repo(ctx):
 ns.collections['graphdb'].add_task(update_repo)
 
 
+
+@task
+def enable_history(ctx):
+    from graphdb.graphdb import repo_config,  bot_user, get_bot_password
+    from graphdb.api import rdf4j_base
+    import requests
+    q = "INSERT DATA { [] <http://www.ontotext.com/at/enabled> true }"
+    _ = requests.get(
+            f"{rdf4j_base}/{repo}/statements",
+            auth=(bot_user, get_bot_password()),
+            params={'update': q},)
+    assert(_.ok)
+
+
+ns.collections['graphdb'].add_task(enable_history)
+
+
 @task
 def upload_graph(ctx, ttl, name=None):
     from pathlib import Path
@@ -49,7 +66,6 @@ def upload_graph(ctx, ttl, name=None):
     from graphdb.api import rdf4j_base
     from graphdb.graphdb import repo_config,  bot_user, get_bot_password
     import requests
-    breakpoint()
     _ = requests.post(
         f"{rdf4j_base}/{repo}/rdf-graphs/{name}",
         auth=(bot_user, get_bot_password()),
