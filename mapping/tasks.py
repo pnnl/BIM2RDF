@@ -43,7 +43,7 @@ ns.collections['graphdb'].add_task(update_repo)
 
 @task
 def enable_history(ctx):
-    from graphdb.graphdb import repo_config,  bot_user, get_bot_password
+    from graphdb.graphdb import  bot_user, get_bot_password
     from graphdb.api import rdf4j_base
     import requests
     q = "INSERT DATA { [] <http://www.ontotext.com/at/enabled> true }"
@@ -62,7 +62,7 @@ def upload_graph(ctx, ttl, name=None):
     assert(ttl.exists())
     if not name: name = ttl.stem
     from graphdb.api import rdf4j_base
-    from graphdb.graphdb import repo_config,  bot_user, get_bot_password
+    from graphdb.graphdb import  bot_user, get_bot_password
     import requests
     _ = requests.post(
         f"{rdf4j_base}/{repo}/rdf-graphs/{name}",
