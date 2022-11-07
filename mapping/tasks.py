@@ -68,7 +68,7 @@ def upload_graph(ctx, ttl, name=None):
         f"{rdf4j_base}/{repo}/rdf-graphs/{name}",
         auth=(bot_user, get_bot_password()),
         headers={"Content-Type": 'text/turtle'},
-        data=(open(ttl, 'rb').read().decode()) )
+        data=open(ttl, 'rb').read().decode('utf-8').encode('utf-8')  ) # weird
     assert(_.ok)
 ns.collections['graphdb'].add_task(upload_graph)
 
