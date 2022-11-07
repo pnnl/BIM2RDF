@@ -73,11 +73,13 @@ def upload_graph(ctx, ttl, name=None):
 ns.collections['graphdb'].add_task(upload_graph)
 
 
-def init(ctx): #TODO
+@task
+def init(ctx): 
     update_repo(ctx)
     enable_history(ctx)
 ns.collections['graphdb'].add_task(init)
-    
+
+
     
 @task
 def map(ctx,
