@@ -16,5 +16,14 @@ stages:
       - mapped.ttl
       - log
 
+  upload_data:
+    cmd: mapping-run-in inv graphdb.upload-graph --ttl mapped.ttl  --name ${building} 
+    wdir: work/output
+    deps:
+      - mapped.ttl
+  upload_ontology:
+    cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name ${ontology}
+    wdir: work/output
+    deps:
+      - ontology.ttl
 
-# to_graphdb:
