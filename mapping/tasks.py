@@ -52,8 +52,6 @@ def enable_history(ctx):
             auth=(bot_user, get_bot_password()),
             params={'update': q},)
     assert(_.ok)
-
-
 ns.collections['graphdb'].add_task(enable_history)
 
 
@@ -71,16 +69,14 @@ def upload_graph(ctx, ttl, name=None):
         auth=(bot_user, get_bot_password()),
         headers={"Content-Type": 'text/turtle'},
         data=(open(ttl, 'rb').read().decode()) )
-    #assert(_.status_code == 200)
     assert(_.ok)
-
 ns.collections['graphdb'].add_task(upload_graph)
 
 
-def init(): #TODO
-    ...
-    # getontos and create_repo
-
+def init(ctx): #TODO
+    update_repo(ctx)
+    enable_history(ctx)
+ns.collections['graphdb'].add_task(init)
     
     
 @task
