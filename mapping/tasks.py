@@ -11,19 +11,21 @@ ns.add_task(get_ontologies)
 
 from pathlib import Path
 
+repo = 'pnnl'
 
 @task 
 def update_repo(ctx):
     config={
-        'rep:repositoryID': "pnnl"}
-    from graphdb.graphdb import repo_config, url, bot_user, get_bot_password
+        'rep:repositoryID': repo}
+    from graphdb.graphdb import repo_config,  bot_user, get_bot_password
+    from graphdb.api import workbench_base
     import requests
-    ids = {_['id'] for _ in requests.get(f"{url}/rest/repositories", auth=(bot_user, get_bot_password() ) ).json()}
+    ids = {_['id'] for _ in requests.get(f"{workbench_base}/repositories", auth=(bot_user, get_bot_password() ) ).json()}
 
     def args():
         from getpass import getpass
         return (
-                (f"{url}/rest/repositories",),
+                (f"{workbench_base}/repositories",),
                 {   'auth':(input('user: '), getpass('password: ') ) ,  # auth=(bot_user, bot_password), manual
                     'files':[('config', repo_config(config).serialize(format='turtle')) ],})
     if config['rep:repositoryID'] not in ids:
@@ -37,6 +39,26 @@ def update_repo(ctx):
         assert(_.ok)
 ns.collections['graphdb'].add_task(update_repo)
 
+
+@task
+def upload_graph(ctx, ttl, name=None):
+    from pathlib import Path
+    ttl = Path(ttl)
+    assert(ttl.exists())
+    if not name: name = ttl.stem
+    from graphdb.api import rdf4j_base
+    from graphdb.graphdb import repo_config,  bot_user, get_bot_password
+    import requests
+    breakpoint()
+    _ = requests.post(
+        f"{rdf4j_base}/{repo}/rdf-graphs/{name}",
+        auth=(bot_user, get_bot_password()),
+        headers={"Content-Type": 'text/turtle'},
+        data=(open(ttl, 'rb').read().decode()) )
+    #assert(_.status_code == 200)
+    assert(_.ok)
+
+ns.collections['graphdb'].add_task(upload_graph)
 
 
 def init(): #TODO
