@@ -23,7 +23,10 @@ def get(name: str):
     assert(name in names)
     import rdflib
     g = rdflib.Graph()
-    for n, f in groups(): g += rdflib.Graph().parse(f)
+    for n, f in groups():
+        _ = rdflib.Graph().parse(f)
+        g += _
+        for p, ns in _.namespaces(): g.bind(p, ns) # why do i have to do this (separately)?
     if 'brick' in name.lower(): g = fix_brick(g)
     return g
 

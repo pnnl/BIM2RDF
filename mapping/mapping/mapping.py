@@ -380,7 +380,9 @@ class OntologyCustomization(s.OntologyCustomization):
         def turtle_soup(loc: Path):
             g = s.Graph()
             for f in (f for f in ( loc ).iterdir() if f.suffix == '.ttl'):
-                g += s.Graph().parse(f)
+                _ = s.Graph().parse(f)
+                g += _
+                for p, ns in _.namespaces(): g.bind(p, ns) # why do i have to do this (separately)?
             return g
         cstm = turtle_soup(mapping_dir / self.base.name)
         return cstm
