@@ -13,6 +13,7 @@ stages:
       - ../input/mappings/${ontology}/${building}/maps.yaml   # ditto
       - ../../ontologies/${ontology}
     outs:
+      - ontology.ttl
       - mapped.ttl
       - log
 
