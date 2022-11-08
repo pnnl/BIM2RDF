@@ -23,13 +23,13 @@ stages:
       md5: 72646c4e85013d482a36e0e4a26428fe
       size: 1630478
     - path: ontology.ttl
-      md5: ac0b40e4126c33b73ff6a5de8e04271e
+      md5: ef008c5d36c24fc46d36046d8187d993
       size: 892963
   upload_ontology:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
     deps:
     - path: ontology.ttl
-      md5: ac0b40e4126c33b73ff6a5de8e04271e
+      md5: ef008c5d36c24fc46d36046d8187d993
       size: 892963
   upload_data:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl mapped.ttl  --name proto-medoffice
