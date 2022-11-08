@@ -74,9 +74,28 @@ ns.collections['graphdb'].add_task(upload_graph)
 
 
 @task
+def set_namespaces(ctx):
+    from graphdb.api import rdf4j_base
+    from graphdb.graphdb import  bot_user, get_bot_password
+    nss = {
+        'brick':    'https://brickschema.org/schema/Brick#',
+        's223':     'http://data.ashrae.org/standard223#',
+        'qudt':     'http://qudt.org/schema/qudt/',}
+    import requests
+    for p,u in nss.items():
+        _ = requests.put(
+            f"{rdf4j_base}/{repo}/namespaces/{p}",
+            auth=(bot_user, get_bot_password()),
+            data=u)
+    assert(_.ok)
+ns.collections['graphdb'].add_task(set_namespaces)
+
+
+@task
 def init(ctx): 
     update_repo(ctx)
     enable_history(ctx)
+    set_namespaces()
 ns.collections['graphdb'].add_task(init)
 
 
