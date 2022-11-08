@@ -24,9 +24,11 @@ def get(name: str):
     import rdflib
     g = rdflib.Graph()
     for n, f in groups():
-        _ = rdflib.Graph().parse(f)
-        g += _
-        for p, ns in _.namespaces(): g.bind(p, ns) # why do i have to do this (separately)?
+        if n == name:
+            _ = rdflib.Graph().parse(f)
+            g += _
+            for p, ns in _.namespaces(): g.bind(p, ns) # why do i have to do this (separately)?
+            break
     if 'brick' in name.lower(): g = fix_brick(g)
     return g
 
