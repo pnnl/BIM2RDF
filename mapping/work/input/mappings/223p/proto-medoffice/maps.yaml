@@ -1,0 +1,168 @@
+---
+prefixes:
+  owl:      http://www.w3.org/2002/07/owl#
+  rdf:      http://www.w3.org/1999/02/22-rdf-syntax-ns#
+  rdfs:     http://www.w3.org/2000/01/rdf-schema#
+  skos:     http://www.w3.org/2004/02/skos/core#
+  s223:     http://data.ashrae.org/standard223#
+  unit:     http://qudt.org/vocab/unit/
+  qudt:     http://qudt.org/schema/qudt/
+  s223x:    http://example.org/s223x/
+  pnnl:     http://example.org/building/unnamed/   # named in processing
+
+maps:
+  - id: luminaire types
+    target: |
+      pnnl:LuminaireType/{TypeMark}          # keeping id as a 'name'
+        rdfs:label      {TypeMark};
+        rdfs:subClassOf s223:Luminaire.
+    source:
+      # could not do select unique but only unique triples were created
+      select
+        TypeMark
+      from
+        LightingFixtureTypes
+      where TypeMark is not NULL
+
+  - id: luminaire instances
+    target: |
+      pnnl:Luminaire/{Id}
+        rdfs:label                        {Id};
+        a                                 pnnl:LuminaireType/{TypeMark};
+        s223x:ratedPowerInput             pnnl:Luminaire/{Id}/Power;
+        s223x:CorrectedColorTemperature   pnnl:Luminaire/{Id}/ColorTemperature;
+        qudt:LuminousFlux                 pnnl:Luminaire/{Id}/LuminousFlux;
+        s223:hasProperty                  pnnl:Luminaire/{Id}/OnOffStatus;
+        s223:hasProperty                  pnnl:Luminaire/{Id}/DimmerStatus.
+      pnnl:Luminaire/{Id}/Power
+        qudt:value   {Wattage};
+        qudt:hasUnit unit:W.
+      pnnl:Luminaire/{Id}/ColorTemperature
+        qudt:value   {CorrectedColorTemperature};
+        qudt:hasUnit unit:K.
+      pnnl:Luminaire/{Id}/LuminousFlux
+       qudt:value   {LuminousFlux};
+       qudt:hasUnit unit:LM.
+      pnnl:Luminaire/{Id}/OnOffStatus
+        s223:hasValue {OnOffStatus}.
+      pnnl:Luminaire/{Id}/DimmerStatus
+        s223:hasValue {DimmerStatus}.
+    source: |
+      select
+        LightingFixtures.Id                           as Id,
+        LightingFixtureTypes.TypeMark                 as TypeMark,
+        LightingFixtureTypes.Wattage                  as Wattage,
+        LightingFixtureTypes.InitialColorTemperature  as CorrectedColorTemperature,
+        LightingFixtureTypes.LuminousFlux             as LuminousFlux,
+        LightingFixtures.SwitchOn                     as OnOffStatus,
+        LightingFixtures.Dimming                      as DimmerStatus
+      from
+        LightingFixtures
+      inner join
+        LightingFixtureTypes
+        on
+          LightingFixtureTypes.Id=LightingFixtures.TypeId
+
+  - id: room instances
+    # blank node issues
+    # https://github.com/ontop/ontop/issues/372
+    # https://github.com/ontop/ontop/issues/303
+    # graphdb doesn't like blank nodes
+    # https://docs.brickschema.org/metadata/entity-properties.html
+    target: |
+      s223x:{RoomType}  a   s223x:Room.
+      pnnl:Room/{Id}
+        rdfs:label      {Number};
+        a               s223x:{RoomType};
+        s223x:GrossArea pnnl:Room/{Id}/Area.
+      pnnl:Room/{Id}/Area
+        qudt:value     {Area}; # no need to convert area value since it's a float in the db
+        qudt:hasUnit   unit:M2.
+    source: |
+      select
+        Id,
+        Number,
+        replace(Name, ' ', '_')
+        as RoomType,
+        Area
+      from
+        Rooms
+
+  - id: floor instances
+    target: |
+      pnnl:Floor/{Id}
+        rdfs:label  {Name};
+        a           s223x:Floor .
+    source:
+      select
+        Id,
+        Name
+      from
+        Levels
+
+  - id: level-room
+    target: |
+      pnnl:Floor/{LevelIdentifier}
+      # physicalspaces contain. domainspaces enclose
+        s223:contains pnnl:Room/{RoomsIdentifier} .
+    source:
+      select
+        Levels.Id as LevelIdentifier,
+        Rooms.Id  as RoomsIdentifier
+      from Levels
+        inner join
+          Rooms
+        on
+          Levels.Id=Rooms.Level
+
+  - id: luminaire-room # physical relation
+    target: pnnl:Luminaire/{LuminaireIdentifier}
+              s223:hasLocation pnnl:Room/{RoomIdentifier} .
+    source: |
+      select
+        LightingFixtures.Id as LuminaireIdentifier,
+        Rooms.Id            as RoomIdentifier
+      from
+        LightingFixtures
+      inner join
+        Rooms
+        on
+          LightingFixtures.LuminaireRoomParameter=Rooms.Number
+
+  # physical spcs can contain domainspaces
+  - id: lighting zones   # control relation. physcial spc (room) 'encloses' lightingzone
+    target:
+      pnnl:Room/{RoomIdentifier}
+        s223:encloses pnnl:LightingControlZone/{LightingControlZoneID}.
+      pnnl:LightingControlZone/{LightingControlZoneID}
+        rdfs:label  {LightingControlZoneID};
+        a           s223x:LightingSpace.
+      pnnl:Luminaire/{Id}
+        s223:connected pnnl:LightingControlZone/{LightingControlZoneID};
+        s223:connectedTo pnnl:LightingControlZone/{LightingControlZoneID}.
+    source:
+      select
+        LightingFixtures.Id as Id,
+        Rooms.Id as RoomIdentifier,
+        substring(LightingControlZoneID, 1, 5) as LightingControlZoneID
+      from
+        LightingFixtures
+      inner join
+        Rooms
+        on
+          LightingFixtures.LuminaireRoomParameter=Rooms.Number
+
+# Connect luminaires based on zone
+  - id: connect luminaires
+    target:
+      pnnl:Luminaire/{Current_Id}
+        s223:connected pnnl:Luminaire/{Connected_Id}.
+    source:
+      select
+        A.Id as Current_Id, B.Id as Connected_Id, A.LightingControlZoneID
+      from
+        LightingFixtures A, LightingFixtures B
+      where
+        Current_Id <> Connected_Id
+        and A.LightingControlZoneID = B.LightingControlZoneID
+      order by A.LightingControlZoneID

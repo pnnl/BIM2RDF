@@ -2,18 +2,18 @@ schema: '2.0'
 stages:
   map:
     cmd: mapping-run-in inv map --db-file ../input/buildings/proto-medoffice.sqlite
-      --map-file ../input/mappings/brick/proto-medoffice/maps.yaml  --ontology brick
+      --map-file ../input/mappings/223p/proto-medoffice/maps.yaml  --ontology 223p
     deps:
-    - path: ../../ontologies/brick
-      md5: 34c159305303170809cbe3ba04da6a5c.dir
-      size: 726355
-      nfiles: 1
+    - path: ../../ontologies/223p
+      md5: 459e79b46400dc9c5c10aa3d453d72d7.dir
+      size: 72282
+      nfiles: 3
     - path: ../input/buildings/proto-medoffice.sqlite
       md5: 433fdd076c6058a8153cbb8ea22ebe70
       size: 2306048
-    - path: ../input/mappings/brick/proto-medoffice/maps.yaml
-      md5: 2da1c313eac08c2f291c8b752a8ba99d
-      size: 3559
+    - path: ../input/mappings/223p/proto-medoffice/maps.yaml
+      md5: 2e439d9d88e4104c0cf0fd3dffedd2fe
+      size: 5772
     outs:
     - path: log
       md5: 70420ddd9aa84859a6ceb0f01733100c.dir
