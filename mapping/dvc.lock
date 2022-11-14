@@ -23,13 +23,13 @@ stages:
       md5: 72646c4e85013d482a36e0e4a26428fe
       size: 1630478
     - path: ontology.ttl
-      md5: 33f44bf9763e540a36eea4f1d784159c
+      md5: baea876004dbb1bb065c8b4c80015b74
       size: 851853
   upload_ontology:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
     deps:
     - path: ontology.ttl
-      md5: 33f44bf9763e540a36eea4f1d784159c
+      md5: baea876004dbb1bb065c8b4c80015b74
       size: 851853
   upload_data:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl mapped.ttl  --name proto-medoffice
@@ -37,3 +37,17 @@ stages:
     - path: mapped.ttl
       md5: 72646c4e85013d482a36e0e4a26428fe
       size: 1630478
+  infer:
+    cmd: mapping-run-in python -X utf8 owlrl_patch.py  --input_syntax=turtle --maximal
+      --owlrl=yes --rdfs=yes --serialization=turtle mapped.ttl  ontology.ttl > inferred.ttl
+    deps:
+    - path: mapped.ttl
+      md5: 72646c4e85013d482a36e0e4a26428fe
+      size: 1630478
+    - path: ontology.ttl
+      md5: baea876004dbb1bb065c8b4c80015b74
+      size: 851853
+    outs:
+    - path: inferred.ttl
+      md5: 60c4acaf8a94b2dc345c25ec97936893
+      size: 4075613
