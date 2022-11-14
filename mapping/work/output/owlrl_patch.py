@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 
-# patching owlrl-script.py to fix https://github.com/RDFLib/OWL-RL/issues/53
+# patching owlrl-script.py to fix 
 # maybe use owlready. or just its reasoner
 # or ontop reasoner?
-
 # TODO: check periodically if this issue has been resolved
+
+# https://github.com/RDFLib/OWL-RL/issues/53
 from rdflib import OWL, RDFS
 OWL.Datatype = RDFS.Datatype
 
