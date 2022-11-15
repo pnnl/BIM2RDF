@@ -39,5 +39,16 @@ stages:
     outs:
       - inferred.ttl
 
+  
+  # validate:
+  #   cmd: mapping-run-in python -m  pyshacl --shacl ../../test/test.ttl --ont-graph ontology.ttl -f turtle -o validation.ttl  mapped.ttl
+  #   wdir: work/output
+  #   deps:
+  #     - ontology.ttl
+  #     - ../../test/test.ttl
+  #   outs:
+  #     - validation.ttl
 
-# test here?
+
+
+# test here? to actually error out if check?
