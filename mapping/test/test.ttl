@@ -7,9 +7,29 @@
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
+
+#question TODO how to spec that there should be brick:Luminaire?
+# make sure there is a room-luminaire link?
+
+
 # brick might already have some shapes defined.
 lighting:SaneLight a sh:NodeShape;
-    #sh:targetClass brick:Luminaire; # only works on inferenced graph  b/c our luminaires are subtypes of luminaire.
+    sh:targetClass brick:Luminaire; # only works on inferenced graph  b/c our luminaires are subtypes of luminaire.
+    sh:property [
+        sh:path brick:ratedPowerInput;       # just saying
+        sh:minCount 1;                       # ..needs to be here
+        sh:maxCount 1;                       # const.
+        sh:property [
+             # http://example.com/proto-medoffice/Luminaire/921363/Power should have kept the id last??
+                sh:path brick:value;
+                sh:minCount 1;
+                sh:maxCount 1;
+                sh:maxInclusive 9999; #
+                ];
+        ].
+
+
+lighting:Design a sh:NodeShape;
     #sh:targetClass <http://example.com/proto-medoffice/LuminaireType/F-1>;  
     sh:targetClass <http://example.com/proto-medoffice/LuminaireType/H-1>;#
     sh:property [
@@ -23,7 +43,6 @@ lighting:SaneLight a sh:NodeShape;
                 sh:maxCount 1;
                 #sh:equals 20e0; #"20.0"^^xsd:double; this is for something else??  Message: Value of <http://example.com/proto-medoffice/Luminaire/921363/Power>->Literal("20.0", datatype=xsd:double) != Literal("20.0", datatype=xsd:double)
                 # sh:lessThanOrEquals 9999e0; # not this
-                sh:maxInclusive 9999; #
                 sh:hasValue 20e0; # 
                 ];
         ].
@@ -34,4 +53,6 @@ lighting:SaneLight a sh:NodeShape;
 
 # therefore...
 # LPD
+
+#lighting:LPDCalc a sh:SPARQLTargetType;
 
