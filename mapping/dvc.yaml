@@ -41,10 +41,10 @@ stages:
 
   
   # validate:
-  #   cmd: mapping-run-in python -m  pyshacl --shacl ../../test/test.ttl --ont-graph ontology.ttl -f turtle -o validation.ttl  mapped.ttl
+  #   cmd: mapping-run-in python -m  pyshacl --shacl ../../test/test.ttl  -f turtle --advanced -o validation.ttl  inferred.ttl
   #   wdir: work/output
   #   deps:
-  #     - ontology.ttl
+  #     - inferred.ttl
   #     - ../../test/test.ttl
   #   outs:
   #     - validation.ttl
