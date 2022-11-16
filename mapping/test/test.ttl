@@ -61,12 +61,10 @@ lighting:SaneLPD a sh:NodeShape;
 		sh:select """
 			PREFIX brick: <https://brickschema.org/schema/Brick#>
             PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
-            # 'overall' check for shacl
-            select (?checks = ?count  as ?this) {
 
             # 'check' level
             #        using if b/c apparently ops on boolean dont see it as numeric
-            select   ( sum(if(?loc_lpd < 100, 1, 0)) as ?checks)  (count(?loc_lpd) as ?count)     {
+            select   ( (?loc_lpd) as ?this )   {
 
             # 'lower-level': agg. by room
             select ?loc_type  ?loc ?area  (sum(?power/?area) as ?loc_lpd)  (sum(?power) as ?loc_power )     { 
@@ -81,10 +79,9 @@ lighting:SaneLPD a sh:NodeShape;
             } group by ?loc_type ?loc ?area
         
             }
-            }
 		    """;
             ];
-    sh:hasValue true.
+    sh:maxInclusive 100. # todo: make ?this an identifier so i know where i am in the graph
 
 
 
