@@ -1,0 +1,54 @@
+schema: '2.0'
+stages:
+  map:
+    cmd: mapping-run-in inv map --db-file ../input/buildings/proto-medoffice.sqlite
+      --map-file ../input/mappings/brick/proto-medoffice/maps.yaml  --ontology brick
+    deps:
+    - path: ../../ontologies/brick
+      md5: 34c159305303170809cbe3ba04da6a5c.dir
+      size: 726355
+      nfiles: 1
+    - path: ../input/buildings/proto-medoffice.sqlite
+      md5: 433fdd076c6058a8153cbb8ea22ebe70
+      size: 2306048
+    - path: ../input/mappings/brick/proto-medoffice/maps.yaml
+      md5: 2da1c313eac08c2f291c8b752a8ba99d
+      size: 3559
+    outs:
+    - path: log
+      md5: 70420ddd9aa84859a6ceb0f01733100c.dir
+      size: 0
+      nfiles: 1
+    - path: mapped.ttl
+      md5: 72646c4e85013d482a36e0e4a26428fe
+      size: 1630478
+    - path: ontology.ttl
+      md5: baea876004dbb1bb065c8b4c80015b74
+      size: 851853
+  upload_ontology:
+    cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
+    deps:
+    - path: ontology.ttl
+      md5: baea876004dbb1bb065c8b4c80015b74
+      size: 851853
+  upload_data:
+    cmd: mapping-run-in inv graphdb.upload-graph --ttl mapped.ttl  --name proto-medoffice
+    deps:
+    - path: mapped.ttl
+      md5: 72646c4e85013d482a36e0e4a26428fe
+      size: 1630478
+  infer:
+    cmd: mapping-run-in python -X utf8 owlrl_patch.py  --input_syntax=turtle --maximal
+      --owlrl=yes --rdfs=yes --extras=yes --axioms=yes --serialization=turtle mapped.ttl  ontology.ttl
+      > inferred.ttl
+    deps:
+    - path: mapped.ttl
+      md5: 72646c4e85013d482a36e0e4a26428fe
+      size: 1630478
+    - path: ontology.ttl
+      md5: baea876004dbb1bb065c8b4c80015b74
+      size: 851853
+    outs:
+    - path: inferred.ttl
+      md5: 075eb7f1fc9f3ef5060245909d4314ed
+      size: 5086070
