@@ -53,38 +53,50 @@ lighting:Design a sh:NodeShape;
 # therefore...
 # LPD
 
-lighting:SaneLPD a sh:NodeShape;
-	sh:target [
-		a sh:SPARQLTarget ;
-		#sh:prefixes ex: ;
+lighting:LPD a sh:NodeShape; # just the calc
+    sh:targetClass brick:Room;
+	sh:rule [
+		a sh:SPARQLRule;
+		#sh:prefixes ex:;
         # in query.py
-		sh:select """
+        # only need the calc, not selecting rooms
+		sh:construct """
 			PREFIX brick: <https://brickschema.org/schema/Brick#>
             PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
 
+            construct {?this brick:value ?loc_lpd} {  
+
             # 'check' level
             #        using if b/c apparently ops on boolean dont see it as numeric
-            select   ( (?loc_lpd) as ?this )   {
+            select   ?loc  ?loc_lpd    {
 
             # 'lower-level': agg. by room
+            # distinct?
             select ?loc_type  ?loc ?area  (sum(?power/?area) as ?loc_lpd)  (sum(?power) as ?loc_power )     { 
             ?luminaire a brick:Luminaire. 
             ?luminaire brick:hasLocation ?loc. 
-            ?luminaire brick:hasLocation/a ?loc_type. 
-            ?loc_type rdfs:subClassOf brick:Room. # in owl is room a subclass of itself?? 
+            ?luminaire brick:hasLocation/a ?loc_type.
+            #?loc_type rdfs:subClassOf brick:Room. # in owl is room a subclass of itself??
             #?loc_type sesame:directSubClassOf brick:Room. # elimnates 'synonyms' and going up the heirarchy
             ?luminaire brick:ratedPowerInput/brick:value ?power.
             ?loc brick:grossArea/brick:value ?area. 
             #?loc a brick:Mechanical_Room. # testing filter
-            } group by ?loc_type ?loc ?area
-        
+            } group by ?loc_type ?loc 
+
+            }
             }
 		    """;
-            ];
-    sh:maxInclusive 100. # todo: make ?this an identifier so i know where i am in the graph
+            ].
 
+lighting:saneLPD a sh:NodeShape;
+    sh:targetClass brick:Room;
+    sh:property [
+       sh:path brick:value; # what i wrote in :LPD
+       sh:minCount 1;
+       sh:minInclusive 0;
+       sh:maxInclusive 100;
+      ].
 
-
-
+# TODO? encode null shhould not show up?
 
 
