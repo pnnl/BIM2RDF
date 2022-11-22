@@ -12,16 +12,16 @@ stages:
       md5: 433fdd076c6058a8153cbb8ea22ebe70
       size: 2306048
     - path: ../input/mappings/223p/proto-medoffice/maps.yaml
-      md5: f54f61d124ea15ac5560be6501068372
-      size: 7296
+      md5: f6f22abec3a41b8e0b641f995a6ce9f0
+      size: 8297
     outs:
     - path: log
       md5: 70420ddd9aa84859a6ceb0f01733100c.dir
       size: 0
       nfiles: 1
     - path: mapped.ttl
-      md5: 388111cd87b55842805b98cdbfa00dfd
-      size: 2916219
+      md5: 5faa976af00794d014be532278e08373
+      size: 3215977
     - path: ontology.ttl
       md5: 738ea1e4f7446c9ac59e26c90317c14a
       size: 35856

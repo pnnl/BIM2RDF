@@ -52,6 +52,10 @@ maps:
         s223:hasValue {OnOffStatus}.
       pnnl:Luminaire/{Id}/DimmerStatus
         s223:hasValue {DimmerStatus}.
+      pnnl:Luminaire/{Id}/Outlet
+        s223:isConnectionPointOf pnnl:Luminaire/{Id}.
+      pnnl:Luminaire/{Id}/Inlet
+        s223:isConnectionPointOf pnnl:Luminaire/{Id}.
     source: |
       select
         LightingFixtures.Id                           as Id,
@@ -151,7 +155,10 @@ maps:
         s223:connectedThrough pnnl:DLightPath/{LightingControlZoneID}.
       pnnl:Luminaire/{Id}
         s223:connected pnnl:LightingSpace/{LightingControlZoneID};
-        s223:connectedTo pnnl:LightingSpace/{LightingControlZoneID}.
+        s223:connectedTo pnnl:LightingSpace/{LightingControlZoneID};
+        s223:connectedThrough pnnl:ELightPath/{LightingControlZoneID}.
+      pnnl:Luminaire/{Id}/Outlet
+        s223:isConnectionPointOf pnnl:ELightPath/{LightingControlZoneID}.
       pnnl:LightingControlZone/{LightingControlZoneID}
         rdfs:label {LightingControlZoneID};
         s223:contains pnnl:LightingSpace/{LightingControlZoneID};
@@ -163,6 +170,16 @@ maps:
         s223:connectsAt pnnl:LightingSpace/{LightingControlZoneID}/ELInlet;
         s223:cnx pnnl:LightingSpace/{LightingControlZoneID}/ELOutlet;
         s223:hasMedium s223:Light-Visible.
+      pnnl:LightingSpace/{LightingControlZoneID}/ELInlet
+        s223:cnx pnnl:LightingSpace/{LightingControlZoneID};
+        s223:isConnectionPointOf pnnl:LightingSpace/{LightingControlZoneID};
+        s223:cnx pnnl:ELightPath/{LightingControlZoneID};
+        s223:connectsThrough pnnl:ELightPath/{LightingControlZoneID}.
+      pnnl:LightingSpace/{LightingControlZoneID}/DLInlet
+        s223:cnx pnnl:LightingSpace/{LightingControlZoneID};
+        s223:connectsThrough pnnl:DLightPath/{LightingControlZoneID}.
+      pnnl:DLightPath/{LightingControlZoneID}
+        s223:connectsAt pnnl:LightingSpace/{LightingControlZoneID}/DLInlet.
     source:
       select
         LightingFixtures.Id as Id,
