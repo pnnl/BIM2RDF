@@ -51,7 +51,7 @@ dependencies:
   #- some analysis library     # [run_req]
   - rdflib                      # [run_req]
   - jinja2                      # [run_req]
-  - python                      # [run_req]
+  - python<=3.10                # [run_req]
   - openjdk                     # need java for ontop
   - cmd:                        # [run_req]
     - python scripts/install.py # [run_req] ontop cli
