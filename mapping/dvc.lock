@@ -12,43 +12,57 @@ stages:
       md5: 433fdd076c6058a8153cbb8ea22ebe70
       size: 2306048
     - path: ../input/mappings/brick/proto-medoffice/maps.yaml
-      md5: 2da1c313eac08c2f291c8b752a8ba99d
-      size: 3559
+      md5: b138c9edc545dcbc83a36f228c3d5ebf
+      size: 5046
     outs:
     - path: log
       md5: 70420ddd9aa84859a6ceb0f01733100c.dir
       size: 0
       nfiles: 1
     - path: mapped.ttl
-      md5: 72646c4e85013d482a36e0e4a26428fe
-      size: 1630478
+      md5: 8550273359000692616534088923f780
+      size: 1701475
     - path: ontology.ttl
-      md5: baea876004dbb1bb065c8b4c80015b74
+      md5: c9eabe2c330e9afb877689dd8975938d
       size: 851853
   upload_ontology:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
     deps:
     - path: ontology.ttl
-      md5: baea876004dbb1bb065c8b4c80015b74
+      md5: c9eabe2c330e9afb877689dd8975938d
       size: 851853
   upload_data:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl mapped.ttl  --name proto-medoffice
     deps:
     - path: mapped.ttl
-      md5: 72646c4e85013d482a36e0e4a26428fe
-      size: 1630478
+      md5: 8550273359000692616534088923f780
+      size: 1701475
   infer:
-    cmd: mapping-run-in python -X utf8 owlrl_patch.py  --input_syntax=turtle --maximal
+    cmd: mapping-run-in python -X utf8 owlrl_patch.py --input_syntax=turtle --maximal
       --owlrl=yes --rdfs=yes --extras=yes --axioms=yes --serialization=turtle mapped.ttl  ontology.ttl
       > inferred.ttl
     deps:
     - path: mapped.ttl
-      md5: 72646c4e85013d482a36e0e4a26428fe
-      size: 1630478
+      md5: 8550273359000692616534088923f780
+      size: 1701475
     - path: ontology.ttl
-      md5: baea876004dbb1bb065c8b4c80015b74
+      md5: c9eabe2c330e9afb877689dd8975938d
       size: 851853
     outs:
     - path: inferred.ttl
-      md5: 075eb7f1fc9f3ef5060245909d4314ed
-      size: 5086070
+      md5: fb2e9c121da4dbc9c42e528625d45d6f
+      size: 5209324
+  validate:
+    cmd: mapping-run-in python -m  pyshacl --shacl ../../test/test.ttl  -f turtle
+      --iterate-rules --advanced -o validation.ttl  inferred.ttl
+    deps:
+    - path: ../../test/test.ttl
+      md5: 4cc113962c8b1f99aa34d5a212282843
+      size: 3500
+    - path: inferred.ttl
+      md5: fb2e9c121da4dbc9c42e528625d45d6f
+      size: 5209324
+    outs:
+    - path: validation.ttl
+      md5: 7aa4692047e43fff72291148daaf2975
+      size: 153

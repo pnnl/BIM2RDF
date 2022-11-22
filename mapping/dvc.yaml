@@ -28,10 +28,10 @@ stages:
     deps:
       - ontology.ttl
 
-  infer:
+  infer: #TODO: multiline cmd
     #   python -m pdb -m owlrl._cli
     #                             utf8 is to force utf8 on windows console
-    cmd: mapping-run-in python -X utf8 owlrl_patch.py  --input_syntax=turtle --maximal --owlrl=yes --rdfs=yes --extras=yes --axioms=yes --serialization=turtle mapped.ttl  ontology.ttl > inferred.ttl
+    cmd: mapping-run-in python -X utf8 owlrl_patch.py --input_syntax=turtle --maximal --owlrl=yes --rdfs=yes --extras=yes --axioms=yes --serialization=turtle mapped.ttl  ontology.ttl > inferred.ttl
     wdir: work/output
     deps:
       - ontology.ttl
@@ -40,14 +40,14 @@ stages:
       - inferred.ttl
 
   
-  # validate:
-  #   cmd: mapping-run-in python -m  pyshacl --shacl ../../test/test.ttl  -f turtle --advanced -o validation.ttl  inferred.ttl
-  #   wdir: work/output
-  #   deps:
-  #     - inferred.ttl
-  #     - ../../test/test.ttl
-  #   outs:
-  #     - validation.ttl
+  validate:
+    cmd: mapping-run-in python -m  pyshacl --shacl ../../test/test.ttl  -f turtle --iterate-rules --advanced -o validation.ttl  inferred.ttl
+    wdir: work/output
+    deps:
+      - inferred.ttl
+      - ../../test/test.ttl
+    outs:
+      - validation.ttl
 
 
 
