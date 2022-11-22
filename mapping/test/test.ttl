@@ -14,6 +14,7 @@
 
 # brick might already have some shapes defined.
 lighting:SaneLight a sh:NodeShape;
+    sh:deactivated true;
     sh:targetClass brick:Luminaire; # only works on inferenced graph  b/c our luminaires are subtypes of luminaire.
     sh:property [
         sh:path brick:ratedPowerInput;       # just saying
@@ -30,6 +31,7 @@ lighting:SaneLight a sh:NodeShape;
 
 
 lighting:Design a sh:NodeShape;
+    sh:deactivated true;
     #sh:targetClass <http://example.com/proto-medoffice/LuminaireType/F-1>;  
     sh:targetClass <http://example.com/proto-medoffice/LuminaireType/H-1>;#
     sh:property [
@@ -85,7 +87,7 @@ lighting:saneLPD a sh:NodeShape;
        sh:path brick:value; # what i wrote in :LPD
        sh:minCount 1;
        sh:minInclusive 0;
-       sh:maxInclusive 100;
+       sh:maxInclusive 20;
       ].
 
 # TODO? encode null shhould not show up?
