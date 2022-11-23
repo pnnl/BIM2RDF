@@ -29,11 +29,11 @@ stages:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name 223p
     deps:
     - path: ontology.ttl
-      md5: 1b4756f6fc011fbdb4370fa0537cd8df
-      size: 35884
+      md5: 738ea1e4f7446c9ac59e26c90317c14a
+      size: 35856
   upload_data:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl mapped.ttl  --name proto-medoffice
     deps:
     - path: mapped.ttl
-      md5: 39d19fbd3955814e16a08bc55a233cb3
-      size: 2191143
+      md5: 5faa976af00794d014be532278e08373
+      size: 3215977
