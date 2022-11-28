@@ -23,13 +23,13 @@ stages:
       md5: 8550273359000692616534088923f780
       size: 1701475
     - path: ontology.ttl
-      md5: c9eabe2c330e9afb877689dd8975938d
+      md5: beb7b350bb20989d33ed1388b1bde35e
       size: 851853
   upload_ontology:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
     deps:
     - path: ontology.ttl
-      md5: c9eabe2c330e9afb877689dd8975938d
+      md5: beb7b350bb20989d33ed1388b1bde35e
       size: 851853
   upload_data:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl mapped.ttl  --name proto-medoffice
@@ -46,21 +46,21 @@ stages:
       md5: 8550273359000692616534088923f780
       size: 1701475
     - path: ontology.ttl
-      md5: c9eabe2c330e9afb877689dd8975938d
+      md5: beb7b350bb20989d33ed1388b1bde35e
       size: 851853
     outs:
     - path: inferred.ttl
-      md5: fb2e9c121da4dbc9c42e528625d45d6f
+      md5: 30c9997683f08ba1dd62b69453868641
       size: 5209324
   validate:
-    cmd: mapping-run-in python -m  pyshacl --shacl ../../test/test.ttl  -f turtle
+    cmd: mapping-run-in python pyshacl_err.py --shacl ../../test/test.ttl  -f turtle
       --iterate-rules --advanced -o validation.ttl  inferred.ttl
     deps:
     - path: ../../test/test.ttl
       md5: 4cc113962c8b1f99aa34d5a212282843
       size: 3500
     - path: inferred.ttl
-      md5: fb2e9c121da4dbc9c42e528625d45d6f
+      md5: 30c9997683f08ba1dd62b69453868641
       size: 5209324
     outs:
     - path: validation.ttl
