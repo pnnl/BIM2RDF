@@ -41,11 +41,11 @@ stages:
 
   
   validate:
-    cmd: mapping-run-in python pyshacl_err.py --shacl ../../test/test.ttl  -f turtle --iterate-rules --advanced -o validation.ttl  inferred.ttl
+    cmd: mapping-run-in python pyshacl_err.py --shacl ../../test/${building}.ttl  -f turtle --iterate-rules --advanced -o validation.ttl  inferred.ttl
     wdir: work/output
     deps:
       - inferred.ttl
-      - ../../test/test.ttl
+      - ../../test/${building}.ttl
     outs:
       - validation.ttl
 

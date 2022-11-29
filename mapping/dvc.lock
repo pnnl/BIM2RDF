@@ -53,16 +53,16 @@ stages:
       md5: 30c9997683f08ba1dd62b69453868641
       size: 5209324
   validate:
-    cmd: mapping-run-in python pyshacl_err.py --shacl ../../test/test.ttl  -f turtle
-      --iterate-rules --advanced -o validation.ttl  inferred.ttl
+    cmd: mapping-run-in python pyshacl_err.py --shacl ../../test/proto-medoffice.ttl  -f
+      turtle --iterate-rules --advanced -o validation.ttl  inferred.ttl
     deps:
-    - path: ../../test/test.ttl
-      md5: 4cc113962c8b1f99aa34d5a212282843
-      size: 3500
+    - path: ../../test/proto-medoffice.ttl
+      md5: d41d8cd98f00b204e9800998ecf8427e
+      size: 0
     - path: inferred.ttl
       md5: 30c9997683f08ba1dd62b69453868641
       size: 5209324
     outs:
     - path: validation.ttl
-      md5: 7aa4692047e43fff72291148daaf2975
-      size: 153
+      md5: d85b64c7337ebf6a86256e355272e1e5
+      size: 156
