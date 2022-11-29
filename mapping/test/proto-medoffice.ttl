@@ -1,0 +1,95 @@
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix lighting: <https://example.com/pnnl/lighting/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix schema: <http://schema.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+#@prefix pnnl: <http://example.com/proto-medoffice/>.
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+#question TODO how to spec that there should be brick:Luminaire?
+# make sure there is a room-luminaire link?
+
+
+# brick might already have some shapes defined.
+lighting:SaneLight a sh:NodeShape;
+    sh:deactivated true;
+    sh:targetClass brick:Luminaire; # only works on inferenced graph  b/c our luminaires are subtypes of luminaire.
+    sh:property [
+        sh:path brick:ratedPowerInput;       # just saying
+        sh:minCount 1;                       # ..needs to be here
+        sh:maxCount 1;                       # const.
+        sh:property [
+             # http://example.com/proto-medoffice/Luminaire/921363/Power should have kept the id last??
+                sh:path brick:value;
+                sh:minCount 1;
+                sh:maxCount 1;
+                sh:maxInclusive 9999; #
+                ];
+        ].
+
+
+lighting:Design a sh:NodeShape;
+    sh:deactivated true;
+    #sh:targetClass <http://example.com/proto-medoffice/LuminaireType/F-1>;  
+    sh:targetClass <http://example.com/proto-medoffice/LuminaireType/H-1>;#
+    sh:property [
+        sh:path brick:ratedPowerInput;       # just saying
+        sh:minCount 1;                       # ..needs to be here
+        sh:maxCount 1;                       # const.
+        sh:property [
+             # http://example.com/proto-medoffice/Luminaire/921363/Power should have kept the id last??
+                sh:path brick:value;
+                sh:minCount 1;
+                sh:maxCount 1;
+                #sh:equals 20e0; #"20.0"^^xsd:double; this is for something else??  Message: Value of <http://example.com/proto-medoffice/Luminaire/921363/Power>->Literal("20.0", datatype=xsd:double) != Literal("20.0", datatype=xsd:double)
+                # sh:lessThanOrEquals 9999e0; # not this
+                sh:hasValue 20e0; # 
+                ];
+        ].
+
+
+#lighting:Room needs to have area data
+
+# therefore...
+# LPD
+
+lighting:LPD a sh:NodeShape; # just the calc
+    sh:targetClass brick:Room; #?loc a brick:Mechanical_Room. # testing filter
+	sh:rule [
+		a sh:SPARQLRule;
+		#sh:prefixes ex:;
+        # in query.py
+        # only need the calc, not selecting rooms
+		sh:construct """
+			PREFIX brick: <https://brickschema.org/schema/Brick#>
+            PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+            
+            
+            construct {?this brick:value ?loc_lpd } {
+            
+            select ?this ?area  (sum(?power/?area) as ?loc_lpd)  (sum(?power) as ?loc_power )  { 
+            ?luminaire a brick:Luminaire.
+            ?luminaire brick:hasLocation ?this.
+            ?luminaire brick:ratedPowerInput/brick:value ?power.
+            ?this brick:grossArea/brick:value ?area.
+            } group by ?this
+
+            }
+
+		    """;
+            ].
+
+lighting:saneLPD a sh:NodeShape;
+    sh:targetClass brick:Room;
+    sh:property [
+       sh:path brick:value; # what i wrote in :LPD
+       sh:minCount 1;
+       sh:minInclusive 0;
+       sh:maxInclusive 20;
+      ].
+
+# TODO? encode null shhould not show up?
+
+

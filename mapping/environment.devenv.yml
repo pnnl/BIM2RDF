@@ -58,6 +58,12 @@ dependencies:
   - invoke                      # [run_req]
   - pyyaml                      # [run_req]
   - attrs                       # [run_req]
+  # pyshacl depends on owlrl
+  # but being explicit here to say:
+  # need graph expansion (owlrl) and validation (pyshacl)
+  - pyshacl                     # [run_req]
+  - owlrl                       # [run_req]
+
   # dev
   - mypy                        # [dev_req]
   - ipython                     # [dev_req]
@@ -65,6 +71,9 @@ dependencies:
   - pip:                        # [dev_req or run_req]
     - types-PyYAML              # [dev_req]
     - phantom-types==0.17.1     # [run_req]
+    #- rdflib-endpoint           # [keep_here] # idk could be either but 'keep here'
+  #- pytest                      # [dev_req]
+  
 
 
 environment:

@@ -28,3 +28,27 @@ stages:
     deps:
       - ontology.ttl
 
+  infer: #TODO: multiline cmd
+    #   python -m pdb -m owlrl._cli
+    #                             utf8 is to force utf8 on windows console
+    cmd: mapping-run-in python -X utf8 owlrl_patch.py --input_syntax=turtle --maximal --owlrl=yes --rdfs=yes --extras=yes --axioms=yes --serialization=turtle mapped.ttl  ontology.ttl > inferred.ttl
+    wdir: work/output
+    deps:
+      - ontology.ttl
+      - mapped.ttl
+    outs:
+      - inferred.ttl
+
+  
+  validate:
+    cmd: mapping-run-in python pyshacl_err.py --shacl ../../test/${building}.ttl  -f turtle --iterate-rules --advanced -o validation.ttl  inferred.ttl
+    wdir: work/output
+    deps:
+      - inferred.ttl
+      - ../../test/${building}.ttl
+    outs:
+      - validation.ttl
+
+
+
+# test here? to actually error out if check?
