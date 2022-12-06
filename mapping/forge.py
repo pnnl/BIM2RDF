@@ -83,8 +83,8 @@ def get_folders(project):
 
 
 proto_medoffice_id = "urn:adsk.wipprod:fs.file:vf.neWKg6LWQWWe0HVbGQ3QZg"#?version=1"
-proto_medoffice_id = "urn%3Aadsk.wipprod%3Adm.lineage%3AneWKg6LWQWWe0HVbGQ3QZg".replace('%3A', ':')
 proto_medoffice_folder = 'urn:adsk.wipprod:fs.folder:co.zj-rVepdRg60MgKWe3DKsQ'
+proto_medoffice_exchange = 'urn:adsk.wipprod:fs.folder:co.Tt-kz0sSTOWRK23IQlBqQw'
 
 @cache
 def get_folder_contents(project, folder):
@@ -109,7 +109,7 @@ def get_exchange(data_exchange_id):
 
 
 def test():
-    f = lambda: proto_medoffice_folder
+    f = lambda: proto_medoffice_exchange
     p = projects['proto-medoffice']
     _ = get_folder_contents(p, f)
     return _
