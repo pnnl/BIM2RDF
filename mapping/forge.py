@@ -15,14 +15,14 @@ from functools import lru_cache as cache
 
 
 @cache  # timeout would be nice
-def get_token():
+def get_token(grant_type='client_credentials', scope='data:read'):
     _ = get_app_credentials()
     _ = requests.post(
             'https://developer.api.autodesk.com/authentication/v2/token',
             auth=(_.id, _.secret),
             params={
-                'grant_type':'client_credentials',
-                'scope': 'data:read'},
+                'grant_type':grant_type,
+                'scope': scope},
             )
     import json
     _ = json.loads(_.content)
@@ -82,9 +82,11 @@ def get_folders(project):
     return _
 
 
-proto_medoffice_id = "urn:adsk.wipprod:fs.file:vf.neWKg6LWQWWe0HVbGQ3QZg"#?version=1"
+proto_medoffice_id =  "urn:adsk.wipprod:fs.file:vf.neWKg6LWQWWe0HVbGQ3QZg"#?version=1" from the viewer gui
+proto_medoffice_id  = "urn:adsk.wipprod:dm.lineage:neWKg6LWQWWe0HVbGQ3QZg"  # from folder contents 'fdx type'?
 proto_medoffice_folder = 'urn:adsk.wipprod:fs.folder:co.zj-rVepdRg60MgKWe3DKsQ'
 proto_medoffice_exchange = 'urn:adsk.wipprod:fs.folder:co.Tt-kz0sSTOWRK23IQlBqQw'
+
 
 @cache
 def get_folder_contents(project, folder):
@@ -97,11 +99,22 @@ def get_folder_contents(project, folder):
 
 
 @cache
-def get_exchange(data_exchange_id):
+def get_exchanges(file_urn):
     _ = requests.get(
         f'https://developer.api.autodesk.com/exchange/v1/exchanges',
         auth=BearerAuth(get_token()),
-        params={'filters':f"attribute.exchangeFileUrn=={data_exchange_id}" },
+        params={'filters':f"attribute.exchangeFileUrn=={file_urn}" },
+        )
+    _ = _.content
+    _ = json.loads(_)
+    return _
+
+
+@cache
+def get_exchange(eid):
+    _ = requests.get(
+        f'https://developer.api.autodesk.com/exchange/v1/exchanges/{eid}',
+        auth=BearerAuth(get_token()),
         )
     _ = _.content
     _ = json.loads(_)
@@ -109,7 +122,7 @@ def get_exchange(data_exchange_id):
 
 
 def test():
-    f = lambda: proto_medoffice_exchange
-    p = projects['proto-medoffice']
-    _ = get_folder_contents(p, f)
+    #_ = get_folder_contents(projects['proto-medoffice'], lambda: proto_medoffice_exchange)
+    #return _
+    _ = get_exchanges(proto_medoffice_id)
     return _
