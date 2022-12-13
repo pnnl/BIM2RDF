@@ -31,27 +31,56 @@ def stream():
     _ =  client().stream.get(id='4256f155c0')
     return _
 
-def object():
+def objects(id='856e4768f86cf6b470f399699df6be03'):
     _ = transport()#.objects
     from specklepy.api import operations
     from specklepy.transports.memory import MemoryTransport # for caching
-    _ = operations.receive(obj_id='32c394baf2edf75a3fdd3fe2a14e7c59', remote_transport=_, local_transport=MemoryTransport())
+    _ = operations.receive(obj_id=id, remote_transport=_, local_transport=MemoryTransport())
     return _
+
+def object(id):
     # graphql that doest recompose
-    #_ = client().object.get(stream_id='4256f155c0', object_id='32c394baf2edf75a3fdd3fe2a14e7c59')
+    _ = client().object.get(stream_id='4256f155c0', object_id=id)
     return _
 
 
-def json():
+def json(d=False):
     from specklepy.serialization.base_object_serializer import BaseObjectSerializer
     _ = BaseObjectSerializer()
-    _ = _.write_json(object(),)
+    if d:
+        _ = _.traverse_base(objects())
+    else:
+        _ = _.write_json(objects(),)
     return _
 
 
 def write():
-    _ = json()
+    _ = json(1)
     _ = _[1] # the json
-    open('neaa.speckle.json', 'w').write(_)
+    #from json import dump
+    #dump()
+    #open('neaa.speckle.json', 'w')
 
 
+def get_json():
+    return open('neaa.speckle.json')
+
+
+def qi():
+    import pandas as pd
+    _ = pd.read_csv('neaalights.csv')
+    ids =  _['Id'].values
+    j = get_json().read()
+    lj = (len(j))
+    found = []
+    for i in ids:
+        #_ = j.find('"elementId":"'+str(int(i))+'"')
+        _ = j.find(str(int(i)))
+        if _ != -1: found.append((i, j[_-30_000: _+100]  ))#  j[max(0,_-100):min(lj,_+100) ] ))
+    return found
+
+def ql():
+    import pandas as pd
+    j = get_json().read()
+    from re import finditer
+    return finditer('fixture', j.lower())
