@@ -19,8 +19,6 @@ def client():
 
 
 
-from typing import Iterable
-
 
 def app_info(client=client(), ):
     from types import SimpleNamespace as NS
@@ -33,12 +31,38 @@ def app_info(client=client(), ):
             yield from c.commit.list(s.id)
     for s,b in _():
         for c in b.commits.items:
-            yield s,b,c
+            yield NS(stream=s,branch=b,commit=c)
     #yield from _() # _[1].commits.items
     #from itertools import product
-    #yield from product(streams, branches())
+    #yield from product(streams, branches())            
 
-#def objects(stream_branches=stream_branches):...
-    #for sb in  stream_branches():
-    #    yield from (b for b in client.stream.list() if filter(s))
+from specklepy.serialization.base_object_serializer import BaseObjectSerializer
+serializer = BaseObjectSerializer()
+
+
+from specklepy.transports.sqlite import SQLiteTransport
+from specklepy.transports.server import ServerTransport
+from specklepy.api import operations
+
+def server_transport(stream_id):
+    return ServerTransport(stream_id=stream_id, client=client())
+
+def sqlite_transport(fn='cache'):
+    return SQLiteTransport(fn)
+
+
+def get(stream_id, object_id): 
+    return operations.receive(
+            object_id,
+            remote_transport=server_transport(stream_id),
+            local_transport=sqlite_transport())
+
     
+
+
+def json(): # (stream_id, object_id)
+    _ = app_info()
+    i = next(_) # test
+    _ = get(i.stream.id, i.commit.referencedObject)
+    id, j = serializer.write_json(_)
+    open(f"{id}.json", 'w').write(j)
