@@ -35,6 +35,7 @@ def app_info(client=client(), ):
     #yield from _() # _[1].commits.items
     #from itertools import product
     #yield from product(streams, branches())            
+            
 
 from specklepy.serialization.base_object_serializer import BaseObjectSerializer
 serializer = BaseObjectSerializer()
@@ -60,9 +61,34 @@ def get(stream_id, object_id):
     
 
 
-def json(): # (stream_id, object_id)
+def json(w=False): # (stream_id, object_id)
     _ = app_info()
     i = next(_) # test
     _ = get(i.stream.id, i.commit.referencedObject)
     id, j = serializer.write_json(_)
     open(f"{id}.json", 'w').write(j)
+
+    
+# maybe have to do object by obj
+
+from pyld import jsonld
+def x():
+    # get all jsonkeys/names
+    j = open('051cd6318fc716ff55ce452121ed59ee.json').read()
+    import json
+    j = json.loads(j)
+    # need to remove speckle's @
+    for k,v in j.copy().items(): # might need to recurse
+        if k.startswith('@'):
+            j[k[1:]] = v
+            del j[k]
+    c = "http://speckle.systems/" # or {} not a context b/c no context there
+    c = "http://schema.org/"
+    #c = "file://"
+    j['@context'] = {'speckle_type': 'http://st', 'Ceilings': 'http://c' }
+    #c = {"speckle_type": "http://speckle.systems/speckle_type"}
+    #c = {}
+    _ = jsonld.expand(j)
+    return _
+
+
