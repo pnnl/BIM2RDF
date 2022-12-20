@@ -74,8 +74,9 @@ def json(w=False): # (stream_id, object_id)
 import jsonpath_ng as jp
 from types import SimpleNamespace
 parsing = SimpleNamespace(
-    fields = jp.parse("$..*"),   # recursive
-    ids = jp.parse("$..id")      # useful for extracting out objs
+    fields = jp.parse("$..*"),     # recursive
+    ids = jp.parse("$..id"),       # useful for extracting out objs
+    # relations could be extracted b/c match results are nested DatumInContext.context -> DatumInContext
 )
 
 
@@ -100,35 +101,29 @@ def remove_at(d: dict) -> dict:
 base_uri = lambda: 'http://speckle.systems/'
 
 def contextualize(d: dict) -> dict:
+    # jsonld context
     d = d.copy()
     _ = {str(m.path) for m in parsing.fields.find(d)}
-    d['@context'] = {f:f"{base_uri()}{f}" for f in _}
+    # generic
+    from pyld.jsonld import KEYWORDS
+    # take out the @
+    KEYWORDS = {k[1:] for k in KEYWORDS}
+    maybe_bad = {f for f in _ if f in KEYWORDS} # Out[26]: {'direction', 'id', 'type', 'value'}
+    from urllib.parse import quote
+    d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }
+    # speckle specific
+    #d['@context']['@id'] = 'idd'
     return d
 
 
 def test():
     _ = sample_json()
     _ = remove_at(_)
+    #_ = {'Networks': 'sdf', 'id':'sdffds'}
     _ = contextualize(_)
-    return _
-
-
-from pyld import jsonld
-def x():
-    # get all jsonkeys/names
-    j = sample_json()
-    # need to remove speckle's @
-    for k,v in j.copy().items(): # might need to recurse
-        if k.startswith('@'):
-            j[k[1:]] = v
-            del j[k]
-    c = "http://speckle.systems/" # or {} not a context b/c no context there
-    c = "http://schema.org/"
-    #c = "file://"
-    j['@context'] = {'speckle_type': 'http://st', 'Ceilings': 'http://c' }
-    #c = {"speckle_type": "http://speckle.systems/speckle_type"}
-    #c = {}
-    _ = jsonld.expand(j)
+    #return _
+    from pyld import jsonld as lj
+    _ = lj.expand(_)
     return _
 
 
