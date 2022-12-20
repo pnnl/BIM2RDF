@@ -67,16 +67,30 @@ def json(w=False): # (stream_id, object_id)
     _ = get(i.stream.id, i.commit.referencedObject)
     id, j = serializer.write_json(_)
     open(f"{id}.json", 'w').write(j)
+    from json import loads
+    return loads(j)
 
-    
+
+import jsonpath_ng as jp
+fields = jp.parse("$..*")
+ids = jp.parse("$..id")
+
+
+
+
+
+def sample_json():
+    _ = open('051cd6318fc716ff55ce452121ed59ee.json').read()
+    import json
+    _ = json.loads(_)
+    return _
+
 # maybe have to do object by obj
 
 from pyld import jsonld
 def x():
     # get all jsonkeys/names
-    j = open('051cd6318fc716ff55ce452121ed59ee.json').read()
-    import json
-    j = json.loads(j)
+    j = sample_json()
     # need to remove speckle's @
     for k,v in j.copy().items(): # might need to recurse
         if k.startswith('@'):
