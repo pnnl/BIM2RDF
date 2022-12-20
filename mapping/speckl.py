@@ -72,11 +72,11 @@ def json(w=False): # (stream_id, object_id)
 
 
 import jsonpath_ng as jp
-fields = jp.parse("$..*")
-ids = jp.parse("$..id")
-
-
-
+from types import SimpleNamespace
+parsing = SimpleNamespace(
+    fields = jp.parse("$..*"),   # recursive
+    ids = jp.parse("$..id")      # useful for extracting out objs
+)
 
 
 def sample_json():
@@ -85,7 +85,23 @@ def sample_json():
     _ = json.loads(_)
     return _
 
-# maybe have to do object by obj
+def remove_at(d: dict) -> dict:
+    # need copy? functional programming rules
+    dc = d.copy()
+    # can't have @. collides with jsonld.
+    for m in parsing.fields.find(dc):
+        k = str(m.path)
+        if k.startswith('@'):
+            _ = m.context.value.pop(k)
+            m.context.value[k[1:]] = _ # is this ok? channging while iterating
+    return dc
+
+
+def test():
+    _ = sample_json()
+    _ = remove_at(_)
+    return _
+
 
 from pyld import jsonld
 def x():
