@@ -136,7 +136,9 @@ def test():
     _ = contextualize(_)
     #return _
     from pyld import jsonld as lj
-    _ = lj.expand(_, )# NS(graph=True).__dict__ )
+    #_ = lj.to_rdf(_) close to flatten
+    #_ = lj.expand(_, )# NS(graph=True).__dict__ )
+    #_ = lj.flatten(_, contextualize({})['@context']  ) # creates @graph
     return _
 
 
