@@ -87,19 +87,29 @@ def sample_json():
 
 def remove_at(d: dict) -> dict:
     # need copy? functional programming rules
-    dc = d.copy()
+    d = d.copy()
     # can't have @. collides with jsonld.
-    for m in parsing.fields.find(dc):
+    for m in parsing.fields.find(d):
         k = str(m.path)
         if k.startswith('@'):
             _ = m.context.value.pop(k)
             m.context.value[k[1:]] = _ # is this ok? channging while iterating
-    return dc
+    return d
+
+
+base_uri = lambda: 'http://speckle.systems/'
+
+def contextualize(d: dict) -> dict:
+    d = d.copy()
+    _ = {str(m.path) for m in parsing.fields.find(d)}
+    d['@context'] = {f:f"{base_uri()}{f}" for f in _}
+    return d
 
 
 def test():
     _ = sample_json()
     _ = remove_at(_)
+    _ = contextualize(_)
     return _
 
 
