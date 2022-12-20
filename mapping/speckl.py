@@ -45,6 +45,7 @@ from specklepy.transports.sqlite import SQLiteTransport
 from specklepy.transports.server import ServerTransport
 from specklepy.api import operations
 
+
 def server_transport(stream_id):
     return ServerTransport(stream_id=stream_id, client=client())
 
@@ -72,11 +73,12 @@ def json(w=False): # (stream_id, object_id)
 
 
 import jsonpath_ng as jp
-from types import SimpleNamespace
-parsing = SimpleNamespace(
+from types import SimpleNamespace as NS
+parsing = NS(
     fields = jp.parse("$..*"),     # recursive
-    ids = jp.parse("$..id"),       # useful for extracting out objs
-    # relations could be extracted b/c match results are nested DatumInContext.context -> DatumInContext
+    ids = jp.parse("$..id"),       # useful for extracting out objs...
+    # ...relations could be extracted b/c match results are nested DatumInContext.context -> DatumInContext
+    jsonld = NS(**{k: jp.parse(f"$..{k}") for k in {'id', 'type', 'value'}}) # there's also speckle_type
 )
 
 
@@ -98,6 +100,17 @@ def remove_at(d: dict) -> dict:
     return d
 
 
+# def adapt(d: dict) -> dict: i think this goes into @graph?
+#     # by adding @
+#     d = d.copy()
+#     from itertools import chain
+#     for m in chain.from_iterable(map(lambda _:_.find(d), (parsing.jsonld.__dict__.values()))):
+#         k = str(m.path)
+#         _ = m.context.value.pop(k)
+#         m.context.value[f"@{k}"] = _
+#     return d
+
+
 base_uri = lambda: 'http://speckle.systems/'
 
 def contextualize(d: dict) -> dict:
@@ -108,22 +121,22 @@ def contextualize(d: dict) -> dict:
     from pyld.jsonld import KEYWORDS
     # take out the @
     KEYWORDS = {k[1:] for k in KEYWORDS}
-    maybe_bad = {f for f in _ if f in KEYWORDS} # Out[26]: {'direction', 'id', 'type', 'value'}
+    maybe_bad = {f for f in _ if f in KEYWORDS} # Out[26]: {'direction', 'id', 'type', 'value'} # id,type, value, match jsonld
     from urllib.parse import quote
     d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }
     # speckle specific
-    #d['@context']['@id'] = 'idd'
     return d
 
 
 def test():
     _ = sample_json()
+    _ = {'Networks': 'sdf', 'id':'sdffds'}
     _ = remove_at(_)
-    #_ = {'Networks': 'sdf', 'id':'sdffds'}
+    #_ = adapt(_)
     _ = contextualize(_)
     #return _
     from pyld import jsonld as lj
-    _ = lj.expand(_)
+    _ = lj.expand(_, )# NS(graph=True).__dict__ )
     return _
 
 
