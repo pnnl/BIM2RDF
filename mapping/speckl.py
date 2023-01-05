@@ -74,6 +74,7 @@ def json(w=False): # (stream_id, object_id)
 
 import jsonpath_ng as jp
 from types import SimpleNamespace as NS
+# just use lenses/optics?
 parsing = NS(
     fields = jp.parse("$..*"),     # recursive
     ids = jp.parse("$..id"),       # useful for extracting out objs...
@@ -89,6 +90,18 @@ def sample_json():
     return _
 
 def remove_at(d: dict) -> dict:
+    # can't have @. collides with jsonld.
+    # need copy? functional programming rules
+    d = d.copy()
+    for m in parsing.fields.find(d):
+        k = str(m.path)
+        if k.startswith('@'):
+            _ = m.context.value.pop(k)
+            m.context.value[k[1:]] = _ # is this ok? channging while iterating
+    return d
+
+def sub_s(d: dict) -> dict:
+    # what's this??
     # need copy? functional programming rules
     d = d.copy()
     # can't have @. collides with jsonld.
@@ -98,7 +111,6 @@ def remove_at(d: dict) -> dict:
             _ = m.context.value.pop(k)
             m.context.value[k[1:]] = _ # is this ok? channging while iterating
     return d
-
 
 # def adapt(d: dict) -> dict: i think this goes into @graph?
 #     # by adding @
@@ -121,22 +133,28 @@ def contextualize(d: dict) -> dict:
     from pyld.jsonld import KEYWORDS
     # take out the @
     KEYWORDS = {k[1:] for k in KEYWORDS}
-    maybe_bad = {f for f in _ if f in KEYWORDS} # Out[26]: {'direction', 'id', 'type', 'value'} # id,type, value, match jsonld
+    maybe_bad = {f for f in _ if f in KEYWORDS} 
+    # maybe_bad = {'direction', 'id', 'type', 'value'} # id,type, value, match jsonld interpretation
     from urllib.parse import quote
-    d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }
+    # creating the 'speckle ontology'
+    d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }  # or just use @vocab?
     # speckle specific
     return d
 
 
 def test():
     _ = sample_json()
-    _ = {'Networks': 'sdf', 'id':'sdffds'}
+    #_ = {'Networks': 'sdf','iid':'sdffds'}
     _ = remove_at(_)
     #_ = adapt(_)
     _ = contextualize(_)
     #return _
     from pyld import jsonld as lj
-    #_ = lj.to_rdf(_) close to flatten
+    _ = lj.flatten(_, )#contextualize({})['@context']) 
+    _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
+    import rdflib
+    _ = rdflib.Graph().parse(data=_, format='nquads')
+    return _
     #_ = lj.expand(_, )# NS(graph=True).__dict__ )
     #_ = lj.flatten(_, contextualize({})['@context']  ) # creates @graph
     return _
