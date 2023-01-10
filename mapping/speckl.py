@@ -100,7 +100,8 @@ def remove_at(d: dict) -> dict:
             m.context.value[k[1:]] = _ # is this ok? channging while iterating
     return d
 
-def sub_s(d: dict) -> dict:
+
+def subs_kw(d: dict) -> dict:
     # what's this??
     # need copy? functional programming rules
     d = d.copy()
@@ -130,25 +131,34 @@ def contextualize(d: dict) -> dict:
     d = d.copy()
     _ = {str(m.path) for m in parsing.fields.find(d)}
     # generic
-    from pyld.jsonld import KEYWORDS
+    #from pyld.jsonld import KEYWORDS
     # take out the @
-    KEYWORDS = {k[1:] for k in KEYWORDS}
-    maybe_bad = {f for f in _ if f in KEYWORDS} 
+    #KEYWORDS = {k[1:] for k in KEYWORDS}
+    #maybe_bad = {f for f in _ if f in KEYWORDS}
     # maybe_bad = {'direction', 'id', 'type', 'value'} # id,type, value, match jsonld interpretation
+    maybe_bad = {'id'}
     from urllib.parse import quote
     # creating the 'speckle ontology'
-    d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }  # or just use @vocab?
+    #d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }  # or just use @vocab?
+    d['@context'] = {'@vocab': base_uri()}
+    #d['@context']['id'] = '@id'
     # speckle specific
     return d
 
 
 def test():
-    _ = sample_json()
-    #_ = {'Networks': 'sdf','iid':'sdffds'}
+    #_ = sample_json()
+    _ = {
+            'id':'_:o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
+            'Outside': 'sdf',
+            'inside': [
+                {'id': 'i1', 
+                'p': 3}
+            ]
+        }
     _ = remove_at(_)
     #_ = adapt(_)
     _ = contextualize(_)
-    #return _
     from pyld import jsonld as lj
     _ = lj.flatten(_, )#contextualize({})['@context']) 
     _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
@@ -158,5 +168,38 @@ def test():
     #_ = lj.expand(_, )# NS(graph=True).__dict__ )
     #_ = lj.flatten(_, contextualize({})['@context']  ) # creates @graph
     return _
+
+
+
+def rdf():
+    # now just map? can make bnode a subject?
+    _ = {
+            'id':'o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
+            'Outside': 'sdf',
+            'inside': [
+                {'id': 'i1', 
+                'p': 3},
+                {'id': 'i2', 
+                'p': 4}
+            ]
+        }
+    _ = sample_json()
+    _ = remove_at(_)
+    #_ = adapt(_)
+    _ = contextualize(_)
+    from pyld import jsonld as lj
+    _ = lj.flatten(_, )#contextualize({})['@context']) 
+    _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
+    return _
+
+
+
+if __name__ == '__main__':
+    _ = rdf()
+    from rdflib import Graph
+    _ = Graph().parse(data=_, format='nquads')
+    _.bind('spkl', base_uri())
+    _.serialize('speckle.ttl', format='ttl')
+    
 
 
