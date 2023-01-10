@@ -183,6 +183,7 @@ def rdf():
     _ = remove_at(_)
     #_ = adapt(_)
     _ = contextualize(_)
+    _ = id_(_)
     from pyld import jsonld as lj
     _ = lj.flatten(_, )#contextualize({})['@context']) 
     _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
