@@ -101,16 +101,12 @@ def remove_at(d: dict) -> dict:
     return d
 
 
-def subs_kw(d: dict) -> dict:
-    # what's this??
-    # need copy? functional programming rules
+def id_(d: dict) -> dict:
     d = d.copy()
-    # can't have @. collides with jsonld.
-    for m in parsing.fields.find(d):
+    for m in parsing.ids.find(d):
         k = str(m.path)
-        if k.startswith('@'):
-            _ = m.context.value.pop(k)
-            m.context.value[k[1:]] = _ # is this ok? channging while iterating
+        _ = m.context.value.pop(k)
+        m.context.value[f"@{k}"] = f"{base_uri()}{_}"
     return d
 
 # def adapt(d: dict) -> dict: i think this goes into @graph?
@@ -149,7 +145,7 @@ def contextualize(d: dict) -> dict:
 def test():
     #_ = sample_json()
     _ = {
-            'id':'_:o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
+            'id':'o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
             'Outside': 'sdf',
             'inside': [
                 {'id': 'i1', 
@@ -157,8 +153,8 @@ def test():
             ]
         }
     _ = remove_at(_)
-    #_ = adapt(_)
     _ = contextualize(_)
+    _ = id_(_)
     from pyld import jsonld as lj
     _ = lj.flatten(_, )#contextualize({})['@context']) 
     _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
