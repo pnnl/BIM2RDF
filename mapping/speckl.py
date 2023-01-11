@@ -102,6 +102,9 @@ def remove_at(d: dict) -> dict:
 
 
 def id_(d: dict) -> dict:
+    """creates speckle identifiers"""
+    # i think i had to do this outside of @context
+    #https://stackoverflow.com/questions/67444075/json-ld-assign-custom-uris-to-blank-nodes-within-context
     d = d.copy()
     for m in parsing.ids.find(d):
         k = str(m.path)
