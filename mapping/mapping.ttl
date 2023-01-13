@@ -31,7 +31,7 @@
 
 
 # lets go with brick
-spkl:fixtures a sh:NodeShape;
+spklsh:fixtures a sh:NodeShape;
     sh:target [ a sh:SPARQLTarget;
         #sh:prefixes put this TODO
         # dont know how to express this as a Node, SubjectOf, or ObjectOf target
