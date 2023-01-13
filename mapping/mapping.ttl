@@ -55,7 +55,6 @@ spkl:fixtures a sh:NodeShape;
                 brick:value   ?watts;
                 brick:hasUnit unit:W;].}
         where {
-            ?this spkl:category  "Lighting Fixtures".
             ?this spkl:parameters/spkl:FBX_LIGHT_WATTAGE/spkl:value ?watts.}
         """;].
     
