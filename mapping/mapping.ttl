@@ -27,7 +27,7 @@
 #     sh:rule [a sh:TripleRule;
 #         sh:subject      sh:this;
 #         sh:predicate    spkl:id;
-#         sh:object       'asdf';] .
+#         sh:object       'asdf';].
 
 
 # lets go with brick
@@ -43,20 +43,20 @@ spkl:fixtures a sh:NodeShape;
         }
         """;];
     sh:rule [a sh:SPARQLRule;
-        #sh:prefixes
+        #sh:prefixes brick:brick;
         sh:construct """
+        PREFIX spkl: <http://speckle.systems/>
+        PREFIX unit: <http://qudt.org/vocab/unit/>
         prefix brick: <https://brickschema.org/schema/Brick#>
+
         construct {
             ?this a brick:Luminaire.
-        }
-        where { }
-	    #?sid spkl:category  "Lighting Fixtures".
-        #?sid spkl:elementId ?eid.
-        #?sid spkl:family ?family.
-        #?sid spkl:type ?type.
-        #?sid spkl:parameters/spkl:ALL_MODEL_MARK/spkl:value ?mark.
-        #?sid spkl:parameters/spkl:FBX_LIGHT_WATTAGE/spkl:value ?watts.
-        #} 
+            ?this brick:Power [ # no such thing as brick:Power though
+                brick:value   ?watts;
+                brick:hasUnit unit:W;].}
+        where {
+            ?this spkl:category  "Lighting Fixtures".
+            ?this spkl:parameters/spkl:FBX_LIGHT_WATTAGE/spkl:value ?watts.}
         """;].
     
 
