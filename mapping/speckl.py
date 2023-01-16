@@ -61,12 +61,41 @@ def get(stream_id, object_id):
 
     
 
+def get_json(stream_id, object_id):
+    import yaml
+    from pathlib import Path
+    _ = open(Path(__file__) / '..' / 'secret.yaml')
+    _  = yaml.safe_load(_)
+    _ = _['speckl_token']
+    from requests.auth import AuthBase
+    class TokenAuth(AuthBase):
+        def __init__(self, token, auth_scheme='Bearer'):
+            self.token = token
+            self.auth_scheme = auth_scheme
+        def __call__(self, request):
+            request.headers['Authorization'] = f'{self.auth_scheme} {self.token}'
+            return request
+    import requests
+    server = 'http://speckle.xyz'
+    _ = requests.get(f"{server}/objects/{stream_id}/{object_id}", auth=TokenAuth(_))
+    _ = _.json()
+    return _
+
 
 def json(w=False): # (stream_id, object_id)
     _ = app_info()
-    i = next(_) # test
-    _ = get(i.stream.id, i.commit.referencedObject)
-    id, j = serializer.write_json(_)
+    # i = next(_) # test
+    # got = None
+    # for i in (_):
+    #     if i.stream.id == '316586b660':
+    #         got = True
+    #         break
+    # if not got: raise ValueError('streamid not found')
+    #_ = get(i.stream.id, i.commit.referencedObject)
+    _ = get('316586b660', '37c11d7537a358eb35970e09b3837aa8') # this id is nowhere to be found in the json
+    #return i, _
+    # https://github.com/specklesystems/specklepy/issues/237#issuecomment-1382598762
+    id, j = serializer.write_json(_)  # creating a new id for some reason.
     open(f"{id}.json", 'w').write(j)
     from json import loads
     return loads(j)
@@ -84,9 +113,11 @@ parsing = NS(
 
 
 def sample_json():
-    _ = open('051cd6318fc716ff55ce452121ed59ee.json').read()
+    _ = open('ae2fdd4c7287b5f4243ce39ecf214269.json').read()
     import json
     _ = json.loads(_)
+    if not (isinstance(_, dict)):
+        _ = {}
     return _
 
 def remove_at(d: dict) -> dict:
@@ -102,14 +133,16 @@ def remove_at(d: dict) -> dict:
 
 
 def id_(d: dict) -> dict:
+    # need to create a case for  when is a list with 'referencedId' which you get from the api
     """creates speckle identifiers"""
     # i think i had to do this outside of @context
     #https://stackoverflow.com/questions/67444075/json-ld-assign-custom-uris-to-blank-nodes-within-context
+    #base_uri = lambda: 
     d = d.copy()
     for m in parsing.ids.find(d):
         k = str(m.path)
         _ = m.context.value.pop(k)
-        m.context.value[f"@{k}"] = f"{base_uri()}{_}"
+        m.context.value[f"@{k}"] = f"{base_uri()}{_}" # TODO: do i really need to do this here?
     return d
 
 # def adapt(d: dict) -> dict: i think this goes into @graph?
@@ -139,7 +172,7 @@ def contextualize(d: dict) -> dict:
     from urllib.parse import quote
     # creating the 'speckle ontology'
     #d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }  # or just use @vocab?
-    d['@context'] = {'@vocab': base_uri()}
+    d['@context'] =  {'@vocab': base_uri()}
     #d['@context']['id'] = '@id'
     # speckle specific
     return d
