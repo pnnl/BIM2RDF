@@ -148,29 +148,7 @@ def id_ref(d: dict) -> dict:
     """creates links to ids"""
     d = d.copy()
     for m in parsing.id_refs.find(d):
-        # m.path = referencedId
-        # m.value = theid
-        # make a  'relation link'
-        # move up until you hit a key
-        def field(m):
-            if type(m.left) is jp.Fields:
-                return m.left 
-            elif type(m.right) is jp.Fields:
-                return m.right
-        _ = (m.full_path)
-        # go up until you hit the field
-        while True:
-            if field(_):
-                if str(field(_)) == 'referencedId':
-                    pass
-                else:
-                    break
-            _ = _.left
-        rel = field(_)
-        rel = str(rel)
-        rel = {rel: f"{base_uri()}{m.value}" } # TODO: do i really need to do this here?
-        m.context.value.update(rel)
-        m.context.value.pop('referencedId')
+        m.context.value['referencedId'] = f"{base_uri()}{m.value}"
         m.context.value.pop('speckle_type')
     return d
 
@@ -208,6 +186,7 @@ def contextualize(d: dict) -> dict:
     # creating the 'speckle ontology'
     #d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }  # or just use @vocab?
     context = {'@vocab': base_uri(), }#'referencedId': {'@type': '@id'} }
+    context = {'@vocab': base_uri(), 'referencedId': {'@type': '@id'} }
     if isinstance(d, dict):
         d['@context'] =  context
     elif isinstance(d, list):
