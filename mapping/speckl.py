@@ -107,17 +107,16 @@ from types import SimpleNamespace as NS
 parsing = NS(
     fields = jp.parse("$..*"),     # recursive
     ids = jp.parse("$..id"),       # useful for extracting out objs...
+    id_refs = jp.parse("$..referencedId"),
     # ...relations could be extracted b/c match results are nested DatumInContext.context -> DatumInContext
     jsonld = NS(**{k: jp.parse(f"$..{k}") for k in {'id', 'type', 'value'}}) # there's also speckle_type
 )
 
 
 def sample_json():
-    _ = open('ae2fdd4c7287b5f4243ce39ecf214269.json').read()
+    _ = open('.json').read()
     import json
     _ = json.loads(_)
-    if not (isinstance(_, dict)):
-        _ = {}
     return _
 
 def remove_at(d: dict) -> dict:
@@ -132,8 +131,7 @@ def remove_at(d: dict) -> dict:
     return d
 
 
-def id_(d: dict) -> dict:
-    # need to create a case for  when is a list with 'referencedId' which you get from the api
+def id_field(d: dict) -> dict:
     """creates speckle identifiers"""
     # i think i had to do this outside of @context
     #https://stackoverflow.com/questions/67444075/json-ld-assign-custom-uris-to-blank-nodes-within-context
@@ -144,6 +142,43 @@ def id_(d: dict) -> dict:
         _ = m.context.value.pop(k)
         m.context.value[f"@{k}"] = f"{base_uri()}{_}" # TODO: do i really need to do this here?
     return d
+
+
+def id_ref(d: dict) -> dict:
+    """creates links to ids"""
+    d = d.copy()
+    for m in parsing.id_refs.find(d):
+        # m.path = referencedId
+        # m.value = theid
+        # make a  'relation link'
+        # move up until you hit a key
+        def field(m):
+            if type(m.left) is jp.Fields:
+                return m.left 
+            elif type(m.right) is jp.Fields:
+                return m.right
+        _ = (m.full_path)
+        # go up until you hit the field
+        while True:
+            if field(_):
+                if str(field(_)) == 'referencedId':
+                    pass
+                else:
+                    break
+            _ = _.left
+        rel = field(_)
+        rel = str(rel)
+        rel = {rel: f"{base_uri()}{m.value}" } # TODO: do i really need to do this here?
+        m.context.value.update(rel)
+        m.context.value.pop('referencedId')
+        m.context.value.pop('speckle_type')
+    return d
+
+def id_(d: dict) -> dict:
+    _ = d
+    _ = id_field(_)
+    _ = id_ref(_)
+    return _
 
 # def adapt(d: dict) -> dict: i think this goes into @graph?
 #     # by adding @
@@ -166,33 +201,41 @@ def contextualize(d: dict) -> dict:
     #from pyld.jsonld import KEYWORDS
     # take out the @
     #KEYWORDS = {k[1:] for k in KEYWORDS}
-    #maybe_bad = {f for f in _ if f in KEYWORDS}
+    # maybe_bad = {f for f in _ if f in KEYWORDS}
     # maybe_bad = {'direction', 'id', 'type', 'value'} # id,type, value, match jsonld interpretation
     maybe_bad = {'id'}
     from urllib.parse import quote
     # creating the 'speckle ontology'
     #d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }  # or just use @vocab?
-    d['@context'] =  {'@vocab': base_uri()}
+    context = {'@vocab': base_uri(), }#'referencedId': {'@type': '@id'} }
+    if isinstance(d, dict):
+        d['@context'] =  context
+    elif isinstance(d, list):
+        #d.insert(0, {'@context': context})
+        d = {'@context': context, '@graph': d} 
     #d['@context']['id'] = '@id'
     # speckle specific
     return d
 
 
 def test():
-    #_ = sample_json()
     _ = {
             'id':'o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
             'Outside': 'sdf',
-            'inside': [
+            '@inside': [
                 {'id': 'i1', 
-                'p': 3}
+                'p': 3},
+                [{'referencedId': 'rid', 'speckle_type': 'reference' }],
+                {'referencedId': 'rid2', 'speckle_type': 'reference' },
             ]
         }
+    _ = sample_json()
     _ = remove_at(_)
-    _ = contextualize(_)
-    _ = id_(_)
+    _ = id_(_) 
+    _ = contextualize(_) # context after other stuff
+    #return _
     from pyld import jsonld as lj
-    _ = lj.flatten(_, )#contextualize({})['@context']) 
+    _ = lj.flatten(_, )#contextualize({})['@context'])
     _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
     import rdflib
     _ = rdflib.Graph().parse(data=_, format='nquads')
@@ -217,9 +260,8 @@ def rdf():
         }
     _ = sample_json()
     _ = remove_at(_)
-    #_ = adapt(_)
-    _ = contextualize(_)
     _ = id_(_)
+    _ = contextualize(_)
     from pyld import jsonld as lj
     _ = lj.flatten(_, )#contextualize({})['@context']) 
     _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
