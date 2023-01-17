@@ -187,6 +187,7 @@ def contextualize(d: dict) -> dict:
     #d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }  # or just use @vocab?
     context = {'@vocab': base_uri(), }#'referencedId': {'@type': '@id'} }
     context = {'@vocab': base_uri(), 'referencedId': {'@type': '@id'} }
+    context = {'@vocab': base_uri(), 'referencedId': '@id' }
     if isinstance(d, dict):
         d['@context'] =  context
     elif isinstance(d, list):
