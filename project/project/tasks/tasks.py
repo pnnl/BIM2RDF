@@ -691,8 +691,6 @@ coll.collections['work-dir'].collections['setup'].add_task(make_env)
 def install_other_deps(ctx, WD, other_deps):
     if not other_deps: return
     assert(isinstance(other_deps, list))
-    other_deps = other_deps[0]
-    assert(isinstance(other_deps, dict))
 
     # 3. install 'other deps'
     WD = work.WorkDir(WD) if isinstance(WD, str) else WD
@@ -703,27 +701,35 @@ def install_other_deps(ctx, WD, other_deps):
         # might create a problem if this program is executed from a wrapper
         dep_pre = f"{WD.dir / 'scripts' / 'bin' / 'run-in'}"
     
+
+    # user prefixed numbers to sort
+    other_deps = sorted(other_deps, key=lambda d: list(d)[0]  )
+    from re import sub
+    # remove number prefix
+    subn = lambda s: sub(r'[0-9]*', '', s, 1)
+    other_deps = [{subn(k):v for k,v in od.items() }  for od in other_deps]
+    
     with ctx.cd(str(WD.dir)):
-        for installer, specs in other_deps.items():
-            if installer == 'pip':
-                # why does conda devnv mess with this??
-                pkgs = [p.replace(' ', '') for p in specs]
-                # use conda run or wrapper?
-                #ctx.run(f"conda run --live-stream --name {dWD.env_name} ... ", echo=True)
-                #                idk  pip on its own doesnt work
-                ctx.run(f"{dep_pre} python -m {installer} install  {' '.join(pkgs)}", echo=True)
-            elif installer == 'cmd':
-                # https://github.com/ESSS/conda-devenv/issues/152
-                from re import sub
-                for spec in specs:
-                    spec = spec.split(' ')
-                    spec = list(spec)
-                    # replaced "(something unique)exe" -> "exe"
-                    spec[0] = sub(r'X.*?X', '', spec[0], 1)
-                    spec = ' '.join(spec)
-                    ctx.run(f"{dep_pre} {spec}", echo=True)
-            else:
-                raise Exception("unrecognized 'other dep'")
+        for other_dep in other_deps:
+            for installer, specs in other_dep.items():
+                if installer == 'pip':
+                    # why does conda devnv mess with this??
+                    pkgs = [p.replace(' ', '') for p in specs]
+                    # use conda run or wrapper?
+                    #ctx.run(f"conda run --live-stream --name {dWD.env_name} ... ", echo=True)
+                    #                idk  pip on its own doesnt work
+                    ctx.run(f"{dep_pre} python -m {installer} install  {' '.join(pkgs)}", echo=True)
+                elif installer == 'cmd':
+                    # https://github.com/ESSS/conda-devenv/issues/152
+                    for spec in specs:
+                        spec = spec.split(' ')
+                        spec = list(spec)
+                        # replaced "(something unique)exe" -> "exe"
+                        spec[0] = sub(r'X.*?X', '', spec[0], 1)
+                        spec = ' '.join(spec)
+                        ctx.run(f"{dep_pre} {spec}", echo=True)
+                else:
+                    raise Exception("unrecognized 'other dep'")
 
 
 def _get_setup_names(wd):

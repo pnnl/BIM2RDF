@@ -33,6 +33,8 @@ External dependencies are specified as a list under the 'dependencies' section.
 These are 'normal' conda dependency specifications except that some can be excluded from being installed in an environment which includes the environment file in which they are defined.
 This is useful to exclude devlopment tools (like test frameworks and code linters) from being installed in an dependent environment.
 In addition to conda-supported 'pip'-type dependencies, a special 'cmd' type dependency allows for executing arbitrary (installation) commands.
+For each dependency type, installation order can be forced by prefixing the installer with a number.
+For example, `pip` can be `0pip` to put it at the top of the execution list (a hack to undo the underlying conda devenv behavior).
 
 
 ## Scripts

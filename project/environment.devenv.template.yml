@@ -47,6 +47,11 @@ dependencies: []
   # ValueError: Couldn't find directory of environment 'ds-template-test'
   #- sometestframework         # [dev_req]
   #- some analysis library     # [run_req]
+  #- pip                        # [run_req]
+  #- 0pip:
+  #  - juliaup
+  #- 1cmd:
+  #  - python -c "import juliaup; juliaup.install(interactive=False)"
 
 environment:
   HOME: {{root}}              # [keep_here]
