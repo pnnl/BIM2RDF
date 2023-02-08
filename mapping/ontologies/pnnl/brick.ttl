@@ -1,13 +1,29 @@
-# I. BRICK 'MODS'
+@prefix brick: <https://brickschema.org/schema/1.3/Brick#>.
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix qudt: <http://qudt.org/2.1/schema/qudt>.
 
-@prefix brick: <https://brickschema.org/schema/Brick#> .
+
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix sdo: <http://schema.org/> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix sdo: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pnnl:   <http://pnnl.gov/schema/> .
+
+
+
+pnnl:Brick a owl:Ontology;
+    owl:imports brick:;
+    owl:imports qudt:.
+
+
+# I. BRICK 'MODS'
+
 
 # ratedpowerinput
 brick:ratedPowerInput a brick:EntityProperty ;
