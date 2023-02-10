@@ -44,20 +44,9 @@ includes:
 channels:
   - conda-forge
 dependencies:
-  # fill out your deps.
-  # if no dep is installed conda will not list the created env.
-  # ValueError: Couldn't find directory of environment 'ds-template-test'
-  #- sometestframework         # [dev_req]
-  #- some analysis library     # [run_req]
   - python<3.11                 # [run_req]
   - rdflib                      # [run_req]
-  - jinja2                      # [run_req]
-  - openjdk                     # need java for ontop
-  - cmd:                        # [run_req]
-    - python scripts/install.py # [run_req] ontop cli
-  - invoke                      # [run_req]
   - pyyaml                      # [run_req]
-  - attrs                       # [run_req]
   # pyshacl depends on owlrl
   # but being explicit here to say:
   # need graph expansion (owlrl) and validation (pyshacl)
@@ -65,15 +54,15 @@ dependencies:
   - owlrl                       # [run_req]
 
   # dev
-  - mypy                        # [dev_req]
   - ipython                     # [dev_req]
-  - ipykernel                   # [dev_req]
   - pip:                        # [dev_req or run_req]
-    - types-PyYAML              # [dev_req]
-    - phantom-types==0.17.1     # [run_req]
     #- rdflib-endpoint           # [keep_here] # idk could be either but 'keep here'
-  #- pytest                      # [dev_req]
-  
+    - jsonpath-ng               # [run_req]
+    - PyLD[requests]            # [run_req]
+    - specklepy                 # [run_req]
+    - requests-file             # [run_req] what needs this?
+
+  #- pytest                      # [dev_req] pyshacl does it all
 
 
 environment:
