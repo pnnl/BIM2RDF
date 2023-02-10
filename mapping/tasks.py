@@ -1,7 +1,6 @@
 from invoke import task, Collection
 
 ns = Collection()
-ns.add_collection(Collection('graphdb'))
 
 @task
 def get_ontologies(ctx):
@@ -11,77 +10,6 @@ ns.add_task(get_ontologies)
 
 from pathlib import Path
 
-repo = 'pnnl'
-
-@task 
-def update_repo(ctx):
-    config={
-        'rep:repositoryID': repo}
-    from graphdb.graphdb import repo_config,  bot_user, get_bot_password
-    from graphdb.api import workbench_base
-    import requests
-    ids = {_['id'] for _ in requests.get(f"{workbench_base}/repositories", auth=(bot_user, get_bot_password() ) ).json()}
-
-    def args():
-        from getpass import getpass
-        return (
-                (f"{workbench_base}/repositories",),
-                {   'auth':(input('user: '), getpass('password: ') ) ,  # auth=(bot_user, bot_password), manual
-                    'files':[('config', repo_config(config).serialize(format='turtle')) ],})
-    if config['rep:repositoryID'] not in ids:
-        p, k = args()
-        _ = getattr(requests, 'post')(*p, **k)
-        assert(_.ok)
-    else:
-        raise NotImplementedError('repo update case')
-        p, k = args()
-        _ = getattr(requests, 'post')(*p, **k) # should be put??
-        assert(_.ok)
-ns.collections['graphdb'].add_task(update_repo)
-
-
-
-@task
-def enable_history(ctx):
-    from graphdb.graphdb import  bot_user, get_bot_password
-    from graphdb.api import rdf4j_base
-    import requests
-    q = "INSERT DATA { [] <http://www.ontotext.com/at/enabled> true }"
-    _ = requests.get(
-            f"{rdf4j_base}/{repo}/statements",
-            auth=(bot_user, get_bot_password()),
-            params={'update': q},)
-    assert(_.ok)
-ns.collections['graphdb'].add_task(enable_history)
-
-
-@task
-def upload_graph(ctx, ttl, name=None):
-    from pathlib import Path
-    ttl = Path(ttl)
-    assert(ttl.exists())
-    if not name: name = ttl.stem
-    from graphdb.api import rdf4j_base
-    from graphdb.graphdb import  bot_user, get_bot_password
-    import requests
-    _ = requests.post(
-        f"{rdf4j_base}/{repo}/rdf-graphs/{name}",
-        auth=(bot_user, get_bot_password()),
-        headers={"Content-Type": 'text/turtle'},
-        data=open(ttl, 'rb').read().decode('utf-8').encode('utf-8')  ) # weird
-    assert(_.ok)
-ns.collections['graphdb'].add_task(upload_graph)
-
-
-
-@task
-def init(ctx): 
-    update_repo(ctx)
-    enable_history(ctx)
-ns.collections['graphdb'].add_task(init)
-
-
-    
 @task
 def map(ctx,
         ontology, map_file = None, # (Path.cwd() / 'maps.yaml' ),
@@ -122,3 +50,6 @@ def map(ctx,
     sr = m.SQLRDFMapping.make((building, ontology, map_file, db_file))
     sr.map(work_dir)
 ns.add_task(map)
+
+
+#TODO: ontology update
