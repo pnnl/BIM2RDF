@@ -1,2 +1,3 @@
-ontop-cli
-!*.ttl
+# with so many ttl files here,
+# we want to distiguish b/w src and generated
+!**/ttlsrc/*.ttl
