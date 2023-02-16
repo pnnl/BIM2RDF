@@ -37,27 +37,16 @@ def app_info(client=client(), ):
     #yield from product(streams, branches())            
             
 
-from specklepy.serialization.base_object_serializer import BaseObjectSerializer
-serializer = BaseObjectSerializer()
 
-
-from specklepy.transports.sqlite import SQLiteTransport
-from specklepy.transports.server import ServerTransport
-from specklepy.api import operations
 
 
 def server_transport(stream_id):
+    from specklepy.transports.server import ServerTransport
     return ServerTransport(stream_id=stream_id, client=client())
 
 def sqlite_transport(fn='cache'):
+    from specklepy.transports.sqlite import SQLiteTransport
     return SQLiteTransport(fn)
-
-
-def get(stream_id, object_id): 
-    return operations.receive(
-            object_id,
-            remote_transport=server_transport(stream_id),
-            local_transport=sqlite_transport())
 
     
 
@@ -82,7 +71,19 @@ def get_json(stream_id, object_id):
     return _
 
 
-def json(w=False): # (stream_id, object_id)
+
+def get(stream_id, object_id):
+    from specklepy.api import operations
+    return operations.receive(
+            object_id,
+            remote_transport=server_transport(stream_id),
+            local_transport=sqlite_transport())
+
+
+def json(w=False): # (stream_id, object_id):
+    # via speckle api
+    from specklepy.serialization.base_object_serializer import BaseObjectSerializer
+    serializer = BaseObjectSerializer()
     _ = app_info()
     # i = next(_) # test
     # got = None
@@ -256,5 +257,4 @@ if __name__ == '__main__':
     _.bind('spkl', base_uri())
     _.serialize('speckle.ttl', format='ttl')
     
-
 

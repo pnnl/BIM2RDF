@@ -23,13 +23,11 @@ name: {{project_name}}-{{os.path.basename(root)}}
 
 # just fill out this stuff here
 {% if dev_req %}
-  ## append_workdir_name('project',     included_workdir_pths)}} 
+  ## append_workdir_name('project',     included_workdir_pths)}}  # almost needed
 {% endif %}
 # ...and here
 {% if run_req %}
-  {{append_workdir_name('project', included_workdir_pths)}}
-  {{ append_workdir_name('dvc', included_workdir_pths)}}
-  {{ append_workdir_name('graphdb', included_workdir_pths)}}
+{{append_workdir_name('project', included_workdir_pths)}}
 {% endif %}
 
 
@@ -44,24 +42,10 @@ includes:
 channels:
   - conda-forge
 dependencies:
-  - python<3.11                 # [run_req]
-  - rdflib                      # [run_req]
-  - pyyaml                      # [run_req]
-  # pyshacl depends on owlrl
-  # but being explicit here to say:
-  # need graph expansion (owlrl) and validation (pyshacl)
-  - pyshacl                     # [run_req]
-  - owlrl                       # [run_req]
-
-  # dev
-  - ipython                     # [dev_req]
-  - pip:                        # [dev_req or run_req]
-    #- rdflib-endpoint           # [keep_here] # idk could be either but 'keep here'
-    - requests-file             # [run_req] what needs this?
-    - fire                      # [run_req] cli gen
-
-  #- pytest                      # [dev_req] pyshacl does it all
-
+  - specklepy                 # [run_req]
+  - jsonpath-ng               # [run_req]
+  - PyLD[requests]            # [run_req]
+  
 
 environment:
   HOME: {{root}}              # [keep_here]
