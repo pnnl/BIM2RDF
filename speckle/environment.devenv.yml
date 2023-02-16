@@ -42,9 +42,11 @@ includes:
 channels:
   - conda-forge
 dependencies:
-  - specklepy                 # [run_req]
-  - jsonpath-ng               # [run_req]
-  - PyLD[requests]            # [run_req]
+  - pip                       # [run_req]
+  - pip:
+    - specklepy                 # [run_req]
+    - jsonpath-ng               # [run_req]
+    - PyLD[requests]            # [run_req]
   
 
 environment:
