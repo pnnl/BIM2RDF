@@ -4,7 +4,7 @@ from functools import lru_cache as cache
 def apikey():
     import json
     from pathlib import Path
-    _ = open(Path(__file__) / '..' / 'secret.json')
+    _ = open(Path(__file__) / '..' / '..'  /'secret.json')
     _  = json.load(_)
     _ = _['speckl_token']
     return _
@@ -43,8 +43,6 @@ def app_info(client=client(), ):
             
 
 
-
-
 def server_transport(stream_id):
     from specklepy.transports.server import ServerTransport
     return ServerTransport(stream_id=stream_id, client=client())
@@ -54,14 +52,6 @@ def sqlite_transport(fn='cache'):
     return SQLiteTransport(fn)
 
 
-from requests.auth import AuthBase
-class TokenAuth(AuthBase):
-    def __init__(self,):
-        self.token = apikey()
-        self.auth_scheme = 'Bearer'
-    def __call__(self, request):
-        request.headers['Authorization'] = f'{self.auth_scheme} {self.token}'
-        return request
 
 
 
@@ -257,87 +247,6 @@ def rdf():
 
 
 
-# global install
-#requests_cache.install_cache('http_cache', allowable_methods={'GET', 'HEAD', 'POST'})
-def get_cached_session():
-    from pathlib import Path
-    db_file = Path(__file__)/'..'/'http_cache'
-    db_file = str(db_file)
-    import requests_cache
-    _ = requests_cache.CachedSession(
-                cache_name=db_file,
-                allowable_methods={'GET', 'HEAD', 'POST'}) # default transport method is post
-    return _
-
-
-from gql.transport.requests import RequestsHTTPTransport
-from requests.adapters import HTTPAdapter, Retry
-from gql.transport.exceptions import TransportAlreadyConnected
-
-
-class CachedRequestHTTPTransport(RequestsHTTPTransport):
-
-    def connect(self):
-        #https://github.com/graphql-python/gql/issues/387#issuecomment-1435323862
-        # copypaste
-        if self.session is None:
-            # Creating a session that can later be re-use to configure custom mechanisms
-            self.session = get_cached_session()
-            # If we specified some retries, we provide a predefined retry-logic
-            if self.retries > 0:
-                adapter = HTTPAdapter(
-                    max_retries=Retry(
-                        total=self.retries,
-                        backoff_factor=0.1,
-                        status_forcelist=[500, 502, 503, 504],
-                        allowed_methods=None,
-                    )
-                )
-                for prefix in "http://", "https://":
-                    self.session.mount(prefix, adapter)
-        else:
-            raise TransportAlreadyConnected("Transport is already connected")
-
-    def xconnect(self):
-        # not annoying version
-        if self.session is None:
-            self.session = requests_cache.CachedSession('http_cache')
-
-gql_url = 'https://speckle.xyz/graphql'
-
-
-import gql.dsl as dsl
-
-
-
-def client():
-    from gql import Client
-    transport=CachedRequestHTTPTransport(url=gql_url, auth=TokenAuth() )
-    _ = Client(
-        transport=transport,
-        fetch_schema_from_transport=True)
-    return _
-
-
-def get_schema():
-    from gql import gql
-    #transport.session = requests_cache.CachedSession('http_cache')
-    #from requests import Session
-    #_.session = Session()
-    _ = client()
-    _.execute(gql('{_}')) # some kind of 'nothing' query just to initialize things
-    _ = _.schema
-    return _
-    from graphql import print_schema
-    _ = print_schema(_)
-    return _
-
-def get_dsl_schema() -> dsl.DSLSchema:
-    _ = get_schema()
-    _ = dsl.DSLSchema(_)
-    return _
-
-
 def test():
     #ds = get_dsl_schema()
     #_ = ds.Query.apps.select()
@@ -348,6 +257,7 @@ def test():
     }
     }
     """
+    from .graphql import client
     _ = client()
     from gql import gql
     _ = _.execute(gql(q))
