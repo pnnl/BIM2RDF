@@ -1,14 +1,19 @@
 from functools import lru_cache as cache
 
-@cache
-def client():
-    from specklepy.api.client import SpeckleClient
-    from specklepy.api.credentials import get_account_from_token
+
+def apikey():
     import json
     from pathlib import Path
     _ = open(Path(__file__) / '..' / 'secret.json')
     _  = json.load(_)
     _ = _['speckl_token']
+    return _
+
+@cache
+def client():
+    from specklepy.api.client import SpeckleClient
+    from specklepy.api.credentials import get_account_from_token
+    _ = apikey()
     account = get_account_from_token(_, 'http://speckle.xyz')
     assert(account)
 
@@ -48,7 +53,17 @@ def sqlite_transport(fn='cache'):
     from specklepy.transports.sqlite import SQLiteTransport
     return SQLiteTransport(fn)
 
-    
+
+from requests.auth import AuthBase
+class TokenAuth(AuthBase):
+    def __init__(self,):
+        self.token = apikey()
+        self.auth_scheme = 'Bearer'
+    def __call__(self, request):
+        request.headers['Authorization'] = f'{self.auth_scheme} {self.token}'
+        return request
+
+
 
 def get_json(stream_id, object_id):
     import yaml
@@ -56,20 +71,12 @@ def get_json(stream_id, object_id):
     _ = open(Path(__file__) / '..' / 'secret.yaml')
     _  = yaml.safe_load(_)
     _ = _['speckl_token']
-    from requests.auth import AuthBase
-    class TokenAuth(AuthBase):
-        def __init__(self, token, auth_scheme='Bearer'):
-            self.token = token
-            self.auth_scheme = auth_scheme
-        def __call__(self, request):
-            request.headers['Authorization'] = f'{self.auth_scheme} {self.token}'
-            return request
+    
     import requests
     server = 'http://speckle.xyz'
     _ = requests.get(f"{server}/objects/{stream_id}/{object_id}", auth=TokenAuth(_))
     _ = _.json()
     return _
-
 
 
 def get(stream_id, object_id):
@@ -298,26 +305,55 @@ class CachedRequestHTTPTransport(RequestsHTTPTransport):
 
 gql_url = 'https://speckle.xyz/graphql'
 
-def get_schema():
-    from gql import Client, gql
-    from graphql import print_schema
-    transport=CachedRequestHTTPTransport(url=gql_url)
-    #transport.session = requests_cache.CachedSession('http_cache')
-    #from requests import Session
-    #_.session = Session()
+
+import gql.dsl as dsl
+
+
+
+def client():
+    from gql import Client
+    transport=CachedRequestHTTPTransport(url=gql_url, auth=TokenAuth() )
     _ = Client(
         transport=transport,
         fetch_schema_from_transport=True)
+    return _
+
+
+def get_schema():
+    from gql import gql
+    #transport.session = requests_cache.CachedSession('http_cache')
+    #from requests import Session
+    #_.session = Session()
+    _ = client()
     _.execute(gql('{_}')) # some kind of 'nothing' query just to initialize things
     _ = _.schema
+    return _
+    from graphql import print_schema
     _ = print_schema(_)
+    return _
+
+def get_dsl_schema() -> dsl.DSLSchema:
+    _ = get_schema()
+    _ = dsl.DSLSchema(_)
     return _
 
 
 def test():
-    print(
-    get_schema()
-    )
+    #ds = get_dsl_schema()
+    #_ = ds.Query.apps.select()
+    q = """
+    {
+    apps {
+        id
+    }
+    }
+    """
+    _ = client()
+    from gql import gql
+    _ = _.execute(gql(q))
+    return _
+
+
 
 
 if __name__ == '__main__':
