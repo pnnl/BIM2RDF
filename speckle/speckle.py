@@ -271,6 +271,8 @@ from gql.transport.exceptions import TransportAlreadyConnected
 class CachedRequestHTTPTransport(RequestsHTTPTransport):
 
     def connect(self):
+        #https://github.com/graphql-python/gql/issues/387#issuecomment-1435323862
+        # copypaste
         if self.session is None:
             # Creating a session that can later be re-use to configure custom mechanisms
             self.session = get_cached_session()
@@ -290,6 +292,7 @@ class CachedRequestHTTPTransport(RequestsHTTPTransport):
             raise TransportAlreadyConnected("Transport is already connected")
 
     def xconnect(self):
+        # not annoying version
         if self.session is None:
             self.session = requests_cache.CachedSession('http_cache')
 
