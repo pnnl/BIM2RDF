@@ -296,12 +296,12 @@ class CachedRequestHTTPTransport(RequestsHTTPTransport):
         if self.session is None:
             self.session = requests_cache.CachedSession('http_cache')
 
-
+gql_url = 'https://speckle.xyz/graphql'
 
 def get_schema():
     from gql import Client, gql
     from graphql import print_schema
-    transport=CachedRequestHTTPTransport(url='https://speckle.xyz/graphql')
+    transport=CachedRequestHTTPTransport(url=gql_url)
     #transport.session = requests_cache.CachedSession('http_cache')
     #from requests import Session
     #_.session = Session()
