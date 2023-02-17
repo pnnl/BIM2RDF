@@ -250,21 +250,30 @@ def rdf():
 
 
 
-import requests_cache
 # global install
 #requests_cache.install_cache('http_cache', allowable_methods={'GET', 'HEAD', 'POST'})
+def get_cached_session():
+    from pathlib import Path
+    db_file = Path(__file__)/'..'/'http_cache'
+    db_file = str(db_file)
+    import requests_cache
+    _ = requests_cache.CachedSession(
+                cache_name=db_file,
+                allowable_methods={'GET', 'HEAD', 'POST'}) # default transport method is post
+    return _
+
 
 from gql.transport.requests import RequestsHTTPTransport
 from requests.adapters import HTTPAdapter, Retry
 from gql.transport.exceptions import TransportAlreadyConnected
+
+
 class CachedRequestHTTPTransport(RequestsHTTPTransport):
 
     def connect(self):
         if self.session is None:
             # Creating a session that can later be re-use to configure custom mechanisms
-            self.session = requests_cache.CachedSession(
-                cache_name='http_cache',
-                allowable_methods={'GET', 'HEAD', 'POST'}) # default transport method is post
+            self.session = get_cached_session()
             # If we specified some retries, we provide a predefined retry-logic
             if self.retries > 0:
                 adapter = HTTPAdapter(
@@ -286,7 +295,6 @@ class CachedRequestHTTPTransport(RequestsHTTPTransport):
 
 
 
-#@cache
 def get_schema():
     from gql import Client, gql
     from graphql import print_schema
