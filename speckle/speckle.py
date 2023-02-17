@@ -4,10 +4,10 @@ from functools import lru_cache as cache
 def client():
     from specklepy.api.client import SpeckleClient
     from specklepy.api.credentials import get_account_from_token
-    import yaml
+    import json
     from pathlib import Path
-    _ = open(Path(__file__) / '..' / 'secret.yaml')
-    _  = yaml.safe_load(_)
+    _ = open(Path(__file__) / '..' / 'secret.json')
+    _  = json.load(_)
     _ = _['speckl_token']
     account = get_account_from_token(_, 'http://speckle.xyz')
     assert(account)
@@ -249,12 +249,32 @@ def rdf():
     return _
 
 
+def get_schema():
+    from gql import Client, gql
+    from graphql import print_schema
+    from gql.transport.requests import RequestsHTTPTransport
+    _ = Client(
+        transport=RequestsHTTPTransport(url='https://speckle.xyz/graphql'),
+        fetch_schema_from_transport=True)
+    _.execute(gql('{_}')) # some kind of 'nothing' query just to initialize things
+    _ = _.schema
+    _ = print_schema(_)
+    return _
+
+    
+
+
+
 
 if __name__ == '__main__':
-    _ = rdf()
-    from rdflib import Graph
-    _ = Graph().parse(data=_, format='nquads')
-    _.bind('spkl', base_uri())
-    _.serialize('speckle.ttl', format='ttl')
+    ...
+    #_ = rdf()
+    #from rdflib import Graph
+    #_ = Graph().parse(data=_, format='nquads')
+    #_.bind('spkl', base_uri())
+    #_.serialize('speckle.ttl', format='ttl')
+
+
+
     
 
