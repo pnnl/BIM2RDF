@@ -249,25 +249,68 @@ def rdf():
     return _
 
 
+
+import requests_cache
+# global install
+#requests_cache.install_cache('http_cache', allowable_methods={'GET', 'HEAD', 'POST'})
+
+from gql.transport.requests import RequestsHTTPTransport
+from requests.adapters import HTTPAdapter, Retry
+from gql.transport.exceptions import TransportAlreadyConnected
+class CachedRequestHTTPTransport(RequestsHTTPTransport):
+
+    def connect(self):
+        if self.session is None:
+            # Creating a session that can later be re-use to configure custom mechanisms
+            self.session = requests_cache.CachedSession(
+                cache_name='http_cache',
+                allowable_methods={'GET', 'HEAD', 'POST'}) # default transport method is post
+            # If we specified some retries, we provide a predefined retry-logic
+            if self.retries > 0:
+                adapter = HTTPAdapter(
+                    max_retries=Retry(
+                        total=self.retries,
+                        backoff_factor=0.1,
+                        status_forcelist=[500, 502, 503, 504],
+                        allowed_methods=None,
+                    )
+                )
+                for prefix in "http://", "https://":
+                    self.session.mount(prefix, adapter)
+        else:
+            raise TransportAlreadyConnected("Transport is already connected")
+
+    def xconnect(self):
+        if self.session is None:
+            self.session = requests_cache.CachedSession('http_cache')
+
+
+
+#@cache
 def get_schema():
     from gql import Client, gql
     from graphql import print_schema
-    from gql.transport.requests import RequestsHTTPTransport
+    transport=CachedRequestHTTPTransport(url='https://speckle.xyz/graphql')
+    #transport.session = requests_cache.CachedSession('http_cache')
+    #from requests import Session
+    #_.session = Session()
     _ = Client(
-        transport=RequestsHTTPTransport(url='https://speckle.xyz/graphql'),
+        transport=transport,
         fetch_schema_from_transport=True)
     _.execute(gql('{_}')) # some kind of 'nothing' query just to initialize things
     _ = _.schema
     _ = print_schema(_)
     return _
 
-    
 
-
+def test():
+    print(
+    get_schema()
+    )
 
 
 if __name__ == '__main__':
-    ...
+    test()
     #_ = rdf()
     #from rdflib import Graph
     #_ = Graph().parse(data=_, format='nquads')
