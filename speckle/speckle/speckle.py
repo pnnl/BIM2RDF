@@ -247,22 +247,6 @@ def rdf():
 
 
 
-def test():
-    #ds = get_dsl_schema()
-    #_ = ds.Query.apps.select()
-    q = """
-    {
-    apps {
-        id
-    }
-    }
-    """
-    from .graphql import client
-    _ = client()
-    from gql import gql
-    _ = _.execute(gql(q))
-    return _
-
 
 
 

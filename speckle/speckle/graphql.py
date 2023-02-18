@@ -66,3 +66,51 @@ def get_dsl_schema() -> dsl.DSLSchema:
     _ = get_schema()
     _ = dsl.DSLSchema(_)
     return _
+
+
+def get_void_query():
+    _ = get_dsl_schema()
+    _ = _.Query._
+    return _
+
+def query(q=get_void_query(), client=client) -> dict: # json
+    if isinstance(q, str):
+        from gql import gql
+        q = gql(q)
+    elif isinstance(q, dsl.DSLField):#DSLSchema):?
+        from gql.dsl import dsl_gql, DSLQuery
+        q = DSLQuery(q)
+        q = dsl_gql(q)
+    else:
+        raise TypeError('not a query')
+    #  #https://requests-cache.readthedocs.io/en/stable/user_guide/expiration.html#precedence
+    # somehow control cache expiry w/ timely queries TODO
+    _ = client()
+    _ = _.execute(q)
+    return _
+
+
+def queries():
+    from types import SimpleNamespace as NS
+    _q = """
+    {
+    apps {
+        id
+    }
+    }
+    """
+    from .graphql import get_dsl_schema
+    s = get_dsl_schema()
+    q = s.Query.streams.select(
+            s.StreamCollection.items.select(
+                s.Stream.id, s.Stream.name
+        ))
+    return NS(streams=q)
+
+
+def test():
+    _ = queries().streams
+    _ = query(_)
+    return _
+
+
