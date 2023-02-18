@@ -101,6 +101,7 @@ def queries():
     """
     from .graphql import get_dsl_schema
     s = get_dsl_schema()
+    # TODO: add limit=9999 argument
     q = s.Query.streams.select(
             s.StreamCollection.items.select(
                 s.Stream.id, s.Stream.name

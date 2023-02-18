@@ -2,7 +2,7 @@ from requests.auth import AuthBase
 
 class TokenAuth(AuthBase):
     def __init__(self,):
-        from .speckle import apikey
+        from .server import apikey
         self.token = apikey()
         self.auth_scheme = 'Bearer'
     def __call__(self, request):
