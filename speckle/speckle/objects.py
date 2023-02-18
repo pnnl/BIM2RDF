@@ -119,7 +119,7 @@ base_uri = lambda: 'http://speckle.systems/'
 def contextualize(d: dict) -> dict:
     # jsonld context
     d = d.copy()
-    _ = {str(m.path) for m in parsing.fields.find(d)}
+    #_ = {str(m.path) for m in parsing.fields.find(d)}
     # generic
     #from pyld.jsonld import KEYWORDS
     # take out the @
@@ -196,14 +196,8 @@ def rdf():
     
 
 
-
-def test():
-    from .graphql import queries
-    q = queries().streams
-
-
 if __name__ == '__main__':
-    test()
+    ...
     #_ = rdf()
     #from rdflib import Graph
     #_ = Graph().parse(data=_, format='nquads')
