@@ -9,8 +9,8 @@ def contextualize(d):
     return _
 
 
-def rdf(q):
-    _ = contextualize(q)
+def rdf(d: dict):
+    _ = contextualize(d)
     from pyld import jsonld as lj
     _ = lj.flatten(_, )#contextualize({})['@context']) 
     from types import SimpleNamespace as NS
