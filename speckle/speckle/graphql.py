@@ -46,7 +46,6 @@ def client():
 
 
 
-
 def get_schema():
     from gql import gql
     #transport.session = requests_cache.CachedSession('http_cache')
@@ -73,6 +72,7 @@ def get_void_query():
     _ = _.Query._
     return _
 
+
 def query(q=get_void_query(), client=client) -> dict: # json
     if isinstance(q, str):
         from gql import gql
@@ -90,6 +90,8 @@ def query(q=get_void_query(), client=client) -> dict: # json
     return _
 
 
+biglim = 99999
+
 def queries():
     from types import SimpleNamespace as NS
     _q = """
@@ -102,15 +104,35 @@ def queries():
     from .graphql import get_dsl_schema
     s = get_dsl_schema()
     # TODO: add limit=9999 argument
-    q = s.Query.streams.select(
+    
+    streams = s.Query.streams.select(
             s.StreamCollection.items.select(
-                s.Stream.id, s.Stream.name
-        ))
-    return NS(streams=q)
+                s.Stream.id, s.Stream.name))
+    
+    object = s.Query.stream.args(id="316586b660").select(
+            s.Stream.id,
+            s.Stream.object.args(id="37c11d7537a358eb35970e09b3837aa8").select(
+                s.Object.id,
+                s.Object.speckleType,
+                s.Object.applicationId,
+                s.Object.createdAt,
+                s.Object.data,
+                s.Object.children.args(limit=biglim, depth=biglim).select(
+                    s.ObjectCollection.totalCount,
+                    s.ObjectCollection.objects.select(
+                        s.Object.id,
+                        s.Object.speckleType,
+                        s.Object.applicationId,
+                        s.Object.createdAt,
+                        s.Object.data,
+                    )
+                )))
+    
+    return NS(streams=streams, object=object)
 
 
 def test():
-    _ = queries().streams
+    _ = queries().object
     _ = query(_)
     return _
 
