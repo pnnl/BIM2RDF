@@ -109,23 +109,16 @@ def queries():
             s.StreamCollection.items.select(
                 s.Stream.id, s.Stream.name))
     
+    # stick with the rest api b/c this add a lil more nesting?
     object = s.Query.stream.args(id="316586b660").select(
             s.Stream.id,
             s.Stream.object.args(id="37c11d7537a358eb35970e09b3837aa8").select(
-                s.Object.id,
-                s.Object.speckleType,
-                s.Object.applicationId,
-                s.Object.createdAt,
                 s.Object.data,
                 s.Object.children.args(limit=biglim, depth=biglim).select(
                     s.ObjectCollection.totalCount,
                     s.ObjectCollection.objects.select(
-                        s.Object.id,
-                        s.Object.speckleType,
-                        s.Object.applicationId,
-                        s.Object.createdAt,
-                        s.Object.data,
-                    )
+                          s.Object.data,
+                     )
                 )))
     
     return NS(streams=streams, object=object)
