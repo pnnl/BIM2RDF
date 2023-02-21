@@ -30,6 +30,8 @@ name: {{project_name}}-{{os.path.basename(root)}}
   {{append_workdir_name('project', included_workdir_pths)}}
   {{ append_workdir_name('dvc', included_workdir_pths)}}
   {{ append_workdir_name('graphdb', included_workdir_pths)}}
+  {{ append_workdir_name('speckle', included_workdir_pths)}}
+  {{ append_workdir_name('ontologies', included_workdir_pths)}}
 {% endif %}
 
 

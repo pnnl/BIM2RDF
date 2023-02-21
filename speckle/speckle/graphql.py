@@ -92,6 +92,11 @@ def query(q=get_void_query(), client=client) -> dict: # json
 
 biglim = 99999
 
+
+# could make it a class.
+# Queries
+# def query1
+# def execute
 def queries():
     from types import SimpleNamespace as NS
     _q = """
@@ -109,7 +114,7 @@ def queries():
                 s.Stream.id, s.Stream.name))
     
     # stick with the rest api b/c this add a lil more nesting?
-    object = s.Query.stream.args(id="316586b660").select(
+    objects = s.Query.stream.args(id="316586b660").select(
             s.Stream.id,
             s.Stream.object.args(id="37c11d7537a358eb35970e09b3837aa8").select(
                 s.Object.data,
@@ -120,7 +125,7 @@ def queries():
                      )
                 )))
     
-    return NS(streams=streams, object=object)
+    return NS(streams=streams, objects=objects)
 
 
 def test():

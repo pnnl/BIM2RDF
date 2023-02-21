@@ -170,8 +170,8 @@ def test():
     return _
 
 
-
-def rdf():
+# can take json or speckleid
+def rdf(d):
     # now just map? can make bnode a subject?
     _ = {
             'id':'o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
@@ -183,7 +183,8 @@ def rdf():
                 'p': 4}
             ]
         }
-    _ = sample_json()
+    #_ = sample_json()
+    _ = d
     _ = remove_at(_)
     _ = id_(_)
     _ = contextualize(_)
@@ -193,7 +194,6 @@ def rdf():
     return _
 
 
-    
 
 
 if __name__ == '__main__':
