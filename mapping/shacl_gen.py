@@ -1,7 +1,5 @@
 # pyshacl 'mode' to give generated data
 # https://github.com/RDFLib/pySHACL/issues/60
-from pyshacl.validate import Validator as _Validator
-from typing import Literal
 
 
 def shacl(
@@ -26,6 +24,7 @@ def shacl(
         data = data
     else:
         raise TypeError('data source')
+    from pyshacl.validate import Validator as _Validator
     v = _Validator(
             data,
             shacl_graph=Graph().parse(  shacl,)     if shacl    else None,
