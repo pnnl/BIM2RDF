@@ -1,49 +1,4 @@
-
 # object data
-
-
-def get_json(stream_id, object_id):
-    import yaml
-    from pathlib import Path
-    _ = open(Path(__file__) / '..' / 'secret.yaml')
-    _  = yaml.safe_load(_)
-    _ = _['speckl_token']
-    
-    import requests
-    server = 'http://speckle.xyz'
-    _ = requests.get(f"{server}/objects/{stream_id}/{object_id}", auth=TokenAuth(_))
-    _ = _.json()
-    return _
-
-
-def get(stream_id, object_id):
-    from specklepy.api import operations
-    return operations.receive(
-            object_id,
-            remote_transport=server_transport(stream_id),
-            local_transport=sqlite_transport())
-
-
-def json(w=False): # (stream_id, object_id):
-    # via speckle sdk
-    from specklepy.serialization.base_object_serializer import BaseObjectSerializer
-    serializer = BaseObjectSerializer()
-    _ = app_info()
-    # i = next(_) # test
-    # got = None
-    # for i in (_):
-    #     if i.stream.id == '316586b660':
-    #         got = True
-    #         break
-    # if not got: raise ValueError('streamid not found')
-    #_ = get(i.stream.id, i.commit.referencedObject)
-    _ = get('316586b660', '37c11d7537a358eb35970e09b3837aa8') # this id is nowhere to be found in the json
-    #return i, _
-    # https://github.com/specklesystems/specklepy/issues/237#issuecomment-1382598762
-    id, j = serializer.write_json(_)  # creating a new id for some reason.
-    open(f"{id}.json", 'w').write(j)
-    from json import loads
-    return loads(j)
 
 
 import jsonpath_ng as jp
@@ -75,18 +30,6 @@ def remove_at(d: dict) -> dict:
             m.context.value[k[1:]] = _ # is this ok? channging while iterating
     return d
 
-
-
-
-# def adapt(d: dict) -> dict: i think this goes into @graph?
-#     # by adding @
-#     d = d.copy()
-#     from itertools import chain
-#     for m in chain.from_iterable(map(lambda _:_.find(d), (parsing.jsonld.__dict__.values()))):
-#         k = str(m.path)
-#         _ = m.context.value.pop(k)
-#         m.context.value[f"@{k}"] = _
-#     return d
 
 
 base_uri = lambda: 'http://speckle.systems/'
