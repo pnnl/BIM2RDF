@@ -25,7 +25,7 @@ def get(stream_id, object_id):
 
 
 def json(w=False): # (stream_id, object_id):
-    # via speckle api
+    # via speckle sdk
     from specklepy.serialization.base_object_serializer import BaseObjectSerializer
     serializer = BaseObjectSerializer()
     _ = app_info()
@@ -76,32 +76,7 @@ def remove_at(d: dict) -> dict:
     return d
 
 
-def id_field(d: dict) -> dict:
-    """creates speckle identifiers"""
-    # i think i had to do this outside of @context
-    #https://stackoverflow.com/questions/67444075/json-ld-assign-custom-uris-to-blank-nodes-within-context
-    #base_uri = lambda: 
-    d = d.copy()
-    for m in parsing.ids.find(d):
-        k = str(m.path)
-        _ = m.context.value.pop(k)
-        m.context.value[f"@{k}"] = f"{base_uri()}{_}" # TODO: do i really need to do this here?
-    return d
 
-
-def id_ref(d: dict) -> dict:
-    """creates links to ids"""
-    d = d.copy()
-    for m in parsing.id_refs.find(d):
-        m.context.value['referencedId'] = f"{base_uri()}{m.value}"
-        m.context.value.pop('speckle_type')
-    return d
-
-def id_(d: dict) -> dict:
-    _ = d
-    _ = id_field(_)
-    _ = id_ref(_)
-    return _
 
 # def adapt(d: dict) -> dict: i think this goes into @graph?
 #     # by adding @
@@ -117,22 +92,15 @@ def id_(d: dict) -> dict:
 base_uri = lambda: 'http://speckle.systems/'
 
 def contextualize(d: dict) -> dict:
-    # jsonld context
+    #"@context": {"@vocab": "http://speckle.systems/", "@base":"http://speckle.systems/", "id": "@id", "referencedId": "@id" },
+    # this works in jsonld playground
     d = d.copy()
-    #_ = {str(m.path) for m in parsing.fields.find(d)}
-    # generic
-    #from pyld.jsonld import KEYWORDS
-    # take out the @
-    #KEYWORDS = {k[1:] for k in KEYWORDS}
-    # maybe_bad = {f for f in _ if f in KEYWORDS}
-    # maybe_bad = {'direction', 'id', 'type', 'value'} # id,type, value, match jsonld interpretation
-    maybe_bad = {'id'}
-    from urllib.parse import quote
-    # creating the 'speckle ontology'
-    #d['@context'] = {f:f"{base_uri()}{quote(f)}" for f in _ if f not in maybe_bad }  # or just use @vocab?
-    context = {'@vocab': base_uri(), }#'referencedId': {'@type': '@id'} }
-    context = {'@vocab': base_uri(), 'referencedId': {'@type': '@id'} }
-    context = {'@vocab': base_uri(), 'referencedId': '@id' }
+    context = {
+        '@vocab':       base_uri(),
+        '@base':        base_uri(),
+        'referencedId': '@id',
+        'id':           '@id'
+        }
     if isinstance(d, dict):
         d['@context'] =  context
     elif isinstance(d, list):
@@ -179,6 +147,7 @@ def rdf(d):
             'inside': [
                 {'id': 'i1', 
                 'p': 3},
+                {'referencedId': 'rid', 'speckle_type': 'whatever' }, 
                 {'id': 'i2', 
                 'p': 4}
             ]
@@ -186,13 +155,13 @@ def rdf(d):
     #_ = sample_json()
     _ = d
     _ = remove_at(_)
-    _ = id_(_)
     _ = contextualize(_)
-    from pyld import jsonld as lj
-    _ = lj.flatten(_, )#contextualize({})['@context']) 
-    _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
+    # from urllib.parse import quote this needs to happen somewhere TODO
+    from rdflib import Graph
+    from json import dumps
+    _ = dumps(_)
+    _ = Graph().parse(data=_, format='json-ld')
     return _
-
 
 
 

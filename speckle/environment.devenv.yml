@@ -49,7 +49,6 @@ dependencies:
     - gql[requests]             # [run_req]
     - jsonpath-ng               # [run_req]
     - requests-cache            # [run_req]
-    - PyLD[requests]            # [run_req]
   
 
 environment:
