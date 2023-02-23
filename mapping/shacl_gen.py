@@ -15,13 +15,15 @@ def shacl(
     #     options: Optional[dict] = None,
     #     **kwargs,
     from pathlib import Path
-    if Path(data).exists():
+    if isinstance(data, Path) and Path(data).exists():
         data = Graph().parse(Path(data))
     elif isinstance(data, str):
         if data.startswith('http'):
             data = Graph().parse(data)
         else: # take it as ttl
             data = Graph().parse(data=data, format='ttl')
+    elif isinstance(data, Graph):
+        data = data
     else:
         raise TypeError('data source')
     v = _Validator(
