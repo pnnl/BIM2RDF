@@ -30,6 +30,15 @@ def remove_at(d: dict) -> dict:
             m.context.value[k[1:]] = _ # is this ok? channging while iterating
     return d
 
+def url_quote(d: dict) -> dict:
+    from urllib.parse import quote 
+    d = d.copy()
+    for m in parsing.fields.find(d):
+        k = str(m.path)
+        v = m.context.value.pop(k)
+        k = quote(k)
+        m.context.value[k] = v # is this ok? channging while iterating
+    return d
 
 
 base_uri = lambda: 'http://speckle.systems/'
@@ -98,8 +107,8 @@ def rdf(d):
     #_ = sample_json()
     _ = d
     _ = remove_at(_)
+    _ = url_quote(_)
     _ = contextualize(_)
-    # from urllib.parse import quote this needs to happen somewhere TODO
     from rdflib import Graph
     from json import dumps
     _ = dumps(_)
