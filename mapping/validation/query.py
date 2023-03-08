@@ -72,6 +72,23 @@ q = """
 """
 
 
+
+#https://stackoverflow.com/questions/47513866/blank-node-skolemization-in-sparql-without-iteration
+q = """
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix spkl: <http://speckle.systems/>
+
+construct {?s ?p ?o}
+#SELECT spkl:sdfs ?obj # cant do pfx:sfx in select
+WHERE {
+  ?s ?p ?o .
+  ?s spkl:id ?o.
+  #BIND( concat("http://speckle.systems/", str(?obj)) as ?sid)
+} LIMIT 10
+"""
+
+
 import sys
 import rdflib
 _ = rdflib.Graph()

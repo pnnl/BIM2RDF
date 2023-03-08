@@ -8,7 +8,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 
-#question TODO how to spec that there should be brick:Luminaire?
+# question TODO how to spec that there should be brick:Luminaire?
 # make sure there is a room-luminaire link?
 
 
