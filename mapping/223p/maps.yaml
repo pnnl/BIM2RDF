@@ -31,7 +31,14 @@ maps:
         a                                 pnnl:LuminaireType/{TypeMark};
         s223x:ratedPowerInput             pnnl:Luminaire/{Id}/Power;
         s223x:CorrectedColorTemperature   pnnl:Luminaire/{Id}/ColorTemperature;
-        qudt:LuminousFlux                 pnnl:Luminaire/{Id}/LuminousFlux.
+        qudt:LuminousFlux                 pnnl:Luminaire/{Id}/LuminousFlux;
+        s223:hasProperty                  pnnl:Luminaire/{Id}/OnOffStatus;
+        s223:hasProperty                  pnnl:Luminaire/{Id}/DimmerStatus;
+        s223:cnx                          pnnl:Luminaire/{Id}/Inlet;
+        s223:hasConnectionPoint           pnnl:Luminaire/{Id}/Inlet;
+        s223:cnx                          pnnl:Luminaire/{Id}/Outlet;
+        s223:hasConnectionPoint           pnnl:Luminaire/{Id}/Outlet;
+        s223:connectedThrough             pnnl:ELightPath/{Id}.
       pnnl:Luminaire/{Id}/Power
         qudt:value   {Wattage};
         qudt:hasUnit unit:W.
@@ -41,25 +48,34 @@ maps:
       pnnl:Luminaire/{Id}/LuminousFlux
        qudt:value   {LuminousFlux};
        qudt:hasUnit unit:LM.
+      pnnl:Luminaire/{Id}/OnOffStatus
+        s223:hasValue {OnOffStatus}.
+      pnnl:Luminaire/{Id}/DimmerStatus
+        s223:hasValue {DimmerStatus}.
+      pnnl:Luminaire/{Id}/Outlet
+        s223:isConnectionPointOf pnnl:Luminaire/{Id}.
+      pnnl:Luminaire/{Id}/Inlet
+        s223:isConnectionPointOf pnnl:Luminaire/{Id}.
     source: |
       select
         LightingFixtures.Id                           as Id,
         LightingFixtureTypes.TypeMark                 as TypeMark,
         LightingFixtureTypes.Wattage                  as Wattage,
         LightingFixtureTypes.InitialColorTemperature  as CorrectedColorTemperature,
-        LightingFixtureTypes.LuminousFlux             as LuminousFlux
+        LightingFixtureTypes.LuminousFlux             as LuminousFlux,
+        LightingFixtures.SwitchOn                     as OnOffStatus,
+        LightingFixtures.Dimming                      as DimmerStatus
       from
         LightingFixtures
       inner join
         LightingFixtureTypes
         on
           LightingFixtureTypes.Id=LightingFixtures.TypeId
-  
 
   - id: room instances
-    #blank node issues
-    #https://github.com/ontop/ontop/issues/372
-    #https://github.com/ontop/ontop/issues/303
+    # blank node issues
+    # https://github.com/ontop/ontop/issues/372
+    # https://github.com/ontop/ontop/issues/303
     # graphdb doesn't like blank nodes
     # https://docs.brickschema.org/metadata/entity-properties.html
     target: |
@@ -70,7 +86,7 @@ maps:
         s223x:GrossArea pnnl:Room/{Id}/Area.
       pnnl:Room/{Id}/Area
         qudt:value     {Area}; # no need to convert area value since it's a float in the db
-        qudt:hasUnit   unit:M2. 
+        qudt:hasUnit   unit:M2.
     source: |
       select
         Id,
@@ -80,7 +96,6 @@ maps:
         Area
       from
         Rooms
-  
 
   - id: floor instances
     target: |
@@ -93,7 +108,7 @@ maps:
         Name
       from
         Levels
- 
+
   - id: level-room
     target: |
       pnnl:Floor/{LevelIdentifier}
@@ -123,17 +138,51 @@ maps:
         on
           LightingFixtures.LuminaireRoomParameter=Rooms.Number
 
-
-#physical spcs can contain domainspaces
+  # physical spcs can contain domainspaces
   - id: lighting zones   # control relation. physcial spc (room) 'encloses' lightingzone
     target:
-      pnnl:Room/{RoomIdentifier} 
-        s223:encloses pnnl:LightingControlZone/{LightingControlZoneID}.
+      pnnl:Room/{RoomIdentifier}
+        s223:encloses pnnl:LightingSpace/{LightingControlZoneID};
+        s223:hasDomain s223:Domain-Physical.
+      pnnl:LightingSpace/{LightingControlZoneID}
+        a s223:DomainSpace;
+        s223:hasDomain s223:Domain-Lighting;
+        s223:cnx pnnl:LightingSpace/{LightingControlZoneID}/ELInlet;
+        s223:hasConnectionPoint pnnl:LightingSpace/{LightingControlZoneID}/ELInlet;
+        s223:cnx pnnl:LightingSpace/{LightingControlZoneID}/DLInlet;
+        s223:hasConnectionPoint pnnl:LightingSpace/{LightingControlZoneID}/DLInlet;
+        s223:connectedThrough pnnl:ELightPath/{LightingControlZoneID};
+        s223:connectedThrough pnnl:DLightPath/{LightingControlZoneID}.
+      pnnl:Luminaire/{Id}
+        s223:connected pnnl:LightingSpace/{LightingControlZoneID};
+        s223:connectedTo pnnl:LightingSpace/{LightingControlZoneID};
+        s223:connectedThrough pnnl:ELightPath/{LightingControlZoneID}.
+      pnnl:Luminaire/{Id}/Outlet
+        s223:isConnectionPointOf pnnl:ELightPath/{LightingControlZoneID}.
       pnnl:LightingControlZone/{LightingControlZoneID}
-        rdfs:label  {LightingControlZoneID};
-        a           s223x:LightingSpace.
+        rdfs:label {LightingControlZoneID};
+        s223:contains pnnl:LightingSpace/{LightingControlZoneID};
+        a s223:Zone;
+        s223:hasDomain s223:Domain-Lighting.
+      pnnl:ELightPath/{LightingControlZoneID}
+        s223:connectsTo pnnl:LightingSpace/{LightingControlZoneID};
+        s223:cnx pnnl:LightingSpace/{LightingControlZoneID}/ELInlet;
+        s223:connectsAt pnnl:LightingSpace/{LightingControlZoneID}/ELInlet;
+        s223:cnx pnnl:LightingSpace/{LightingControlZoneID}/ELOutlet;
+        s223:hasMedium s223:Light-Visible.
+      pnnl:LightingSpace/{LightingControlZoneID}/ELInlet
+        s223:cnx pnnl:LightingSpace/{LightingControlZoneID};
+        s223:isConnectionPointOf pnnl:LightingSpace/{LightingControlZoneID};
+        s223:cnx pnnl:ELightPath/{LightingControlZoneID};
+        s223:connectsThrough pnnl:ELightPath/{LightingControlZoneID}.
+      pnnl:LightingSpace/{LightingControlZoneID}/DLInlet
+        s223:cnx pnnl:LightingSpace/{LightingControlZoneID};
+        s223:connectsThrough pnnl:DLightPath/{LightingControlZoneID}.
+      pnnl:DLightPath/{LightingControlZoneID}
+        s223:connectsAt pnnl:LightingSpace/{LightingControlZoneID}/DLInlet.
     source:
       select
+        LightingFixtures.Id as Id,
         Rooms.Id as RoomIdentifier,
         substring(LightingControlZoneID, 1, 5) as LightingControlZoneID
       from
@@ -142,4 +191,19 @@ maps:
         Rooms
         on
           LightingFixtures.LuminaireRoomParameter=Rooms.Number
-  
+
+# Connect luminaires based on zone (I think it should be based on circuits)
+# but there are no circuits in the medium office building
+  - id: connect luminaires
+    target:
+      pnnl:Luminaire/{Current_Id}
+        s223:connected pnnl:Luminaire/{Connected_Id}.
+    source:
+      select
+        A.Id as Current_Id, B.Id as Connected_Id, A.LightingControlZoneID
+      from
+        LightingFixtures A, LightingFixtures B
+      where
+        Current_Id <> Connected_Id
+        and A.LightingControlZoneID = B.LightingControlZoneID
+      order by A.LightingControlZoneID
