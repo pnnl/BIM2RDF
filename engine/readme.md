@@ -1,1 +1,1 @@
-TODO: write readme
+generic rules engine
