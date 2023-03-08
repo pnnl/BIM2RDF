@@ -35,6 +35,7 @@ This is useful to exclude devlopment tools (like test frameworks and code linter
 In addition to conda-supported 'pip'-type dependencies, a special 'cmd' type dependency allows for executing arbitrary (installation) commands.
 For each dependency type, installation order can be forced by prefixing the installer with a number.
 For example, `pip` can be `0pip` to put it at the top of the execution list (a hack to undo the underlying conda devenv behavior).
+This can also be applied to 'cmd' dependencies as they might need to be ordered.
 
 
 ## Scripts
