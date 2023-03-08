@@ -151,4 +151,33 @@ maps:
       from
         LightingFixtures
   
- 
+  - id: hvac zones
+    target:
+      pnnl:HVACZone/{Id}
+        rdfs:label  {Name};
+        a           brick:HVAC_Zone.
+    source: |
+      select # really want ' select distinct' here
+        HVACZones.Id    as Id,
+        HVACZones.Name  as Name
+      from
+        HVACZones
+      inner join
+        Rooms
+        on
+          Rooms.ThermalZonetoRoom=HVACZones.Name
+
+  - id: hvac zones - rooms
+    target:
+      pnnl:HVACZone/{HVACZoneId}
+        brick:hasPart       pnnl:Room/{RoomId}.
+    source:
+      select
+        HVACZones.Id    as  HVACZoneId,
+        Rooms.Id        as  RoomId
+      from
+        HVACZones
+      inner join
+        Rooms
+        on
+          HVACZones.Name=Rooms.ThermalZonetoRoom 
