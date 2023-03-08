@@ -5,7 +5,7 @@ from typing import Generic, TypeVar#, NewType, TypeVar
 
 import sys
 if sys.version_info >= (3, 11):
-    from typing import Self as SeltT
+    from typing import Self as SelfT
 else:
     from typing_extensions import Self as SelfT # need mypy > 1.0 (new)
 
