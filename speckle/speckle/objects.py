@@ -109,23 +109,13 @@ def rdf(d):
     _ = remove_at(_)
     _ = url_quote(_)
     _ = contextualize(_)
-    from rdflib import Graph
-    from json import dumps
-    _ = dumps(_)
-    _ = Graph().parse(data=_, format='json-ld')
+    from pyld import jsonld as lj
+    _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
     return _
-
 
 
 if __name__ == '__main__':
     ...
-    #_ = rdf()
-    #from rdflib import Graph
-    #_ = Graph().parse(data=_, format='nquads')
-    #_.bind('spkl', base_uri())
-    #_.serialize('speckle.ttl', format='ttl')
 
 
-
-    
 
