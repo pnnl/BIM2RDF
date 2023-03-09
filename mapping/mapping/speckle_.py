@@ -1,4 +1,5 @@
 # called it speckle_ b/c of naming issues
+# 'from speckle' would be recursive
 
 from speckle.graphql import queries, query
 from speckle.objects import rdf
