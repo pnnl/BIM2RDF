@@ -47,7 +47,7 @@ dependencies:
     - gql[requests]             # [run_req]
     - jsonpath-ng               # [run_req]
     - requests-cache            # [run_req]
-  
+    - rdflib                    # [run_req]
 
 environment:
   HOME: {{root}}              # [keep_here]

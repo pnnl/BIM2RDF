@@ -109,8 +109,26 @@ def rdf(d):
     _ = remove_at(_)
     _ = url_quote(_)
     _ = contextualize(_)
-    from pyld import jsonld as lj
-    _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
+    #from pyld import jsonld as lj
+    #_ = lj.flatten(_)
+    #lj.to_rdf()
+    # _ = lj.to_rdf()
+    #     _,
+    #     options=NS(
+    #     format='application/n-quads',
+    #     produceGeneralizedRdf=True).__dict__ ) #
+    # PROBLEM: only produces triples that are identified in @context
+    # doesn't seem to be responding to @vocab
+    # maybe not compliant!
+    from rdflib import Graph
+    from json import dumps
+    _ = dumps(_)
+    _ = Graph().parse(data=_, format='json-ld')
+    from io import BytesIO
+    o = BytesIO()
+    _ = _.serialize(o, 'text/turtle')
+    o.seek(0)
+    _ = o
     return _
 
 
