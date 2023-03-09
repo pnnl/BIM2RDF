@@ -2,11 +2,14 @@ PREFIX spkl: <http://speckle.systems/>
 PREFIX unit: <http://qudt.org/vocab/unit/>
 prefix brick: <https://brickschema.org/schema/Brick#>
 
+
 construct {
   ?this a brick:Luminaire.
   ?this brick:Power [ # no such thing as brick:Power though
             brick:value   ?watts;
-            brick:hasUnit unit:W;].}
+            brick:hasUnit unit:W].
+}
  where {
      ?this spkl:category  "Lighting Fixtures".
-     ?this spkl:parameters/spkl:FBX_LIGHT_WATTAGE/spkl:value ?watts.}
+     ?this spkl:parameters/spkl:FBX_LIGHT_WATTAGE/spkl:value ?watts.
+}
