@@ -46,7 +46,7 @@ def db():
     return db
 
 
-def engine():
+def engine(*, rules=rules, db=db):
     from .engine import Engine, OxiGraph
     _ = Engine(
             rules(),
@@ -54,13 +54,14 @@ def engine():
     return _
 
 
-def test():
-    _ = engine()
-    _ = _()
-    return _
 
 
 if __name__ == '__main__':
-    ...
+    
+    _ = engine()
+    _ = _()
+    s = _.db._store
+    s.dump('out.ttl', 'text/turtle')
+
 
 
