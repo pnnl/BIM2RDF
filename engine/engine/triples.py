@@ -365,6 +365,7 @@ class Engine(b.Engine): # rule app on Store
         #    return Result(self.db, False)
 
 
+# TODO: logging versions of engine and rule
 
 
 if __name__ == '__main__':
