@@ -1,5 +1,3 @@
-# called it speckle_ b/c of naming issues
-# 'from speckle' would be recursive
 
 from speckle.graphql import queries, query
 from speckle.objects import rdf
@@ -19,9 +17,9 @@ def brick() -> Path:
 def map():
     q = queries()
     q = q.objects
-    d = query(q)
-    d = rdf(d)
-    m = brick() # mapping
+    d = query(q)    # json
+    d = rdf(d)      # rdf
+    m = brick()     # mapping
     o = get_ontology('brick')
     _ = shacl(d, shacl=m, ontology=o)
     return _
