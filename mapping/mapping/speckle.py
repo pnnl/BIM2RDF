@@ -46,7 +46,8 @@ def db():
     return db
 
 
-def engine(*, rules=rules, db=db):
+from .engine import Engine
+def fengine(*, rules=rules, db=db) -> Engine:
     from .engine import Engine, OxiGraph
     _ = Engine(
             rules(),
@@ -54,14 +55,18 @@ def engine(*, rules=rules, db=db):
     return _
 
 
-
-
 if __name__ == '__main__':
+    import fire
     
-    _ = engine()
-    _ = _()
-    s = _.db._store
-    s.dump('out.ttl', 'text/turtle')
+    from pathlib import Path
+    def engine(*, out=Path('out.ttl')) -> Path:
+        if not (str(out).lower().endswith('ttl')):
+            raise ValueError('just use ttl fmt')
+        _ = fengine()
+        _ = _.db._store
+        _.dump(str(out), 'text/turtle')
+        return out
 
+    fire.Fire(engine) # HAHH!!
 
 
