@@ -11,21 +11,7 @@ def rules() -> Rules: #sparql mapping 'rules' for now
     _ = list(_) + [rdflib_semantics]
     _ = Rules([rdflib_semantics])
     return _
-# try:
-#     from typing import Self
-#     print('upgrade to python 3.11')
-# except:
-#     from typing_extensions import Self
 
-# from .engine import Rules as _Rules
-# class Rules(_Rules):
-#     # def __new__(cls) -> Self:
-#     #     return super().__new__()
-#     @classmethod
-#     def __call__(cls) -> '_Rules':
-#         return get_rules()
-
-# (query>json) > ttl > mapping/validation via shacl > ttl
 
 
 def db():
