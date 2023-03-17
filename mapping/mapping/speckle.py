@@ -2,13 +2,14 @@
 
 from .engine import Rules
 def rules() -> Rules: #sparql mapping 'rules' for now 
-    from .engine import ConstructQuery, Rules
+    from .engine import ConstructQuery, Rules, rdflib_semantics, PyRule
     from . import mapping_dir
     from pathlib import Path
     _ = Path(mapping_dir).glob('**/*.sparql')
     _ = map(lambda p: open(p).read(),   _)
     _ = map(ConstructQuery,             _)
-    _ = Rules(_)
+    _ = list(_) + [rdflib_semantics]
+    _ = Rules([rdflib_semantics])
     return _
 # try:
 #     from typing import Self
@@ -25,6 +26,7 @@ def rules() -> Rules: #sparql mapping 'rules' for now
 #         return get_rules()
 
 # (query>json) > ttl > mapping/validation via shacl > ttl
+
 
 def db():
     from speckle.graphql import queries, query
@@ -63,6 +65,7 @@ if __name__ == '__main__':
         if not (str(out).lower().endswith('ttl')):
             raise ValueError('just use ttl fmt')
         _ = fengine()
+        _()
         _ = _.db._store
         _.dump(str(out), 'text/turtle')
         return out
