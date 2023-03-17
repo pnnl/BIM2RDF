@@ -51,7 +51,8 @@ def client():
 
 
 
-def app_info(client=client(), ):
+def app_info(client=client):
+    client = client()
     from types import SimpleNamespace as NS
     streams = (s for s in client.stream.list() )
     def _(streams=streams):
