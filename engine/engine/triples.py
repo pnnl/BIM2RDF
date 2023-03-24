@@ -12,7 +12,27 @@ from typing import Iterable, Iterator, Callable
 class Triples(b.Data):
 
     def __init__(self, data: Iterable[g.Triple]) -> None:
-        self._data = data
+        __ = []
+        url = 'http://deanon/'
+        def it():
+            i = 0
+            while True:
+                yield i
+                i += 1
+        iz = iter(it())
+        # is the skolemization ok?
+        for s,p,o in data:
+            if isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
+                i = next(iz)
+                s = g.NamedNode(f'{url}/{i}')
+                o = g.NamedNode(f'{url}/{i}')
+            elif isinstance(s, g.BlankNode) and not isinstance(o, g.BlankNode):
+                s = g.NamedNode(f'{url}/{next(iz)}')
+            elif not isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
+                o = g.NamedNode(f'{url}/{next(iz)}')
+            _ = g.Triple(s,p,o)
+            __.append(_)
+        self._data = __
 
     def __iter__(self) -> Iterable[g.Triple]:
         yield from self._data
@@ -43,6 +63,7 @@ class OxiGraph(b.DataBase):
         return len(self._store)
     
     def __hash__(self) -> int:
+        #return len(self._store) not strictly correct
         _ = self._store
         _ = frozenset(_)
         _ = hash(_)
@@ -91,6 +112,8 @@ class SelectQuery(b.Query):
         return _
 
 
+
+
 class ConstructQuery(b.Query):
 
     def __init__(self, query: str) -> None:
@@ -109,9 +132,7 @@ class ConstructQuery(b.Query):
         _ = Triples(_)
         return _
 
-# could generate via sparql construct or python
 
-from functools import lru_cache
 
 class ConstructRule(b.Rule):
 
@@ -134,7 +155,6 @@ class ConstructRule(b.Rule):
         # TODO
         return Triples([])
 
-    @lru_cache
     def __call__(self, db: OxiGraph) -> Triples:
         _ = db._store.query(str(self.spec))
         assert(isinstance(_, g.QueryTriples))
