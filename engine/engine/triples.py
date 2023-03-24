@@ -24,7 +24,7 @@ class Triples(b.Data):
     def insert(self, db: 'OxiGraph', graph=None ) -> None:
         from io import BytesIO
         fmt='application/n-triples'
-        _ = BytesIO() 
+        _ = BytesIO()
         g.serialize(self._data, _, fmt)
         _.seek(0)
         if len(_.getbuffer()):
@@ -41,6 +41,12 @@ class OxiGraph(b.DataBase):
 
     def __len__(self):
         return len(self._store)
+    
+    def __hash__(self) -> int:
+        _ = self._store
+        _ = frozenset(_)
+        _ = hash(_)
+        return _
 
     # on the query
     #def query(self, query: 'SelectQuery') -> 'SelectQueryData':
@@ -105,6 +111,8 @@ class ConstructQuery(b.Query):
 
 # could generate via sparql construct or python
 
+from functools import lru_cache
+
 class ConstructRule(b.Rule):
 
     def __init__(self, spec: ConstructQuery) -> None:
@@ -126,10 +134,10 @@ class ConstructRule(b.Rule):
         # TODO
         return Triples([])
 
+    @lru_cache
     def __call__(self, db: OxiGraph) -> Triples:
         _ = db._store.query(str(self.spec))
         assert(isinstance(_, g.QueryTriples))
-        #yield from _
         return Triples(_)
 
 
@@ -324,6 +332,7 @@ class Engine(b.Engine): # rule app on Store
         #_: Iterable[g.Triple] = chain.from_iterable(_)
         # _.insert(self.db)
         for r in self.rules:
+            #print(r.spec, len(self.db))
             _ = r(self.db)
             _.insert(self.db)
         return self.db
