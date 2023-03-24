@@ -9,30 +9,55 @@ from typing import Iterable, Iterator, Callable
 # meta/rdfstar inserstion somewhere TODO
 
 
+
+def normalize(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
+    triples = tuple(triples) # b/c i loop through it twice
+    # is the skolemization ok?
+    tohash = []
+    for s,p,o in triples:
+        if isinstance(s, g.NamedNode):
+            tohash.append(s)
+        if isinstance(p, g.NamedNode):
+            tohash.append(p)
+        if isinstance(o, g.NamedNode):
+            tohash.append(o)
+    tohash = frozenset(tohash)
+    tohash = hash(tohash)
+    tohash = abs(tohash)
+
+    url = f'http://deanon/{tohash}/'
+    def it():
+        i = 0
+        while True:
+            yield i
+            i += 1
+    iz = iter(it())
+    __ = []
+    for s,p,o in triples:
+        if isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
+            i = next(iz)
+            s = g.NamedNode(f'{url}{i}')
+            o = g.NamedNode(f'{url}{i}')
+        elif isinstance(s, g.BlankNode) and not isinstance(o, g.BlankNode):
+            s = g.NamedNode(f'{url}{next(iz)}')
+        elif not isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
+            o = g.NamedNode(f'{url}{next(iz)}')
+        else: # no change
+            pass
+        _ = g.Triple(s,p,o)
+        __.append(_)
+    __ = tuple(__) # immutable
+    return __
+
+
 class Triples(b.Data):
 
     def __init__(self, data: Iterable[g.Triple]) -> None:
-        __ = []
-        url = 'http://deanon/'
-        def it():
-            i = 0
-            while True:
-                yield i
-                i += 1
-        iz = iter(it())
-        # is the skolemization ok?
-        for s,p,o in data:
-            if isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
-                i = next(iz)
-                s = g.NamedNode(f'{url}/{i}')
-                o = g.NamedNode(f'{url}/{i}')
-            elif isinstance(s, g.BlankNode) and not isinstance(o, g.BlankNode):
-                s = g.NamedNode(f'{url}/{next(iz)}')
-            elif not isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
-                o = g.NamedNode(f'{url}/{next(iz)}')
-            _ = g.Triple(s,p,o)
-            __.append(_)
-        self._data = __
+        _ = normalize(data)
+        self._data = _
+    
+    def __hash__(self) -> int:
+        return hash(frozenset(self))
 
     def __iter__(self) -> Iterable[g.Triple]:
         yield from self._data
@@ -41,7 +66,7 @@ class Triples(b.Data):
         from itertools import chain 
         return Triples(chain(self._data, data._data))
 
-    def insert(self, db: 'OxiGraph', graph=None ) -> None:
+    def insert(self, db: 'OxiGraph', graph=g.DefaultGraph()) -> None:
         from io import BytesIO
         fmt='application/n-triples'
         _ = BytesIO()
