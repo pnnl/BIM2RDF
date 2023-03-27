@@ -5,7 +5,7 @@ from engine.triples import (
         ConstructQuery,
         Rules,
         Rule ,  # for owlrl TODO
-        PyRule,
+        PyRule, PyRuleCallable,
         Triples,
         Engine, OxiGraph)
 
@@ -168,7 +168,41 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
     return _
 
 
+# could have created a class
 # class OWLRL(PyRule):
-
 #     def __init__(self, spec: PyRuleCallable) -> None:
 #         super().__init__(spec)
+
+
+
+from pathlib import Path
+from typing import Callable
+ttl = str
+from io import BytesIO
+def get_data_getter(src: BytesIO | ttl | Path | Callable[[], ttl ]  ) ->  Callable[[OxiGraph], Triples]:
+    from pyoxigraph import Store
+    if isinstance(src, BytesIO):
+        s = Store()
+        s.bulk_load(src, 'text/turtle')
+        _ = lambda _: Triples(q.triple for q in s)
+        return _
+    if isinstance(src, ttl):
+        _ = src.encode()
+        _ = BytesIO(_)
+        _ = get_data_getter(_)
+        return _
+    elif isinstance(src, Path):
+        assert(src.suffix == '.ttl')
+        _ = open(src, 'rb')
+        _ = _.read()
+        _ = BytesIO(_)
+        _ = get_data_getter(_)
+        return _
+    elif callable(src):
+        _ = src()
+        _ = get_data_getter(_)
+        return _
+    else:
+        raise ValueError('dont know how to get data')
+
+

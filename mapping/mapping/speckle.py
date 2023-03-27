@@ -1,61 +1,73 @@
+from .engine import Rules, Callable, OxiGraph, Triples
 
 
-from .engine import Rules
-def rules() -> Rules: #sparql mapping 'rules' for now 
-    from .engine import ConstructQuery, Rules, rdflib_semantics, PyRule
+def rules(semantics = True) -> Rules: #sparql mapping 'rules' for now 
+    from .engine import ConstructQuery, Rules, rdflib_semantics
     from . import mapping_dir
     from pathlib import Path
     _ = Path(mapping_dir).glob('**/*.sparql')
     _ = map(lambda p: open(p).read(),   _)
     _ = map(ConstructQuery,             _)
-    _ = list(_) + [rdflib_semantics]
-    _ = Rules([rdflib_semantics])
+    #_ = list(_) + ([rdflib_semantics] if semantics else [])
+    _ = [rdflib_semantics]
+    _ = Rules(_)
     return _
 
 
+def get_ontology(ontology: str) -> Callable[[OxiGraph], Triples]:
+    from .engine import get_data_getter
+    from ontologies import get
+    _ = get(ontology)
+    _ = get_data_getter(_)
+    return _
 
-def db():
+
+# args will be stream, commit
+def get_speckle() -> Callable[[OxiGraph], Triples]: 
     from speckle.graphql import queries, query
     _ = queries()
     _ = _.objects
     _ = query(_) # dict
     from speckle.objects import rdf
     _ = rdf(_) #
-    fmt = 'text/turtle'
-    #_ = parse(_, fmt) 
-    from pyoxigraph import Store
-    db = Store()
-    db.bulk_load(_, fmt)
-    from ontologies import get as get_ontology
-    _ = get_ontology('brick')
-    _ = open(_, 'rb')
-    db.bulk_load(_, fmt)
-    #from shacl_gen import shacl
-    return db
+    _ = _.read()
+    _ = _.decode()
+    from .engine import get_data_getter
+    _ = get_data_getter(_)
+    return _
+
+
+def data():
+    _ = [get_speckle(), get_ontology('brick') ]
+    _ = Rules(_)
+    return _
 
 
 from .engine import Engine
-def fengine(*, rules=rules, db=db) -> Engine:
+def fengine(*, rules=rules, data=data) -> Engine:
+    # functions for args
     from .engine import Engine, OxiGraph
     _ = Engine(
-            rules(),
-            OxiGraph(db()) )
+            rules()+data(),
+            OxiGraph(), MAX_ITER=10 )
     return _
+
+
+from pathlib import Path
+def engine(*, semantics=True, out=Path('out.ttl')) -> Path:
+    # data/config for args
+    if not (str(out).lower().endswith('ttl')):
+        raise ValueError('just use ttl fmt')
+    _ = fengine(rules=lambda: rules(semantics=semantics) )
+    _()
+    _ = _.db._store
+    _.dump(str(out), 'text/turtle')
+    return out
+
 
 
 if __name__ == '__main__':
     import fire
-    
-    from pathlib import Path
-    def engine(*, out=Path('out.ttl')) -> Path:
-        if not (str(out).lower().endswith('ttl')):
-            raise ValueError('just use ttl fmt')
-        _ = fengine()
-        _()
-        _ = _.db._store
-        _.dump(str(out), 'text/turtle')
-        return out
-
     fire.Fire(engine) # HAHH!!
 
 
