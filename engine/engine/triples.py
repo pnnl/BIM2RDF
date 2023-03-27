@@ -403,7 +403,7 @@ class Engine(b.Engine): # rule app on Store
     def __init__(self, rules: Rules, db: OxiGraph, MAX_ITER=999) -> None:
         self._rules = rules
         self._db = db
-        db._store.dump(open('init.ttl', 'wb'), 'text/turtle')
+        #db._store.dump(open('init.ttl', 'wb'), 'text/turtle')
         self.MAX_ITER = MAX_ITER
 
     @property
@@ -428,7 +428,7 @@ class Engine(b.Engine): # rule app on Store
             print( repr(r), len(_), len(self.db))
             #      r.spec
             #print(r, hash(_), hash(self.db))
-            g.serialize(_,  open(f'{next(iz)}.ttl', 'wb') , 'text/turtle')
+            #g.serialize(_,  open(f'{next(iz)}.ttl', 'wb') , 'text/turtle')
             _.insert(self.db)
             
         return self.db
