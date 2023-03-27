@@ -5,12 +5,18 @@
 
 from .abstract import abstract as b
 import pyoxigraph as g
-from typing import Iterable, Iterator, Callable
+from typing import Iterable, Iterator
 # meta/rdfstar inserstion somewhere TODO
 
 
+def it():
+    i = 0
+    while True:
+        yield i
+        i += 1
 
-def normalize(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
+
+def _normalize_h(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
     triples = tuple(triples) # b/c i loop through it twice
     # is the skolemization ok?
     tohash = []
@@ -21,23 +27,26 @@ def normalize(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
             tohash.append(p)
         if isinstance(o, g.NamedNode):
             tohash.append(o)
-    tohash = frozenset(tohash)
-    tohash = hash(tohash)
-    tohash = abs(tohash)
+    from hashlib import md5
+    tohash = (str(t.value) for t in tohash)
+    tohash = sorted(tohash)
+    tohash = ''.join(t for t in tohash)
+    tohash = tohash.encode()
+    tohash = md5(tohash)
+    tohash = tohash.hexdigest()
+    #tohash = len(triples)
+    #print('norm', len(triples), tohash)
 
     url = f'http://deanon/{tohash}/'
-    def it():
-        i = 0
-        while True:
-            yield i
-            i += 1
     iz = iter(it())
     __ = []
-    for s,p,o in triples:
+    for en, (s,p,o) in enumerate(triples):
         if isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
-            i = next(iz)
-            s = g.NamedNode(f'{url}{i}')
-            o = g.NamedNode(f'{url}{i}')
+            if s == o:
+                s = o = g.NamedNode(f'{url}{next(iz)}')
+            else:
+                s = g.NamedNode(f'{url}{next(iz)}')
+                o = g.NamedNode(f'{url}{next(iz)}')
         elif isinstance(s, g.BlankNode) and not isinstance(o, g.BlankNode):
             s = g.NamedNode(f'{url}{next(iz)}')
         elif not isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
@@ -50,14 +59,49 @@ def normalize(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
     return __
 
 
+global_counter = iter(it())
+# this doesnt work. doesnt uniquify
+def _normalize_c(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
+    def url(): return f'http://deanon/{next(global_counter)}'
+    __ = []
+    for en, (s,p,o) in enumerate(triples):
+        if isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
+            if s == o:
+                s = o = g.NamedNode(f'{url()}')
+            else:
+                s = g.NamedNode(f'{url()}')
+                o = g.NamedNode(f'{url()}')
+        elif isinstance(s, g.BlankNode) and not isinstance(o, g.BlankNode):
+            s = g.NamedNode(f'{url()}')
+        elif not isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
+            o = g.NamedNode(f'{url()}')
+        else: # no change
+            pass
+        _ = g.Triple(s,p,o)
+        __.append(_)
+    __ = tuple(__) # immutable
+    return __
+
+
+def normalize(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
+    _ = triples
+    _ = _normalize_h(_)
+    return _
+
+
 class Triples(b.Data):
 
-    def __init__(self, data: Iterable[g.Triple]) -> None:
+    def __init__(self, data: Iterable[g.Triple]=[]) -> None:
         _ = normalize(data)
         self._data = _
     
     def __hash__(self) -> int:
         return hash(frozenset(self))
+    
+    def __len__(self) -> int:
+        i = 0
+        for _ in self: i += 1
+        return i
 
     def __iter__(self) -> Iterable[g.Triple]:
         yield from self._data
@@ -78,7 +122,7 @@ class Triples(b.Data):
 
 class OxiGraph(b.DataBase):
     
-    def __init__(self, db: g.Store) -> None:
+    def __init__(self, db: g.Store=g.Store()) -> None:
         self._store = db
     
     def __iter__(self) -> Iterable[g.Quad]:
@@ -135,7 +179,6 @@ class SelectQuery(b.Query):
         assert(isinstance(_, g.QuerySolutions))
         _ = SelectQueryData(_)
         return _
-
 
 
 
@@ -245,6 +288,7 @@ class PyRule(b.Rule):
     
     def __call__(self, db: OxiGraph) -> Triples:
         _ = self.spec(db)
+        _ = Triples(_)
         return _
 
 def _idf(db: OxiGraph): return Triples([])
@@ -316,7 +360,6 @@ class Rules(b.Rules):
         _ = map(lambda cr: cr.meta(data)._data, self)
         from itertools import chain
         _ = chain.from_iterable(_)
-        _ = Triples(_)
         return _
 
     def __add__(self, rule: 'Rules') -> 'Rules':
@@ -353,11 +396,15 @@ class Result(b.Result):
         return self.db
 
 
+iz = iter(it())
+
 class Engine(b.Engine): # rule app on Store
 
-    def __init__(self, rules: Rules, db: OxiGraph) -> None:
+    def __init__(self, rules: Rules, db: OxiGraph, MAX_ITER=999) -> None:
         self._rules = rules
         self._db = db
+        db._store.dump(open('init.ttl', 'wb'), 'text/turtle')
+        self.MAX_ITER = MAX_ITER
 
     @property
     def rules(self) -> Rules:
@@ -377,9 +424,13 @@ class Engine(b.Engine): # rule app on Store
         #_: Iterable[g.Triple] = chain.from_iterable(_)
         # _.insert(self.db)
         for r in self.rules:
-            #print(r.spec, len(self.db))
             _ = r(self.db)
+            print( repr(r), len(_), len(self.db))
+            #      r.spec
+            #print(r, hash(_), hash(self.db))
+            g.serialize(_,  open(f'{next(iz)}.ttl', 'wb') , 'text/turtle')
             _.insert(self.db)
+            
         return self.db
 
     def stop(self) -> bool:
@@ -390,7 +441,7 @@ class Engine(b.Engine): # rule app on Store
             return False
     
     def __iter__(self) -> Iterable[OxiGraph]:
-        MAX_ITER = 999
+        MAX_ITER = self.MAX_ITER
         i = 0
         while (not self.stop()):
             if i > MAX_ITER: break
