@@ -51,6 +51,8 @@ def fengine(*, rules=rules) -> Engine:
     return _
 
 
+    
+
 from pathlib import Path
 def engine(stream_id, *, object_id=None,
            semantics=True,
@@ -58,11 +60,10 @@ def engine(stream_id, *, object_id=None,
     # data/config for args
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
-    _ = fengine(rules=lambda: rules(
-                    semantics=semantics)
-                    +Rules([get_speckle(stream_id, object_id)])
+    _ = fengine(rules=lambda: (
+                    Rules([get_speckle(stream_id, object_id)])
                     +Rules([get_ontology('223p')])
-                    )
+                    +rules(semantics=semantics)))
     _()
     _ = _.db._store
     _.dump(str(out), 'text/turtle')
