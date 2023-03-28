@@ -11,7 +11,9 @@ from engine.triples import (
 
 
 from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Semantics, OWLRL_Semantics
-
+from owlrl.OWLRLExtras import OWLRL_Extension_Trimming 
+#https://github.com/RDFLib/OWL-RL/issues/53
+from rdflib import OWL, RDFS
 
 # def rules(self, t, cycle_num):
 #     """
@@ -112,6 +114,71 @@ from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Sema
 # Semantics.flush_stored_triples = flush_stored_triples
 
 
+def post_process(self):
+    """
+    Do some post-processing step performing the trimming of the graph. See the :class:`.OWLRL_Extension_Trimming`
+    class for further details.
+    """
+    from rdflib import OWL, RDFS, RDF
+    from owlrl.OWLRLExtras import OWLRL_Extension
+    from owlrl.XsdDatatypes import OWL_RL_Datatypes
+    from owlrl.OWLRL import OWLRL_Annotation_properties
+    OWLRL_Extension.post_process(self)
+    self.flush_stored_triples()
+
+    to_be_removed = set()
+    for t in self.graph:
+        s, p, o = t
+        if s == o:
+            if (
+                p == OWL.sameAs
+                or p == OWL.equivalentClass
+                or p == RDFS.subClassOf
+                or p == RDFS.subPropertyOf
+            ):
+                to_be_removed.add(t)
+        if (
+            (p == RDFS.subClassOf and (o == OWL.Thing or o == RDFS.Resource))
+            or (p == RDF.type and o == RDFS.Resource)
+            or (s == OWL.Nothing and p == RDFS.subClassOf)
+        ):
+            to_be_removed.add(t)
+
+    for dt in OWL_RL_Datatypes:
+        # see if this datatype appears explicitly in the graph as the type of a symbol
+        if len([s for s in self.graph.subjects(RDF.type, dt)]) == 0:
+            to_be_removed.add((dt, RDF.type, RDFS.Datatype))
+            to_be_removed.add((dt, RDF.type, OWL.DataRange))
+
+            for t in self.graph.triples((dt, OWL.disjointWith, None)):
+                to_be_removed.add(t)
+            for t in self.graph.triples((None, OWL.disjointWith, dt)):
+                to_be_removed.add(t)
+
+    for an in OWLRL_Annotation_properties:
+        self.graph.remove((an, RDF.type, OWL.AnnotationProperty))
+
+    to_be_removed.add((OWL.Nothing, RDF.type, OWL.Class))
+    to_be_removed.add((OWL.Nothing, RDF.type, RDFS.Class))
+    to_be_removed.add((OWL.Thing, RDF.type, OWL.Class))
+    to_be_removed.add((OWL.Thing, RDF.type, RDFS.Class))
+    to_be_removed.add((OWL.Thing, OWL.equivalentClass, RDFS.Resource))
+    to_be_removed.add((RDFS.Resource, OWL.equivalentClass, OWL.Thing))
+    to_be_removed.add((OWL.Class, OWL.equivalentClass, RDFS.Class))
+    to_be_removed.add((OWL.Class, RDFS.subClassOf, RDFS.Class))
+    to_be_removed.add((RDFS.Class, OWL.equivalentClass, OWL.Class))
+    to_be_removed.add((RDFS.Class, RDFS.subClassOf, OWL.Class))
+    to_be_removed.add((RDFS.Datatype, RDFS.subClassOf, OWL.DataRange))
+    to_be_removed.add((RDFS.Datatype, OWL.equivalentClass, OWL.DataRange))
+    to_be_removed.add((OWL.DataRange, RDFS.subClassOf, RDFS.Datatype))#OWL.Datatype))
+    to_be_removed.add((OWL.DataRange, OWL.equivalentClass, RDFS.Datatype))#OWL.Datatype))
+
+    for t in to_be_removed:
+        self.graph.remove(t)
+
+OWLRL_Extension_Trimming.post_process = post_process
+
+
 from rdflib import Literal, Graph as _Graph
 class Graph(_Graph):
 
@@ -149,9 +216,11 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
     #     owl:Thing ;
     # owl:sameAs false .
     # seems 'bad' https://www.w3.org/TR/rdf11-concepts/#section-triples
-    _.closure()
+    #_.closure()
+    #_ = OWLRL_Extension_Trimming(g2, True, True, rdfs=True)
+    #_.closure()
     # take out _offensive triples
-    for bad in g2._offensive: g2.remove(bad);
+    for bad in g2._offensive: g2.remove(bad)
     from rdflib.compare import graph_diff
     _ = graph_diff(g1, g2)
     diff = _[2] - _[1]
