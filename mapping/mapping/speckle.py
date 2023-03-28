@@ -54,11 +54,11 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGr
     if stream_id != d['id']: raise ValueError('stream not found')
     
     _ = d['branches']['items']
+    _ = sorted(_, key=lambda i: i['createdAt'] )
     for d in _:
         if branch_id in {d['id'], d['name']}:
             branch_id = d['id']
             break
-    # i think this just loops to the latest
     if branch_id:
         if branch_id != d['id']:
             raise ValueError('branch not found')
@@ -66,11 +66,11 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGr
         branch_id = d['id']
     
     _ = d['commits']['items']
+    _ = sorted(_, key=lambda i: i['createdAt'] )
     for d in _:
         if d['referencedObject'] == object_id:
             object_id = d['referencedObject']
             break
-    # i think this just loops to the latest
     if object_id:
         if object_id != d['referencedObject']:
             raise ValueError('object not found')
