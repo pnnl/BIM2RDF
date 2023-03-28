@@ -109,21 +109,23 @@ def queries():
     from .graphql import get_dsl_schema
     s = get_dsl_schema()
     
-    streams = s.Query.streams.args(limit=biglim).select(
+    def streams():
+        return s.Query.streams.args(limit=biglim).select(
             s.StreamCollection.items.select(
                 s.Stream.id, s.Stream.name))
     
     # stick with the rest api b/c this add a lil more nesting?
-    objects = s.Query.stream.args(id="316586b660").select(
-            s.Stream.id,
-            s.Stream.object.args(id="37c11d7537a358eb35970e09b3837aa8").select(
-                s.Object.data,
-                s.Object.children.args(limit=biglim, depth=biglim).select(
-                    s.ObjectCollection.totalCount,
-                    s.ObjectCollection.objects.select(
-                          s.Object.data,
-                     )
-                )))
+    def objects(stream_id, object_id):
+        return s.Query.stream.args(id=stream_id).select(
+                    s.Stream.id,
+                    s.Stream.object.args(id=object_id).select(
+                        s.Object.data,
+                        s.Object.children.args(limit=biglim, depth=biglim).select(
+                            s.ObjectCollection.totalCount,
+                            s.ObjectCollection.objects.select(
+                                s.Object.data,
+                            )
+                        )))
     
     return NS(streams=streams, objects=objects)
 

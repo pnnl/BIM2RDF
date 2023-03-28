@@ -5,11 +5,14 @@ def rules(semantics = True) -> Rules: #sparql mapping 'rules' for now
     from .engine import ConstructQuery, Rules, rdflib_semantics
     from . import mapping_dir
     from pathlib import Path
-    _ = Path(mapping_dir).glob('**/*.sparql')
+    _ = Path(mapping_dir).glob('**/speckle/*.sparql')
     _ = map(lambda p: open(p).read(),   _)
     _ = map(ConstructQuery,             _)
-    #_ = list(_) + ([rdflib_semantics] if semantics else [])
-    _ = [rdflib_semantics]
+    _ = list(_) + ([rdflib_semantics] if semantics else [])
+    _ = [
+
+        rdflib_semantics,
+        ]
     _ = Rules(_)
     return _
 
@@ -23,10 +26,10 @@ def get_ontology(ontology: str) -> Callable[[OxiGraph], Triples]:
 
 
 # args will be stream, commit
-def get_speckle() -> Callable[[OxiGraph], Triples]: 
+def get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]: 
     from speckle.graphql import queries, query
     _ = queries()
-    _ = _.objects
+    _ = _.objects(stream_id, object_id)
     _ = query(_) # dict
     from speckle.objects import rdf
     _ = rdf(_) #
@@ -37,28 +40,29 @@ def get_speckle() -> Callable[[OxiGraph], Triples]:
     return _
 
 
-def data():
-    _ = [get_speckle(), get_ontology('brick') ]
-    _ = Rules(_)
-    return _
-
 
 from .engine import Engine
-def fengine(*, rules=rules, data=data) -> Engine:
+def fengine(*, rules=rules) -> Engine:
     # functions for args
     from .engine import Engine, OxiGraph
     _ = Engine(
-            rules()+data(),
+            rules(),
             OxiGraph(), MAX_ITER=10 )
     return _
 
 
 from pathlib import Path
-def engine(*, semantics=True, out=Path('out.ttl')) -> Path:
+def engine(stream_id, *, object_id=None,
+           semantics=True,
+           out=Path('out.ttl')) -> Path:
     # data/config for args
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
-    _ = fengine(rules=lambda: rules(semantics=semantics) )
+    _ = fengine(rules=lambda: rules(
+                    semantics=semantics)
+                    +Rules([get_speckle(stream_id, object_id)])
+                    +Rules([get_ontology('223p')])
+                    )
     _()
     _ = _.db._store
     _.dump(str(out), 'text/turtle')
