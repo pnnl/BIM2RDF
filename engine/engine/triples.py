@@ -425,7 +425,7 @@ class Engine(b.Engine): # rule app on Store
         # _.insert(self.db)
         for r in self.rules:
             _ = r(self.db)
-            print( repr(r), len(_), len(self.db))
+            print( repr(r.spec), len(_), len(self.db))
             #      r.spec
             #print(r, hash(_), hash(self.db))
             #g.serialize(_,  open(f'{next(iz)}.ttl', 'wb') , 'text/turtle')
