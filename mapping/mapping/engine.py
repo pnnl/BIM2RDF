@@ -13,7 +13,6 @@ from engine.triples import (
 from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Semantics, OWLRL_Semantics
 from owlrl.OWLRLExtras import OWLRL_Extension_Trimming 
 #https://github.com/RDFLib/OWL-RL/issues/53
-from rdflib import OWL, RDFS
 
 # def rules(self, t, cycle_num):
 #     """
