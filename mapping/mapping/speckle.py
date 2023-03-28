@@ -26,7 +26,7 @@ def get_ontology(ontology: str) -> Callable[[OxiGraph], Triples]:
 
 
 # args will be stream, commit
-def get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]: 
+def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     from speckle.graphql import queries, query
     _ = queries()
     _ = _.objects(stream_id, object_id)
@@ -40,7 +40,49 @@ def get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     return _
 
 
+def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGraph], Triples]:
+    assert(stream_id)
+    from speckle.graphql import queries, query
+    _ = queries()
+    _ = _.general_meta()
+    _ = query(_)
+    _ = _['streams']['items']
+    for d in _:
+        if stream_id in {d['id'], d['name']}:
+            stream_id = d['id']
+            break
+    if stream_id != d['id']: raise ValueError('stream not found')
+    
+    _ = d['branches']['items']
+    for d in _:
+        if branch_id in {d['id'], d['name']}:
+            branch_id = d['id']
+            break
+    # i think this just loops to the latest
+    if branch_id:
+        if branch_id != d['id']:
+            raise ValueError('branch not found')
+    else:
+        branch_id = d['id']
+    
+    _ = d['commits']['items']
+    for d in _:
+        if d['referencedObject'] == object_id:
+            object_id = d['referencedObject']
+            break
+    # i think this just loops to the latest
+    if object_id:
+        if object_id != d['referencedObject']:
+            raise ValueError('object not found')
+    else:
+        object_id = d['referencedObject']
 
+    _ = d
+    assert(stream_id)
+    assert(object_id)
+    return _get_speckle(stream_id, object_id)
+    
+    
 from .engine import Engine
 def fengine(*, rules=rules) -> Engine:
     # functions for args
@@ -51,17 +93,16 @@ def fengine(*, rules=rules) -> Engine:
     return _
 
 
-    
 
 from pathlib import Path
-def engine(stream_id, *, object_id=None,
+def engine(stream_id, *, branch_id=None, object_id=None,
            semantics=True,
            out=Path('out.ttl')) -> Path:
     # data/config for args
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
     _ = fengine(rules=lambda: (
-                    Rules([get_speckle(stream_id, object_id)])
+                    Rules([get_speckle(stream_id, branch_id=branch_id, object_id=object_id) ])
                     +Rules([get_ontology('223p')])
                     +rules(semantics=semantics)))
     _()
