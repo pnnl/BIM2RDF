@@ -5,9 +5,17 @@ stages:
   #  cmd: dvc pull ../input/buildings/${building}.sqlite                       # TODO: make sure it's the same as map-file above
   #  wdir: work/output
 
+#dvc the ontology repo
+
+  ontologies: # https://github.com/iterative/dvc.org/issues/2170 is it possible to have a pipeline with more than one yaml?
+    cmd: ontologies-run-in dvc repro
+    wdir: ../ontologies
+
   map:
-    cmd: mapping-run-in  python -m mapping.speckle   # --db-file --map-file --ontology not really params for this new way
+    cmd: mapping-run-in  python -m mapping.speckle  --stream_id=neea-medoffice  # --db-file --map-file --ontology not really params for this new way
     wdir: work/output
+    # deps:
+    #   - ../../../ontologies/dvc.yaml:make
     outs:
       - out.ttl
 
