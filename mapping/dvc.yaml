@@ -12,34 +12,18 @@ stages:
     wdir: ../ontologies
 
   map:
-    cmd: mapping-run-in  python -m mapping.speckle  --stream_id=neea-medoffice  # --db-file --map-file --ontology not really params for this new way
+    cmd: mapping-run-in  python -m mapping.speckle  --stream_id=${building}  # --db-file --map-file --ontology not really params for this new way
     wdir: work/output
     # deps:
     #   - ../../../ontologies/dvc.yaml:make
     outs:
       - out.ttl
 
-  # upload_data:
-  #   cmd: mapping-run-in inv graphdb.upload-graph --ttl mapped.ttl  --name ${building} 
-  #   wdir: work/output
-  #   deps:
-  #     - mapped.ttl
-  # upload_ontology:
-  #   cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name ${ontology}
-  #   wdir: work/output
-  #   deps:
-  #     - ontology.ttl
-
-  # infer: #TODO: multiline cmd
-  #   #   python -m pdb -m owlrl._cli
-  #   #                             utf8 is to force utf8 on windows console
-  #   cmd: mapping-run-in python -X utf8 owlrl_patch.py --input_syntax=turtle --maximal --owlrl=yes --rdfs=yes --extras=yes --axioms=yes --serialization=turtle mapped.ttl  ontology.ttl > inferred.ttl
-  #   wdir: work/output
-  #   deps:
-  #     - ontology.ttl
-  #     - mapped.ttl
-  #   outs:
-  #     - inferred.ttl
+  upload_data:
+    cmd: mapping-run-in python -m graphdb.tasks upload_graph out.ttl  --name ${building}
+    wdir: work/output
+    deps:
+      - out.ttl
 
   
   # validate:
