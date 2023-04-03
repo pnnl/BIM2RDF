@@ -1,5 +1,5 @@
 building: Pritoni
-ontology: brick
+
 # bdg dep mapping file
 # might want to create a params.py
 # to dynamically create mapping file ref.
