@@ -10,8 +10,6 @@ from engine.triples import (
         Engine, OxiGraph)
 
 
-from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Semantics, OWLRL_Semantics
-from owlrl.OWLRLExtras import OWLRL_Extension_Trimming 
 #https://github.com/RDFLib/OWL-RL/issues/53
 
 # def rules(self, t, cycle_num):
@@ -175,6 +173,10 @@ def post_process(self):
     for t in to_be_removed:
         self.graph.remove(t)
 
+from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Semantics, OWLRL_Semantics
+#from owlrl.CombinedClosure import RDFS_Semantics as Semantics
+from owlrl.OWLRLExtras import OWLRL_Extension_Trimming 
+
 OWLRL_Extension_Trimming.post_process = post_process
 
 
@@ -190,7 +192,92 @@ class Graph(_Graph):
             self._offensive.add(t)
         # so that it keeps working as usual
         return super().add(t)
+    
+def closure(self):
+    """
+    Generate the closure the graph. This is the real 'core'.
 
+    The processing rules store new triples via the separate method :func:`.Core.store_triple` which stores
+    them in the :code:`added_triples` array. If that array is empty at the end of a cycle,
+    it means that the whole process can be stopped.
+
+    If required, the relevant axiomatic triples are added to the graph before processing in cycles. Similarly
+    the exchange of literals against bnodes is also done in this step (and restored after all cycles are over).
+    """
+    self.pre_process()
+
+    # Handling the axiomatic triples. In general, this means adding all tuples in the list that
+    # forwarded, and those include RDF or RDFS. In both cases the relevant parts of the container axioms should also
+    # be added.
+    if self.axioms:
+        self.add_axioms()
+
+    # Add the datatype axioms, if needed (note that this makes use of the literal proxies, the order of the call
+    # is important!
+    if self.daxioms:
+        self.add_d_axioms()
+
+    self.flush_stored_triples()
+
+    # Get first the 'one-time rules', ie, those that do not need an extra round in cycles down the line
+    self.one_time_rules()
+    self.flush_stored_triples()
+
+    # Go cyclically through all rules until no change happens
+    new_cycle = True
+    cycle_num = 0
+    while new_cycle:
+        # yes, there was a change, let us go again
+        cycle_num += 1
+
+
+        # go through all rules, and collect the replies (to see whether any change has been done)
+        # the new triples to be added are collected separately not to interfere with
+        # the current graph yet
+        self.empty_stored_triples()
+
+        # Execute all the rules; these might fill up the added triples array
+        for t in self.graph:
+            self.rules(t, cycle_num)
+
+        # Add the tuples to the graph (if necessary, that is). If any new triple has been generated, a new cycle
+        # will be necessary...
+        new_cycle = len(self.added_triples) > 0
+
+        # DEBUG: print the cycle number out
+        if True:#self._debug:
+            print(f"-semantics Cycle {cycle_num} added {len(self.added_triples)} triples.")
+
+        for t in self.added_triples:
+            self.graph.add(t)
+
+    self.post_process()
+    self.flush_stored_triples()
+
+    # Add possible error messages
+    if self.error_messages:
+        # I am not sure this is the right vocabulary to use for this purpose, but I haven't found anything!
+        # I could, of course, come up with my own, but I am not sure that would be kosher...
+        self.graph.bind("err", "http://www.daml.org/2002/03/agents/agent-ont#")
+        for m in self.error_messages:
+            message = BNode()
+            self.graph.add((message, RDF.type, ERRNS.ErrorMessage))
+            self.graph.add((message, ERRNS.error, Literal(m)))
+
+Semantics.closure = closure
+
+
+from pyoxigraph import Store
+def og2rg(og: Store,) -> Graph:
+    from io import BytesIO
+    _ = BytesIO()
+    to = 'text/turtle'
+    og.dump(_, to)
+    _.seek(0)
+    _ = Graph().parse(_, to)
+    return _
+
+#https://github.com/oxigraph/oxrdflib/issues/22
 
 def rdflib_semantics(db: OxiGraph) -> Triples:
     #https://github.com/oxigraph/oxrdflib/blob/f0f0a110c58e8e82acd2eb0af5514392d2941596/oxrdflib/__init__.py#L20
@@ -198,16 +285,13 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
     #s._store = g._store
     # will need to copy b/c the rule iface is triples
     # rdflibg = Graph(s)
-    from io import BytesIO
-    _ = BytesIO()
     to = 'text/turtle'
-    db._store.dump(_, to)
-    _.seek(0)
-    g1 = Graph().parse(_, to)
+    g1 = og2rg(db._store)
     # copy
-    _.seek(0)
-    g2 = Graph().parse(_, to)
+    g2 = Graph()
+    for _ in g1: g2.add(_)
     _ = Semantics(g2, True, True, rdfs=True)
+    # _._debug = True generates waaay to much.
     # i think these are the datatype axioms (3rd arg)
     # false a rdfs:Literal,
     #     rdfs:Resource,
@@ -217,7 +301,7 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
     # seems 'bad' https://www.w3.org/TR/rdf11-concepts/#section-triples
     #_.closure()
     #_ = OWLRL_Extension_Trimming(g2, True, True, rdfs=True)
-    #_.closure()
+    _.closure()
     # take out _offensive triples
     for bad in g2._offensive: g2.remove(bad)
     from rdflib.compare import graph_diff
