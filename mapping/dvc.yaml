@@ -23,7 +23,7 @@ stages:
       - out.ttl
 
   upload_data:
-    cmd: mapping-run-in echo #python -m graphdb.tasks upload_graph out.ttl  --name ${building}
+    cmd: mapping-run-in python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building} 
     wdir: work
     deps:
       - out.ttl
