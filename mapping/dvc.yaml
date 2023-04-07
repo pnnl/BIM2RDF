@@ -14,7 +14,7 @@ stages:
       - ../ontologies
 
   map:
-    cmd: mapping-run-in  python -m mapping.speckle --semantics=False --stream_id=${building}  # --db-file --map-file --ontology not really params for this new way
+    cmd: mapping-run-in  python -m mapping.speckle --semantics=True --stream_id=${building}  # --db-file --map-file --ontology not really params for this new way
     wdir: work
     deps:
       - ../223p

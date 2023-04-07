@@ -259,8 +259,11 @@ def closure(self):
         # I am not sure this is the right vocabulary to use for this purpose, but I haven't found anything!
         # I could, of course, come up with my own, but I am not sure that would be kosher...
         self.graph.bind("err", "http://www.daml.org/2002/03/agents/agent-ont#")
+        from rdflib import BNode, RDF
+        from owlrl.Namespaces import ERRNS
         for m in self.error_messages:
-            message = BNode()
+            break # this might be creating a problem w/ inf loop
+            message = BNode() # this creates an inf loop bc it's different each time
             self.graph.add((message, RDF.type, ERRNS.ErrorMessage))
             self.graph.add((message, ERRNS.error, Literal(m)))
 
