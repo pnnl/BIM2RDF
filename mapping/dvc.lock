@@ -1,30 +1,20 @@
 schema: '2.0'
 stages:
   map:
-    cmd: mapping-run-in inv map --db-file ../input/buildings/proto-medoffice.sqlite
-      --map-file ../input/mappings/brick/proto-medoffice/maps.yaml  --ontology brick
+    cmd: mapping-run-in  python -m mapping.speckle --semantics=False --stream_id=Pritoni
     deps:
-    - path: ../../ontologies/brick
-      md5: 34c159305303170809cbe3ba04da6a5c.dir
-      size: 726355
-      nfiles: 1
-    - path: ../input/buildings/proto-medoffice.sqlite
-      md5: 433fdd076c6058a8153cbb8ea22ebe70
-      size: 2306048
-    - path: ../input/mappings/brick/proto-medoffice/maps.yaml
-      md5: b138c9edc545dcbc83a36f228c3d5ebf
-      size: 5046
+    - path: ../../ontologies
+      md5: 5ed53b2f61aec7b9d4fed1bd6160f33e.dir
+      size: 310800450
+      nfiles: 675
+    - path: ../223p
+      md5: d18041baa9d4442f85d7c0abb680ef7c.dir
+      size: 13353
+      nfiles: 3
     outs:
-    - path: log
-      md5: 70420ddd9aa84859a6ceb0f01733100c.dir
-      size: 0
-      nfiles: 1
-    - path: mapped.ttl
-      md5: 8550273359000692616534088923f780
-      size: 1701475
-    - path: ontology.ttl
-      md5: beb7b350bb20989d33ed1388b1bde35e
-      size: 851853
+    - path: out.ttl
+      md5: 67942ddcbfbab6b94d196f053eece6ae
+      size: 82097969
   upload_ontology:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
     deps:
@@ -32,11 +22,12 @@ stages:
       md5: beb7b350bb20989d33ed1388b1bde35e
       size: 851853
   upload_data:
-    cmd: mapping-run-in inv graphdb.upload-graph --ttl mapped.ttl  --name proto-medoffice
+    cmd: graphdb-run-in python -m graphdb.tasks upload_graph out.ttl --delete=True  --name
+      Pritoni
     deps:
-    - path: mapped.ttl
-      md5: 8550273359000692616534088923f780
-      size: 1701475
+    - path: out.ttl
+      md5: 67942ddcbfbab6b94d196f053eece6ae
+      size: 82097969
   infer:
     cmd: mapping-run-in python -X utf8 owlrl_patch.py --input_syntax=turtle --maximal
       --owlrl=yes --rdfs=yes --extras=yes --axioms=yes --serialization=turtle mapped.ttl  ontology.ttl
@@ -66,3 +57,10 @@ stages:
     - path: validation.ttl
       md5: 7aa4692047e43fff72291148daaf2975
       size: 153
+  ontologies:
+    cmd: ontologies-run-in dvc repro
+    deps:
+    - path: ../ontologies
+      md5: 5ed53b2f61aec7b9d4fed1bd6160f33e.dir
+      size: 310800450
+      nfiles: 675
