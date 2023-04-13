@@ -1,3 +1,4 @@
+from rdflib import Graph
 from pyoxigraph import Store
 def og2rg(og: Store,) -> Graph:
     from io import BytesIO
