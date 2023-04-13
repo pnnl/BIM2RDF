@@ -262,8 +262,8 @@ def closure(self):
         from rdflib import BNode, RDF
         from owlrl.Namespaces import ERRNS
         for m in self.error_messages:
-            break # this might be creating a problem w/ inf loop
-            message = BNode() # this creates an inf loop bc it's different each time
+            break # ............
+            message = BNode() # ....this creates an inf loop bc it's different each time
             self.graph.add((message, RDF.type, ERRNS.ErrorMessage))
             self.graph.add((message, ERRNS.error, Literal(m)))
 
@@ -341,7 +341,7 @@ def get_data_getter(src: BytesIO | ttl | Path | Callable[[], ttl ]  ) ->  Callab
         s.bulk_load(src, 'text/turtle')
         _ = lambda _: Triples(q.triple for q in s)
         return _
-    if isinstance(src, ttl):
+    elif isinstance(src, ttl):
         _ = src.encode()
         _ = BytesIO(_)
         _ = get_data_getter(_)
