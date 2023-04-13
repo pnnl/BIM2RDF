@@ -270,15 +270,7 @@ def closure(self):
 Semantics.closure = closure
 
 
-from pyoxigraph import Store
-def og2rg(og: Store,) -> Graph:
-    from io import BytesIO
-    _ = BytesIO()
-    to = 'text/turtle'
-    og.dump(_, to)
-    _.seek(0)
-    _ = Graph().parse(_, to)
-    return _
+from .conversions import og2rg
 
 #https://github.com/oxigraph/oxrdflib/issues/22
 
