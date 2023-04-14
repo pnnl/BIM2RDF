@@ -12,6 +12,7 @@ stages:
     wdir: ../ontologies
     deps:
       - ../ontologies
+    # TODO: sequential! or dep 223pttl?
 
   map:
     cmd: mapping-run-in  python -m mapping.speckle --semantics=True --stream_id=${building}  # --db-file --map-file --ontology not really params for this new way
@@ -27,17 +28,6 @@ stages:
     wdir: work
     deps:
       - out.ttl
-
   
-  # validate:
-  #   cmd: mapping-run-in python pyshacl_err.py --shacl ../../test/${building}.ttl  -f turtle --iterate-rules --advanced -o validation.ttl  inferred.ttl
-  #   wdir: work/output
-  #   deps:
-  #     - inferred.ttl
-  #     - ../../test/${building}.ttl
-  #   outs:
-  #     - validation.ttl
-
-
 
 # test here? to actually error out if check?
