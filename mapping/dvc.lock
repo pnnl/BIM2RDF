@@ -3,18 +3,13 @@ stages:
   map:
     cmd: mapping-run-in  python -m mapping.speckle --semantics=True --stream_id=Pritoni
     deps:
-    - path: ../../ontologies
-      md5: d4187be5b43f174e929a4e782ea6c3b2.dir
-      size: 290186188
-      nfiles: 670
-    - path: ../223p
-      md5: d18041baa9d4442f85d7c0abb680ef7c.dir
-      size: 13353
-      nfiles: 3
+    - path: ../../ontologies/imported/223p.ttl
+      md5: 22426b32b5ee9c991c18ea02043f4c2e
+      size: 6927431
     outs:
     - path: out.ttl
-      md5: af2365896fc1761bdc0b84ff54e7aa70
-      size: 25150775
+      md5: bac83720901e4abeb41386b3bfc829a0
+      size: 2094251
   upload_ontology:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
     deps:
@@ -26,8 +21,8 @@ stages:
       Pritoni
     deps:
     - path: out.ttl
-      md5: af2365896fc1761bdc0b84ff54e7aa70
-      size: 25150775
+      md5: bac83720901e4abeb41386b3bfc829a0
+      size: 2094251
   infer:
     cmd: mapping-run-in python -X utf8 owlrl_patch.py --input_syntax=turtle --maximal
       --owlrl=yes --rdfs=yes --extras=yes --axioms=yes --serialization=turtle mapped.ttl  ontology.ttl
@@ -61,6 +56,6 @@ stages:
     cmd: ontologies-run-in dvc repro
     deps:
     - path: ../ontologies
-      md5: d4187be5b43f174e929a4e782ea6c3b2.dir
-      size: 290186188
+      md5: 1c6d1de47270bfad7d6188fc7d1ceef4.dir
+      size: 290181535
       nfiles: 670
