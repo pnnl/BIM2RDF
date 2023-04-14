@@ -81,13 +81,13 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGr
     return _get_speckle(stream_id, object_id)
     
     
-from .engine import Engine
+from validation.engine import Engine
 def fengine(*, rules=rules) -> Engine:
     # functions for args
-    from .engine import Engine, OxiGraph
+    from .engine import OxiGraph
     _ = Engine(
             rules(),
-            OxiGraph(), MAX_ITER=10 )
+            OxiGraph(), MAX_ITER=20 )
     return _
 
 
@@ -100,13 +100,13 @@ def engine(stream_id, *, branch_id=None, object_id=None,
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
     _ = fengine(rules=lambda: (
-                    Rules([get_speckle(stream_id, branch_id=branch_id, object_id=object_id) ])
-                    +rules(semantics=semantics)))
+                    Rules([get_speckle(stream_id, branch_id=branch_id, object_id=object_id) ,  ])
+                    +rules(semantics=semantics)
+                    ) )
     _()
     _ = _.db._store
     _.dump(str(out), 'text/turtle')
     return out
-
 
 
 if __name__ == '__main__':
