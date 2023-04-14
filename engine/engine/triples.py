@@ -134,7 +134,7 @@ class OxiGraph(b.DataBase):
         return len(self._store)
     
     def __hash__(self) -> int:
-        #return len(self._store) not strictly correct
+        # return len(self._store)#  not strictly correct
         _ = self._store
         _ = frozenset(_)
         _ = hash(_)
@@ -183,7 +183,6 @@ class SelectQuery(b.Query):
         return _
 
 
-
 class ConstructQuery(b.Query):
 
     def __init__(self, query: str) -> None:
@@ -204,7 +203,24 @@ class ConstructQuery(b.Query):
 
 
 
-class ConstructRule(b.Rule):
+dbh = set()
+class CachedRuleCall:
+
+    def __call__(self, db: OxiGraph) -> Triples:
+        #return self.do(db) #to disable
+        #h = hash((db))
+        h = hash(str(len(db))+str(hash(db._store)))
+        if h in dbh:
+            return Triples([]) # was already captured
+        else:
+            dbh.add(h)
+            return self.do(db)
+
+        
+class Rule(CachedRuleCall, b.Rule): ...
+
+
+class ConstructRule(Rule):
 
     def __init__(self, spec: ConstructQuery) -> None:
         self._spec = spec
@@ -225,7 +241,7 @@ class ConstructRule(b.Rule):
         # TODO
         return Triples([])
 
-    def __call__(self, db: OxiGraph) -> Triples:
+    def do(self, db: OxiGraph) -> Triples:
         _ = db._store.query(str(self.spec))
         assert(isinstance(_, g.QueryTriples))
         return Triples(_)
@@ -257,7 +273,7 @@ class ConstructRules(b.Rules):
         _ = Triples(_)
         return _
     
-    def __call__(self, db: OxiGraph) -> Triples:
+    def do(self, db: OxiGraph) -> Triples:
         _ = map(lambda q: q(db)._data, self.spec)
         from itertools import chain
         _ = chain.from_iterable(_)
@@ -269,10 +285,10 @@ from typing import Protocol, runtime_checkable
 @runtime_checkable
 class PyRuleCallable(Protocol):
     def __call__(self, db: OxiGraph) -> Triples:
-        ...
+        raise NotImplementedError
 #Callable[[OxiGraph], Triples]
 
-class PyRule(b.Rule):
+class PyRule(Rule):
 
     def __init__(self, spec: PyRuleCallable) -> None:
         self._spec = spec
@@ -288,7 +304,7 @@ class PyRule(b.Rule):
     def __add__(self, rule: 'PyRule') -> 'PyRules':
         return PyRules([self.spec, rule.spec])
     
-    def __call__(self, db: OxiGraph) -> Triples:
+    def do(self, db: OxiGraph) -> Triples:
         _ = self.spec(db)
         _ = Triples(_)
         return _
@@ -346,9 +362,10 @@ class Rules(b.Rules):
     
     @classmethod
     def spec2rule(cls, s: Spec) -> Rule:
-        if isinstance(s, PyRuleCallable): # :/
+        #                               plain function
+        if type(s) is type(lambda:''): # :/ weird
             return PyRule(s)
-        elif isinstance(s, ConstructQuery):
+        elif type(s) is ConstructQuery:
             return ConstructRule(s)
         else:
             raise TypeError('unknown rule type')
@@ -416,7 +433,7 @@ class Engine(b.Engine): # rule app on Store
     def db(self) -> OxiGraph:
         return self._db
     
-    def validatation(self) -> Validation:
+    def validatation(self) -> Result:
         raise NotImplementedError
     
     def crank_once(self) -> OxiGraph:
@@ -475,7 +492,6 @@ class Engine(b.Engine): # rule app on Store
 
 
 # TODO: logging versions of engine and rule
-
 
 if __name__ == '__main__':
     # consume dir for data
