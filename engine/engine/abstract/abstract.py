@@ -134,7 +134,7 @@ class Engine(ABC):
         ...
 
     @abstractmethod
-    def validatation(self) -> Validation | Validations:
+    def validate(self) -> Result:
         ...
 
     @abstractmethod

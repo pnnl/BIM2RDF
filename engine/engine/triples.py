@@ -433,8 +433,8 @@ class Engine(b.Engine): # rule app on Store
     def db(self) -> OxiGraph:
         return self._db
     
-    def validatation(self) -> Result:
-        raise NotImplementedError
+    def validate(self) -> Result:
+        raise NotImplementedError    
     
     def crank_once(self) -> OxiGraph:
         #_ = map(lambda r: r(self.db), self.rules)
@@ -483,7 +483,6 @@ class Engine(b.Engine): # rule app on Store
         return _
     
     def __call__(self) -> Result:
-        #try:
         db = self.final()
         return Result(db, True)
         #except:
