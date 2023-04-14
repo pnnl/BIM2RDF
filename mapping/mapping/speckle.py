@@ -1,14 +1,16 @@
 from .engine import Rules, Callable, OxiGraph, Triples
 
 
-def rules(semantics = True) -> Rules: #sparql mapping 'rules' for now 
+def rules(semantics = True) -> Rules: 
     from .engine import ConstructQuery, Rules, rdflib_semantics
     from . import mapping_dir
     from pathlib import Path
     _ = Path(mapping_dir).glob('**/223p/*.sparql')
     _ = map(lambda p: open(p).read(),   _)
     _ = map(ConstructQuery,             _)
+
     _ = list(_) + ([rdflib_semantics] if semantics else [])
+
     _ = Rules(_)
     return _
 
@@ -99,7 +101,6 @@ def engine(stream_id, *, branch_id=None, object_id=None,
         raise ValueError('just use ttl fmt')
     _ = fengine(rules=lambda: (
                     Rules([get_speckle(stream_id, branch_id=branch_id, object_id=object_id) ])
-                    +Rules([get_ontology('223p')])
                     +rules(semantics=semantics)))
     _()
     _ = _.db._store
