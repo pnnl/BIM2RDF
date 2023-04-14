@@ -15,6 +15,7 @@ def it():
         yield i
         i += 1
 
+#hashes = set()
 
 def _normalize_h(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
     triples = tuple(triples) # b/c i loop through it twice
@@ -34,26 +35,27 @@ def _normalize_h(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
     tohash = tohash.encode()
     tohash = md5(tohash)
     tohash = tohash.hexdigest()
+    
+    # if tohash not in hashes:
+    #     print(tohash, len(list(triples)))
+    # hashes.add(tohash);
     #tohash = len(triples)
     #print('norm', len(triples), tohash)
 
     url = f'http://deanon/{tohash}/'
     iz = iter(it())
+    bnm = {} # bn -> iz
+    # give a num to the blank nodes
+    for s, _, o in triples:
+        if isinstance(s, g.BlankNode): bnm[s] = next(iz)
+        if isinstance(o, g.BlankNode): bnm[o] = next(iz)
+        # NA really
+        if isinstance(_, g.BlankNode): bnm[_] = next(iz)
+    
     __ = []
-    for en, (s,p,o) in enumerate(triples):
-        if isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
-            if s == o:
-                s = o = g.NamedNode(f'{url}{next(iz)}')
-            else:
-                s = g.NamedNode(f'{url}{next(iz)}')
-                o = g.NamedNode(f'{url}{next(iz)}')
-        elif isinstance(s, g.BlankNode) and not isinstance(o, g.BlankNode):
-            s = g.NamedNode(f'{url}{next(iz)}')
-        elif not isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
-            o = g.NamedNode(f'{url}{next(iz)}')
-        else: # no change
-            pass
-        _ = g.Triple(s,p,o)
+    for spo in (triples):
+        _ = map(lambda s: g.NamedNode(f'{url}{bnm[s]}') if s in bnm else s, spo  )
+        _ = g.Triple(*_)
         __.append(_)
     __ = tuple(__) # immutable
     return __
