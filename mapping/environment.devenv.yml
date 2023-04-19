@@ -59,6 +59,7 @@ dependencies:
   # dev
   - ipython                     # [dev_req]
   - pip:                        # [dev_req or run_req]
+    - oxrdflib                  # [run_req]
     #- rdflib-endpoint           # [keep_here] # idk could be either but 'keep here'
     - requests-file             # [run_req] what needs this?
     - fire                      # [run_req] cli gen

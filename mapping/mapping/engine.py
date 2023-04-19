@@ -373,7 +373,7 @@ def get_shacl_triple_rules() -> SPARQLResult:
             sh:subject sh:this;
             sh:predicate ?p;
             sh:object ?o;
-            rdfs:comment ?comment;  # part of meta
+            #rdfs:comment ?comment;  # part of meta TODO: optional
         ].
     }
     """)
@@ -385,7 +385,7 @@ def get_shacl_triple_rules() -> SPARQLResult:
 
 from typing import Iterable
 def make_shacl_construct() -> Iterable[ConstructQuery]:
-    for s, p, o, comment in (get_shacl_triple_rules()):
+    for s, p, o in (get_shacl_triple_rules()):
         #PyRule()
         q = make_construct_query(
             f"?this <{p}> <{o}>.", # construct
