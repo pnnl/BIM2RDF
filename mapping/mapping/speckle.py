@@ -5,12 +5,18 @@ def rules(semantics = True) -> Rules:
     from .engine import ConstructQuery, Rules, rdflib_semantics
     from . import mapping_dir
     from pathlib import Path
+    # mappings
     _ = Path(mapping_dir).glob('**/223p/*.sparql')
     _ = map(lambda p: open(p).read(),   _)
     _ = map(ConstructQuery,             _)
 
+    # semantics
     _ = list(_) + ([rdflib_semantics] if semantics else [])
 
+    # 223p rules
+    from .engine import make_shacl_rules
+    _ = _ + list(make_shacl_rules())
+    
     _ = Rules(_)
     return _
 

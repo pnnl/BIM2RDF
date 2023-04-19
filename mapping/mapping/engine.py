@@ -326,7 +326,7 @@ from pathlib import Path
 from typing import Callable
 ttl = str
 from io import BytesIO
-def get_data_getter(src: BytesIO | ttl | Path | Callable[[], ttl ]  ) ->  Callable[[OxiGraph], Triples]:
+def get_data_getter(src: BytesIO | ttl | Path | Callable[[], ttl ]  ) ->  Callable[[OxiGraph], Triples]: # TODO: use pyrule
     from pyoxigraph import Store
     if isinstance(src, BytesIO):
         s = Store()
@@ -352,4 +352,48 @@ def get_data_getter(src: BytesIO | ttl | Path | Callable[[], ttl ]  ) ->  Callab
     else:
         raise ValueError('dont know how to get data')
 
+
+from rdflib.plugins.sparql.processor import SPARQLResult
+def get_shacl_triple_rules() -> SPARQLResult:
+    # something sh:rule [ a sh:TripleRule ;
+    #         rdfs:comment "Cooling coils will always have the role Role-Cooling" ;
+    #         sh:object s223:Role-Cooling ;
+    #         sh:predicate s223:hasRole ;
+    #         sh:subject sh:this ],
+    from rdflib import Graph
+    from ontologies import get as geto
+    o = geto('223p')
+    o = Graph().parse(o)
+    r = o.query("""
+    prefix sh: <http://www.w3.org/ns/shacl#> 
+    select ?s ?p ?o ?comment where {
+        ?s sh:rule [a sh:TripleRule;
+            sh:subject sh:this;
+            sh:predicate ?p;
+            sh:object ?o;
+            rdfs:comment ?comment;  # part of meta
+        ].
+    }
+    """)
+    return r
+
+
+from typing import Iterable
+def make_shacl_rules() -> Iterable[ConstructQuery]:
+    for s, p, o, comment in (get_shacl_triple_rules()):
+        #PyRule()
+        q = make_construct_query(
+            f"?this <{p}> <{o}>.", # construct
+            f"?this a <{s}>.")    # where
+        q = ConstructQuery(q)
+        yield q
+
+
+def make_construct_query(construct: str, where: str=""):
+    #lol @ triple brackets: two to escape. third for the var
+    _ = f"""
+    construct {{{construct}}}
+    where {{{where}}}
+    """
+    return _
 
