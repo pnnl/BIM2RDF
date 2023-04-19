@@ -14,9 +14,9 @@ def rules(semantics = True) -> Rules:
     _ = list(_) + ([rdflib_semantics] if semantics else [])
 
     # 223p rules
-    from .engine import make_shacl_rules
-    _ = _ + list(make_shacl_rules())
-    
+    from .engine import make_shacl_construct
+    _ = _ + list(make_shacl_construct())
+
     _ = Rules(_)
     return _
 

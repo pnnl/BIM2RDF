@@ -379,7 +379,7 @@ def get_shacl_triple_rules() -> SPARQLResult:
 
 
 from typing import Iterable
-def make_shacl_rules() -> Iterable[ConstructQuery]:
+def make_shacl_construct() -> Iterable[ConstructQuery]:
     for s, p, o, comment in (get_shacl_triple_rules()):
         #PyRule()
         q = make_construct_query(
