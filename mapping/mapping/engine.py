@@ -366,7 +366,9 @@ def get_shacl_triple_rules() -> SPARQLResult:
     o = Graph().parse(o)
     r = o.query("""
     prefix sh: <http://www.w3.org/ns/shacl#> 
+
     select ?s ?p ?o ?comment where {
+        ?s a sh:NodeShape.
         ?s sh:rule [a sh:TripleRule;
             sh:subject sh:this;
             sh:predicate ?p;
@@ -376,6 +378,9 @@ def get_shacl_triple_rules() -> SPARQLResult:
     }
     """)
     return r
+
+
+
 
 
 from typing import Iterable
