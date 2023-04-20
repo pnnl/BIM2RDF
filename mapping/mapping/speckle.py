@@ -6,7 +6,7 @@ def rules(semantics = True) -> Rules:
     from . import mapping_dir
     from pathlib import Path
     # mappings
-    _ = Path(mapping_dir).glob('**/223p/*.sparql')
+    _ = Path(mapping_dir).glob('**/223p/*.rq') # https://www.iana.org/assignments/media-types/application/sparql-query
     _ = map(lambda p: open(p).read(),   _)
     _ = map(ConstructQuery,             _)
 
