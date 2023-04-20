@@ -352,39 +352,156 @@ def get_data_getter(src: BytesIO | ttl | Path | Callable[[], ttl ]  ) ->  Callab
     else:
         raise ValueError('dont know how to get data')
 
+def get_shapes():
+    from rdflib import Graph
+    from ontologies import get as geto
+    o = geto('223p')
+    o = Graph().parse(o)
+    from pyshacl import ShapesGraph
+    _ = ShapesGraph(o)
+    return _
+
 
 from rdflib.plugins.sparql.processor import SPARQLResult
 def get_shacl_triple_rules() -> SPARQLResult:
+    # simple
     # something sh:rule [ a sh:TripleRule ;
     #         rdfs:comment "Cooling coils will always have the role Role-Cooling" ;
     #         sh:object s223:Role-Cooling ;
     #         sh:predicate s223:hasRole ;
     #         sh:subject sh:this ],
+    # s223:MeasuredPropertyRule a sh:NodeShape ;
+    # rdfs:comment "Associate the object of hasMeasurementLocation directly with the observed Property." ;
+    # sh:rule [ a sh:TripleRule ;
+    #         rdfs:comment "Associate the object of hasMeasurementLocation directly with the observed Property." ;
+    #         sh:object [ sh:path ( [ sh:inversePath s223:hasMeasurementLocation ] s223:observes ) ] ;
+    #         sh:predicate s223:hasProperty ;
+    #         sh:subject sh:this ],
+    from rdflib import Graph
+    from ontologies import get as geto
+    o = geto('223p')
+    o = Graph().parse(o)
+    ns = """
+    ?s a sh:NodeShape.
+    ?s sh:rule [a sh:TripleRule;
+                sh:subject sh:this;
+                sh:predicate ?p;
+                sh:object ?os
+                  ;].
+    ?os ?op ?oo.
+    """
+    nsw =ns#.replace('?o', "?_o")
+    #rdfs:comment ?comment;  # part of meta TODO: optional
+    # https://stackoverflow.com/questions/37186530/how-do-i-construct-get-the-whole-sub-graph-from-a-given-resource-in-rdf-graph
+    # wooooowww! (:|!:)* 
+    #https://gist.github.com/tomsaleeba/ff8e145b3efd1127e48baa6512df24e2
+    #?s2 (!<urn:nothing>)+ [] . # any length property path where the property != "something it will never equal" (i.e. find everything)
+    r = o.query(f"""
+    prefix sh: <http://www.w3.org/ns/shacl#>
+    #prefix : <urn:ex:>
+    construct {{{ns}}}
+    where {{{nsw}
+        #?os sh:path ?oo.
+        ?os (!<urn:never>)* [].
+        ?os ?op ?oo.
+       }}
+    """)
+    return r
+
+
+def get_shacl_sparql_rules() -> SPARQLResult:
+#     s223:CorrelatedColorTemperatureSensor a s223:Class,
+#         sh:NodeShape ;
+#     rdfs:label "Correlated color temperature sensor" ;
+#     rdfs:subClassOf s223:LightSensor ;
+#     sh:rule [ a sh:SPARQLRule ;
+#             rdfs:comment "A CorrelatedColorTemperatureSensor will always observe a Property that has a QuantityKind of ThermodynamicTemperature." ;
+#             sh:construct """\r
+# CONSTRUCT {?prop qudt:hasQuantityKind qudtqk:ThermodynamicTemperature .}\r
+# WHERE {\r
+#   $this s223:observes ?prop .\r
+# }\r
+# sh:prefixes <http://data.ashrae.org/standard223/1.0/extension/equipments-extensions-rules> ],
+# """ ;
+# prefixes
+# <http://data.ashrae.org/standard223/1.0/extension/equipments-extensions-rules>
+#   a owl:Ontology ;
+#   owl:imports <http://data.ashrae.org/standard223/1.0/model/all> ;
+#   sh:declare [
+#       sh:namespace "http://data.ashrae.org/standard223#"^^xsd:anyURI ;
+#       sh:prefix "s223" ;
+#     ] ;
+#   sh:declare [
+#       sh:namespace "http://data.ashrae.org/standard223/1.0/vocab/role#"^^xsd:anyURI ;
+#       sh:prefix "role" ;
+#     ] ;
+#   sh:declare [
+#       sh:namespace "http://qudt.org/vocab/quantitykind/"^^xsd:anyURI ;
+#       sh:prefix "qudtqk" ;
+#     ] ;
+#   sh:declare [
+#       sh:namespace "http://qudt.org/vocab/unit/"^^xsd:anyURI ;
+#       sh:prefix "unit" ;
+#     ] ;
+#   sh:declare [
+#       sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ;
+#       sh:prefix "rdfs" ;
+#     ] ;
+# .
     from rdflib import Graph
     from ontologies import get as geto
     o = geto('223p')
     o = Graph().parse(o)
     r = o.query("""
-    prefix sh: <http://www.w3.org/ns/shacl#> 
-
-    select ?s ?p ?o ?comment where {
+    prefix sh: <http://www.w3.org/ns/shacl#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+    select distinct ?q ?pfx ?ns  where {
         ?s a sh:NodeShape.
-        ?s sh:rule [a sh:TripleRule;
-            sh:subject sh:this;
-            sh:predicate ?p;
-            sh:object ?o;
+        ?s sh:rule [a sh:SPARQLRule;
+            sh:construct ?q;
             #rdfs:comment ?comment;  # part of meta TODO: optional
+            #sh:prefixes ?pfxs;   # depends on author being proper
+        ].
+        ?pfxs a owl:Ontology.
+        ?pfxs sh:declare [
+            sh:namespace ?ns;
+            sh:prefix    ?pfx;
         ].
     }
     """)
     return r
 
 
-
-
-
 from typing import Iterable
-def make_shacl_construct() -> Iterable[ConstructQuery]:
+def make_shacl_sparql_constructs(results= get_shacl_sparql_rules) -> Iterable[ConstructQuery]:
+    queries = {}
+    for q, pfx, ns in results():
+        if q not in queries:
+            queries[q] = {pfx: ns}
+        else:
+            queries[q][pfx] = ns
+    
+    # squishing everything
+    #namespaces = {}
+    #for ns in queries.values(): namespaces.update(ns)
+    #return namespaces
+    # use rdflib utils to parse the sparql construct
+    #import rdflib.plugins.sparql.parser as  sp
+    #import rdflib.plugins.sparql.algebra as sa
+    for q in queries:
+        namespaces = queries[q] #dpends on author being proper. consider getting directly from files with ontologies.namespaces
+        #namespaces = namespaces
+        _ = '\n'.join(f"PREFIX {pfx}:<{ns}>" for pfx,ns in namespaces.items() )  + str(q)
+        #_ = sp.parseQuery(_)
+        #_ = sa.translateQuery(_)
+        # weid function that uses a file
+        #_ = sa.translateAlgebra(_) # https://github.com/RDFLib/rdflib/pull/2267 eliminate file intermdiaary todo
+        _ = ConstructQuery(_)
+        yield _
+
+
+def make_shaclrule_constructs() -> Iterable[ConstructQuery]:
     for s, p, o in (get_shacl_triple_rules()):
         #PyRule()
         q = make_construct_query(
@@ -392,6 +509,7 @@ def make_shacl_construct() -> Iterable[ConstructQuery]:
             f"?this a <{s}>.")    # where
         q = ConstructQuery(q)
         yield q
+    yield from make_shacl_sparql_constructs()
 
 
 def make_construct_query(construct: str, where: str=""):
@@ -402,3 +520,107 @@ def make_construct_query(construct: str, where: str=""):
     """
     return _
 
+
+from pyshacl import Shape # ShapesGraph
+from pyshacl.helper.sparql_query_helper import SPARQLQueryHelper
+
+
+def test():
+    _ = get_shapes()
+    return _
+    for s in _.shapes:
+        _ = SPARQLQueryHelper(s, 'node', 'select_text')    
+        return _
+
+
+# https://github.com/RDFLib/pySHACL/blob/b31e9f6c667ce72ceab3e8a14cf46dcc51810045/pyshacl/helper/sparql_query_helper.py
+def shacl_path_to_sparql_path(shape: Shape, prefixes={}, recursion=0):
+    #path_val is arg
+    """
+    :param path_val:
+    :type path_val: rdflib.term.Node
+    :param recursion:
+    :type recursion: int
+    :returns: string
+    :rtype: str
+    """
+    from pyshacl.consts import (
+    OWL_PFX,
+    RDF_PFX,
+    RDFS_PFX,
+    SH,
+    OWL_Ontology,
+    RDF_type,
+    SH_alternativePath,
+    SH_inversePath,
+    SH_namespace,
+    SH_oneOrMorePath,
+    SH_prefix,
+    SH_prefixes,
+    SH_zeroOrMorePath,
+    SH_zeroOrOnePath,)
+    from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
+    import rdflib
+    #from pyshacl
+
+    sg = self.shape.sg
+    # Link: https://www.w3.org/TR/shacl/#property-paths
+    if isinstance(path_val, rdflib.URIRef):
+        string_uri = str(path_val)
+        for p, ns in self.prefixes.items():
+            if string_uri.startswith(ns):
+                string_uri = ':'.join([p, string_uri.replace(ns, '')])
+                return string_uri
+        return "<{}>".format(string_uri)
+    elif isinstance(path_val, rdflib.Literal):
+        raise ReportableRuntimeError("Values of a property path cannot be a Literal.")
+    # At this point, path_val _must_ be a BNode
+    # TODO, the path_val BNode must be value of exactly one sh:path subject in the SG.
+    if recursion >= 10:
+        raise ReportableRuntimeError("Path traversal depth is too much!")
+    sequence_list = list(sg.graph.items(path_val))
+    if len(sequence_list) > 0:
+        all_collected = []
+        for s in sequence_list:
+            seq1_string = self._shacl_path_to_sparql_path(s, recursion=recursion + 1)
+            all_collected.append(seq1_string)
+        if len(all_collected) < 2:
+            raise ReportableRuntimeError("List of SHACL sequence paths must have alt least two path items.")
+        return "/".join(all_collected)
+
+    find_inverse = set(sg.objects(path_val, SH_inversePath))
+    if len(find_inverse) > 0:
+        inverse_path = next(iter(find_inverse))
+        inverse_path_string = self._shacl_path_to_sparql_path(inverse_path, recursion=recursion + 1)
+        return "^{}".format(inverse_path_string)
+
+    find_alternatives = set(sg.objects(path_val, SH_alternativePath))
+    if len(find_alternatives) > 0:
+        alternatives_list = next(iter(find_alternatives))
+        all_collected = []
+        for a in sg.graph.items(alternatives_list):
+            alt1_string = self._shacl_path_to_sparql_path(a, recursion=recursion + 1)
+            all_collected.append(alt1_string)
+        if len(all_collected) < 2:
+            raise ReportableRuntimeError("List of SHACL alternate paths must have alt least two path items.")
+        return "|".join(all_collected)
+
+    find_zero_or_more = set(sg.objects(path_val, SH_zeroOrMorePath))
+    if len(find_zero_or_more) > 0:
+        zero_or_more_path = next(iter(find_zero_or_more))
+        zom_path_string = self._shacl_path_to_sparql_path(zero_or_more_path, recursion=recursion + 1)
+        return "{}*".format(zom_path_string)
+
+    find_zero_or_one = set(sg.objects(path_val, SH_zeroOrOnePath))
+    if len(find_zero_or_one) > 0:
+        zero_or_one_path = next(iter(find_zero_or_one))
+        zoo_path_string = self._shacl_path_to_sparql_path(zero_or_one_path, recursion=recursion + 1)
+        return "{}?".format(zoo_path_string)
+
+    find_one_or_more = set(sg.objects(path_val, SH_oneOrMorePath))
+    if len(find_one_or_more) > 0:
+        one_or_more_path = next(iter(find_one_or_more))
+        oom_path_string = self._shacl_path_to_sparql_path(one_or_more_path, recursion=recursion + 1)
+        return "{}+".format(oom_path_string)
+
+    raise NotImplementedError("That path method to get value nodes of property shapes is not yet implemented.")
