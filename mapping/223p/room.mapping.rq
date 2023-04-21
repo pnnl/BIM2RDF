@@ -1,0 +1,12 @@
+PREFIX spkl: <http://speckle.systems/>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+
+construct {
+  ?this a s223:PhysicalSpace.
+  ?this rdfs:label ?name.}
+where {
+    ?this spkl:category "Rooms".
+    ?this spkl:name ?name.}
