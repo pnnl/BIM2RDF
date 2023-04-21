@@ -265,7 +265,7 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     #data, shacl=None, ontology=None,
     #advanced=False):
     _ = og2rg(db._store)
-    _ = shacl(_, shacl=ontology(), advanced=True )
+    _ = shacl(_, shacl=ontology(), advanced=True, iterate_rules=True )
     _ = _.generated
     _ = rg2og(_)
     _ = Triples(q.triple for q in _)
