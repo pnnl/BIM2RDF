@@ -23,7 +23,7 @@ def graph(g) -> Graph:
 
 def shacl(
     data, shacl=None, ontology=None,
-    advanced=False):
+    advanced=False, iterate_rules=False):
     #    self,
     #     data_graph: GraphLike,
     #     *args,
@@ -32,11 +32,12 @@ def shacl(
     #     options: Optional[dict] = None,
     #     **kwargs,
     from pyshacl.validate import Validator as _Validator
+    data = graph(data)
     v = _Validator(
-            graph(data),
+            data,
             shacl_graph=graph(shacl,)   if shacl    else None,
             ont_graph=graph(ontology)   if ontology else None,
-            options={'advanced': advanced}
+            options={'advanced': advanced, 'iterate_rules': iterate_rules}
             )
     from types import SimpleNamespace as NS
     validation = v.run() # (not nonconform), report:graph, text
