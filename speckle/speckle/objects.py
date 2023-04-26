@@ -51,7 +51,8 @@ def contextualize(d: dict) -> dict:
         '@vocab':       base_uri(),
         '@base':        base_uri(),
         'referencedId': '@id',
-        'id':           '@id'
+        'id':           '@id',
+        "data":         {"@container": "@list"}  # assumption: all data keys are lists!
         }
     if isinstance(d, dict):
         d['@context'] =  context
@@ -97,6 +98,7 @@ def rdf(d):
             'id':'o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
             'Outside': 'sdf',
             'inside': [
+                {'id': 'dataid', 'data': list(range(3))+list(range(3))  }, # assumes set w/o @container:@list
                 {'id': 'i1', 
                 'p': 3},
                 {'referencedId': 'rid', 'speckle_type': 'whatever' }, 
