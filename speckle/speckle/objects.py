@@ -13,6 +13,15 @@ parsing = NS(
 )
 
 
+def find_list_fields(d: dict):
+    #d = {'n': 3, 'nested': {'nl': [], 'n':3 } }
+
+    for m in parsing.fields.find(d):
+        k = str(m.path)
+        if isinstance(m.value, list):
+            yield k
+
+
 def sample_json():
     _ = open('.json').read()
     import json
@@ -52,8 +61,10 @@ def contextualize(d: dict) -> dict:
         '@base':        base_uri(),
         'referencedId': '@id',
         'id':           '@id',
-        "data":         {"@container": "@list"}  # assumption: all data keys are lists!
+        #"data":         {"@container": "@list"}  # assumption: all data keys are lists!
         }
+    # assumption: keys are consistantly lists
+    for lf in find_list_fields(d): context[lf] = {"@container": "@list"}; del lf
     if isinstance(d, dict):
         d['@context'] =  context
     elif isinstance(d, list):
