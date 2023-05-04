@@ -131,27 +131,6 @@ def meshesq(list_selector, graph=None) -> query:
 
 
 
-def translationq(speckle_category=None, graph=None) -> query:
-    _ = f"""
-    PREFIX spkl: <{base_uri()}>
-
-    select ?s  (count(?f)-1 as ?pos) ?xyz {from_graph(graph)}
-    where {{
-    
-    {speckle_categoryq(speckle_category)}
-    ?s (!<urn:nothappening>)*/spkl:matrix ?m.
-    
-    ?m rdf:rest* ?f. ?f rdf:rest* ?n.
-    ?n rdf:first ?xyz.
-
-    }}
-    group by ?s ?m ?n ?xyz
-    order by ?s ?m ?pos
-    """
-    _ = query(_)
-    return _
-
-
 from .engine import OxiGraph, Triples
 def mesh_assignment(db: OxiGraph, cat1, cat2) -> Triples:
     def mqr(category, lst2arr):
