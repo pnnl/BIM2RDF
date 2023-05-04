@@ -63,9 +63,19 @@ def matmul(a,b):
 class query(str): pass
 
 
-def speckle_categoryq(cat) -> str:
-    _ =  f'?s spkl:category "{cat}".' if cat else ""
+def list_selector(cat) -> str:
+    catl = f'\n ?s spkl:category "{cat}".'
+    to_list = '\n ?s spkl:displayValue/(!<urn:nothappening>)*/spkl:vertices/(!<urn:nothappening>)*/spkl:data ?vl.'
+    _ =  ''
+    _ += catl
+    if cat == "Lighting Fixtures":
+        _ += '\n ?s spkl:definition ?d.'
+        _ += to_list.replace('?s', '?d')
+    else:
+        _ += to_list
+
     return _
+
 
 def from_graph(graph:str=''):
     return ('from'+graph) if graph else ''
@@ -73,9 +83,7 @@ def from_graph(graph:str=''):
 
 from speckle import base_uri
 
-
-def meshesq(speckle_category=None, graph=None) -> query:
-    # just go into the graph for the list
+def meshesq(list_selector, graph=None) -> query:
     _ = f"""
     PREFIX spkl: <{base_uri()}>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -83,31 +91,9 @@ def meshesq(speckle_category=None, graph=None) -> query:
     select ?s ?vl  (count(?f)-1 as ?pos) ?xyz {from_graph(graph)}
     where {{
     
-    {speckle_categoryq(speckle_category)}
-    ?s (!<urn:nothappening>)* ?m.  # connect ?s to the mesh in any way
-
-    ?m spkl:speckle_type "Objects.Geometry.Mesh".
-    ?m spkl:vertices/spkl:data* ?vl.
-    #?vl rdf:rest*/rdf:first ?xyz.  # order not guaranteed!
-    ?vl rdf:rest* ?f. ?f rdf:rest* ?n. # conects (first, next) ptrs to data list
-    ?n rdf:first ?xyz.
-
-    }}
-    group by ?s ?vl ?n ?xyz
-    order by ?vl ?pos
-    """
-    _ = f"""
-    PREFIX spkl: <{base_uri()}>
-    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-    select ?s ?vl  (count(?f)-1 as ?pos) ?xyz {from_graph(graph)}
-    where {{
-    
-    {speckle_categoryq(speckle_category)}
+    {list_selector}
     # path 'parts' must contain: dispalyValue, vertices, and data
     # connect them in whatever way
-    # why not in  sparql can do like filepath wildcards?? .../*/...
-    ?s spkl:displayValue/(!<urn:nothappening>)*/spkl:vertices/(!<urn:nothappening>)*/spkl:data ?vl.  # connect to displayValue
     #?m spkl:speckle_type "Objects.Geometry.Mesh".
     #?dc spkl:speckle_type "Speckle.Core.Models.DataChunk".
     #?m  spkl:vertices ?vl.
@@ -121,6 +107,7 @@ def meshesq(speckle_category=None, graph=None) -> query:
     group by ?s ?vl ?n ?xyz
     order by ?vl ?pos
     """
+    print(_)
     _ = query(_)
     return _
 
@@ -166,21 +153,27 @@ def translationq(speckle_category=None, graph=None) -> query:
 
 
 from .engine import OxiGraph, Triples
-def mesh_assignment(db: OxiGraph, point_catogory, mesh_category) -> Triples:
+def mesh_assignment(db: OxiGraph, cat1, cat2) -> Triples:
     def mqr(category):
+        from numpy import  array
         from collections import defaultdict
         mr = defaultdict(lambda : defaultdict(list))
-        _ = db._store.query(meshesq(category))
+        selector = list_selector(category)
+        _ = db._store.query(meshesq(selector))
         for thing, lst, i, xyz in _: mr[thing][lst].append(xyz)
         from itertools import chain
         for thing, lsts in mr.items():
             _ = chain.from_iterable(lsts.values())
             _ = map(lambda _: float(_.value ), _)
-            _ = list_to_pts(_)
+            _ = tuple(_)
+            _ = array(_)
+            _ = _.reshape(-1, 3)
             mr[thing] = _
         return mr
-    mr = mqr(mesh_category)
-    return mr
+    return mqr(cat1)
+    c2r = mqr(cat2)
+    c1r = mqr(cat1)
+    return c1r
     # for lighting fixtures i think the same mesh can be pointed to by
     #for pt, x, y, z in _:
         #return pt
