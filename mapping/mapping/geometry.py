@@ -130,24 +130,6 @@ def meshesq(list_selector, graph=None) -> query:
     return _
 
 
-# https://github.com/specklesystems/speckle-sharp/issues/1774
-# deprecated
-def baseptq(speckle_category=None, graph=None) -> query:
-    _ = f"""
-      PREFIX spkl: <http://speckle.systems/>
-      select ?p ?x ?y ?z {from_graph(graph)}
-        where {{
-        {speckle_categoryq(speckle_category)}
-        ?s (!<urn:nothappening>)* ?p. 
-
-        ?p spkl:basePoint/spkl:x ?x.
-        ?p spkl:basePoint/spkl:y ?y.
-        ?p spkl:basePoint/spkl:z ?z.
-        }}
-    """
-    _ = query(_)
-    return _
-
 
 def translationq(speckle_category=None, graph=None) -> query:
     _ = f"""
@@ -192,11 +174,7 @@ def mesh_assignment(db: OxiGraph, cat1, cat2) -> Triples:
             _ = _.reshape(*shape)
             mr[thing] = _
         return mr
-    return mqr("Lighting Fixtures", 'vertices')
-    c2r = mqr(cat2)
-    c1r = mqr(cat1)
-    return c1r
-    # for lighting fixtures i think the same mesh can be pointed to by
+    
     #for pt, x, y, z in _:
         #return pt
         #for thing, pts in mr.items():
