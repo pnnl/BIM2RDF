@@ -62,19 +62,38 @@ def matmul(a,b):
 
 class query(str): pass
 
+from typing import Literal
+def list_selector(cat: str, cat_to_list: Literal['vertices'] | Literal['transform'] ) -> str:
+    #                                    could still add faces here TODO
+    # room vertices
+    #?s spkl:category "Rooms".
+    # ?s spkl:displayValue/(!<urn:nothappening>)*/spkl:vertices/(!<urn:nothappening>)*/spkl:data ?vl.
+    
+    # lighitng fixture vertices
+    #?s spkl:category "Lighting Fixtures".
+    #?s spkl:definition/spkl:displayValue/(!<urn:nothappening>)*/spkl:vertices/(!<urn:nothappening>)*/spkl:data ?vl.
+    
+    # lighting fixture transform
+    #?s spkl:category "Lighting Fixtures".
+    #?s spkl:transform/spkl:matrix ?vl.
 
-def list_selector(cat) -> str:
+    # pattern: 1. category spec 2. cat2list
+    # defaults
     catl = f'\n ?s spkl:category "{cat}".'
-    to_list = '\n ?s spkl:displayValue/(!<urn:nothappening>)*/spkl:vertices/(!<urn:nothappening>)*/spkl:data ?vl.'
-    _ =  ''
-    _ += catl
-    if cat == "Lighting Fixtures":
-        _ += '\n ?s spkl:definition ?d.'
-        _ += to_list.replace('?s', '?d')
+    _to_list = 'spkl:displayValue/(!<urn:nothappening>)*/spkl:vertices/(!<urn:nothappening>)*/spkl:data ?vl.'
+    if cat_to_list == 'vertices':
+        to_list = "?s " +  _to_list
     else:
-        _ += to_list
+        assert(cat_to_list == 'transform')
+        to_list = "?s spkl:transform/spkl:matrix ?vl."
 
-    return _
+    # specific
+    if (cat == 'Lighting Fixtures') and (cat_to_list == 'vertices'):
+        to_list = "?s spkl:definition/"+_to_list
+    
+    assert('?s' in catl)
+    assert('?s' in to_list)
+    return '\n'.join([catl, to_list])
 
 
 def from_graph(graph:str=''):
@@ -107,7 +126,6 @@ def meshesq(list_selector, graph=None) -> query:
     group by ?s ?vl ?n ?xyz
     order by ?vl ?pos
     """
-    print(_)
     _ = query(_)
     return _
 
@@ -154,23 +172,27 @@ def translationq(speckle_category=None, graph=None) -> query:
 
 from .engine import OxiGraph, Triples
 def mesh_assignment(db: OxiGraph, cat1, cat2) -> Triples:
-    def mqr(category):
+    def mqr(category, lst2arr):
         from numpy import  array
         from collections import defaultdict
         mr = defaultdict(lambda : defaultdict(list))
-        selector = list_selector(category)
+        selector = list_selector(category, lst2arr)
         _ = db._store.query(meshesq(selector))
         for thing, lst, i, xyz in _: mr[thing][lst].append(xyz)
         from itertools import chain
+        if   lst2arr == 'vertices':     shape = (-1, 3)
+        elif lst2arr == 'transform':    shape = (4,4)
+        else:                           shape = (-1,) # nothing
+        #else: raise ValueError(f'unknown list2  {lst}')
         for thing, lsts in mr.items():
             _ = chain.from_iterable(lsts.values())
             _ = map(lambda _: float(_.value ), _)
             _ = tuple(_)
             _ = array(_)
-            _ = _.reshape(-1, 3)
+            _ = _.reshape(*shape)
             mr[thing] = _
         return mr
-    return mqr(cat1)
+    return mqr("Lighting Fixtures", 'vertices')
     c2r = mqr(cat2)
     c1r = mqr(cat1)
     return c1r
