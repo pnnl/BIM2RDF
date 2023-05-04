@@ -102,7 +102,7 @@ def from_graph(graph:str=''):
 
 from speckle import base_uri
 
-def meshesq(list_selector, graph=None) -> query:
+def geoq(list_selector, graph=None) -> query:
     _ = f"""
     PREFIX spkl: <{base_uri()}>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -130,35 +130,42 @@ def meshesq(list_selector, graph=None) -> query:
     return _
 
 
+from .engine import OxiGraph
+def category_array(db: OxiGraph, category, lst2arr):
+    from numpy import  array
+    from collections import defaultdict
+    mr = defaultdict(lambda : defaultdict(list))
+    selector = list_selector(category, lst2arr)
+    _ = db._store.query(geoq(selector))
+    for thing, lst, i, xyz in _: mr[thing][lst].append(xyz)
+    from itertools import chain
+    if   lst2arr == 'vertices':     shape = (-1, 3)
+    elif lst2arr == 'transform':    shape = (4,4)
+    else:                           shape = (-1,) # nothing
+    #else: raise ValueError(f'unknown list2  {lst}')
+    for thing, lsts in mr.items():
+        _ = chain.from_iterable(lsts.values())
+        _ = map(lambda _: float(_.value ), _)
+        _ = tuple(_)
+        _ = array(_)
+        _ = _.reshape(*shape)
+        mr[thing] = _
+    return mr
 
-from .engine import OxiGraph, Triples
-def mesh_assignment(db: OxiGraph, cat1, cat2) -> Triples:
-    def mqr(category, lst2arr):
-        from numpy import  array
-        from collections import defaultdict
-        mr = defaultdict(lambda : defaultdict(list))
-        selector = list_selector(category, lst2arr)
-        _ = db._store.query(meshesq(selector))
-        for thing, lst, i, xyz in _: mr[thing][lst].append(xyz)
-        from itertools import chain
-        if   lst2arr == 'vertices':     shape = (-1, 3)
-        elif lst2arr == 'transform':    shape = (4,4)
-        else:                           shape = (-1,) # nothing
-        #else: raise ValueError(f'unknown list2  {lst}')
-        for thing, lsts in mr.items():
-            _ = chain.from_iterable(lsts.values())
-            _ = map(lambda _: float(_.value ), _)
-            _ = tuple(_)
-            _ = array(_)
-            _ = _.reshape(*shape)
-            mr[thing] = _
-        return mr
-    
+
+def are_objs_inside(db: OxiGraph, cat1, cat2):
+    # general case
+
+    # maybe special cases
+    #if (cat1 == 'Lighting Fixtures') and (cat2 == 'Rooms'):
+
+
     #for pt, x, y, z in _:
         #return pt
         #for thing, pts in mr.items():
          #   if is_point_inside_points((x,y,z), pts):
           #      yield pt, thing
+
 
 
 def test():
