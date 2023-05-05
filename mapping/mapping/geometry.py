@@ -127,7 +127,7 @@ def compare(db: OxiGraph, cat1, cat2,):
         yield o1, o2, in_hull(np.array([rep_pt1]), geo2)
 
 
-def get_obj_assignment(db: OxiGraph, cat1, cat2):
+def get_obj_assignment_dict(db: OxiGraph, cat1, cat2) -> dict:
     _ = compare(db, cat1, cat2)
     from collections import defaultdict
     inside = defaultdict(list)
@@ -136,8 +136,41 @@ def get_obj_assignment(db: OxiGraph, cat1, cat2):
         best = sorted(cs, key=lambda oc: score(oc[1]) )[-1]
         #                       consider 0 or None as total failue
         inside[o1] = best[0] if score(best[1]) else None
+
     return inside
 
+
+from functools import cache
+@cache
+def get_uri():
+    ontology='223p' # TODO: std refs to s223
+    from ontologies import get, namespaces
+    _ = ontology
+    _ = get(_)
+    _ = [ns for ns in namespaces() if ns.path == _]
+    _ = _[0]
+    _ = _.namespaces()
+    _ = [ns for ns in _ if ns.prefix == 's223']
+    _ = _[0]
+    _ = _.uri
+    return _
+
+
+from .engine import Triples
+def assigment_triples(d: dict) -> Triples:
+    import pyoxigraph as og
+    u = get_uri()
+    _ = [og.Triple(o1, og.NamedNode(u+'contains'), o2) for o1,o2 in d.items()]
+    _ = Triples(_)
+    return _
+
+
+from typing import Callable
+def get_obj_assignment_rule(db: OxiGraph, cat1, cat2) -> Callable[[OxiGraph], Triples]:
+    # o1 contains o2
+    #_ = [ in inside]
+    TODO
+    return _
 
 
 def test():
@@ -145,5 +178,6 @@ def test():
     _ = Store()
     _.bulk_load('./work/out.ttl', 'text/turtle')
     _ =  OxiGraph(_)
-    _ = get_obj_assignment(_ , "Lighting Fixtures", "Rooms")
+    _ = get_obj_assignment_dict(_ , "Lighting Fixtures", "Rooms")
+    _ = assigment_triples(_)
     return _
