@@ -1,56 +1,4 @@
 
-import numpy as np
-def is_point_inside_points(
-        pt:  np.ndarray,
-        pts: np.ndarray) \
-    -> bool:
-    """inside ...or touching"""
-    if len(pts) < 2:
-        raise ValueError('need at least two pts to make sense')
-    mins = pts.min(0)
-    maxs = pts.max(0)
-    cond = mins <= pt <= maxs
-    if all(cond):
-        return True
-    else:
-        return False
-
-
-def minmax_xyz(pts, coord='z', mm='min'):
-    # some representative pt
-    assert(mm in {'min', 'max'})
-    xyz2i = {xyz:i for i,xyz in enumerate('xyz') }
-    _ = sorted(pts, key=lambda p: p[xyz2i[coord]] )
-    if mm == 'min':
-        return _[0]
-    else:
-        return _[-1]
-    raise ValueError
-
-
-def list_to_pts(l):
-    l = list(l)
-    assert(not len(l) % 3)
-    # take every 3rd
-    xs = (l)[0::3]
-    ys = (l)[1::3]
-    zs = (l)[2::3]
-    _ = zip(xs, ys, zs)
-    _ = list(_)
-    return _
-
-
-def matmul(a,b):
-    ar,ac = a.shape # n_rows * n_cols
-    br,bc = b.shape # n_rows * n_cols
-    assert ac==br # rows == columns
-    #c = torch.zeros(ar, bc)
-    for i in range(ar):
-        for j in range(bc):
-            for k in range(ac): # or br
-                c[i,j] += a[i,k] * b[k,j]
-    return c
-
 
 class query(str): pass
 
@@ -167,6 +115,7 @@ def score(comparison):
 
 
 def compare(db: OxiGraph, cat1, cat2,):
+    import numpy as np
     # generic approach: convex hull with all points of c1
     # but shortcut here is to just use the transform pt
     from itertools import product
