@@ -158,11 +158,13 @@ def in_hull(p, hull):
     from scipy.spatial import Delaunay
     if not isinstance(hull,Delaunay):
         hull = Delaunay(hull)
-    return hull.find_simplex(p)>=0
+    return hull.find_simplex(p)>=0 # test if inside
+
 
 def score(comparison):
     s = sum(comparison)
-    return s
+    return s # could be 0
+
 
 def compare(db: OxiGraph, cat1, cat2,):
     # generic approach: convex hull with all points of c1
@@ -176,20 +178,23 @@ def compare(db: OxiGraph, cat1, cat2,):
         yield o1, o2, in_hull(np.array([rep_pt1]), geo2)
 
 
+def get_obj_assignment(db: OxiGraph, cat1, cat2):
+    _ = compare(db, cat1, cat2)
+    from collections import defaultdict
+    inside = defaultdict(list)
+    for o1, o2, c in tuple(_): inside[o1].append((o2, c))
+    for o1, cs in inside.items():
+        best = sorted(cs, key=lambda oc: score(oc[1]) )[-1]
+        #                       consider 0 or None as total failue
+        inside[o1] = best[0] if score(best[1]) else None
+    return inside
+
+
 
 def test():
     from pyoxigraph import Store
     _ = Store()
     _.bulk_load('./work/out.ttl', 'text/turtle')
     _ =  OxiGraph(_)
-    _ = compare(_, 'Lighting Fixtures', 'Rooms')
-    from collections import defaultdict
-    inside = defaultdict(list)
-    _ = tuple(_)
-    for o1, o2, c in _: inside[o1].append((o2, c))
-    for o1, ds in inside.items():
-        best = sorted(ds, key=lambda od: score(od[1]) )[-1]
-        inside[o1] = best if best else None
-    return inside
-    _ = mesh_assignment(_ , "Lighting Fixtures", "Rooms")
+    _ = get_obj_assignment(_ , "Lighting Fixtures", "Rooms")
     return _
