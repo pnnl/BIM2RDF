@@ -1,23 +1,15 @@
-from typing import Tuple, Iterable
 
-Point = Tuple[float, float, float]
+import numpy as np
 def is_point_inside_points(
-        pt:             Point,
-        pts: Iterable[  Point ]) \
+        pt:  np.ndarray,
+        pts: np.ndarray) \
     -> bool:
     """inside ...or touching"""
     if len(pts) < 2:
         raise ValueError('need at least two pts to make sense')
-    mnx = min(p[0] for p in pts)
-    mny = min(p[1] for p in pts)
-    mnz = min(p[2] for p in pts)
-    mxx = max(p[0] for p in pts)
-    mxy = max(p[1] for p in pts)
-    mxz = max(p[2] for p in pts)
-    cond = [
-        (mnx <= pt[0] <= mxx),
-        (mny <= pt[1] <= mxy),
-        (mnz <= pt[2] <= mxz),]
+    mins = pts.min(0)
+    maxs = pts.max(0)
+    cond = mins <= pt <= maxs
     if all(cond):
         return True
     else:
@@ -153,18 +145,35 @@ def category_array(db: OxiGraph, category, lst2arr):
     return mr
 
 
-def are_objs_inside(db: OxiGraph, cat1, cat2):
-    # general case
+def in_hull(p, hull):
+    #https://stackoverflow.com/questions/16750618/whats-an-efficient-way-to-find-if-a-point-lies-in-the-convex-hull-of-a-point-cl/16898636#16898636
+    """
+    Test if points in `p` are in `hull`
 
-    # maybe special cases
-    #if (cat1 == 'Lighting Fixtures') and (cat2 == 'Rooms'):
+    `p` should be a `NxK` coordinates of `N` points in `K` dimensions
+    `hull` is either a scipy.spatial.Delaunay object or the `MxK` array of the 
+    coordinates of `M` points in `K`dimensions for which Delaunay triangulation
+    will be computed
+    """
+    from scipy.spatial import Delaunay
+    if not isinstance(hull,Delaunay):
+        hull = Delaunay(hull)
+    return hull.find_simplex(p)>=0
 
+def score(comparison):
+    s = sum(comparison)
+    return s
 
-    #for pt, x, y, z in _:
-        #return pt
-        #for thing, pts in mr.items():
-         #   if is_point_inside_points((x,y,z), pts):
-          #      yield pt, thing
+def compare(db: OxiGraph, cat1, cat2,):
+    # generic approach: convex hull with all points of c1
+    # but shortcut here is to just use the transform pt
+    from itertools import product
+    for (o1, geo1), (o2, geo2) in product(
+                                category_array(db, cat1, 'transform').items(),
+                                category_array(db, cat2, 'vertices').items() ):
+        rep_pt1 = (geo1[xyz][-1] for xyz in range(3)) # just taking the translation part
+        rep_pt1 = tuple(rep_pt1)
+        yield o1, o2, in_hull(np.array([rep_pt1]), geo2)
 
 
 
@@ -173,5 +182,14 @@ def test():
     _ = Store()
     _.bulk_load('./work/out.ttl', 'text/turtle')
     _ =  OxiGraph(_)
+    _ = compare(_, 'Lighting Fixtures', 'Rooms')
+    from collections import defaultdict
+    inside = defaultdict(list)
+    _ = tuple(_)
+    for o1, o2, c in _: inside[o1].append((o2, c))
+    for o1, ds in inside.items():
+        best = sorted(ds, key=lambda od: score(od[1]) )[-1]
+        inside[o1] = best if best else None
+    return inside
     _ = mesh_assignment(_ , "Lighting Fixtures", "Rooms")
     return _
