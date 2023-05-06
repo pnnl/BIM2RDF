@@ -55,6 +55,9 @@ dependencies:
   # need graph expansion (owlrl) and validation (pyshacl)
   - pyshacl                     # [run_req]
   - owlrl                       # [run_req]
+  # geometry
+  - numpy                       # [run_req] 
+  - scipy                       # [run_req]
 
   # dev
   - ipython                     # [dev_req]
