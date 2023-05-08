@@ -1,15 +1,19 @@
-
 PREFIX spkl: <http://speckle.systems/>
 PREFIX unit: <http://qudt.org/vocab/unit/>
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix brick: <https://brickschema.org/schema/Brick#>
+PREFIX brick: <https://brickschema.org/schema/Brick#>
 
+
+# see query in  geometry.py
 construct {
-  
   ?this a s223:Luminaire.
   ?this rdfs:label ?number .}
- where {
-     ?this spkl:category  "Lighting Fixtures".
-     ?this spkl:elementId ?number.}
-
+where {
+    # particularly the data that's under definition
+     # since the 'lighting fixture' category
+     # shows up in multiple places under 'Network'
+    ?this spkl:definition ?_.
+    ?this spkl:category "Lighting Fixtures".
+    ?this spkl:elementId ?number.
+}

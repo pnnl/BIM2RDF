@@ -4,12 +4,20 @@ stages:
     cmd: mapping-run-in  python -m mapping.speckle --semantics=True --stream_id=Pritoni
     deps:
     - path: ../../ontologies/imported/223p.ttl
-      md5: 22426b32b5ee9c991c18ea02043f4c2e
-      size: 6927431
+      md5: ee646eb64e6011cab48e2f4c491a4b5a
+      size: 30597014
+    - path: ../223p
+      md5: 4b9228104136fdd9eae211e33f53b139.dir
+      size: 13947
+      nfiles: 4
+    - path: ../mapping
+      md5: e1d58874f408c4f5cd85d9a5d44f87fc.dir
+      size: 85627
+      nfiles: 22
     outs:
     - path: out.ttl
-      md5: bac83720901e4abeb41386b3bfc829a0
-      size: 2094251
+      md5: 231db51c56aaa444690fb9b24bc36756
+      size: 14078434
   upload_ontology:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
     deps:
@@ -21,8 +29,8 @@ stages:
       Pritoni
     deps:
     - path: out.ttl
-      md5: bac83720901e4abeb41386b3bfc829a0
-      size: 2094251
+      md5: 9c8ab26e18607b2a1d5496274f66155b
+      size: 13619397
   infer:
     cmd: mapping-run-in python -X utf8 owlrl_patch.py --input_syntax=turtle --maximal
       --owlrl=yes --rdfs=yes --extras=yes --axioms=yes --serialization=turtle mapped.ttl  ontology.ttl
@@ -59,3 +67,10 @@ stages:
       md5: 1c6d1de47270bfad7d6188fc7d1ceef4.dir
       size: 290181535
       nfiles: 670
+  upload:
+    cmd: graphdb-run-in python -m graphdb.tasks upload_graph out.ttl --delete=True  --name
+      Pritoni
+    deps:
+    - path: out.ttl
+      md5: 231db51c56aaa444690fb9b24bc36756
+      size: 14078434
