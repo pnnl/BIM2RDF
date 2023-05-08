@@ -1,12 +1,9 @@
 stages:
 # or just have it as a manual cmd?
 # use foreach? param sweep discussion https://github.com/iterative/dvc/pull/8187
-  #data:
-  #  cmd: dvc pull ../input/buildings/${building}.sqlite                       # TODO: make sure it's the same as map-file above
-  #  wdir: work/output
 
   map:
-    cmd: mapping-run-in  python -m mapping.speckle --semantics=True --stream_id=${building}  # --db-file --map-file --ontology not really params for this new way
+    cmd: mapping-run-in  python -m mapping.speckle --semantics=True --stream_id=${building} 
     wdir: work
     deps:
       - ../../ontologies/imported/223p.ttl
@@ -15,7 +12,7 @@ stages:
     outs:
       - out.ttl
 
-  upload_data:
+  upload:
     cmd: graphdb-run-in python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
     wdir: work
     deps:
