@@ -50,7 +50,7 @@ def url_quote(d: dict) -> dict:
     return d
 
 
-base_uri = lambda: 'http://speckle.systems/'
+from . import base_uri
 
 def contextualize(d: dict) -> dict:
     #"@context": {"@vocab": "http://speckle.systems/", "@base":"http://speckle.systems/", "id": "@id", "referencedId": "@id" },
