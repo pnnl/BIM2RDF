@@ -10,11 +10,12 @@ stages:
     wdir: work
     deps:
       - ../../ontologies/imported/223p.ttl
+      - ../223p
     outs:
       - out.ttl
 
   upload_data:
-    cmd: graphdb-run-in python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building} 
+    cmd: graphdb-run-in python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
     wdir: work
     deps:
       - out.ttl
