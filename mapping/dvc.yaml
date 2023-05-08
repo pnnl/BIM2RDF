@@ -11,6 +11,7 @@ stages:
     deps:
       - ../../ontologies/imported/223p.ttl
       - ../223p
+      - ../mapping
     outs:
       - out.ttl
 
