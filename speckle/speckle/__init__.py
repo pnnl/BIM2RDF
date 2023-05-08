@@ -1,0 +1,1 @@
+base_uri = lambda: 'http://speckle.systems/'

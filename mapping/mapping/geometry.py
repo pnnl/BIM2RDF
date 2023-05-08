@@ -160,24 +160,17 @@ from .engine import Triples
 def assigment_triples(d: dict) -> Triples:
     import pyoxigraph as og
     u = get_uri()
-    _ = [og.Triple(o1, og.NamedNode(u+'contains'), o2) for o1,o2 in d.items()]
+    _ = [og.Triple(o2, og.NamedNode(u+'contains'), o1) for o1,o2 in d.items()]
     _ = Triples(_)
     return _
 
 
 from typing import Callable
-def get_obj_assignment_rule(db: OxiGraph, cat1, cat2) -> Callable[[OxiGraph], Triples]:
+def get_obj_assignment_rule(cat1, cat2) -> Callable[[OxiGraph], Triples]:
     # o1 contains o2
-    #_ = [ in inside]
-    TODO
-    return _
+    def r(db: OxiGraph,) -> Triples:
+        _ = get_obj_assignment_dict(db, cat1, cat2)
+        _ = assigment_triples(_)
+        return _
+    return r
 
-
-def test():
-    from pyoxigraph import Store
-    _ = Store()
-    _.bulk_load('./work/out.ttl', 'text/turtle')
-    _ =  OxiGraph(_)
-    _ = get_obj_assignment_dict(_ , "Lighting Fixtures", "Rooms")
-    _ = assigment_triples(_)
-    return _

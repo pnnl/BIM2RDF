@@ -9,6 +9,10 @@ def rules(semantics = True) -> Rules:
     _ = Path(mapping_dir).glob('**/223p/*.rq') # https://www.iana.org/assignments/media-types/application/sparql-query
     _ = map(lambda p: open(p).read(),   _)
     _ = map(ConstructQuery,             _)
+    # geometry
+    from .geometry import get_obj_assignment_rule
+    _ = list(_)
+    _ = _ + [get_obj_assignment_rule('Lighting Fixtures', 'Rooms')]
 
     # semantics
     _ = list(_) + ([rdflib_semantics] if semantics else [])
