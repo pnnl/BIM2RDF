@@ -93,7 +93,7 @@ def category_array(db: OxiGraph, category, lst2arr):
     return mr
 
 
-def in_hull(p, hull):
+def in_hull(p, hull): # todo: concave hull
     #https://stackoverflow.com/questions/16750618/whats-an-efficient-way-to-find-if-a-point-lies-in-the-convex-hull-of-a-point-cl/16898636#16898636
     """
     Test if points in `p` are in `hull`
