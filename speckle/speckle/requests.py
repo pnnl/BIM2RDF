@@ -14,7 +14,7 @@ class TokenAuth(AuthBase):
 #requests_cache.install_cache('http_cache', allowable_methods={'GET', 'HEAD', 'POST'})
 def get_cached_session():
     from pathlib import Path
-    db_file = Path(__file__)/'..'/ '..' / 'http_cache'
+    db_file = Path(__file__).parent.parent/'http_cache'
     db_file = str(db_file)
     import requests_cache
     _ = requests_cache.CachedSession(

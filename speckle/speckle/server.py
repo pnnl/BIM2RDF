@@ -28,7 +28,7 @@ def test():
 def apikey():
     import json
     from pathlib import Path
-    _ = open(Path(__file__) / '..' / '..'  /'secret.json')
+    _ = open(Path(__file__).parent.parent/'secret.json')
     _  = json.load(_)
     _ = _['speckl_token']
     return _
