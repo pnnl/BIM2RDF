@@ -24,5 +24,6 @@ members = [
     "project",
     "project_azure", 
     "project_dvc",
+    #"notebooking"
     ]
     # "ontology" has a problem
