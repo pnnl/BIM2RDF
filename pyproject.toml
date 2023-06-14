@@ -25,6 +25,6 @@ members = [
     "project_azure", 
     "project_dvc",
     #"notebooking" 
-    "ontology",# "ontology" has a problem
+    "ontologies",
     "ontoenv",
     ]
