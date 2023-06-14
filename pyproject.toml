@@ -18,3 +18,6 @@ managed = true
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.rye.workspace]
+members = ["ontologies"] # pass over this as there is a problem.
