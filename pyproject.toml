@@ -20,4 +20,9 @@ managed = true
 allow-direct-references = true
 
 [tool.rye.workspace]
-members = ["project", ] # "ontology" has a problem
+members = [
+    "project",
+    "project_azure", 
+    "project_dvc",
+    ]
+    # "ontology" has a problem
