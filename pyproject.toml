@@ -27,4 +27,5 @@ members = [
     #"notebooking" problem
     "ontologies",
     "ontoenv",
+    #"graphdb",
     ]
