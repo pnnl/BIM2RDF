@@ -6,7 +6,7 @@ authors = [
     { name = "Bilal Faye", email = "bilal.faye@pnnl.gov" }
 ]
 dependencies = [
-    "python<3.11",
+    #"python<3.11",
     "rdflib",
     "pyyaml",
     "pyshacl",
