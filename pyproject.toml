@@ -28,7 +28,7 @@ members = [
     "ontologies",
     "ontoenv",
     "graphdb",
-    "speckle"
+    "speckle",
     ]
 
 
