@@ -1,0 +1,30 @@
+[project]
+name = "mapping"
+version = "0.1.0"
+description = "Add a short description here"
+authors = [
+    { name = "Bilal Faye", email = "bilal.faye@pnnl.gov" }
+]
+dependencies = [
+    "python<3.11",
+    "rdflib",
+    "pyyaml",
+    "pyshacl",
+    "owlrl",
+    "numpy",
+    "scipy",
+    "oxrdflib",
+    "requests-file",
+    "fire",
+]
+readme = "README.md"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+
+[tool.hatch.metadata]
+allow-direct-references = true
