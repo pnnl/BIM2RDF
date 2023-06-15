@@ -1,0 +1,24 @@
+[project]
+name = "speckle"
+version = "0.1.0"
+description = "Add a short description here"
+authors = [
+    { name = "Bilal Faye", email = "bilal.faye@pnnl.gov" }
+]
+dependencies = [
+    "gql[requests]",
+    "jsonpath-ng",
+    "requests-cache",
+    "rdflib",
+]
+readme = "README.md"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+
+[tool.hatch.metadata]
+allow-direct-references = true
