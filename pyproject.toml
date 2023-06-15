@@ -29,3 +29,7 @@ members = [
     "ontoenv",
     #"graphdb",
     ]
+
+
+[tool.rye.scripts]
+# per workspace tools are not 'collected'
