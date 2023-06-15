@@ -29,6 +29,7 @@ members = [
     "ontoenv",
     "graphdb",
     "speckle",
+    "engine",
     ]
 
 
