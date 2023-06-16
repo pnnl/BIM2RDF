@@ -24,7 +24,7 @@ members = [
     "project",
     "project_azure", 
     "project_dvc",
-    #"notebooking" problem
+    #"notebooking" disabled for now
     "ontologies",
     "ontoenv",
     "graphdb",
