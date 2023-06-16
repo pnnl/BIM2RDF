@@ -3,7 +3,8 @@ name = "mapping"
 version = "0.1.0"
 description = "Add a short description here"
 authors = [
-    { name = "Bilal Faye", email = "bilal.faye@pnnl.gov" }
+    { name = "Bilal Faye", email = "bilal.faye@pnnl.gov" }, 
+    { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
 ]
 dependencies = [
     #"python<3.11",
