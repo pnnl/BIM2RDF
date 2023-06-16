@@ -7,7 +7,6 @@ authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
 ]
 dependencies = [
-    #"python<3.11",
     "rdflib",
     "pyyaml",
     "pyshacl",
