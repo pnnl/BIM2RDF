@@ -3,17 +3,18 @@ stages:
 # use foreach? param sweep discussion https://github.com/iterative/dvc/pull/8187
 
   map:
-    cmd: mapping-run-in  python -m mapping.speckle --semantics=True --stream_id=${building} 
+    cmd: python -m mapping.speckle --semantics=True --stream_id=${building} 
     wdir: work
     deps:
       - ../../ontologies/imported/223p.ttl
       - ../223p
-      - ../mapping
+      - ../src/mapping
+      # ../src/validation?
     outs:
       - out.ttl
 
   upload:
-    cmd: graphdb-run-in python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
+    cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
     wdir: work
     deps:
       - out.ttl
