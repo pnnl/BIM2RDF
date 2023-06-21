@@ -20,8 +20,8 @@ stages:
     outs:
     - path: out.ttl
       hash: md5
-      md5: 01f94c160104ed9132c0edda5b883351
-      size: 5195937
+      md5: c330027848bfd8c411cbd494e0d3d6ea
+      size: 12421433
   upload_ontology:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
     deps:
@@ -72,9 +72,9 @@ stages:
       size: 290181535
       nfiles: 670
   upload:
-    cmd: graphdb-run-in python -m graphdb.tasks upload_graph out.ttl --delete=True  --name
-      Pritoni
+    cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name Pritoni
     deps:
     - path: out.ttl
-      md5: 94aee820bc7955e50b5d6d23674abe7b
-      size: 55343256
+      hash: md5
+      md5: c330027848bfd8c411cbd494e0d3d6ea
+      size: 12421433
