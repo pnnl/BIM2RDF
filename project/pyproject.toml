@@ -8,7 +8,7 @@ authors = [
 readme = "README.md"
 dependencies = [
    "pyprojroot",
-  "invoke",]
+  "fire",]
 
 [tool.rye]
 managed = true

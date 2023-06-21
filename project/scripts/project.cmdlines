@@ -1,1 +1,0 @@
-invoke -r ${WORK_DIR_PATH} ${*}
