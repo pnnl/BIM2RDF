@@ -7,6 +7,10 @@ def config(dev=True, ):
     # merging behavior
     run("git config pull.ff only")
 
+    # fix windows stupidity
+    run("git config  core.eol lf")
+    run("git config  core.autocrlf input")
+
     # id
     from project import root
     cf = root / 'project' / 'config.json'
