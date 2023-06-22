@@ -1,16 +1,32 @@
 from .run import run
 
-def config():
+
+def config(dev=True, ): 
+    if not dev: return
+
+    # merging behavior
     run("git config pull.ff only")
-    set_git_hooks()
 
-
-def set_git_hooks():
-    """
-    install git hooks using pre-commit tool
-    """
+    # id
+    from project import root
+    cf = root / 'project' / 'config.json'
+    def updateg(c={}):
+        c['git'] = {}
+        c['git']['name'] =  input("enter git name: " ).strip()
+        c['git']['email'] = input("enter git email: ").strip()
+        return c
+    import json
+    if not cf.exists():
+        c = updateg()
+        json.dump(c, open(cf, 'w'))
+    #if update: dont really need this option
+    c = json.load(open(cf))
+    run(f'git config --local user.name  "{c["git"]["name"]}"')
+    run(f'git config --local user.email "{c["git"]["email"]}"')
+    
+    # hooks
     run(f"pre-commit install",)
-    run(f"pre-commit install    --hook-type     prepare-commit-msg", )
+    run(f"pre-commit install    --hook-type     prepare-commit-msg",)
 
 
 def _prepare_commit_msg_hook(COMMIT_MSG_FILE): # could not use work_dir
