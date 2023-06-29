@@ -497,12 +497,7 @@ class Engine(b.Engine): # rule app on Store
     def __call__(self) -> Result:
         db = self.final()
         return Result(db, True)
-        #except:
-        #    sdf
-        #    return Result(self.db, False)
 
-
-# TODO: logging versions of engine and rule
 
 if __name__ == '__main__':
     # consume dir for data
