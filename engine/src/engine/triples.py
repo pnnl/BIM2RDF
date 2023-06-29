@@ -424,6 +424,15 @@ class Engine(b.Engine): # rule app on Store
         self._db = db
         #db._store.dump(open('init.ttl', 'wb'), 'text/turtle')
         self.MAX_ITER = MAX_ITER
+        
+        # logging
+        from collections import defaultdict, namedtuple
+        from types import SimpleNamespace as NS
+        self.logging = NS(
+            log = defaultdict(list),
+            delta = namedtuple('delta', ['before', 'after'] )
+        )
+        
 
     @property
     def rules(self) -> Rules:
@@ -444,7 +453,10 @@ class Engine(b.Engine): # rule app on Store
         # _.insert(self.db)
         for r in self.rules:
             _ = r(self.db)
-            print( repr(r.spec), len(_), len(self.db))
+            
+            self.logging.log[r.spec].append( 
+                self.logging.delta( len(_), len(self.db) )
+              )
             #      r.spec
             #print(r, hash(_), hash(self.db))
             #g.serialize(_,  open(f'{next(iz)}.ttl', 'wb') , 'text/turtle')
