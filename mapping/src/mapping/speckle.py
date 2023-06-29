@@ -121,6 +121,10 @@ def engine(stream_id, *, branch_id=None, object_id=None,
 
 if __name__ == '__main__':
     import fire
+    import logging
+    logging.basicConfig(force=True) # force removes other loggers that got picked up.
+    from engine.triples import logger
+    logger.setLevel(logging.INFO)
     fire.Fire(engine) # HAHH!!
 
 
