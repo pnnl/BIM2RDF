@@ -417,21 +417,29 @@ class Result(b.Result):
 
 iz = iter(it())
 
+
+import logging # :( i dont do module level imports
+logger = logging.getLogger('engine')
+
 class Engine(b.Engine): # rule app on Store
 
-    def __init__(self, rules: Rules, db: OxiGraph, MAX_ITER=999) -> None:
+    def __init__(self, rules: Rules, db: OxiGraph, MAX_ITER=999,
+                 log=True, print_log=True,
+                 ) -> None:
         self._rules = rules
         self._db = db
         #db._store.dump(open('init.ttl', 'wb'), 'text/turtle')
         self.MAX_ITER = MAX_ITER
         
         # logging
-        from collections import defaultdict, namedtuple
-        from types import SimpleNamespace as NS
-        self.logging = NS(
-            log = defaultdict(list),
-            delta = namedtuple('delta', ['before', 'after'] )
-        )
+        if log:
+            from collections import defaultdict, namedtuple
+            from types import SimpleNamespace as NS
+            self.logging = NS(
+                print = print_log,
+                log = defaultdict(list),
+                delta = namedtuple('delta', ['before', 'after'] )
+            )
         
 
     @property
@@ -454,9 +462,12 @@ class Engine(b.Engine): # rule app on Store
         for r in self.rules:
             _ = r(self.db)
             
-            self.logging.log[r.spec].append( 
-                self.logging.delta( len(_), len(self.db) )
-              )
+            if hasattr(self, 'logging'):
+                delta = self.logging.delta(len(self.db), len(_)+len(self.db))
+                self.logging.log[r.spec].append(delta)
+                if self.logging.print:
+                    logger.info(
+                        f"{repr(r)}: # triples before {delta.before }, after {delta.after }")
             #      r.spec
             #print(r, hash(_), hash(self.db))
             #g.serialize(_,  open(f'{next(iz)}.ttl', 'wb') , 'text/turtle')
