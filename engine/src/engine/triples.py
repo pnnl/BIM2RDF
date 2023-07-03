@@ -217,8 +217,22 @@ class CachedRuleCall:
             return self.do(db)
 
         
-class Rule(CachedRuleCall, b.Rule): ...
+class Rule(CachedRuleCall, b.Rule):
 
+    def add_meta(self, data: Triples) -> Triples:
+        def nested(data):
+            _ = self.meta(data)
+            ms = tuple(_)
+            if ms:
+                for t in data:
+                    for m in ms:
+                        yield g.Triple(t, g.NamedNode('http://meta'), m)
+            else:
+                yield from data
+        _ = nested(data)
+        _ = Triples(_)
+        return _
+    
 
 class ConstructRule(Rule):
 
@@ -229,8 +243,8 @@ class ConstructRule(Rule):
     def spec(self) -> ConstructQuery:
         return self._spec
 
-    def __add__(self, rule: 'ConstructRule') -> 'ConstructRules':
-        return ConstructRules([self.spec, rule.spec])
+    def __add__(self, rule: 'Rule') -> 'Rules':
+        return Rules([self, rule])
     
     def const_meta(self) -> Triples:
         # something that doesn't depend on the data
@@ -246,39 +260,6 @@ class ConstructRule(Rule):
         assert(isinstance(_, g.QueryTriples))
         return Triples(_)
 
-
-class ConstructRules(b.Rules):
-    def __init__(self, spec: Iterable[ConstructQuery]) -> None:
-        self._spec = spec
-    
-    @property
-    def spec(self) -> Iterable[ConstructQuery]:
-        return self._spec
-    #queries:  = spec complaint
-    #            Iterable[ConstructQuery] complaint
-
-    def __iter__(self) -> Iterator['ConstructRule']:
-        yield from map(lambda s: ConstructRule(s), self.spec)
-
-    def __add__(self, rules: 'ConstructRules | ConstructRule') -> 'ConstructRules':
-        if isinstance(rules, ConstructRule):
-            rule = rules
-            rules = ConstructRules([rule.spec])
-        return ConstructRules(list(self.spec) + list(rules.spec) )
-    
-    def meta(self, data: Triples) -> Triples:
-        _ = map(lambda cr: cr.meta(data)._data, self)
-        from itertools import chain
-        _ = chain.from_iterable(_)
-        _ = Triples(_)
-        return _
-    
-    def do(self, db: OxiGraph) -> Triples:
-        _ = map(lambda q: q(db)._data, self.spec)
-        from itertools import chain
-        _ = chain.from_iterable(_)
-        _ = Triples(_)
-        return _
 
 
 from typing import Protocol, runtime_checkable
@@ -301,94 +282,53 @@ class PyRule(Rule):
         # can add query str. or triples!
         return Triples([])
     
-    def __add__(self, rule: 'PyRule') -> 'PyRules':
-        return PyRules([self.spec, rule.spec])
+    def __add__(self, rule: 'Rule') -> 'Rules':
+        return Rules([self, rule])
     
     def do(self, db: OxiGraph) -> Triples:
         _ = self.spec(db)
         _ = Triples(_)
+        _ = self.add_meta(_)
         return _
+
 
 def _idf(db: OxiGraph): return Triples([])
 idf: PyRuleCallable = _idf
 NoEffect = PyRule(idf)
 
-class PyRules(b.Rules):
 
-    def __init__(self, spec: Iterable[PyRuleCallable]) -> None:
-        self._spec = spec
-    
-    @property
-    def spec(self) -> Iterable[PyRuleCallable]:
-        return self._spec
-
-    def __iter__(self) -> Iterator[PyRule]:
-        _ = map(lambda r: PyRule(r) , self.spec)
-        return _
-    
-    def __add__(self, rules: 'PyRules') -> 'PyRules':
-        _ = list(self) + list(rules)
-        return PyRules(_)
-    
-    def meta(self, data: Triples) -> Triples:
-        _ = map(lambda cr: cr.meta(data)._data, self)
-        from itertools import chain
-        _ = chain.from_iterable(_)
-        _ = Triples(_)
-        return _
-    
-    def __call__(self, db: OxiGraph) -> Triples:
-        _ = map(lambda c: PyRule(c)(db)._data, self.spec)
-        from itertools import chain
-        _ = chain.from_iterable(_)
-        _ = Triples(_)
-        return _
-
-
-
-# can probably delete PyRules and ContructRules TODO
 
 Spec = PyRuleCallable | ConstructQuery
 RulesSpec = Iterable[ Spec ]
 Rule = PyRule | ConstructRule
 class Rules(b.Rules):
 
-    def __init__(self, spec: RulesSpec) -> None:
-        self._spec = spec
+    def __init__(self, rules: Iterator[Rule] ) -> None:
+        self.rules = rules
     
     @property
     def spec(self) -> RulesSpec:
-        return list(self._spec)
+        return list(r.spec for r in self.rules)
     
-    @classmethod
-    def spec2rule(cls, s: Spec) -> Rule:
-        #                               plain function
-        if type(s) is type(lambda:''): # :/ weird
-            return PyRule(s)
-        elif type(s) is ConstructQuery:
-            return ConstructRule(s)
-        else:
-            raise TypeError('unknown rule type')
     
     def __iter__(self) -> Iterator[Rule]:
-        for s in self.spec:
-            _ = self.spec2rule(s)
-            yield _
+        for r in self.rules: yield r
+
 
     def meta(self, data: Triples) -> Triples:
+        # get the meta from each
         _ = map(lambda cr: cr.meta(data)._data, self)
         from itertools import chain
         _ = chain.from_iterable(_)
         return _
 
-    def __add__(self, rule: 'Rules') -> 'Rules':
-        from itertools import chain
-        _ = chain(self.spec, rule.spec)
-        _ = list(_)
+
+    def __add__(self, rules: 'Rules') -> 'Rules':
+        _ = list(self.rules)+list(rules.rules)
         return Rules(_)
     
     def __call__(self, db: OxiGraph) -> Triples:
-        _ = map(lambda c: self.spec2rule(c)(db)._data, self.spec)
+        _ = map(lambda r: (r)(db)._data, self.rules)
         from itertools import chain
         _ = chain.from_iterable(_)
         _ = Triples(_)
