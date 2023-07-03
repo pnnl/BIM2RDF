@@ -88,7 +88,11 @@ class Graph(_Graph):
             self._offensive.add(t)
         # so that it keeps working as usual
         return super().add(t)
-    
+
+
+import logging 
+logger = logging.getLogger('mapping_engine')
+
 def closure(self):
     """
     Generate the closure the graph. This is the real 'core'.
@@ -142,7 +146,7 @@ def closure(self):
 
         # DEBUG: print the cycle number out
         if True:#self._debug:
-            print(f"-semantics Cycle {cycle_num} added {len(self.added_triples)} triples.")
+            logger.info(f"semantics Cycle {cycle_num} added {len(self.added_triples)} triples.")
 
         for t in self.added_triples:
             self.graph.add(t)
