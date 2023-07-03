@@ -145,9 +145,4 @@ def queries():
     return NS(general_meta=general_meta, objects=objects)
 
 
-def test():
-    _ = queries().general_meta()
-    _ = query(_)
-    return _
-
 

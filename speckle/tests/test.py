@@ -60,31 +60,6 @@ def meta():
 
 def test_rdf(meta):
     from speckle.meta import rdf
-
-
-    _ = {
-            'id':'o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
-            'Outside': 'sdf',
-            '@inside': [
-                {'id': 'i1', 
-                'p': 3},
-                [{'referencedId': 'rid', 'speckle_type': 'reference' }],
-                {'referencedId': 'rid2', 'speckle_type': 'reference' },
-            ]
-        }
-    _ = sample_json()
-    _ = remove_at(_)
-    _ = id_(_) 
-    _ = contextualize(_) # context after other stuff
-    #return _
-    from pyld import jsonld as lj
-    _ = lj.flatten(_, )#contextualize({})['@context'])
-    _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
-    import rdflib
-    _ = rdflib.Graph().parse(data=_, format='nquads')
-    return _
-    #_ = lj.expand(_, )# NS(graph=True).__dict__ )
-    #_ = lj.flatten(_, contextualize({})['@context']  ) # creates @graph
-    return _
+    _ = rdf(meta)
 
 
