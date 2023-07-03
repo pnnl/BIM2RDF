@@ -1,25 +1,27 @@
-from .engine import Rules, Callable, OxiGraph, Triples
+from engine.triples import Triples
+from .engine import Rules, Callable, OxiGraph, Triples, PyRule
 
 
 def rules(semantics = True) -> Rules: 
-    from .engine import ConstructQuery, Rules, rdflib_semantics
+    from .engine import ConstructRule, Rules, rdflib_semantics
     from . import mapping_dir
     from pathlib import Path
     # mappings
     _ = Path(mapping_dir).glob('**/223p/*.rq') # https://www.iana.org/assignments/media-types/application/sparql-query
     _ = map(lambda p: open(p).read(),   _)
-    _ = map(ConstructQuery,             _)
+    _ = map(ConstructRule,             _)
+
     # geometry
     from .geometry import get_obj_assignment_rule
     _ = list(_)
-    _ = _ + [get_obj_assignment_rule('Lighting Fixtures', 'Rooms')]
+    _ = _ + [PyRule(get_obj_assignment_rule('Lighting Fixtures', 'Rooms'))]
 
     # semantics
-    _ = list(_) + ([rdflib_semantics] if semantics else [])
+    _ = list(_) + ([PyRule(rdflib_semantics)] if semantics else [])
 
     #                     223p rules
     from .engine import pyshacl_rules 
-    _ = _ + [pyshacl_rules] # ...but as one thing
+    _ = _ + [PyRule(pyshacl_rules)] # ...but as one thing
 
     _ = Rules(_)
     return _
@@ -33,14 +35,23 @@ def get_ontology(ontology: str) -> Callable[[OxiGraph], Triples]:
     return _
 
 
+class SpeckleGetter(PyRule):
+
+    def meta(self, data: Triples) -> Triples:
+        # TODO
+        _ = Triples()
+        return _
+    
+
+
 # args will be stream, commit
 def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     from speckle.graphql import queries, query
     _ = queries()
     _ = _.objects(stream_id, object_id)
     _ = query(_) # dict
-    from speckle.objects import rdf
-    _ = rdf(_) #
+    from speckle.objects import rdf as ordf
+    _ = ordf(_) #
     _ = _.read()
     _ = _.decode()
     from .engine import get_data_getter
@@ -110,7 +121,7 @@ def engine(stream_id, *, branch_id=None, object_id=None,
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
     _ = fengine(rules=lambda: (
-                    Rules([get_speckle(stream_id, branch_id=branch_id, object_id=object_id) ,  ])
+                    Rules([ PyRule(get_speckle(stream_id, branch_id=branch_id, object_id=object_id)) ,  ])
                     +rules(semantics=semantics)
                     ) )
     _()

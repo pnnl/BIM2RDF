@@ -2,7 +2,7 @@
 engine specialization
 """
 from engine.triples import (
-        ConstructQuery,
+        ConstructRule, PyRule,
         Rules,
         Rule ,  # for owlrl TODO
         PyRule, PyRuleCallable,
