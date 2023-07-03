@@ -26,6 +26,7 @@ allow-direct-references = true
 
 
 [tool.pytest.ini_options]
+addopts = ['-s']
 testpaths = ["tests/*.py"]
 [tool.pytest-watcher]
 now = true
