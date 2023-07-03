@@ -12,6 +12,7 @@ class TokenAuth(AuthBase):
 
 # global install
 #requests_cache.install_cache('http_cache', allowable_methods={'GET', 'HEAD', 'POST'})
+# TODO expire this somehow
 def get_cached_session():
     from project import root
     db_file = root / 'speckle' /'http_cache'
