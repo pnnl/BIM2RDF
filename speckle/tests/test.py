@@ -57,9 +57,32 @@ def meta():
                                                        {'id': '95a53efca0', 'referencedObject': 'f948c72c9b2388f562eff47a7a61b1cf', 'createdAt': '2022-12-13T22:48:43.700Z'}]}}]}}]}}
     return _
 
+@pytest.fixture
+def objects():
+    # now just map? can make bnode a subject?
+    _ = {
+            'id':'o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
+            'Outside': 'sdf',
+            'inside': [
+                {'id': 'dataid', 'data': list(range(3))+list(range(3))  }, # assumes set w/o @container:@list
+                {'id': 'i1', 
+                'p': 3},
+                {'referencedId': 'rid', 'speckle_type': 'whatever' }, 
+                {'id': 'i2', 
+                'p': 4}
+            ]
+        }
+    return _
 
-def test_rdf(meta):
+
+def test_meta_rdf(meta):
     from speckle.meta import rdf
     _ = rdf(meta)
+
+
+def test_objects_rdf(objects):
+    from speckle.objects import rdf
+    _ = rdf(objects)
+    
 
 

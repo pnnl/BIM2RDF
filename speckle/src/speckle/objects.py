@@ -39,6 +39,7 @@ def remove_at(d: dict) -> dict:
             m.context.value[k[1:]] = _ # is this ok? channging while iterating
     return d
 
+
 def url_quote(d: dict) -> dict:
     from urllib.parse import quote 
     d = d.copy()
@@ -75,48 +76,9 @@ def contextualize(d: dict) -> dict:
     return d
 
 
-def test():
-    _ = {
-            'id':'o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
-            'Outside': 'sdf',
-            '@inside': [
-                {'id': 'i1', 
-                'p': 3},
-                [{'referencedId': 'rid', 'speckle_type': 'reference' }],
-                {'referencedId': 'rid2', 'speckle_type': 'reference' },
-            ]
-        }
-    _ = sample_json()
-    _ = remove_at(_)
-    _ = id_(_) 
-    _ = contextualize(_) # context after other stuff
-    #return _
-    from pyld import jsonld as lj
-    _ = lj.flatten(_, )#contextualize({})['@context'])
-    _ = lj.to_rdf(_, options=NS(format='application/n-quads').__dict__ ) #close to flatten
-    import rdflib
-    _ = rdflib.Graph().parse(data=_, format='nquads')
-    return _
-    #_ = lj.expand(_, )# NS(graph=True).__dict__ )
-    #_ = lj.flatten(_, contextualize({})['@context']  ) # creates @graph
-    return _
-
 
 # can take json or speckleid
 def rdf(d):
-    # now just map? can make bnode a subject?
-    _ = {
-            'id':'o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
-            'Outside': 'sdf',
-            'inside': [
-                {'id': 'dataid', 'data': list(range(3))+list(range(3))  }, # assumes set w/o @container:@list
-                {'id': 'i1', 
-                'p': 3},
-                {'referencedId': 'rid', 'speckle_type': 'whatever' }, 
-                {'id': 'i2', 
-                'p': 4}
-            ]
-        }
     #_ = sample_json()
     _ = d
     _ = remove_at(_)
