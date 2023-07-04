@@ -207,7 +207,9 @@ dbh = set()
 class CachedRuleCall:
 
     def __call__(self, db: OxiGraph) -> Triples:
-        #return self.do(db) #to disable
+        # disabling
+        return self.do(db) 
+        # TODO
         #h = hash((db))
         h = hash(str(len(db))+str(hash(db._store)))
         if h in dbh:

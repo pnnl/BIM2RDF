@@ -43,8 +43,8 @@ class SpeckleGetter(PyRule):
         self._getters = _
 
     def meta(self, data: Triples) -> Triples:
-        #_ = self._getters.meta() TODO
-        _ = Triples()
+        _ = self._getters.meta() 
+        #_ = Triples()
         return _
 
 
