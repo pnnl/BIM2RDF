@@ -1,4 +1,4 @@
-from engine.triples import Triples
+from engine.triples import PyRuleCallable, Triples
 from .engine import Rules, Callable, OxiGraph, Triples, PyRule
 
 
@@ -9,7 +9,7 @@ def rules(semantics = True) -> Rules:
     # mappings
     _ = Path(mapping_dir).glob('**/223p/*.rq') # https://www.iana.org/assignments/media-types/application/sparql-query
     _ = map(lambda p: open(p).read(),   _)
-    _ = map(ConstructRule,             _)
+    _ = map(ConstructRule,              _)
 
     # geometry
     from .geometry import get_obj_assignment_rule
@@ -37,11 +37,15 @@ def get_ontology(ontology: str) -> Callable[[OxiGraph], Triples]:
 
 class SpeckleGetter(PyRule):
 
+    def __init__(self, stream_id, branch_id=None, object_id=None) -> None:
+        _ = get_speckle(stream_id, branch_id=branch_id, object_id=object_id)
+        super().__init__(_.objects)
+        self._getters = _
+
     def meta(self, data: Triples) -> Triples:
-        # TODO
+        #_ = self._getters.meta() TODO
         _ = Triples()
         return _
-    
 
 
 # args will be stream, commit
@@ -58,6 +62,47 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     _ = get_data_getter(_)
     return _
 
+
+
+def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
+    from speckle.graphql import queries, query
+    _ = queries()
+    _ = _.general_meta()
+    _ = query(_)
+    id = 'id'
+    name = 'name'
+    items = 'items'
+    stream = 'stream'; streams = 'streams'
+    branch = 'branch'; branches = 'branches'
+    createdAt = 'createdAt'
+    referencedObject = 'referencedObject'
+    commit = 'commit'; commits = 'commits'
+    m = {}
+    for s in _[streams][items]:
+        if stream_id == s[id]:
+            m[stream] = {id: s[id], name: s[name]}
+            break
+    
+    for b in s[branches][items]:
+        if branch_id == b[id]:
+            m[branch] = {id: b[id], name: b[name], createdAt: b[createdAt] }
+            break
+    
+    for c in b[commits][items]:
+        if object_id == c[referencedObject]:
+            m[commit] = {id: c[id], referencedObject: c[referencedObject], createdAt: c[createdAt] }
+            break
+    
+    _ = m
+    from speckle.meta import rdf as mrdf
+    _ = mrdf(_) #
+    from pyoxigraph import parse
+    _ = parse(_, 'text/turtle')
+    _ = Triples(_)
+    return _
+
+
+#TODO: sparql query the full general_meta
 
 def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGraph], Triples]:
     assert(stream_id)
@@ -99,7 +144,10 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGr
     _ = d
     assert(stream_id)
     assert(object_id)
-    return _get_speckle(stream_id, object_id)
+    from types import SimpleNamespace as N
+    return N(
+        objects=_get_speckle(stream_id, object_id),
+        meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )
     
     
 from validation.engine import Engine
@@ -121,7 +169,7 @@ def engine(stream_id, *, branch_id=None, object_id=None,
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
     _ = fengine(rules=lambda: (
-                    Rules([ PyRule(get_speckle(stream_id, branch_id=branch_id, object_id=object_id)) ,  ])
+                    Rules([SpeckleGetter(stream_id, branch_id=branch_id, object_id=object_id),  ])
                     +rules(semantics=semantics)
                     ) )
     _()
