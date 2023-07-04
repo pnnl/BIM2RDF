@@ -229,8 +229,7 @@ class Rule(CachedRuleCall, b.Rule):
                 for t in data:
                     for m in ms:
                         yield g.Triple(t, g.NamedNode('http://meta'), m)
-            else:
-                yield from data
+            yield from data
         _ = nested(data)
         _ = Triples(_)
         return _
