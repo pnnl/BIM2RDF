@@ -1,25 +1,27 @@
-from .engine import Rules, Callable, OxiGraph, Triples
+from engine.triples import PyRuleCallable, Triples
+from .engine import Rules, Callable, OxiGraph, Triples, PyRule
 
 
 def rules(semantics = True) -> Rules: 
-    from .engine import ConstructQuery, Rules, rdflib_semantics
+    from .engine import ConstructRule, Rules, rdflib_semantics
     from . import mapping_dir
     from pathlib import Path
     # mappings
     _ = Path(mapping_dir).glob('**/223p/*.rq') # https://www.iana.org/assignments/media-types/application/sparql-query
     _ = map(lambda p: open(p).read(),   _)
-    _ = map(ConstructQuery,             _)
+    _ = map(ConstructRule,              _)
+
     # geometry
     from .geometry import get_obj_assignment_rule
     _ = list(_)
-    _ = _ + [get_obj_assignment_rule('Lighting Fixtures', 'Rooms')]
+    _ = _ + [PyRule(get_obj_assignment_rule('Lighting Fixtures', 'Rooms'))]
 
     # semantics
-    _ = list(_) + ([rdflib_semantics] if semantics else [])
+    _ = list(_) + ([PyRule(rdflib_semantics)] if semantics else [])
 
     #                     223p rules
     from .engine import pyshacl_rules 
-    _ = _ + [pyshacl_rules] # ...but as one thing
+    _ = _ + [PyRule(pyshacl_rules)] # ...but as one thing
 
     _ = Rules(_)
     return _
@@ -33,20 +35,74 @@ def get_ontology(ontology: str) -> Callable[[OxiGraph], Triples]:
     return _
 
 
+class SpeckleGetter(PyRule):
+
+    def __init__(self, stream_id, branch_id=None, object_id=None) -> None:
+        _ = get_speckle(stream_id, branch_id=branch_id, object_id=object_id)
+        super().__init__(_.objects)
+        self._getters = _
+
+    def meta(self, data: Triples) -> Triples:
+        _ = self._getters.meta() 
+        #_ = Triples()
+        return _
+
+
 # args will be stream, commit
 def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     from speckle.graphql import queries, query
     _ = queries()
     _ = _.objects(stream_id, object_id)
     _ = query(_) # dict
-    from speckle.objects import rdf
-    _ = rdf(_) #
+    from speckle.objects import rdf as ordf
+    _ = ordf(_) #
     _ = _.read()
     _ = _.decode()
     from .engine import get_data_getter
     _ = get_data_getter(_)
     return _
 
+
+
+def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
+    from speckle.graphql import queries, query
+    _ = queries()
+    _ = _.general_meta()
+    _ = query(_)
+    id = 'id'
+    name = 'name'
+    items = 'items'
+    stream = 'stream'; streams = 'streams'
+    branch = 'branch'; branches = 'branches'
+    createdAt = 'createdAt'
+    referencedObject = 'referencedObject'
+    commit = 'commit'; commits = 'commits'
+    m = {}
+    for s in _[streams][items]:
+        if stream_id == s[id]:
+            m[stream] = {id: s[id], name: s[name]}
+            break
+    
+    for b in s[branches][items]:
+        if branch_id == b[id]:
+            m[branch] = {id: b[id], name: b[name], createdAt: b[createdAt] }
+            break
+    
+    for c in b[commits][items]:
+        if object_id == c[referencedObject]:
+            m[commit] = {id: c[id], referencedObject: c[referencedObject], createdAt: c[createdAt] }
+            break
+    
+    _ = m
+    from speckle.meta import rdf as mrdf
+    _ = mrdf(_) #
+    from pyoxigraph import parse
+    _ = parse(_, 'text/turtle')
+    _ = Triples(_)
+    return _
+
+
+#TODO: sparql query the full general_meta
 
 def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGraph], Triples]:
     assert(stream_id)
@@ -88,7 +144,10 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGr
     _ = d
     assert(stream_id)
     assert(object_id)
-    return _get_speckle(stream_id, object_id)
+    from types import SimpleNamespace as N
+    return N(
+        objects=_get_speckle(stream_id, object_id),
+        meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )
     
     
 from validation.engine import Engine
@@ -110,7 +169,7 @@ def engine(stream_id, *, branch_id=None, object_id=None,
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
     _ = fengine(rules=lambda: (
-                    Rules([get_speckle(stream_id, branch_id=branch_id, object_id=object_id) ,  ])
+                    Rules([SpeckleGetter(stream_id, branch_id=branch_id, object_id=object_id),  ])
                     +rules(semantics=semantics)
                     ) )
     _()
@@ -124,6 +183,8 @@ if __name__ == '__main__':
     import logging
     logging.basicConfig(force=True) # force removes other loggers that got picked up.
     from engine.triples import logger
+    logger.setLevel(logging.INFO)
+    from .engine import logger
     logger.setLevel(logging.INFO)
     fire.Fire(engine) # HAHH!!
 
