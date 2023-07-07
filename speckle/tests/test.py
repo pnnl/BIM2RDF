@@ -75,14 +75,18 @@ def objects():
     return _
 
 
-def test_meta_rdf(meta):
+def test_meta_rdf(meta,snapshot):
     from speckle.meta import rdf
-    _ = rdf(meta)
+    actual = rdf(meta)
+    assert actual == snapshot
 
 
-def test_objects_rdf(objects):
+
+def test_objects_rdf(objects,snapshot):
     from speckle.objects import rdf
-    _ = rdf(objects)
+    actual = rdf(objects)
+    assert actual ==snapshot
+
     
 
 

@@ -6,10 +6,14 @@ authors = [
     { name = "Bilal Faye", email = "bilal.faye@pnnl.gov" }
 ]
 dependencies = [
-    "gql[requests]", "urllib3<2",  #https://github.com/psf/requests/releases/tag/v2.30.0
+    "gql[requests]",
+    "urllib3<2",
+    #https://github.com/psf/requests/releases/tag/v2.30.0
     "jsonpath-ng",
     "requests-cache",
     "rdflib",
+    "syrupy~=4.0.4",
+    "pytest~=7.4.0",
 ]
 readme = "README.md"
 
