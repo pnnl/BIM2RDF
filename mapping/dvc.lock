@@ -20,8 +20,8 @@ stages:
     outs:
     - path: out.ttl
       hash: md5
-      md5: d6b7eec51bc6259048516f094f008a5e
-      size: 78154683
+      md5: 5e997c933bed766cd15a98d345fd44c5
+      size: 84715430
   upload_ontology:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
     deps:
@@ -76,5 +76,5 @@ stages:
     deps:
     - path: out.ttl
       hash: md5
-      md5: c330027848bfd8c411cbd494e0d3d6ea
-      size: 12421433
+      md5: 5e997c933bed766cd15a98d345fd44c5
+      size: 84715430
