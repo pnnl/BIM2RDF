@@ -3,7 +3,7 @@ def config():
     import os.path 
     from project import root
     _= root / 'speckle' / 'secret.json'
-    if os.path.isfile(_) == True: 
+    if os.path.isfile(_) == False: 
         import json
         input_data = input("enter your token: ")
         json_object = {"speckl_token": input_data}
