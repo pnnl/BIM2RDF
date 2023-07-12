@@ -87,6 +87,11 @@ def test_objects_rdf(objects,snapshot):
     actual = rdf(objects)
     assert actual ==snapshot
 
+def test_query_ql(snapshot):
+    from speckle.graphql import query
+    actual = query()
+    assert actual == snapshot
+
     
 
 
