@@ -5,6 +5,7 @@ class TokenAuth(AuthBase):
         from .server import apikey
         self.token = apikey()
         self.auth_scheme = 'Bearer'
+        
     def __call__(self, request):
         request.headers['Authorization'] = f'{self.auth_scheme} {self.token}'
         return request
