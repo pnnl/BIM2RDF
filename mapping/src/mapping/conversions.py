@@ -8,7 +8,7 @@ def og2rg(og: Store,) -> Graph:
     to = 'text/turtle'
     un_star = Store()
     for q in og:
-        if isinstance(q.subject, Triple):
+        if isinstance(q.subject, Triple): 
             un_star.add(
                 Quad(
                     q.subject.subject,
@@ -16,6 +16,9 @@ def og2rg(og: Store,) -> Graph:
                     q.subject.object,
                     q.graph_name)
             )
+        # dont care if object is as it's 'just' meta ?
+        #if isinstance(q.object, Triple): 
+
         else:
             un_star.add(q)
     un_star.dump(_, to)
