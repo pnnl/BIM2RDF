@@ -16,7 +16,8 @@ def og2rg(og: Store,) -> Graph:
                     q.subject.object,
                     q.graph_name)
             )
-        # dont care if object is as it's 'just' meta ?
+        # dont care too much about inferencing metadata
+        # the metadata are objects.
         #if isinstance(q.object, Triple): 
 
         else:
