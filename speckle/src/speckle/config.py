@@ -2,7 +2,7 @@
 def config(dev = True):
     import pathlib
     file_loc = pathlib.Path.cwd().parent.parent
-    file_name = 'secretz.json'
+    file_name = 'secret.json'
     _ = file_loc / file_name
     if _.exists() == False: 
         import json
