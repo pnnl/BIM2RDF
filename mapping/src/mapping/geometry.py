@@ -89,7 +89,7 @@ def category_array(db: OxiGraph, category, lst2arr):
     mr = defaultdict(lambda : defaultdict(list))
     _ = (
         list_selector(category, lst2arr),
-        branch_selector(category, 'electrical'))
+        branch_selector(category, 'electrical')) # some branch that represents bdg arch/struct
     _ = geoq(*_)
     _ = db._store.query(_)
     for thing, lst, i, xyz in _: mr[thing][lst].append(xyz)
