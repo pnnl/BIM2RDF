@@ -1,9 +1,7 @@
 
 def config(dev = True):
-    import pathlib
-    file_loc = pathlib.Path.cwd().parent.parent
-    file_name = 'secret.json'
-    _ = file_loc / file_name
+    from project import root
+    _ = root / 'speckle' / 'secret.json'
     if _.exists() == False: 
         import json
         input_data = input("enter your token: ")
