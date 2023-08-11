@@ -259,8 +259,9 @@ class ConstructRule(Rule):
     def do(self, db: OxiGraph) -> Triples:
         _ = db._store.query(str(self.spec))
         assert(isinstance(_, g.QueryTriples))
-        return Triples(_)
-
+        _ = Triples(_)
+        _ = self.add_meta(_) 
+        return _
 
 
 from typing import Protocol, runtime_checkable

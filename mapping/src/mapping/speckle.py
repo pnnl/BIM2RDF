@@ -8,7 +8,6 @@ def rules(semantics = True) -> Rules:
     from pathlib import Path
     # mappings
     _ = Path(mapping_dir).glob('**/223p/*.rq') # https://www.iana.org/assignments/media-types/application/sparql-query
-    _ = map(lambda p: open(p).read(),   _)
     _ = map(ConstructRule,              _)
 
     # geometry
@@ -20,7 +19,7 @@ def rules(semantics = True) -> Rules:
     _ = list(_) + ([PyRule(rdflib_semantics)] if semantics else [])
 
     #                     223p rules
-    from .engine import pyshacl_rules 
+    from .engine import pyshacl_rules
     _ = _ + [PyRule(pyshacl_rules)] # ...but as one thing
 
     _ = Rules(_)
