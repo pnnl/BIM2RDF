@@ -8,7 +8,6 @@ def rules(semantics = True) -> Rules:
     from pathlib import Path
     # mappings
     _ = Path(mapping_dir).glob('**/223p/*.rq') # https://www.iana.org/assignments/media-types/application/sparql-query
-    _ = map(lambda p: open(p).read(),   _)
     _ = map(ConstructRule,              _)
 
     # geometry
@@ -20,7 +19,7 @@ def rules(semantics = True) -> Rules:
     _ = list(_) + ([PyRule(rdflib_semantics)] if semantics else [])
 
     #                     223p rules
-    from .engine import pyshacl_rules 
+    from .engine import pyshacl_rules
     _ = _ + [PyRule(pyshacl_rules)] # ...but as one thing
 
     _ = Rules(_)
@@ -36,6 +35,33 @@ def get_ontology(ontology: str) -> Callable[[OxiGraph], Triples]:
 
 
 class SpeckleGetter(PyRule):
+
+    @staticmethod
+    def get_branches(stream_id):
+        assert(stream_id)
+        from speckle.graphql import queries, query
+        _ = queries()
+        _ = _.general_meta()
+        _ = query(_)
+        _ = _['streams']['items']
+        for d in _:
+            if stream_id in {d['id'], d['name']}:
+                stream_id = d['id']
+                break
+        if stream_id != d['id']: raise ValueError('stream not found')
+        
+        _ = d['branches']['items']
+        _ = sorted(_, key=lambda i: i['createdAt'] )
+        _ = tuple(d['id'] for d in _)
+        return _
+
+    @classmethod
+    def multiple(cls, stream_id, branch_ids=[]):  # object_ids = []
+        #  TODO 1:1 with object_id    (bid_n, oid_n) --> speckle export
+        if not branch_ids: # analagous behavior to branch_id=None
+            branch_ids = cls.get_branches(stream_id)
+        for b in branch_ids:
+            yield cls(stream_id, branch_id=b, )
 
     def __init__(self, stream_id, branch_id=None, object_id=None) -> None:
         _ = get_speckle(stream_id, branch_id=branch_id, object_id=object_id)
@@ -168,8 +194,19 @@ def engine(stream_id, *, branch_id=None, object_id=None,
     # data/config for args
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
+    
+    # parsing of branch_id is relegated to 
+    if branch_id is None:
+        # figuring this is the default mode of working from now.
+        data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id) ])
+    elif isinstance(branch_id, (list, tuple)):
+        data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id, branch_id)])
+    elif isinstance(branch_id, str):
+        data_rules = Rules([SpeckleGetter(stream_id, branch_id=branch_id, object_id=object_id),])
+    else:
+        raise TypeError('branch id not processed')
     _ = fengine(rules=lambda: (
-                    Rules([SpeckleGetter(stream_id, branch_id=branch_id, object_id=object_id),  ])
+                    data_rules
                     +rules(semantics=semantics)
                     ) )
     _()

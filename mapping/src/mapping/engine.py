@@ -2,7 +2,9 @@
 engine specialization
 """
 from engine.triples import (
-        ConstructRule, PyRule,
+        ConstructQuery,
+        ConstructRule as _ConstructRule, 
+        PyRule,
         Rules,
         Rule ,  # for owlrl TODO
         PyRule, PyRuleCallable,
@@ -70,10 +72,32 @@ from engine.triples import (
 # RDFS_Semantics.rules = rules
 
 
-
 from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Semantics, OWLRL_Semantics
 #from owlrl.CombinedClosure import RDFS_Semantics as Semantics
 
+
+class ConstructRule(_ConstructRule):
+
+    def __init__(self, path) -> None:
+        from pathlib import Path
+        path = Path(path).absolute()
+        self.path = path
+        # for the mapping case, we're starting from the file
+        spec = open(path).read()
+        super().__init__(spec)
+
+    def meta(self, data: Triples) -> Triples:
+        yield from super().meta(data)
+        from pyoxigraph import NamedNode, Triple, Literal
+        p = 'http://mmeta'
+        fp = self.path.parts[-2:] # get the file plus its parent dir
+        fp = '/'.join(fp)
+        yield from Triples([Triple(
+                #        watch that the fn is unique enough
+                NamedNode(f'{p}/construct/query/{fp}'),
+                NamedNode(f'{p}/query'), # ?
+                Literal(str(self.spec))
+                     )])
 
 
 from rdflib import Literal, Graph as _Graph

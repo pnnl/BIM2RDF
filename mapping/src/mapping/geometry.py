@@ -40,11 +40,23 @@ def from_graph(graph:str=''):
     return ('from'+graph) if graph else ''
 
 
-from speckle import base_uri
+def branch_selector(cat,  branch=None):
+    # need both to get the expected result!
+    s = f'<<?s spkl:category "{cat}" >>'
+    p = "meta:"
+    o = f'<<?branch spkl:name "{branch}" >>'
+    _ = f"{s} {p} {o}." if branch else ''
+    s = f'<<?n rdf:first ?xyz >>'
+    _ = _ + '\n' + (f"{s} {p} {o}." if branch else '')
+    return _
 
-def geoq(list_selector, graph=None) -> query:
+
+from speckle import base_uri, meta_uri
+
+def geoq(list_selector, branch_selector='', graph=None) -> query:  # add to group, the export
     _ = f"""
     PREFIX spkl: <{base_uri()}>
+    PREFIX meta: <{meta_uri()}>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
     select ?s ?vl  (count(?f)-1 as ?pos) ?xyz {from_graph(graph)}
@@ -60,7 +72,7 @@ def geoq(list_selector, graph=None) -> query:
     ?vl rdf:rest* ?f. ?f rdf:rest* ?n. # conects (first, next) ptrs to data list
     ?n rdf:first ?xyz.
 
-    #filter(?s =spkl:b355f4bc783e05e4b29bb2482237ca36)
+    {branch_selector}
 
     }}
     group by ?s ?vl ?n ?xyz
@@ -75,8 +87,11 @@ def category_array(db: OxiGraph, category, lst2arr):
     from numpy import  array
     from collections import defaultdict
     mr = defaultdict(lambda : defaultdict(list))
-    selector = list_selector(category, lst2arr)
-    _ = db._store.query(geoq(selector))
+    _ = (
+        list_selector(category, lst2arr),
+        branch_selector(category, 'electrical')) # some branch that represents bdg arch/struct
+    _ = geoq(*_)
+    _ = db._store.query(_)
     for thing, lst, i, xyz in _: mr[thing][lst].append(xyz)
     from itertools import chain
     if   lst2arr == 'vertices':     shape = (-1, 3)
