@@ -44,7 +44,7 @@ def branch_selector(cat,  branch=None):
     # need both to get the expected result!
     s = f'<<?s spkl:category "{cat}" >>'
     p = "meta:"
-    o = f'<<?branch spkl:name "{branch}" >>'
+    o = f'<<?branch spkl:name "{branch}" >>'  # branchName could be used here TODO
     _ = f"{s} {p} {o}." if branch else ''
     s = f'<<?n rdf:first ?xyz >>'
     _ = _ + '\n' + (f"{s} {p} {o}." if branch else '')
@@ -89,7 +89,7 @@ def category_array(db: OxiGraph, category, lst2arr):
     mr = defaultdict(lambda : defaultdict(list))
     _ = (
         list_selector(category, lst2arr),
-        branch_selector(category, 'electrical')) # some branch that represents bdg arch/struct
+        branch_selector(category, 'architecture/rooms and lighting fixtures')) # some branch that represents bdg arch/struct
     _ = geoq(*_)
     _ = db._store.query(_)
     for thing, lst, i, xyz in _: mr[thing][lst].append(xyz)
