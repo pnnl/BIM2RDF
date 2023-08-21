@@ -130,7 +130,7 @@ def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
 
 #TODO: sparql query the full general_meta
 
-def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGraph], Triples]:
+def get_speckle(stream_id, *, branch_id=None, object_id=None):
     assert(stream_id)
     from speckle.graphql import queries, query
     _ = queries()
@@ -156,6 +156,13 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGr
         branch_id = d['id']
     
     _ = d['commits']['items']
+    from types import SimpleNamespace as N
+    if not len(_):  # if there are no items
+        return N(
+            objects=lambda _: Triples(),
+            meta=lambda: Triples(),
+        )
+
     _ = sorted(_, key=lambda i: i['createdAt'] )
     for d in _:
         if d['referencedObject'] == object_id:
@@ -170,7 +177,6 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None) -> Callable[[OxiGr
     _ = d
     assert(stream_id)
     assert(object_id)
-    from types import SimpleNamespace as N
     return N(
         objects=_get_speckle(stream_id, object_id),
         meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )

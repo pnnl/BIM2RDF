@@ -8,5 +8,5 @@ construct {
   ?this a s223:PhysicalSpace.
   ?this rdfs:label ?name.}
 where {
-    ?this spkl:category "Rooms".
+    <<?this spkl:category  "Rooms">> <http://meta> <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
     ?this spkl:name ?name.}
