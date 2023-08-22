@@ -4,7 +4,7 @@
 def config(dev = True):
     from .git import config as gitconfig
     if dev: gitconfig()
-    #from speckle.config import config; config()
+    from speckle.config import config; config(dev=True)
     # TODO: trigger configs from each workspace.
     # from <workspace>.config import config; config()
     # ...etc.
