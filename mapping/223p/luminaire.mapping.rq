@@ -2,7 +2,6 @@ PREFIX spkl: <http://speckle.systems/>
 PREFIX unit: <http://qudt.org/vocab/unit/>
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX brick: <https://brickschema.org/schema/Brick#>
 PREFIX meta: <http://meta>
 
 
