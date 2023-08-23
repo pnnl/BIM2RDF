@@ -1,0 +1,16 @@
+PREFIX spkl: <http://speckle.systems/>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix meta: <http://meta>
+PREFIX spklx: <http://speckle.systems/ext/>
+
+
+construct
+{
+    ?p s223:encloses ?d.
+}
+where {
+    ?p a s223:PhysicalSpace.
+    ?d a s223:DomainSpace.
+}
