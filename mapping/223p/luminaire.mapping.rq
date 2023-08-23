@@ -3,6 +3,7 @@ PREFIX unit: <http://qudt.org/vocab/unit/>
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX brick: <https://brickschema.org/schema/Brick#>
+PREFIX meta: <http://meta>
 
 
 # see query in  geometry.py
@@ -10,7 +11,7 @@ construct {
   ?this a s223:Luminaire.
   ?this rdfs:label ?number .}
 where {
-    <<?this spkl:category  "Lighting Fixtures">> <http://meta> <<?mi spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
+    <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
     ?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types'
     ?this spkl:elementId ?number.
 }

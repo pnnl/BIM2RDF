@@ -3,10 +3,11 @@ PREFIX unit: <http://qudt.org/vocab/unit/>
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix brick: <https://brickschema.org/schema/Brick#>
+prefix meta: <http://meta>
 
 construct {
   ?this a s223:PhysicalSpace.
   ?this rdfs:label ?name.}
 where {
-    <<?this spkl:category  "Rooms">> <http://meta> <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
+    <<?this spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
     ?this spkl:name ?name.}

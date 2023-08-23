@@ -3,7 +3,8 @@ stages:
 # use foreach? param sweep discussion https://github.com/iterative/dvc/pull/8187
 
   map:
-    cmd: python -m mapping.speckle --semantics=True --stream_id=${building}
+    #                                        set to false for testing. really slow.
+    cmd: python -m mapping.speckle --semantics=False --stream_id=${building}
     wdir: work
     deps:
       - ../../ontologies/imported/223p.ttl
