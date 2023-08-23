@@ -1,4 +1,5 @@
-Where 'work' happens. Refer to `dvc` (which just wraps the `inv` commands).
+Where 'work' happens.
+Refer to `dvc`.
 
 
 Basic use:
