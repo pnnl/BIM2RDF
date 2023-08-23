@@ -1,0 +1,18 @@
+PREFIX spkl: <http://speckle.systems/>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix meta: <http://meta>
+PREFIX spklx: <http://speckle.systems/ext/>
+
+
+construct 
+{
+    ?this a s223:Zone.
+    ?this rdfs:label ?this. # as it's a name
+}
+where {
+<<?s spkl:category  "Spaces">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
+?s spkl:zoneName ?zn.
+bind( iri(concat( str(spklx:), "zone/", encode_for_uri(?zn) )) AS ?this).
+}
