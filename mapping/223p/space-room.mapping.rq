@@ -3,14 +3,24 @@ PREFIX unit: <http://qudt.org/vocab/unit/>
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix meta: <http://meta>
-PREFIX spklx: <http://speckle.systems/ext/>
 
-
-construct
+construct 
 {
     ?p s223:encloses ?d.
 }
+#select ?rn ?rl
 where {
-    ?p a s223:PhysicalSpace.
+	?p a s223:PhysicalSpace.
+	### relationship
+    ?p rdfs:label ?rl.
+    ?d spkl:parameters/spkl:ROOM_NAME/spkl:value ?_rn.
+    # revit creates a new name if a room is divided by spaces
+    # in this case, revit appends a dash, -, followed by a number
+    # so the logic below takes the name before the dash if it exists
+    # otherwise (no dash) it takes the name as is.
+    bind(if( STRBEFORE(?_rn, "-" ) , STRBEFORE(?_rn, "-" ) , ?_rn  ) as ?rn).
+    filter(?rl = ?rn)
+    ?d spkl:category  "Spaces".
+    ###
     ?d a s223:DomainSpace.
 }
