@@ -9,7 +9,7 @@ PREFIX spklx: <http://speckle.systems/ext/>
 construct 
 {
     ?this a s223:Zone.
-    ?this rdfs:label ?this. # as it's a name
+    ?this rdfs:label ?zn. # as it's a name
 }
 where {
 <<?s spkl:category  "Spaces">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here

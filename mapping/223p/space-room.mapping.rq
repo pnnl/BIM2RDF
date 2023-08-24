@@ -6,17 +6,11 @@ prefix meta: <http://meta>
 PREFIX spklx: <http://speckle.systems/ext/>
 
 
-construct 
+construct
 {
-    ?z s223:contains ?ds.
+    ?p s223:encloses ?d.
 }
 where {
-    ?z a s223:Zone.
-    # relationship:
-    ?z rdfs:label ?zn.
-    ?z a s223:Zone.
-    ?ds spkl:category  "Spaces".
-    ?ds spkl:zoneName ?zn.
-    ##
-    ?ds a s223:DomainSpace. 
+    ?p a s223:PhysicalSpace.
+    ?d a s223:DomainSpace.
 }
