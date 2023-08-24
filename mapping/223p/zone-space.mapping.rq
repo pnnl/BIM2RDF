@@ -8,9 +8,15 @@ PREFIX spklx: <http://speckle.systems/ext/>
 
 construct 
 {
-    ?z s223:contains ?s.
+    ?z s223:contains ?ds.
 }
 where {
     ?z a s223:Zone.
-    ?s a s223:DomainSpace.
+    # relationship:
+    ?z rdfs:label ?zn.
+    ?z a s223:Zone.
+    ?ds spkl:category  "Spaces".
+    ?ds spkl:zoneName ?zn.
+    ##
+    ?ds a s223:DomainSpace. 
 }
