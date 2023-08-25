@@ -18,6 +18,8 @@ where {
     # in this case, revit appends a dash, -, followed by a number
     # so the logic below takes the name before the dash if it exists
     # otherwise (no dash) it takes the name as is.
+    # ISSUE: what if room name (actually) contains a dash?
+    # TODO: geometry is the easiet solution instead of name mangling
     bind(if( STRBEFORE(?_rn, "-" ) , STRBEFORE(?_rn, "-" ) , ?_rn  ) as ?rn).
     filter(?rl = ?rn)
     ?d spkl:category  "Spaces".
