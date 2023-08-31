@@ -14,12 +14,21 @@ class TokenAuth(AuthBase):
 # global install
 #requests_cache.install_cache('http_cache', allowable_methods={'GET', 'HEAD', 'POST'})
 # TODO expire this somehow
-def get_cached_session():
+def get_session(dev = True):
     from project import root
     db_file = root / 'speckle' /'http_cache'
     db_file = str(db_file)
     import requests_cache
-    _ = requests_cache.CachedSession(
+    from requests_cache import DO_NOT_CACHE,EXPIRE_IMMEDIATELY
+    if dev:
+        _ = requests_cache.CachedSession(
                 cache_name=db_file,
-                allowable_methods={'GET', 'HEAD', 'POST'}) # default transport method is post
-    return _
+                allowable_methods={'GET', 'HEAD', 'POST'},
+                expire_after=DO_NOT_CACHE) # default transport method is post
+        return _
+    else:
+        exp_session = requests_cache.CachedSession(
+            cache_name=db_file,
+            allowable_methods={'GET', 'HEAD', 'POST'},
+            expire_after= EXPIRE_IMMEDIATELY)
+        return exp_session
