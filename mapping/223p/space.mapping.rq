@@ -6,7 +6,8 @@ prefix meta: <http://meta>
 
 construct {
   ?this a s223:DomainSpace.
-  ?this rdfs:label ?name.}
+  ?this s223:hasDomain s223:Domain-Lighting.
+  ?this rdfs:label ?name.} 
 where {
     <<?this spkl:category  "Spaces">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
     ?this spkl:name ?name.}
