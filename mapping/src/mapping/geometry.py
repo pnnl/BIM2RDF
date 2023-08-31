@@ -171,11 +171,13 @@ def get_uri():
     return _
 
 
+
 from .engine import Triples
-def assigment_triples(d: dict) -> Triples:
+def assigment_triples(d: dict, cat1=None, cat2=None) -> Triples:
     import pyoxigraph as og
     u = get_uri()
-    _ = [og.Triple(o2, og.NamedNode(u+'contains'), o1) for o1,o2 in d.items()]
+    # triples  might be a function of cat1 and cat2
+    _ = [og.Triple(o2, og.NamedNode(u+'hasPhysicalLocation'), o1) for o1,o2 in d.items()]
     _ = Triples(_)
     return _
 
