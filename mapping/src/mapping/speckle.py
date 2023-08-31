@@ -13,7 +13,10 @@ def rules(semantics = True) -> Rules:
     # geometry
     from .geometry import get_obj_assignment_rule
     _ = list(_)
-    _ = _ + [PyRule(get_obj_assignment_rule('Lighting Fixtures', 'Rooms'))]
+    _ = _ + [PyRule(get_obj_assignment_rule(
+                    'Lighting Fixtures', 'Rooms',
+                    branch1='architecture/rooms and lighting fixtures',
+                    branch2='architecture/rooms and lighting fixtures'))]
 
     # semantics
     _ = list(_) + ([PyRule(rdflib_semantics)] if semantics else [])

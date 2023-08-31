@@ -83,13 +83,13 @@ def geoq(list_selector, branch_selector='', graph=None) -> query:  # add to grou
 
 
 from .engine import OxiGraph
-def category_array(db: OxiGraph, category, lst2arr):
+def category_array(db: OxiGraph, category, lst2arr, branch=None):
     from numpy import  array
     from collections import defaultdict
     mr = defaultdict(lambda : defaultdict(list))
     _ = (
         list_selector(category, lst2arr),
-        branch_selector(category, 'architecture/rooms and lighting fixtures')) # some branch that represents bdg arch/struct
+        branch_selector(category, branch=branch)) # some branch that represents bdg arch/struct
     _ = geoq(*_)
     _ = db._store.query(_)
     for thing, lst, i, xyz in _: mr[thing][lst].append(xyz)
@@ -129,21 +129,21 @@ def score(comparison):
     return s # could be 0
 
 
-def compare(db: OxiGraph, cat1, cat2,):
+def compare(db: OxiGraph, cat1, cat2, branch1=None, branch2=None):
     import numpy as np
     # generic approach: convex hull with all points of c1
     # but shortcut here is to just use the transform pt
     from itertools import product
     for (o1, geo1), (o2, geo2) in product(
-                                category_array(db, cat1, 'transform').items(),
-                                category_array(db, cat2, 'vertices').items() ):
+                                category_array(db, cat1, 'transform', branch=branch1).items(),
+                                category_array(db, cat2, 'vertices', branch=branch2).items() ):
         rep_pt1 = (geo1[xyz][-1] for xyz in range(3)) # just taking the translation part
         rep_pt1 = tuple(rep_pt1)
         yield o1, o2, in_hull(np.array([rep_pt1]), geo2)
 
 
-def get_obj_assignment_dict(db: OxiGraph, cat1, cat2) -> dict:
-    _ = compare(db, cat1, cat2)
+def get_obj_assignment_dict(db: OxiGraph, cat1, cat2, branch1=None, branch2=None) -> dict:
+    _ = compare(db, cat1, cat2, branch1=branch1, branch2=branch2)
     from collections import defaultdict
     inside = defaultdict(list)
     for o1, o2, c in tuple(_): inside[o1].append((o2, c))
@@ -173,20 +173,23 @@ def get_uri():
 
 
 from .engine import Triples
-def assigment_triples(d: dict, cat1=None, cat2=None) -> Triples:
+def assigment_triples(d: dict, cat1=None, cat2=None, ) -> Triples:
     import pyoxigraph as og
     u = get_uri()
     # triples  might be a function of cat1 and cat2
-    _ = [og.Triple(o2, og.NamedNode(u+'hasPhysicalLocation'), o1) for o1,o2 in d.items()]
+    if (cat1=='Lighting Fixtures') and (cat2=='Rooms'):
+        _ = [og.Triple(o1, og.NamedNode(u+'hasPhysicalLocation'), o2) for o1,o2 in d.items()]
+    else:
+        _ = []
     _ = Triples(_)
     return _
 
 
 from typing import Callable
-def get_obj_assignment_rule(cat1, cat2) -> Callable[[OxiGraph], Triples]:
+def get_obj_assignment_rule(cat1, cat2, branch1=None, branch2=None) -> Callable[[OxiGraph], Triples]:
     # o1 contains o2
     def r(db: OxiGraph,) -> Triples:
-        _ = get_obj_assignment_dict(db, cat1, cat2)
+        _ = get_obj_assignment_dict(db, cat1, cat2, branch1=branch1, branch2=branch2)
         _ = assigment_triples(_)
         return _
     return r
