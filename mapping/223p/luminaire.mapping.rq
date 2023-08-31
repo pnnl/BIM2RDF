@@ -9,9 +9,11 @@ PREFIX meta: <http://meta>
 construct {
   ?this a s223:Luminaire.
   ?this rdfs:label ?number .
+  # input
   ?this s223:hasConnectionPoint ?cpi.
   ?cpi  a s223:InletConnectionPoint.
   ?cpi s223:hasMedium s223:Medium-Electricity. #later we can add the value of voltage  
+  # output
   ?this s223:hasConnectionPoint ?cpo.
   ?cpo  a s223:OutletConnectionPoint.  
   ?cpo s223:hasMedium s223:EM-Light.
