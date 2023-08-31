@@ -4,10 +4,9 @@ engine specialization
 from engine.triples import (
         ConstructQuery,
         ConstructRule as _ConstructRule, 
-        PyRule,
         Rules,
         Rule ,  # for owlrl TODO
-        PyRule, PyRuleCallable,
+        PyRule as _PyRule, PyRuleCallable,
         Triples,
         Engine, OxiGraph)
 
@@ -75,6 +74,7 @@ from engine.triples import (
 from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Semantics, OWLRL_Semantics
 #from owlrl.CombinedClosure import RDFS_Semantics as Semantics
 
+meta_prefix = 'http://mmeta'
 
 class ConstructRule(_ConstructRule):
 
@@ -89,7 +89,7 @@ class ConstructRule(_ConstructRule):
     def meta(self, data: Triples) -> Triples:
         yield from super().meta(data)
         from pyoxigraph import NamedNode, Triple, Literal
-        p = 'http://mmeta'
+        p = meta_prefix
         fp = self.path.parts[-2:] # get the file plus its parent dir
         fp = '/'.join(fp)
         yield from Triples([Triple(
@@ -98,6 +98,18 @@ class ConstructRule(_ConstructRule):
                 NamedNode(f'{p}/query'), # ?
                 Literal(str(self.spec))
                      )])
+
+class PyRule(_PyRule):
+    def meta(self, data: Triples) -> Triples:
+        yield from super().meta(data)
+        from pyoxigraph import NamedNode, Triple, Literal
+        from inspect import getsource
+        p = meta_prefix
+        yield from Triples([Triple(
+                NamedNode(f'{p}/python/function'),
+                NamedNode(f'{p}/python/source'),
+                Literal(getsource(self.spec)),
+        )])
 
 
 from rdflib import Literal, Graph as _Graph
