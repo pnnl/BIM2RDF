@@ -173,10 +173,9 @@ def get_uri():
 
 
 from .engine import Triples
-def assigment_triples(d: dict, cat1=None, cat2=None, ) -> Triples:
+def assigment_triples(d: dict, cat1, cat2) -> Triples:
     import pyoxigraph as og
     u = get_uri()
-    # triples  might be a function of cat1 and cat2
     if (cat1=='Lighting Fixtures') and (cat2=='Rooms'):
         _ = [og.Triple(o1, og.NamedNode(u+'hasPhysicalLocation'), o2) for o1,o2 in d.items()]
     else:
@@ -190,7 +189,7 @@ def get_obj_assignment_rule(cat1, cat2, branch1=None, branch2=None) -> Callable[
     # o1 contains o2
     def r(db: OxiGraph,) -> Triples:
         _ = get_obj_assignment_dict(db, cat1, cat2, branch1=branch1, branch2=branch2)
-        _ = assigment_triples(_)
+        _ = assigment_triples(_, cat1, cat2)
         return _
     return r
 
