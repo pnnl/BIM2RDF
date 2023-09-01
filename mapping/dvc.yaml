@@ -4,7 +4,7 @@ stages:
 
   map:
     #                                        set to false for testing. really slow.
-    cmd: python -m mapping.speckle --semantics=False --stream_id=${building}
+    cmd: python -m mapping.speckle --inference=False --stream_id=${building}
     wdir: work
     deps:
       - ../../ontologies/imported/223p.ttl

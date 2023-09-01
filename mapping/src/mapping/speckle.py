@@ -2,8 +2,8 @@ from engine.triples import PyRuleCallable, Triples
 from .engine import Rules, Callable, OxiGraph, Triples, PyRule
 
 
-def rules(semantics = True) -> Rules: 
-    from .engine import ConstructRule, Rules, rdflib_semantics
+def rules(inference = True) -> Rules: 
+    from .engine import ConstructRule, Rules
     from . import mapping_dir
     from pathlib import Path
     # mappings
@@ -18,12 +18,12 @@ def rules(semantics = True) -> Rules:
                     branch1='architecture/rooms and lighting fixtures',
                     branch2='architecture/rooms and lighting fixtures'))]
 
-    # semantics
-    _ = list(_) + ([PyRule(rdflib_semantics)] if semantics else [])
-
-    #                     223p rules
-    from .engine import pyshacl_rules
-    _ = _ + [PyRule(pyshacl_rules)] # ...but as one thing
+    # inference
+    _ = list(_)
+    if inference:
+        #                     223p rules
+        from .engine import pyshacl_rules, rdflib_semantics
+        _ = _ + [PyRule(rdflib_semantics), PyRule(pyshacl_rules)]
 
     _ = Rules(_)
     return _
@@ -198,7 +198,7 @@ def fengine(*, rules=rules) -> Engine:
 
 from pathlib import Path
 def engine(stream_id, *, branch_id=None, object_id=None,
-           semantics=True,
+           inference=True,
            out=Path('out.ttl')) -> Path:
     # data/config for args
     if not (str(out).lower().endswith('ttl')):
@@ -216,7 +216,7 @@ def engine(stream_id, *, branch_id=None, object_id=None,
         raise TypeError('branch id not processed')
     _ = fengine(rules=lambda: (
                     data_rules
-                    +rules(semantics=semantics)
+                    +rules(inference=inference)
                     ) )
     _()
     _ = _.db._store
