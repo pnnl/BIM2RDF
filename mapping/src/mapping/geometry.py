@@ -1,10 +1,44 @@
 
-
 class query(str): pass
 
+def has_property(store, property, category=None, subject=None):
+    # objects in the speckle sense (not semantic)
+    #no need for branch and graph specifiers
+    if (not category) and (not subject):
+        raise ValueError('supply either cat or subject')
+    if subject:
+        subject = str(subject)
+        assert(subject.startswith('<'))
+        assert(subject.endswith(  '>'))
+    else:
+        subject = '?s'
+    if subject:
+        categoryline = ""
+    else:
+        categoryline = f"""{subject} spkl:category "{category}"."""
+    _ = f"""
+    {prefixes()}
+    select ?v
+    where {{
+        {subject} spkl:{property} ?v.
+        {categoryline}
+    }}
+    limit 1
+    """
+    _ = query(_)
+    _ = store.query(_)
+    _ = tuple(r[0] for r in _)
+    assert(len(_) in {0, 1})
+    if _: return _[0]
+
+
 from typing import Literal
-def list_selector(cat: str, cat_to_list: Literal['vertices'] | Literal['transform'] ) -> str:
+def lists_selector(subject: str,
+                   cat_to_list: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'], ) -> str:
     #                                    could still add faces here TODO
+    # when encountering a list
+    # /path/to/list/rdf:rest*/rdf:first ?item.
+    
     # room vertices
     #?s spkl:category "Rooms".
     # ?s spkl:displayValue/(!<urn:nothappening>)*/spkl:vertices/(!<urn:nothappening>)*/spkl:data ?vl.
@@ -19,48 +53,85 @@ def list_selector(cat: str, cat_to_list: Literal['vertices'] | Literal['transfor
 
     # pattern: 1. category spec 2. cat2list
     # defaults
-    catl = f'\n ?s spkl:category "{cat}".'
-    _to_list = 'spkl:displayValue/(!<urn:nothappening>)*/spkl:vertices/(!<urn:nothappening>)*/spkl:data ?vl.'
-    if cat_to_list == 'vertices':
-        to_list = "?s " +  _to_list
+    s = subject
+    #                 displayValue --> List --> Vertices --> List --> data --> ?List
+    _to_list = 'spkl:displayValue/rdf:rest*/rdf:first/spkl:vertices/rdf:rest*/rdf:first/spkl:data ?vl.'
+    if 'vertices' == cat_to_list:
+        to_list = f"{s} " +  _to_list
+    elif cat_to_list == 'definition/vertices':
+        # if has transform, then need to go through def
+    #if (cat == 'Lighting Fixtures') and (cat_to_list == 'vertices'):
+        to_list = f"{s} spkl:definition/"+_to_list
     else:
         assert(cat_to_list == 'transform')
-        to_list = "?s spkl:transform/spkl:matrix ?vl."
-
-    # specific
-    if (cat == 'Lighting Fixtures') and (cat_to_list == 'vertices'):
-        to_list = "?s spkl:definition/"+_to_list
-    
-    assert('?s' in catl)
-    assert('?s' in to_list)
-    return '\n'.join([catl, to_list])
+        #                    transform ->  maxtrix ->  ?List
+        to_list = f"{s} spkl:transform/spkl:matrix ?vl."
+    assert(f"{s}" in to_list)
+    return '\n'.join([to_list])
 
 
 def from_graph(graph:str=''):
     return ('from'+graph) if graph else ''
 
 
-def branch_selector(cat,  branch=None):
-    # need both to get the expected result!
-    s = f'<<?s spkl:category "{cat}" >>'
+def geo_branch_selector(branch=None):
+    s = f'<<?n rdf:first ?xyz >>'
     p = "meta:"
     o = f'<<?branch spkl:name "{branch}" >>'  # branchName could be used here TODO
     _ = f"{s} {p} {o}." if branch else ''
-    s = f'<<?n rdf:first ?xyz >>'
-    _ = _ + '\n' + (f"{s} {p} {o}." if branch else '')
     return _
 
 
 from speckle import base_uri, meta_uri
 
-def geoq(list_selector, branch_selector='', graph=None) -> query:  # add to group, the export
+
+def prefixes():
     _ = f"""
     PREFIX spkl: <{base_uri()}>
     PREFIX meta: <{meta_uri()}>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    """
+    return _
 
-    select ?s ?vl  (count(?f)-1 as ?pos) ?xyz {from_graph(graph)}
+
+def objectsq(cat, branch=None, graph=None):
+    # objects in the speckle sense (not semantic)
+    _ = f"?s spkl:category \"{cat}\""
+    if branch:
+        bl = f"""<< {_} >> meta: <<?branch spkl:name "{branch}" >>."""
+    else:
+        bl = ''
+    _ = f"""
+    {prefixes()}
+
+    select distinct ?s {from_graph(graph)}
     where {{
+        {_}.
+        {bl}
+    }}
+    """ # branchName could be used here TODO
+    _ = query(_)
+    return _
+
+
+def get_objects(store, cat, branch=None, graph=None):
+    # fast enough query
+    _ = objectsq(cat, branch=branch, graph=graph)
+    _ = store.query(_)
+    return tuple(r[0] for r in _)
+
+
+def geoq(subject, list_selector, branch_selector='', graph=None, ) -> query:  # add to group, the export
+    # single object at a time to not load all geometry in one query
+    # using values seems to help with performance. (using filter was too slow)
+    # need branch selector if have subject?
+    _ = f"""
+    {prefixes()}
+
+    select ?vl  (count(?f)-1 as ?pos) ?xyz {from_graph(graph)}
+    where {{
+    
+    values ?s {{ {subject} }}
     
     {list_selector}
     # path 'parts' must contain: dispalyValue, vertices, and data
@@ -73,42 +144,45 @@ def geoq(list_selector, branch_selector='', graph=None) -> query:  # add to grou
     ?n rdf:first ?xyz.
 
     {branch_selector}
-
+    
     }}
-    group by ?s ?vl ?n ?xyz
+    group by ?vl ?n ?xyz
     order by ?vl ?pos
     """
     _ = query(_)
     return _
 
 
-from .engine import OxiGraph
-def category_array(db: OxiGraph, category, lst2arr, branch=None):
-    from numpy import  array
-    from collections import defaultdict
-    mr = defaultdict(lambda : defaultdict(list))
+def get_geometry(store,
+                 subject, lst2arr: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'],
+                 branch, graph=None):
     _ = (
-        list_selector(category, lst2arr),
-        branch_selector(category, branch=branch)) # some branch that represents bdg arch/struct
-    _ = geoq(*_)
-    _ = db._store.query(_)
-    for thing, lst, i, xyz in _: mr[thing][lst].append(xyz)
-    from itertools import chain
-    if   lst2arr == 'vertices':     shape = (-1, 3)
+        subject,
+        lists_selector(subject, lst2arr,),
+        geo_branch_selector(branch))
+    _ = geoq(*_, graph=graph)
+    _ = store.query(_) # slow!!! TODO? can just cache the hull result
+    if   'vertices' in lst2arr:     shape = (-1, 3)
     elif lst2arr == 'transform':    shape = (4,4)
-    else:                           shape = (-1,) # nothing
-    #else: raise ValueError(f'unknown list2  {lst}')
-    for thing, lsts in mr.items():
-        _ = chain.from_iterable(lsts.values())
-        _ = map(lambda _: float(_.value ), _)
-        _ = tuple(_)
-        _ = array(_)
-        _ = _.reshape(*shape)
-        mr[thing] = _
-    return mr
+    else:                           #shape = (-1,) # nothing. makes no sense to keep going
+        raise ValueError(f"converting {lst2arr} list to array not defined")
+    from collections import defaultdict
+    g = defaultdict(list)
+    for lst, i, xyz in _: g[lst].append(xyz)
+    _ = g
+    assert(_) # need to have data
+    from itertools import chain
+    _ = chain.from_iterable(_.values())
+    _ = map(lambda _: float(_.value ), _)
+    _ = tuple(_)
+    from numpy import array
+    _ = array(_)
+    _ = _.reshape(*shape)
+    return _
 
 
-def in_hull(p, hull): # todo: concave hull
+def in_hull(pts, hull): # -> list/array of bool
+    # TODO: concave hull
     #https://stackoverflow.com/questions/16750618/whats-an-efficient-way-to-find-if-a-point-lies-in-the-convex-hull-of-a-point-cl/16898636#16898636
     """
     Test if points in `p` are in `hull`
@@ -119,41 +193,136 @@ def in_hull(p, hull): # todo: concave hull
     will be computed
     """
     from scipy.spatial import Delaunay
-    if not isinstance(hull,Delaunay):
+    if not isinstance(hull, Delaunay):
         hull = Delaunay(hull)
-    return hull.find_simplex(p)>=0 # test if inside
+    return hull.find_simplex(pts)>=0 # test if inside
 
 
-def score(comparison):
-    s = sum(comparison)
-    return s # could be 0
+
+def frac_pts_in(o1: 'pts', o2: 'pts',
+           isin = in_hull,
+           sample=False, frac1=.1, frac2=.1,
+           ) -> float:
+    """fraction of pts of o1 in o2"""
+    # default is the conservative/thorough setting.
+    if sample: # this may not be needed here. part of Object.volume_pts functionality
+        from random import sample
+        #                need at least 1 pt.
+        o1 = sample(o1, max(1, int(len(o1)*frac1)) )
+        #                need at least 4 pts.
+        o2 = sample(o2, max(4, int(len(o2)*frac2)) )
+    _ = isin(o1, o2)
+    _ = sum(_) / len(_)
+    return _
+
+from functools import cached_property
+
+class Object:
+    # perhaps the speckle sdk is useful here
+    def __init__(self, uri, store, branch) -> None:
+        uri = str(uri)
+        if not (uri.startswith('<')):
+            uri = '<'+uri
+        if not (uri.endswith(  '>')):
+            uri = uri+'>'
+        self.uri = uri
+        self.store = store
+        self.branch = branch # reqd to filter
+    
+    @classmethod
+    def get_objects(cls, store, category, branch):
+        for uri in get_objects(store, category, branch=branch, ):
+            yield cls(uri, store, branch)
+    
+    def __str__(self) -> str:
+        return str(self.uri)
+    
+    def has(self, property) -> 'node':
+        _ = has_property(self.store, property, subject=self.uri)
+        if _: return _ # or _.value since it's wrapped
+    
+    def vertices(self):
+        if self.has('definition',) and self.has('transform'):
+            v = get_geometry(self.store, self.uri, 'definition/vertices', self.branch)
+            from numpy import stack, ones
+            v = stack((v[:, 0], v[:, 1], v[:, 2], ones(len(v))), axis=-1)
+            v = v.reshape(len(v), 4, 1)
+            t = self.transform()  # why is it 4x4 instead of 3x3?
+            v = t @ v
+            v = v[:, (0, 1, 2)]
+            v = v.reshape(len(v), 3)
+            return v
+        elif self.has('displayValue'):
+            return get_geometry(self.store, self.uri, 'vertices', self.branch)
+        
+        raise Exception('really should return vertices')
+    
+    def get_volume_pts(self, ): # arg: npts.
+        # TODO
+        # take the CONCAVE hull and 'fill it' 
+        # to more generally talk about 'percent inside'
+        # approach:
+        # * take sets of set(p1, p2)
+        #   interpolate b/w them?
+        # * take the enclosing cube
+        #   generate random pts in the cube
+        #   check if inside hull to admit
+        return self.vertices() # ...so this is not accurate
+    @cached_property
+    def volume_pts(self):
+        return self.get_volume_pts()
+    
+    def transform(self,):
+        if self.has('transform'):
+            return get_geometry(self.store, self.uri, 'transform', self.branch)
+        
+    def hull(self):
+        # TODO: CONVEX
+        from scipy.spatial import Delaunay
+        _ = Delaunay(self.vertices())
+        return _
+    
+    def frac_inside(self, other: 'Object', **kw) -> float:
+        return frac_pts_in(self.volume_pts, other.volume_pts, **kw)
+        
+    def __contains__(self, other: 'Object'):
+        if self.frac_inside(other) == 1: # precisely. otherwise, use frac_inside
+            return True
+        else:
+            return False
+
+# general checking enclosing procedure:
+# for some obj, get its vertices
+# if the obj is has transform property 
+# then the associated vertices should be transformed,
+# or, as a shortcut, just the translation pt is used.
+# (but then the translation pt should be in the enclosure).
 
 
-def compare(db: OxiGraph, cat1, cat2, branch1=None, branch2=None):
-    import numpy as np
-    # generic approach: convex hull with all points of c1
-    # but shortcut here is to just use the transform pt
-    from itertools import product
-    for (o1, geo1), (o2, geo2) in product(
-                                category_array(db, cat1, 'transform', branch=branch1).items(),
-                                category_array(db, cat2, 'vertices', branch=branch2).items() ):
-        rep_pt1 = (geo1[xyz][-1] for xyz in range(3)) # just taking the translation part
-        rep_pt1 = tuple(rep_pt1)
-        yield o1, o2, in_hull(np.array([rep_pt1]), geo2)
+
+from typing import Iterable
+from types import SimpleNamespace as NS
+class Comparison(NS): pass
+
+def compare(store,
+        cat1, cat2,
+        branch1, branch2,
+        analysis: Literal['fracInside'] | Literal['inside'] = 'inside', tol=.9, **kw) -> Iterable[Comparison]:
+    C = Comparison
+    for o1 in Object.get_objects(store, cat1, branch1):
+        for o2 in Object.get_objects(store, cat2, branch2):
+            if analysis == 'fracInside':
+                f = o1.frac_inside(o2, **kw)
+                yield                       C(o1=o1, fracInside=f,  o2=o2)
+            elif analysis == 'inside':
+                f = o1.frac_inside(o2, **kw)
+                if f > tol: yield           C(o1=o1, inside=f,      o2=o2)
+                break # no need for all
+            raise ValueError('what analysis?')
 
 
-def get_obj_assignment_dict(db: OxiGraph, cat1, cat2, branch1=None, branch2=None) -> dict:
-    _ = compare(db, cat1, cat2, branch1=branch1, branch2=branch2)
-    from collections import defaultdict
-    inside = defaultdict(list)
-    for o1, o2, c in tuple(_): inside[o1].append((o2, c))
-    for o1, cs in inside.items():
-        best = sorted(cs, key=lambda oc: score(oc[1]) )[-1]
-        #                       consider 0 or None as total failue
-        inside[o1] = best[0] if score(best[1]) else None
-
-    return inside
-
+# geometry above
+# semantic stuff below
 
 from functools import cache
 @cache
@@ -171,6 +340,9 @@ def get_uri():
     return _
 
 
+# just make one 'http://geo/fracInside'
+# to expose in construct mapping
+
 
 from .engine import Triples
 def assigment_triples(d: dict, cat1, cat2) -> Triples:
@@ -183,6 +355,8 @@ def assigment_triples(d: dict, cat1, cat2) -> Triples:
     _ = Triples(_)
     return _
 
+
+from .engine import OxiGraph
 
 from typing import Callable
 def get_obj_assignment_rule(cat1, cat2, branch1=None, branch2=None) -> Callable[[OxiGraph], Triples]:
