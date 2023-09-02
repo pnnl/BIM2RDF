@@ -61,10 +61,11 @@ def contextualize(d: dict) -> dict:
         '@base':        base_uri(),
         'referencedId': '@id',
         'id':           '@id',
-        #"data":         {"@container": "@list"}
+        #"data":         {"@container": "@list"} most (almost all?) of these are the data lists
         }
+    #    make lists rdf lists
     for lf in find_list_fields(d): context[lf] = {"@container": "@list"}; del lf
-    # perhaps there might be just one close to the root...
+    # perhaps there might be just one list keyed as 'data' close to the root...
     # ..but then encode_data_lists handles the majority of cases where
     # the lists have the coord data.
     if isinstance(d, dict):
