@@ -3,6 +3,7 @@ name = "speckle"
 version = "0.1.0"
 description = "Add a short description here"
 authors = [
+    {name =  "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
     { name = "Bilal Faye", email = "bilal.faye@pnnl.gov" }
 ]
 dependencies = [
