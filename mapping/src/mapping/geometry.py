@@ -155,7 +155,6 @@ def get_geometry(store,
 
 
 def in_hull(pts, hull): # -> list/array of bool
-    # TODO: concave hull
     #https://stackoverflow.com/questions/16750618/whats-an-efficient-way-to-find-if-a-point-lies-in-the-convex-hull-of-a-point-cl/16898636#16898636
     """
     Test if points in `p` are in `hull`
@@ -165,28 +164,14 @@ def in_hull(pts, hull): # -> list/array of bool
     coordinates of `M` points in `K`dimensions for which Delaunay triangulation
     will be computed
     """
-    from scipy.spatial import Delaunay
-    if not isinstance(hull, Delaunay):
-        hull = Delaunay(hull)
     return hull.find_simplex(pts)>=0 # test if inside
 
 
+def hull(pts):
+    # TODO: concave hull
+    from scipy.spatial import Delaunay
+    return Delaunay(pts)
 
-def frac_pts_in(o1: 'pts', o2: 'pts',
-           isin = in_hull,
-           sample=False, frac1=.1, frac2=.1,
-           ) -> float:
-    """fraction of pts of o1 in o2"""
-    # default is the conservative/thorough setting.
-    if sample: # this may not be needed here. part of Object.volume_pts functionality
-        from random import sample
-        #                need at least 1 pt.
-        o1 = sample(o1, max(1, int(len(o1)*frac1)) )
-        #                need at least 4 pts.
-        o2 = sample(o2, max(4, int(len(o2)*frac2)) )
-    _ = isin(o1, o2)
-    _ = sum(_) / len(_)
-    return _
 
 from functools import cached_property
 
@@ -261,14 +246,14 @@ class Object:
     @cached_property
     def transform(self): return self.get_transform()
 
-    def hull(self): # TODO: integrate. this is not called
-        # TODO: CONVEX
-        from scipy.spatial import Delaunay
-        _ = Delaunay(self.vertices())
+    def hull(self):
+        _ = hull(self.vertices())
         return _
     
     def frac_inside(self, other: 'Object', **kw) -> float:
-        return frac_pts_in(self.volume_pts, other.volume_pts, **kw)
+        _ = in_hull(self.volume_pts, other.hull(), **kw)
+        _ = sum(_) / len(_)
+        return _
         
     def __contains__(self, other: 'Object'):
         if other.frac_inside(self) == 1: # precisely. otherwise, use frac_inside
