@@ -1,7 +1,7 @@
 schema: '2.0'
 stages:
   map:
-    cmd: python -m mapping.speckle --semantics=False --stream_id=Pritoni
+    cmd: python -m mapping.speckle --inference=False --stream_id=Pritoni
     deps:
     - path: ../../ontologies/imported/223p.ttl
       hash: md5
@@ -9,19 +9,19 @@ stages:
       size: 4054607
     - path: ../223p
       hash: md5
-      md5: 90090a93a0decd4418344525cc7b8150.dir
+      md5: d61f27b42a75788befc5bd02ed12ecff.dir
       size: 17990
-      nfiles: 9
+      nfiles: 10
     - path: ../src/mapping
       hash: md5
-      md5: c7bf7ef25df89ec40fb2ba1d84178d6d.dir
-      size: 60193
-      nfiles: 10
+      md5: dcedf82ac831b25d5465b613a0024ec3.dir
+      size: 72076
+      nfiles: 11
     outs:
     - path: out.ttl
       hash: md5
-      md5: 62fb88eed4f5279ac4e4b4635c93ea1a
-      size: 522543366
+      md5: b0cf8d246d573a1a990bbc6825334217
+      size: 84382177
   upload_ontology:
     cmd: mapping-run-in inv graphdb.upload-graph --ttl ontology.ttl --name brick
     deps:
@@ -76,5 +76,5 @@ stages:
     deps:
     - path: out.ttl
       hash: md5
-      md5: 62fb88eed4f5279ac4e4b4635c93ea1a
-      size: 522543366
+      md5: 0425537fdb09fd756c7496ab9a8857af
+      size: 522566880

@@ -6,20 +6,18 @@ def rules(inference = True) -> Rules:
     from .engine import ConstructRule, Rules
     from . import mapping_dir
     from pathlib import Path
+
+    inference = False; _ = []
     # mappings
     _ = Path(mapping_dir).glob('**/223p/*.rq') # https://www.iana.org/assignments/media-types/application/sparql-query
     _ = map(ConstructRule,              _)
+    _ = list(_)
 
     # geometry
-    from .geometry import get_obj_assignment_rule
-    _ = list(_)
-    _ = _ + [PyRule(get_obj_assignment_rule(
-                    'Lighting Fixtures', 'Rooms',
-                    branch1='architecture/rooms and lighting fixtures',
-                    branch2='architecture/rooms and lighting fixtures'))]
+    from .geometry import locations
+    _ = _ + [PyRule(locations)]
 
     # inference
-    _ = list(_)
     if inference:
         #                     223p rules
         from .engine import pyshacl_rules, rdflib_semantics

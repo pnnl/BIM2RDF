@@ -277,7 +277,7 @@ class Object:
 from typing import Iterable
 
 
-def compare(store,
+def compare(store: 'og.Store',
         cat1, cat2,
         branch1, branch2,
         analysis: Literal['fracInside'] | Literal['inside'] = 'inside', tol=.9, **kw) -> Iterable['Comparison']:
@@ -309,6 +309,7 @@ class Comparison:
         self.o2 = o2
 
     def triples(self) -> 'Triples':
+        # map these triples to ontology in a sparql construct 
         from pyoxigraph import parse
         _ = f"""
         PREFIX geo: <{self.uri}>
@@ -325,16 +326,9 @@ class Comparison:
 # semantic stuff below
 
 
-# just make one 
-# to expose in construct mapping
-
-from .engine import Triples, OxiGraph
-from typing import Callable
-def get_obj_assignment_rule(cat1, cat2, branch1=None, branch2=None) -> Callable[[OxiGraph], Triples]:
-    # o1 contains o2
-    def r(db: OxiGraph,) -> Triples:
-        _ = get_obj_assignment_dict(db, cat1, cat2, branch1=branch1, branch2=branch2)
-        _ = assigment_triples(_, cat1, cat2)
-        return _
-    return r
-
+from .engine import OxiGraph, Triples
+def locations(db: OxiGraph) -> Triples:
+    branch = 'architecture/rooms and lighting fixtures'
+    for c in compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='inside'):
+        yield from c.triples()
+    # add more: space, zone, room stuff
