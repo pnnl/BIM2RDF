@@ -221,7 +221,7 @@ class Object:
             from numpy import stack, ones
             v = stack((v[:, 0], v[:, 1], v[:, 2], ones(len(v))), axis=-1)
             v = v.reshape(len(v), 4, 1)
-            t = self.transform()  # why is it 4x4 instead of 3x3?
+            t = self.transform  # why is it 4x4 instead of 3x3?
             v = t @ v
             v = v[:, (0, 1, 2)]
             v = v.reshape(len(v), 3)
@@ -243,24 +243,25 @@ class Object:
         #   check if inside hull to admit
         return self.vertices() # ...so this is not accurate
     @cached_property
-    def volume_pts(self):
-        return self.get_volume_pts()
+    def volume_pts(self): return self.get_volume_pts()
     
-    def transform(self,):
+    def get_transform(self,):
         if self.has('transform'):
             return get_geometry(self.store, self.uri, 'transform', self.branch)
-        
+    @cached_property
+    def transform(self): return self.get_transform()
+
     def hull(self):
         # TODO: CONVEX
         from scipy.spatial import Delaunay
-        _ = Delaunay(self.vertices())
+        _ = Delaunay(self.vertices)
         return _
     
     def frac_inside(self, other: 'Object', **kw) -> float:
         return frac_pts_in(self.volume_pts, other.volume_pts, **kw)
         
     def __contains__(self, other: 'Object'):
-        if self.frac_inside(other) == 1: # precisely. otherwise, use frac_inside
+        if other.frac_inside(self) == 1: # precisely. otherwise, use frac_inside
             return True
         else:
             return False
