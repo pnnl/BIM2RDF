@@ -135,6 +135,7 @@ class OxiGraph(b.DataBase):
     
     def __hash__(self) -> int:
         # return len(self._store)#  not strictly correct
+        # return _
         _ = self._store
         _ = frozenset(_)
         _ = hash(_)
@@ -202,24 +203,26 @@ class ConstructQuery(b.Query):
         return _
 
 
+called = set() # [(rule, dbstate), ...]
 
-dbh = set()
 class CachedRuleCall:
 
     def __call__(self, db: OxiGraph) -> Triples:
-        # disabling
-        return self.do(db) 
-        # TODO
-        #h = hash((db))
-        h = hash(str(len(db))+str(hash(db._store)))
-        if h in dbh:
+        #return self.do(db)  # disabling
+        #h = hash((db)) # len(db) is risky
+        h = len(db)
+        call = (hash(self), h)
+        if call in called:
             return Triples([]) # was already captured
         else:
-            dbh.add(h)
+            called.add(call)
             return self.do(db)
 
         
 class Rule(CachedRuleCall, b.Rule):
+
+    def __hash__(self) -> int:
+        return hash(self.spec)
 
     def add_meta(self, data: Triples) -> Triples:
         def nested(data):
