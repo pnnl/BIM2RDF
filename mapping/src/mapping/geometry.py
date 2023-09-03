@@ -231,17 +231,27 @@ class Object:
         
         raise Exception('really should return vertices')
     
-    def get_volume_pts(self, ): # arg: npts.
-        # TODO
-        # take the CONCAVE hull and 'fill it' 
-        # to more generally talk about 'percent inside'
-        # approach:
-        # * take sets of set(p1, p2)
-        #   interpolate b/w them?
-        # * take the enclosing cube
-        #   generate random pts in the cube
-        #   check if inside hull to admit
-        return self.vertices() # ...so this is not accurate
+    def get_volume_pts(self, n = 100, seed=123):
+        # generate random pts in hull
+        _ = self.vertices()
+        from numpy import array
+        bounds = array([_.min(axis=0), _.max(axis=0)]).T
+        assert(bounds.shape == (3,2))
+        import numpy.random as random
+        r = random.default_rng(seed) # need a seed for deterministic,
+        # ...otherwise process will keep generating (new) data
+        pts = (
+            r.uniform(*bounds[0], n*2), # double is more than good
+            r.uniform(*bounds[1], n*2),
+            r.uniform(*bounds[2], n*2))
+        del bounds
+        pts = array(pts)
+        pts = pts.T
+        assert(pts.shape[1] == 3)
+        _ = in_hull(pts, self.hull())
+        _ = pts[_][:n] # filtering Trues
+        assert(_.shape[0] == n)  # very unlikely to fail
+        return _
     @cached_property
     def volume_pts(self): return self.get_volume_pts()
     
@@ -254,7 +264,7 @@ class Object:
     def hull(self): # TODO: integrate. this is not called
         # TODO: CONVEX
         from scipy.spatial import Delaunay
-        _ = Delaunay(self.vertices)
+        _ = Delaunay(self.vertices())
         return _
     
     def frac_inside(self, other: 'Object', **kw) -> float:
