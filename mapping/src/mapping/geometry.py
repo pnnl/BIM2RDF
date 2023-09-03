@@ -165,6 +165,12 @@ def in_hull(pts, hull): # -> list/array of bool
     will be computed
     """
     return hull.find_simplex(pts)>=0 # test if inside
+# general checking enclosing procedure:
+# for some obj, get its vertices
+# if the obj is has transform property 
+# then the associated vertices should be transformed,
+# or, as a shortcut, just the translation pt is used.
+# (but then the translation pt should be in the enclosure).
 
 
 def hull(pts):
@@ -174,6 +180,7 @@ def hull(pts):
 
 
 from functools import cached_property
+
 
 class Object:
     # perhaps the speckle sdk is useful here,
@@ -266,13 +273,6 @@ class Object:
             return True
         else:
             return False
-
-# general checking enclosing procedure:
-# for some obj, get its vertices
-# if the obj is has transform property 
-# then the associated vertices should be transformed,
-# or, as a shortcut, just the translation pt is used.
-# (but then the translation pt should be in the enclosure).
 
 
 
