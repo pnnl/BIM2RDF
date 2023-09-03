@@ -20,21 +20,16 @@ def it():
 def _normalize_h(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
     triples = tuple(triples) # b/c i loop through it twice
     # is the skolemization ok?
-    tohash = []
-    for s,p,o in triples:
-        if isinstance(s, g.NamedNode):
-            tohash.append(s)
-        if isinstance(p, g.NamedNode):
-            tohash.append(p)
-        if isinstance(o, g.NamedNode):
-            tohash.append(o)
-    from hashlib import md5
-    tohash = (str(t.value) for t in tohash)
-    tohash = sorted(tohash)
-    tohash = ''.join(t for t in tohash)
-    tohash = tohash.encode()
-    tohash = md5(tohash)
-    tohash = tohash.hexdigest()
+    def td():
+        for s,p,o in triples:
+            if isinstance(s, g.NamedNode):
+                yield (s)
+            if isinstance(p, g.NamedNode):
+                yield (p)
+            if isinstance(o, g.NamedNode):
+                yield (o)
+    tohash = ''.join(str(_) for _ in td())
+    tohash = hash(tohash)
     
     # if tohash not in hashes:
     #     print(tohash, len(list(triples)))
@@ -137,6 +132,7 @@ class OxiGraph(b.DataBase):
         # return len(self._store)#  not strictly correct
         # return _
         _ = self._store
+        # pyoxigraph doesn't hash the contents
         _ = frozenset(_)
         _ = hash(_)
         return _
