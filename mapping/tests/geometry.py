@@ -37,21 +37,10 @@ print(
 ol in o2, il in o2,
 )
 
-for c in geo.compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='fracInside'):
-    print(c)
-#o1s = list(geo.Object.get_objects(db._store, 'Lighting Fixtures', branch))
-#print('o1s')
-#o2s = list(geo.Object.get_objects(db._store, 'Rooms', branch))
-#print('o2s')
-#print(o1s[0].vertices())
-#o1s = list(o1s)
-print(time()-start)
-# g = geo.get_geometry(db._store,
-#              o, 'Lighting Fixtures', 'vertices',
-#             branch='architecture/rooms and lighting fixtures')
+for c in geo.compare(db._store, 'Spaces', 'Rooms', branch, branch, analysis='fracInside'):
+   print(c.o1.uri, c.fracInside, c.o2.uri)
+   print(c.triples())
+   break
 
-#os = geo.get_objects(db._store, 'Lighting Fixtures', branch='architecture/rooms and lighting fixtures')
-#_ = geo.has_property(db._store, 'Lighting Fixtures', 'xdisplayValue')
-#_ = geo.has_property(db._store, 'definition', subject=o)
-#print('property:', _)
-breakpoint()
+
+print(time()-start)

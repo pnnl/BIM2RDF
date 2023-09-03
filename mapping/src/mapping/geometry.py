@@ -275,25 +275,24 @@ class Object:
 
 
 from typing import Iterable
-from types import SimpleNamespace as NS
-class Comparison(NS): pass
+
 
 def compare(store,
         cat1, cat2,
         branch1, branch2,
-        analysis: Literal['fracInside'] | Literal['inside'] = 'inside', tol=.9, **kw) -> Iterable[Comparison]:
+        analysis: Literal['fracInside'] | Literal['inside'] = 'inside', tol=.9, **kw) -> Iterable['Comparison']:
     C = Comparison
     for o1 in Object.get_objects(store, cat1, branch1):
         for o2 in Object.get_objects(store, cat2, branch2):
             if analysis == 'fracInside':
                 f = o1.frac_inside(o2, **kw)
-                yield                       C(o1=o1, fracInside=f,  o2=o2)
+                yield                       C(o1, f, o2)
                 continue
             elif analysis == 'inside':
                 f = o1.frac_inside(o2, **kw)
                 if f > tol:
                     # found its (1) location...
-                    yield                   C(o1=o1, inside=f,      o2=o2)
+                    yield                   C(o1, f, o2)
                     break # ...no need to go through the rest.
                 else:
                     continue
@@ -301,42 +300,35 @@ def compare(store,
 
 
 # geometry above
+
+class Comparison:
+    uri = 'http://mapping/geo#'#fracInside'
+    def __init__(self, o1: Object, fracInside, o2: Object) -> None:
+        self.o1 = o1
+        self.fracInside = fracInside
+        self.o2 = o2
+
+    def triples(self) -> 'Triples':
+        from pyoxigraph import parse
+        _ = f"""
+        PREFIX geo: <{self.uri}>
+        {self.o1.uri} geo:fracInside [
+                        {self.o2.uri}  {self.fracInside}  ].
+        """
+        _ = _.encode()
+        from io import BytesIO
+        _ = parse(BytesIO(_), 'text/turtle')
+        _ = tuple(_)
+        return _
+
+
 # semantic stuff below
 
-from functools import cache
-@cache
-def get_uri():
-    ontology='223p' # TODO: std refs to s223
-    from ontologies import get, namespaces
-    _ = ontology
-    _ = get(_)
-    _ = [ns for ns in namespaces() if ns.path == _]
-    _ = _[0]
-    _ = _.namespaces()
-    _ = [ns for ns in _ if ns.prefix == 's223']
-    _ = _[0]
-    _ = _.uri
-    return _
 
-
-# just make one 'http://geo/fracInside'
+# just make one 
 # to expose in construct mapping
 
-
-from .engine import Triples
-def assigment_triples(d: dict, cat1, cat2) -> Triples:
-    import pyoxigraph as og
-    u = get_uri()
-    if (cat1=='Lighting Fixtures') and (cat2=='Rooms'):
-        _ = [og.Triple(o1, og.NamedNode(u+'hasPhysicalLocation'), o2) for o1,o2 in d.items()]
-    else:
-        _ = []
-    _ = Triples(_)
-    return _
-
-
-from .engine import OxiGraph
-
+from .engine import Triples, OxiGraph
 from typing import Callable
 def get_obj_assignment_rule(cat1, cat2, branch1=None, branch2=None) -> Callable[[OxiGraph], Triples]:
     # o1 contains o2
