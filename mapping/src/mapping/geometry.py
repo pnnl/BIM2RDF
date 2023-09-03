@@ -172,16 +172,15 @@ def in_hull(pts, hull): # -> list/array of bool
 # or, as a shortcut, just the translation pt is used.
 # (but then the translation pt should be in the enclosure).
 
-
 def hull(pts):
     # TODO: concave hull
     from scipy.spatial import Delaunay
     return Delaunay(pts)
 
 
+objects_cache = {} # TODO: could set an item limit
+
 from functools import cached_property
-
-
 class Object:
     # perhaps the speckle sdk is useful here,
     # so that i dont have to query
@@ -204,7 +203,13 @@ class Object:
     @classmethod
     def get_objects(cls, store, category, branch):
         for uri in get_objects(store, category, branch=branch, ):
-            yield cls(uri, store, branch)
+            if uri in objects_cache:
+                yield objects_cache[uri]
+            else:
+                _ = cls(uri, store, branch)
+                objects_cache[uri] = _
+                yield _
+
     
     def __str__(self) -> str:
         return str(self.uri)
@@ -246,7 +251,7 @@ class Object:
         pts = array(pts)
         pts = pts.T
         assert(pts.shape[1] == 3)
-        _ = in_hull(pts, self.hull())
+        _ = in_hull(pts, self.hull)
         _ = pts[_][:n] # filtering Trues
         assert(_.shape[0] == n)  # very unlikely to fail
         return _
@@ -258,13 +263,13 @@ class Object:
             return get_geometry(self.store, self.uri, 'transform', self.branch)
     @cached_property
     def transform(self): return self.get_transform()
-
+    @cached_property
     def hull(self):
         _ = hull(self.vertices())
         return _
     
     def frac_inside(self, other: 'Object', **kw) -> float:
-        _ = in_hull(self.volume_pts, other.hull(), **kw)
+        _ = in_hull(self.volume_pts, other.hull, **kw)
         _ = sum(_) / len(_)
         return _
         
@@ -273,7 +278,6 @@ class Object:
             return True
         else:
             return False
-
 
 
 
