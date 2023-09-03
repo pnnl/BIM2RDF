@@ -30,7 +30,7 @@ def sample_json():
 def remove_at(d: dict) -> dict:
     # can't have @. collides with jsonld.
     # need copy? functional programming rules
-    d = d.copy()
+    # d = d.copy()
     for m in parsing.fields.find(d):
         k = str(m.path)
         if k.startswith('@'):
@@ -41,7 +41,7 @@ def remove_at(d: dict) -> dict:
 
 def url_quote(d: dict) -> dict:
     from urllib.parse import quote 
-    d = d.copy()
+    # d = d.copy()
     for m in parsing.fields.find(d):
         k = str(m.path)
         v = m.context.value.pop(k)
@@ -55,7 +55,7 @@ from . import base_uri
 def contextualize(d: dict) -> dict:
     #"@context": {"@vocab": "http://speckle.systems/", "@base":"http://speckle.systems/", "id": "@id", "referencedId": "@id" },
     # this works in jsonld playground
-    d = d.copy()
+    #d = d.copy()
     context = {
         '@vocab':       base_uri(),
         '@base':        base_uri(),
@@ -79,7 +79,7 @@ def contextualize(d: dict) -> dict:
 
 def encode_data_lists(d: dict) -> dict:
     # need copy? functional programming rules
-    d = d.copy()
+    # d = d.copy()
     for m in parsing.fields.find(d):
         k = str(m.path)
         if k == 'data':
