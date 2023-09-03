@@ -1,0 +1,12 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX geo: <http://mapping/geo#>
+
+construct {
+    ?o1 s223:hasPhysicalLocation ?o2.
+}
+where {
+?o1 geo:fracInside [
+    ?o2  ?f].
+?o1 a s223:Luminaire.
+filter(?f > .9)  # ...maybe a part of it is inside the ceiling?
+}
