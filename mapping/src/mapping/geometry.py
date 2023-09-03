@@ -251,7 +251,7 @@ class Object:
     @cached_property
     def transform(self): return self.get_transform()
 
-    def hull(self):
+    def hull(self): # TODO: integrate. this is not called
         # TODO: CONVEX
         from scipy.spatial import Delaunay
         _ = Delaunay(self.vertices)
