@@ -188,6 +188,12 @@ class Object:
         self.store = store
         self.branch = branch # reqd to filter
     
+    def __repr__(self) -> str:
+        return f"Object({self.uri})"
+    
+    def __hash__(self) -> int:
+        return hash(self.uri)
+    
     @classmethod
     def get_objects(cls, store, category, branch):
         for uri in get_objects(store, category, branch=branch, ):
@@ -269,22 +275,22 @@ class Object:
 # (but then the translation pt should be in the enclosure).
 
 
+
+
 from typing import Iterable
-
-
 def compare(store: 'og.Store',
         cat1, cat2,
         branch1, branch2,
-        analysis: Literal['fracInside'] | Literal['inside'] = 'inside', tol=.9, **kw) -> Iterable['Comparison']:
+        analysis: Literal['fracInside'] | Literal['inside'] = 'inside', tol=.9, ) -> Iterable['Comparison']:
     C = Comparison
     for o1 in Object.get_objects(store, cat1, branch1):
         for o2 in Object.get_objects(store, cat2, branch2):
             if analysis == 'fracInside':
-                f = o1.frac_inside(o2, **kw)
+                f = o1.frac_inside(o2)
                 yield                       C(o1, f, o2)
                 continue
             elif analysis == 'inside':
-                f = o1.frac_inside(o2, **kw)
+                f = o1.frac_inside(o2)
                 if f > tol:
                     # found its (1) location...
                     yield                   C(o1, f, o2)
