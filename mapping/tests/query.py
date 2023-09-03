@@ -19,12 +19,17 @@ def test(query: Path, dir: Path='tmp', ttl: Path=None, ):
     _ = _.read_text()
     _ = s.query(_)
     import pandas as pd
+    if hasattr(_, 'variables'):
+        columns = [v.value for v in _.variables]
+    else:
+        # ie is a construct query
+        columns = ['subject', 'predicate', 'object']
     _ = pd.DataFrame(
             tuple(
                 tuple(c.value
                     for c in qs)
                 for qs in _),
-            columns=[v.value for v in _.variables])
+            columns=columns)
     with pd.option_context(
         'display.max_rows', None,
         'display.max_columns', None):
