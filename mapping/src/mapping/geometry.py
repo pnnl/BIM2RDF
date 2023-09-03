@@ -288,6 +288,7 @@ def compare(store,
             if analysis == 'fracInside':
                 f = o1.frac_inside(o2, **kw)
                 yield                       C(o1=o1, fracInside=f,  o2=o2)
+                continue
             elif analysis == 'inside':
                 f = o1.frac_inside(o2, **kw)
                 if f > tol:

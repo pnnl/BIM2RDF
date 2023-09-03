@@ -37,7 +37,7 @@ print(
 ol in o2, il in o2,
 )
 
-for c in geo.compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch):
+for c in geo.compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='fracInside'):
     print(c)
 #o1s = list(geo.Object.get_objects(db._store, 'Lighting Fixtures', branch))
 #print('o1s')
