@@ -38,23 +38,8 @@ def lists_selector(subject: str,
     #                                    could still add faces here TODO
     # when encountering a list
     # /path/to/list/rdf:rest*/rdf:first ?item.
-    
-    # room vertices
-    #?s spkl:category "Rooms".
-    # ?s spkl:displayValue/(!<urn:nothappening>)*/spkl:vertices/(!<urn:nothappening>)*/spkl:data ?vl.
-    
-    # lighitng fixture vertices
-    #?s spkl:category "Lighting Fixtures".
-    #?s spkl:definition/spkl:displayValue/(!<urn:nothappening>)*/spkl:vertices/(!<urn:nothappening>)*/spkl:data ?vl.
-    
-    # lighting fixture transform
-    #?s spkl:category "Lighting Fixtures".
-    #?s spkl:transform/spkl:matrix ?vl.
-
-    # pattern: 1. category spec 2. cat2list
-    # defaults
     s = subject
-    #                 displayValue --> List --> Vertices --> List --> data --> ?List
+    #                 displayValue -->   List -->         Vertices -->     List -->      base64data --> str
     _to_list = 'spkl:displayValue/rdf:rest*/rdf:first/spkl:vertices/rdf:rest*/rdf:first/spkl:data ?vl.'
     if 'vertices' == cat_to_list:
         to_list = f"{s} " +  _to_list
@@ -73,13 +58,6 @@ def lists_selector(subject: str,
 def from_graph(graph:str=''):
     return ('from'+graph) if graph else ''
 
-
-def geo_branch_selector(branch=None):
-    s = f'<<?n rdf:first ?xyz >>'
-    p = "meta:"
-    o = f'<<?branch spkl:name "{branch}" >>'  # branchName could be used here TODO
-    _ = f"{s} {p} {o}." if branch else ''
-    return _
 
 
 from speckle import base_uri, meta_uri
@@ -121,6 +99,14 @@ def get_objects(store, cat, branch=None, graph=None):
     return tuple(r[0] for r in _)
 
 
+def geo_branch_selector(branch=None):
+    s = f'<<?_so ?_sp ?vl >>'
+    p = "meta:"
+    o = f'<<?_branch spkl:name "{branch}" >>'  # branchName could be used here TODO
+    _ = f"{s} {p} {o}." if branch else ''
+    return _
+
+
 def geoq(subject, list_selector, branch_selector='', graph=None, ) -> query:  # add to group, the export
     # single object at a time to not load all geometry in one query
     # using values seems to help with performance. (using filter was too slow)
@@ -128,26 +114,12 @@ def geoq(subject, list_selector, branch_selector='', graph=None, ) -> query:  # 
     _ = f"""
     {prefixes()}
 
-    select ?vl  (count(?f)-1 as ?pos) ?xyz {from_graph(graph)}
+    select ?vl  {from_graph(graph)}
     where {{
-    
     values ?s {{ {subject} }}
-    
     {list_selector}
-    # path 'parts' must contain: dispalyValue, vertices, and data
-    # connect them in whatever way
-    #?m spkl:speckle_type "Objects.Geometry.Mesh".
-    #?dc spkl:speckle_type "Speckle.Core.Models.DataChunk".
-    #?m  spkl:vertices ?vl.
-    #?vl rdf:rest*/rdf:first ?xyz.  # order not guaranteed!
-    ?vl rdf:rest* ?f. ?f rdf:rest* ?n. # conects (first, next) ptrs to data list
-    ?n rdf:first ?xyz.
-
     {branch_selector}
-    
     }}
-    group by ?vl ?n ?xyz
-    order by ?vl ?pos
     """
     _ = query(_)
     return _
@@ -163,21 +135,22 @@ def get_geometry(store,
     _ = geoq(*_, graph=graph)
     _ = store.query(_) # slow!!! TODO? can just cache the hull result
     if   'vertices' in lst2arr:     shape = (-1, 3)
-    elif lst2arr == 'transform':    shape = (4,4)
+    elif lst2arr == 'transform':    shape = ( 4, 4)
     else:                           #shape = (-1,) # nothing. makes no sense to keep going
         raise ValueError(f"converting {lst2arr} list to array not defined")
     from collections import defaultdict
     g = defaultdict(list)
-    for lst, i, xyz in _: g[lst].append(xyz)
+    for i,lst in enumerate(_): g[i].append(lst[0].value)
     _ = g
     assert(_) # need to have data
     from itertools import chain
     _ = chain.from_iterable(_.values())
-    _ = map(lambda _: float(_.value ), _)
-    _ = tuple(_)
-    from numpy import array
-    _ = array(_)
-    _ = _.reshape(*shape)
+    from speckle.objects import data_decode
+    _ = map(lambda _: data_decode(_), _)
+    _ = map(lambda _: (_).reshape(*shape), _)
+    from numpy import vstack
+    _ = tuple(_) # need to pass in a 'real' sequence ..
+    _ = vstack(_) # ...bc this gives a FutureWarning
     return _
 
 
@@ -218,7 +191,8 @@ def frac_pts_in(o1: 'pts', o2: 'pts',
 from functools import cached_property
 
 class Object:
-    # perhaps the speckle sdk is useful here
+    # perhaps the speckle sdk is useful here,
+    # so that i dont have to query
     def __init__(self, uri, store, branch) -> None:
         uri = str(uri)
         if not (uri.startswith('<')):
@@ -297,7 +271,6 @@ class Object:
 # then the associated vertices should be transformed,
 # or, as a shortcut, just the translation pt is used.
 # (but then the translation pt should be in the enclosure).
-
 
 
 from typing import Iterable
