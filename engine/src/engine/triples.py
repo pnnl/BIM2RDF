@@ -81,6 +81,9 @@ def _normalize_c(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
 
 
 def normalize(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
+    # anon nodes get a unique id
+    # need to deanon nodes so that we dont get
+    # new anon nondes every time data with anon nodes is read.
     _ = triples
     _ = _normalize_h(_)
     return _
