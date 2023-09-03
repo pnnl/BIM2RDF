@@ -89,7 +89,12 @@ def encode_data_lists(d: dict) -> dict:
             else:
                 assert(isinstance(_, list))
                 _ = m.context.value.pop(k)
-                m.context.value['base64data'] = data_encode(_) # is this ok? channging while iterating
+                m.context.value[k] = data_encode(_) # is this ok? channging while iterating
+        if k == 'matrix':
+            _ = m.context.value[k]
+            assert(isinstance(_, list))
+            _ = m.context.value.pop(k)
+            m.context.value[k] = data_encode(_) # is this ok? channging while iterating
     return d
 
 
