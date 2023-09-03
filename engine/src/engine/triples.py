@@ -402,18 +402,16 @@ class Engine(b.Engine): # rule app on Store
         #_: Iterable[g.Triple] = chain.from_iterable(_)
         # _.insert(self.db)
         for r in self.rules:
+            before = len(self.db)
             _ = r(self.db)
-            
+            _.insert(self.db)
+
             if hasattr(self, 'logging'):
-                delta = self.logging.delta(len(self.db), len(_)+len(self.db))
+                delta = self.logging.delta(before, len(self.db))
                 self.logging.log[r.spec].append(delta)
                 if self.logging.print:
                     logger.info(
                         f"{repr(r)}: # triples before {delta.before }, after {delta.after }")
-            #      r.spec
-            #print(r, hash(_), hash(self.db))
-            #g.serialize(_,  open(f'{next(iz)}.ttl', 'wb') , 'text/turtle')
-            _.insert(self.db)
             
         return self.db
 
