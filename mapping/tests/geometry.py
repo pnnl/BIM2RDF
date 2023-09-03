@@ -16,18 +16,29 @@ import mapping.geometry as geo
 from time import time
 roof = "<http://speckle.systems/f19e851bf8b35a971bb8d48021cee5aa>"
 chair = "<http://speckle.systems/a3bcdc5c0ee2e46689f256c6b43fe798>"
-light = "<http://speckle.systems/0786c943cd6bc8164bd3e61946d779a9>"
+
 space =  "<http://speckle.systems/92aae4513016cb4b2509abc87002e040>"
 door = "<http://speckle.systems/e9d5acacef9c1f5919023ab01085711b>"
+
+oo =    "<http://speckle.systems/5110826a766e8bd2f6a1cecf6de2a69f>"
+inlight = "<http://speckle.systems/5b9b49428464c68d85e431a937ae964b>"
+outlight = "<http://speckle.systems/133bf1ff08bb6bbdd516a25cd8f81d3f>"
+
+
 branch = 'architecture/rooms and lighting fixtures'
-o1 = geo.Object(light, db._store, branch=branch)
-o2 = geo.Object(chair, db._store, branch=branch)
+ol = geo.Object(outlight, db._store, branch=branch)
+il = geo.Object(inlight, db._store, branch=branch)
+o2 = geo.Object(oo, db._store, branch=branch)
+
 
 print('start')
 start = time()
+print(
+ol in o2, il in o2,
+)
+
 for c in geo.compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch):
-    print('c')
-    print(c,)
+    print(c)
 #o1s = list(geo.Object.get_objects(db._store, 'Lighting Fixtures', branch))
 #print('o1s')
 #o2s = list(geo.Object.get_objects(db._store, 'Rooms', branch))

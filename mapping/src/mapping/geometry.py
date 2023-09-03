@@ -290,8 +290,12 @@ def compare(store,
                 yield                       C(o1=o1, fracInside=f,  o2=o2)
             elif analysis == 'inside':
                 f = o1.frac_inside(o2, **kw)
-                if f > tol: yield           C(o1=o1, inside=f,      o2=o2)
-                break # no need for all
+                if f > tol:
+                    # found its (1) location...
+                    yield                   C(o1=o1, inside=f,      o2=o2)
+                    break # ...no need to go through the rest.
+                else:
+                    continue
             raise ValueError('what analysis?')
 
 
