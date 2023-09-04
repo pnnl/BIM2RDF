@@ -18,9 +18,12 @@ def it():
 #hashes = set()
 
 def _normalize_h(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
-    triples = tuple(triples) # b/c i loop through it twice
     # is the skolemization ok?
-    def td():
+    triples = tuple(triples, )
+    if not triples: return ()
+    def tohash():
+        # hash the 'constants' to id the set of triples.
+        # ...not the ones that can potentially change
         for s,p,o in triples:
             if isinstance(s, g.NamedNode):
                 yield (s)
@@ -28,14 +31,14 @@ def _normalize_h(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
                 yield (p)
             if isinstance(o, g.NamedNode):
                 yield (o)
-    tohash = ''.join(str(_) for _ in td())
-    tohash = hash(tohash)
-    
-    # if tohash not in hashes:
-    #     print(tohash, len(list(triples)))
-    # hashes.add(tohash);
-    #tohash = len(triples)
-    #print('norm', len(triples), tohash)
+    from hashlib import md5 # md5 instead of __hash__ bc hash() changes bw program launches
+    tohash = (str(t.value) for t in tohash())
+    tohash = sorted(tohash)
+    tohash = ''.join(t for t in tohash)
+    tohash = tohash.encode()
+    tohash = md5(tohash)
+    tohash = tohash.hexdigest()
+
 
     url = f'http://deanon/{tohash}/'
     iz = iter(it())
