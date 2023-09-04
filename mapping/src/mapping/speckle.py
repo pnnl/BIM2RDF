@@ -7,7 +7,6 @@ def rules(inference = True) -> Rules:
     from . import mapping_dir
     from pathlib import Path
 
-    inference = False; _ = []
     # mappings
     _ = Path(mapping_dir).glob('**/223p/*.rq') # https://www.iana.org/assignments/media-types/application/sparql-query
     _ = map(ConstructRule,              _)
