@@ -432,7 +432,7 @@ class Engine(b.Engine): # rule app on Store
         i = 0
         while (not self.stop()):
             if i > MAX_ITER:
-                print('reached max iter')
+                logger.warning('reached max iter')
                 break
             yield self.db
             i += 1
