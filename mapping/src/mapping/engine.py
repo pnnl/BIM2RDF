@@ -260,16 +260,6 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
 #     def __init__(self, spec: PyRuleCallable) -> None:
 #         super().__init__(spec)
 
-from functools import lru_cache
-@lru_cache(1)
-def ontology():
-    from ontologies import get
-    _ = get('223p')
-    from rdflib import Graph
-    g = Graph()
-    g.parse(_)
-    return g
-
 
 
 from pathlib import Path
@@ -302,6 +292,16 @@ def get_data_getter(src: BytesIO | ttl | Path | Callable[[], ttl ]  ) ->  Callab
     else:
         raise ValueError('dont know how to get data')
 
+
+from functools import lru_cache
+@lru_cache(1)
+def ontology():
+    from ontologies import get
+    _ = get('223p')
+    from rdflib import Graph
+    g = Graph()
+    g.parse(_)
+    return g
 
 def pyshacl_rules(db: OxiGraph) -> Triples:
     from validation.shacl import shacl
