@@ -105,11 +105,15 @@ class PyRule(_PyRule):
         from pyoxigraph import NamedNode, Triple, Literal
         from inspect import getsource
         p = meta_prefix
-        yield from Triples([Triple(
-                NamedNode(f'{p}/python/function'),
-                NamedNode(f'{p}/python/source'),
-                Literal(getsource(self.spec)),
-        )])
+        yield from Triples([
+            Triple(
+                NamedNode(f'{p}/python#function'),
+                NamedNode(f'{p}/python#source'),
+                Literal(getsource(self.spec)),),
+            Triple(NamedNode(f'{p}/python#function'),
+                NamedNode(f'{p}/python#name'),
+                Literal((self.spec.__name__)),)
+        ])
 
 
 from rdflib import Literal, Graph as _Graph
