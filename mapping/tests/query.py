@@ -25,8 +25,8 @@ def test(query: Path, dir: Path='tmp', ttl: Path=None, ):
         # ie is a construct query
         columns = ['subject', 'predicate', 'object']
     _ = pd.DataFrame(
-            tuple(
-                tuple(c.value
+            tuple( #                                  nested triple
+                tuple( (c.value if hasattr(c, 'value') else str(c))
                     for c in qs)
                 for qs in _),
             columns=columns)
