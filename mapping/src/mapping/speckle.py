@@ -126,7 +126,7 @@ def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
     _ = mrdf(_) #
     from pyoxigraph import parse
     _ = parse(_, 'text/turtle')
-    _ = Triples(_) # ! important! but centralized in PyRule
+    _ = Triples(_) # ! important! has blank nodes  but handled  centrally by '.deanon()' in PyRule.
     return _
 
 
