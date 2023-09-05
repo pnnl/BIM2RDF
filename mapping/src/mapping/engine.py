@@ -212,19 +212,12 @@ Semantics.closure = closure
 
 from .conversions import og2rg, rg2og
 
-#https://github.com/oxigraph/oxrdflib/issues/22
 
 def rdflib_semantics(db: OxiGraph) -> Triples:
-    #https://github.com/oxigraph/oxrdflib/blob/f0f0a110c58e8e82acd2eb0af5514392d2941596/oxrdflib/__init__.py#L20
-    # store constructor deps on 'config'. should be able to just taks store
-    #s._store = g._store
-    # will need to copy b/c the rule iface is triples
-    # rdflibg = Graph(s)
-    to = 'text/turtle'
-    g1 = og2rg(db._store)
-    # copy
+    _ = get_filtered(db._store)
+    g1 = og2rg(_) 
     g2 = Graph()
-    for _ in g1: g2.add(_)
+    for t in g1: g2.add(t) # copy to get the above 'features'
     _ = Semantics(g2, True, True, rdfs=True)
     # _._debug = True generates waaay to much.
     # i think these are the datatype axioms (3rd arg)
@@ -239,6 +232,16 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
     _.closure()
     # take out _offensive triples
     for bad in g2._offensive: g2.remove(bad)
+    to = 'text/turtle'
+    from io import BytesIO
+    _ = BytesIO()
+    g2.serialize(_, to)
+    del g2
+    _.seek(0)
+    from pyoxigraph import parse
+    _ = parse(_, to)
+    _ = (t for t in _ if 0 == len(tuple(db._store.quads_for_pattern(*t))))
+    return _ 
     from rdflib.compare import graph_diff
     _ = graph_diff(g1, g2)
     diff = _[2] - _[1]
@@ -262,40 +265,22 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
 
 
 
-from pathlib import Path
-from typing import Callable
-ttl = str
-from io import BytesIO
-def get_data_getter(src: BytesIO | ttl | Path | Callable[[], ttl ]  ) ->  Callable[[OxiGraph], Triples]: # TODO: use pyrule
-    from pyoxigraph import Store
-    if isinstance(src, BytesIO):
-        s = Store()
-        s.bulk_load(src, 'text/turtle')
-        _ = lambda _: Triples(q.triple for q in s)
-        return _
-    elif isinstance(src, ttl):
-        _ = src.encode()
-        _ = BytesIO(_)
-        _ = get_data_getter(_)
-        return _
-    elif isinstance(src, Path):
-        assert(src.suffix == '.ttl')
-        _ = open(src, 'rb')
-        _ = _.read()
-        _ = BytesIO(_)
-        _ = get_data_getter(_)
-        return _
-    elif callable(src):
-        _ = src()
-        _ = get_data_getter(_)
-        return _
-    else:
-        raise ValueError('dont know how to get data')
+from pyoxigraph import Store
+# TODO: filter mapped, ontology, by uri or rdfstar
+def get_filtered(store: Store, *p, **k) -> Store:
+    _ = store
+    from .util import filter_mapped
+    _ = _.query(filter_mapped(*p, **k))
+    s = Store()
+    from pyoxigraph import Quad
+    _ = tuple(_) # got an error if empty!
+    if len(_): s.bulk_extend(Quad(*t) for t in _)
+    return s
 
 
 from functools import lru_cache
 @lru_cache(1)
-def ontology():
+def rgontology(): # rdflib graph ontology
     from ontologies import get
     _ = get('223p')
     from rdflib import Graph
@@ -303,13 +288,16 @@ def ontology():
     g.parse(_)
     return g
 
+
 def pyshacl_rules(db: OxiGraph) -> Triples:
     from validation.shacl import shacl
     #def shacl(
     #data, shacl=None, ontology=None,
     #advanced=False):
-    _ = og2rg(db._store)
-    _ = shacl(_, shacl=ontology(), advanced=True, iterate_rules=True )
+    _ = db._store
+    _ = get_filtered(_)
+    _ = og2rg(_)
+    _ = shacl(_, shacl=rgontology(), advanced=True, iterate_rules=True )
     _ = _.generated
     _ = rg2og(_)
     _ = Triples(q.triple for q in _)
