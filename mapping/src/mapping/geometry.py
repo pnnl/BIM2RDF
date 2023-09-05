@@ -142,7 +142,7 @@ def get_geometry(store,
     g = defaultdict(list)
     for i,lst in enumerate(_): g[i].append(lst[0].value)
     _ = g
-    assert(_) # need to have data
+    assert(_) # need to have data for a subject
     from itertools import chain
     _ = chain.from_iterable(_.values())
     from speckle.objects import data_decode
@@ -332,7 +332,7 @@ class Comparison:
 
 
 from .engine import OxiGraph, Triples
-def locations(db: OxiGraph) -> Triples:
+def overlap(db: OxiGraph) -> Triples:
     branch = 'architecture/rooms and lighting fixtures'
     for c in compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='inside'):
         yield from c.triples()
