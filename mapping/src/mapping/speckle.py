@@ -1,23 +1,24 @@
 from engine.triples import PyRuleCallable, Triples
-from .engine import Rules, Callable, OxiGraph, Triples, PyRule
+from .engine import Rules, OxiGraph, Triples, PyRule
+from typing import Callable
 
 
-def rules(inference = True) -> Rules: 
+def rules(inference = True) -> Rules:
     from .engine import ConstructRule, Rules
     from . import mapping_dir
     from pathlib import Path
-
     # mappings
-    _ = Path(mapping_dir).glob('**/223p/*.rq') # https://www.iana.org/assignments/media-types/application/sparql-query
+    _ = Path(mapping_dir).glob('**/223p/*.rq') 
     _ = map(ConstructRule,              _)
     _ = list(_)
 
-    # geometry
-    from .geometry import locations
-    _ = _ + [PyRule(locations)]
+    # geometry calcs
+    from .geometry import overlap
+    _ = _ + [PyRule(overlap)]
 
     # inference
     if inference:
+        _ = _ + [PyRule(get_ontology)]
         #                     223p rules
         from .engine import pyshacl_rules, rdflib_semantics
         _ = _ + [PyRule(rdflib_semantics), PyRule(pyshacl_rules)]
@@ -26,15 +27,20 @@ def rules(inference = True) -> Rules:
     return _
 
 
-def get_ontology(ontology: str) -> Callable[[OxiGraph], Triples]:
-    from .engine import get_data_getter
+def get_ontology(_: OxiGraph) -> Triples:
+    from .util import get_data
     from ontologies import get
-    _ = get(ontology)
-    _ = get_data_getter(_)
+    _ = get('223p')
+    _ = get_data(_)
     return _
 
 
 class SpeckleGetter(PyRule):
+
+    def __init__(self, stream_id, branch_id=None, object_id=None) -> None:
+        _ = get_speckle(stream_id, branch_id=branch_id, object_id=object_id)
+        super().__init__(_.objects)
+        self._getters = _
 
     @staticmethod
     def get_branches(stream_id):
@@ -63,10 +69,6 @@ class SpeckleGetter(PyRule):
         for b in branch_ids:
             yield cls(stream_id, branch_id=b, )
 
-    def __init__(self, stream_id, branch_id=None, object_id=None) -> None:
-        _ = get_speckle(stream_id, branch_id=branch_id, object_id=object_id)
-        super().__init__(_.objects)
-        self._getters = _
 
     def meta(self, data: Triples) -> Triples:
         _ = self._getters.meta() 
@@ -83,9 +85,9 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     from speckle.objects import rdf as ordf
     _ = ordf(_) #
     _ = _.read()
-    _ = _.decode()
-    from .engine import get_data_getter
-    _ = get_data_getter(_)
+    d = _.decode()
+    from .util import get_data
+    _ = lambda _: get_data(d)
     return _
 
 
@@ -124,7 +126,7 @@ def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
     _ = mrdf(_) #
     from pyoxigraph import parse
     _ = parse(_, 'text/turtle')
-    _ = Triples(_)
+    _ = Triples(_) # ! important! but centralized in PyRule
     return _
 
 
@@ -182,19 +184,24 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )
     
     
-from validation.engine import Engine
-def fengine(*, rules=rules) -> Engine:
+
+def fengine(*, validation=True, rules=rules) -> 'Engine':
     # functions for args
     from .engine import OxiGraph
+    if validation:
+        from validation.engine import Engine
+    else:
+        from .engine import Engine
     _ = Engine(
             rules(),
-            OxiGraph(), MAX_ITER=20 )
+            OxiGraph(), MAX_ITER=20)
     return _
 
 
 
 from pathlib import Path
 def engine(stream_id, *, branch_id=None, object_id=None,
+           validation=True,
            inference=True,
            out=Path('out.ttl')) -> Path:
     # data/config for args
@@ -211,10 +218,13 @@ def engine(stream_id, *, branch_id=None, object_id=None,
         data_rules = Rules([SpeckleGetter(stream_id, branch_id=branch_id, object_id=object_id),])
     else:
         raise TypeError('branch id not processed')
-    _ = fengine(rules=lambda: (
+    _ = fengine(
+            rules=lambda: (
                     data_rules
-                    +rules(inference=inference)
-                    ) )
+                    +rules(inference=inference,)
+                    ),
+            validation=validation,
+        )
     _()
     _ = _.db._store
     _.dump(str(out), 'text/turtle')
