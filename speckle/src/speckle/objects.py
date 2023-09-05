@@ -64,7 +64,8 @@ def contextualize(d: dict) -> dict:
         #"data":         {"@container": "@list"} most (almost all?) of these are the data lists
         }
     #    make lists rdf lists
-    for lf in find_list_fields(d): context[lf] = {"@container": "@list"}; del lf
+    for lf in find_list_fields(d):
+        context[lf] = {"@container": "@list"}; del lf
     # perhaps there might be just one list keyed as 'data' close to the root...
     # ..but then encode_data_lists handles the majority of cases where
     # the lists have the coord data.
@@ -131,6 +132,7 @@ def data_decode(d: str) -> 'array':
 
 
 
+
 # can take json or speckleid
 def rdf(d): 
     #_ = sample_json()
@@ -138,6 +140,7 @@ def rdf(d):
     _ = remove_at(_)
     _ = url_quote(_)
     _ = encode_data_lists(_)
+    # the num lists wont show
     _ = contextualize(_)
     #from pyld import jsonld as lj
     #_ = lj.flatten(_)

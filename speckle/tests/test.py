@@ -64,7 +64,13 @@ def objects():
             'id':'o1', # ok maybe just take this id as speckle and reinterpret as schema.org/id
             'Outside': 'sdf',
             'inside': [
-                {'id': 'dataid', 'data': list(range(3))+list(range(3))  }, # assumes set w/o @container:@list
+                {'id': 'dataid',
+                 'data': list(range(3))+list(range(3)),    # should come out as encoded list
+                 'matrix': list(range(3))+list(range(3)),  # this one too.
+                 'notdatalist': [                          # but not this
+                     {'x': 'y'}
+                 ]
+                     }, 
                 {'id': 'i1', 
                 'p': 3},
                 {'referencedId': 'rid', 'speckle_type': 'whatever' }, 
@@ -81,11 +87,11 @@ def test_meta_rdf(meta,snapshot):
     assert actual == snapshot
 
 
-
-def test_objects_rdf(objects,snapshot):
+def test_objects_rdf(objects, snapshot):
     from speckle.objects import rdf
     actual = rdf(objects)
-    assert actual ==snapshot
+    assert actual == snapshot
+    
 
 def test_query_ql(snapshot):
     from speckle.graphql import query
