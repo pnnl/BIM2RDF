@@ -3,8 +3,8 @@ stages:
 # use foreach? param sweep discussion https://github.com/iterative/dvc/pull/8187
 
   map:
-    #                                        set to false for testing. really slow.
-    cmd: python -m mapping.speckle --inference=False --stream_id=${building}
+    #                                        set to false for testing.
+    cmd: python -m mapping.speckle --inference=True --validation=False --stream_id=${building}
     wdir: work
     deps:
       - ../../ontologies/imported/223p.ttl
@@ -12,7 +12,7 @@ stages:
       - ../src/mapping
       # ../src/validation?
     outs:
-      - out.ttl
+      - out.ttl # need to keep tracking this?
 
   upload:
     cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
