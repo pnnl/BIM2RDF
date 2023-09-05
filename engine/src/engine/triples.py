@@ -15,91 +15,20 @@ def it():
         yield i
         i += 1
 
-#hashes = set()
 
-def _normalize_h(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
-    # is the skolemization ok?
-    triples = tuple(triples, )
-    if not triples: return ()
-    def tohash():
-        # hash the 'constants' to id the set of triples.
-        # ...not the ones that can potentially change
-        for s,p,o in triples:
-            if isinstance(s, g.NamedNode):
-                yield (s)
-            if isinstance(p, g.NamedNode):
-                yield (p)
-            if isinstance(o, g.NamedNode):
-                yield (o)
-    from hashlib import md5 # md5 instead of __hash__ bc hash() changes bw program launches
-    tohash = (str(t.value) for t in tohash())
-    tohash = sorted(tohash)
-    tohash = ''.join(t for t in tohash)
-    tohash = tohash.encode()
-    tohash = md5(tohash)
-    tohash = tohash.hexdigest()
-
-
-    url = f'http://deanon/{tohash}/'
-    iz = iter(it())
-    bnm = {} # bn -> iz
-    # give a num to the blank nodes
-    for s, _, o in triples:
-        if isinstance(s, g.BlankNode): bnm[s] = next(iz)
-        if isinstance(o, g.BlankNode): bnm[o] = next(iz)
-        # NA really
-        if isinstance(_, g.BlankNode): bnm[_] = next(iz)
-    
-    __ = []
-    for spo in (triples):
-        _ = map(lambda s: g.NamedNode(f'{url}{bnm[s]}') if s in bnm else s, spo  )
-        _ = g.Triple(*_)
-        __.append(_)
-    __ = tuple(__) # immutable
-    return __
-
-
-global_counter = iter(it())
-# this doesnt work. doesnt uniquify
-def _normalize_c(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
-    def url(): return f'http://deanon/{next(global_counter)}'
-    __ = []
-    for en, (s,p,o) in enumerate(triples):
-        if isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
-            if s == o:
-                s = o = g.NamedNode(f'{url()}')
-            else:
-                s = g.NamedNode(f'{url()}')
-                o = g.NamedNode(f'{url()}')
-        elif isinstance(s, g.BlankNode) and not isinstance(o, g.BlankNode):
-            s = g.NamedNode(f'{url()}')
-        elif not isinstance(s, g.BlankNode) and isinstance(o, g.BlankNode):
-            o = g.NamedNode(f'{url()}')
-        else: # no change
-            pass
-        _ = g.Triple(s,p,o)
-        __.append(_)
-    __ = tuple(__) # immutable
-    return __
-
-
-def normalize(triples: Iterable[g.Triple]) -> Iterable[g.Triple]:
-    # anon nodes get a unique id
-    # need to deanon nodes so that we dont get
-    # new anon nondes every time data with anon nodes is read.
-    _ = triples
-    _ = _normalize_h(_)
-    return _
+# anon nodes break the repeatability
+# so this is a cache that associates
+# hash(namednodes) -> blanknodes
+deanoned = {}
 
 
 class Triples(b.Data):
 
     def __init__(self, data: Iterable[g.Triple]=[]) -> None:
-        _ = normalize(data)
-        self._data = _
+        self._data = tuple((data))
     
     def __hash__(self) -> int:
-        return hash(frozenset(self))
+        return hash((self._data))
     
     def __len__(self) -> int:
         i = 0
@@ -112,15 +41,96 @@ class Triples(b.Data):
     def __add__(self, data: 'Triples' ) -> 'Triples':
         from itertools import chain 
         return Triples(chain(self._data, data._data))
+    
+    def known_hash(self) -> str:
+        # a hash based on the content. assumed to persist.
+        if not self._data: return ''
+        def tohash(triples):
+            # hash the 'constants' to id the set of triples.
+            # ...not the ones that can potentially change
+            for spo in triples:
+                for _ in spo:
+                    if isinstance(_, g.BlankNode):
+                        continue
+                    if str(_.value).startswith(self.deanon_uri):
+                        continue
+                    yield _
+
+        # do i need a hashing library??
+        from hashlib import md5 # md5 instead of __hash__ bc hash() changes bw program launches
+        tohash = (str(t.value) for t in tohash(self._data))
+        tohash = sorted(tohash)
+        tohash = ''.join(t for t in tohash)
+        tohash = tohash.encode()
+        tohash = md5(tohash)
+        tohash = tohash.hexdigest()
+        return tohash
+    
+    def anons(self):
+        for triple in self:
+            if any(map(lambda _: isinstance(_, g.BlankNode) , triple)):
+                yield triple
+
+    def deanon(self) -> 'Triples':
+        # block newly generated anon nodes if they've already been seen.
+        # the 'id' is the context of named nodes in the triples 'batch'.
+        id = self.known_hash()
+        if not id: return Triples()
+        
+        if id in deanoned:
+            da = deanoned[id]
+            nn = []
+            for triple in self:
+                if all(map(lambda _: not isinstance(_, g.BlankNode) , triple)):
+                    nn.append(triple)
+        else:
+            da = []
+            nn = []
+            for triple in self:
+                if any(map(lambda _: isinstance(_, g.BlankNode) , triple)):
+                    da.append(triple)
+                else:
+                    nn.append(triple)
+            deanoned[id] = tuple(da)
+
+        r = self.__class__(nn) + self.__class__(da)
+        return r
+    deanon_uri = 'http://deanon' # {id}
+    def _deanon(self) -> 'Triples':
+        # not sure this is correct
+        id = self.known_hash()
+        if not id: return Triples()
+        url = f'{self.deanon_uri}/{id}'
+        iz = iter(it())
+        
+        if id in deanoned:
+            da = deanoned[id]
+            nn = []
+            for triple in self:
+                if all(map(lambda _: not isinstance(_, g.BlankNode) , triple)):
+                    nn.append(triple)
+        else:
+            da = []
+            nn = []
+            for triple in self:
+                if any(map(lambda _: isinstance(_, g.BlankNode) , triple)):
+                    s, p, o = triple
+                    s = g.NamedNode(f"{url}/{next(iz)}") if isinstance(s, g.BlankNode) else s
+                    p = g.NamedNode(f"{url}/{next(iz)}") if isinstance(p, g.BlankNode) else p
+                    o = g.NamedNode(f"{url}/{next(iz)}") if isinstance(o, g.BlankNode) else o
+                    triple = g.Triple(s, p, o)
+                    da.append(triple)
+                else:
+                    nn.append(triple)
+            deanoned[id] = tuple(da)
+
+        r = self.__class__(nn) + self.__class__(da)
+        return r
+    
 
     def insert(self, db: 'OxiGraph', graph=g.DefaultGraph()) -> None:
-        from io import BytesIO
-        fmt='application/n-triples'
-        _ = BytesIO()
-        g.serialize(self._data, _, fmt)
-        _.seek(0)
-        if len(_.getbuffer()):
-            db._store.bulk_load(_, fmt, to_graph=graph)
+        if len(self):
+            db._store.bulk_extend(g.Quad(*t) for t in self)
 
 
 class OxiGraph(b.DataBase):
@@ -210,7 +220,6 @@ called = set() # [(rule, dbstate), ...]
 class CachedRuleCall:
 
     def __call__(self, db: OxiGraph) -> Triples:
-        #return self.do(db)  # disabling
         #h = hash((db)) # len(db) is risky
         h = len(db)
         call = (hash(self), h)
@@ -218,7 +227,8 @@ class CachedRuleCall:
             return Triples([]) # was already captured
         else:
             called.add(call)
-            return self.do(db)
+            _ = self.do(db)
+            return _
 
         
 class Rule(CachedRuleCall, b.Rule):
@@ -227,15 +237,18 @@ class Rule(CachedRuleCall, b.Rule):
         return hash(self.spec)
 
     def add_meta(self, data: Triples) -> Triples:
-        def nested(data):
+        def nest(data):
             _ = self.meta(data)
-            ms = tuple(_)
-            if ms:
+            _ = Triples(_)
+            _ = _.deanon()
+            ms = _
+            if ms: # metas
                 for t in data:
                     for m in ms:
+                        #            ('data'triple,    meta  ,   'meta'triple)
                         yield g.Triple(t, g.NamedNode('http://meta'), m)
             yield from data
-        _ = nested(data)
+        _ = nest(data)
         _ = Triples(_)
         return _
     
@@ -265,6 +278,7 @@ class ConstructRule(Rule):
         _ = db._store.query(str(self.spec))
         assert(isinstance(_, g.QueryTriples))
         _ = Triples(_)
+        _ = _.deanon()
         _ = self.add_meta(_) 
         return _
 
@@ -295,6 +309,7 @@ class PyRule(Rule):
     def do(self, db: OxiGraph) -> Triples:
         _ = self.spec(db)
         _ = Triples(_)
+        _ = _.deanon()
         _ = self.add_meta(_)
         return _
 
@@ -302,7 +317,6 @@ class PyRule(Rule):
 def _idf(db: OxiGraph): return Triples([])
 idf: PyRuleCallable = _idf
 NoEffect = PyRule(idf)
-
 
 
 Spec = PyRuleCallable | ConstructQuery
@@ -335,7 +349,7 @@ class Rules(b.Rules):
         return Rules(_)
     
     def __call__(self, db: OxiGraph) -> Triples:
-        _ = map(lambda r: (r)(db)._data, self.rules)
+        _ = map(lambda r: r(db)._data, self.rules)
         from itertools import chain
         _ = chain.from_iterable(_)
         _ = Triples(_)
@@ -362,9 +376,6 @@ class Result(b.Result):
         return self.db
 
 
-iz = iter(it())
-
-
 import logging # :( i dont do module level imports
 logger = logging.getLogger('engine')
 
@@ -375,7 +386,6 @@ class Engine(b.Engine): # rule app on Store
                  ) -> None:
         self._rules = rules
         self._db = db
-        #db._store.dump(open('init.ttl', 'wb'), 'text/turtle')
         self.MAX_ITER = MAX_ITER
         
         # logging
@@ -385,9 +395,7 @@ class Engine(b.Engine): # rule app on Store
             self.logging = NS(
                 print = print_log,
                 log = defaultdict(list),
-                delta = namedtuple('delta', ['before', 'after'] )
-            )
-        
+                delta = namedtuple('delta', ['before', 'after'] ))
 
     @property
     def rules(self) -> Rules:
@@ -401,11 +409,6 @@ class Engine(b.Engine): # rule app on Store
         raise NotImplementedError    
     
     def crank_once(self) -> OxiGraph:
-        #_ = map(lambda r: r(self.db), self.rules)
-        #from itertools import chain
-        #_ = chain.from_iterable(_)
-        #_: Iterable[g.Triple] = chain.from_iterable(_)
-        # _.insert(self.db)
         for r in self.rules:
             before = len(self.db)
             _ = r(self.db)
@@ -416,7 +419,7 @@ class Engine(b.Engine): # rule app on Store
                 self.logging.log[r.spec].append(delta)
                 if self.logging.print:
                     logger.info(
-                        f"{repr(r)}: # triples before {delta.before }, after {delta.after }")
+                        f"{repr(r)}: # triples before {delta.before }  after {delta.after } => {delta.after-delta.before}")
             
         return self.db
 
