@@ -93,6 +93,7 @@ class ConstructRule(_ConstructRule):
         fp = self.path.parts[-2:] # get the file plus its parent dir
         fp = '/'.join(fp)
         yield from Triples([Triple(
+                # TODO: add a name here to be like the pyrule
                 #        watch that the fn is unique enough
                 NamedNode(f'{p}/construct/query/{fp}'),
                 NamedNode(f'{p}/query'), # ?
@@ -110,6 +111,7 @@ class PyRule(_PyRule):
                 NamedNode(f'{p}/python#function'),
                 NamedNode(f'{p}/python#source'),
                 Literal(getsource(self.spec)),),
+            # could redundant bc the name can be seen in the source
             Triple(NamedNode(f'{p}/python#function'),
                 NamedNode(f'{p}/python#name'),
                 Literal((self.spec.__name__)),)
