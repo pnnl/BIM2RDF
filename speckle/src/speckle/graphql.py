@@ -9,9 +9,9 @@ class CachedRequestHTTPTransport(RequestsHTTPTransport):
         #https://github.com/graphql-python/gql/issues/387#issuecomment-1435323862
         # copypaste
         if self.session is None:
-            from .requests import get_cached_session
+            from .requests import get_session
             # Creating a session that can later be re-use to configure custom mechanisms
-            self.session = get_cached_session()
+            self.session = get_session()
             # If we specified some retries, we provide a predefined retry-logic
             if self.retries > 0:
                 adapter = HTTPAdapter(
@@ -35,14 +35,20 @@ class CachedRequestHTTPTransport(RequestsHTTPTransport):
 gql_url = 'https://speckle.xyz/graphql'
 
 
-def client():
+def client(dev=True):
     from gql import Client
     from .requests import TokenAuth
-    transport=CachedRequestHTTPTransport(url=gql_url, auth=TokenAuth() )
-    _ = Client(
-        transport=transport,
-        fetch_schema_from_transport=True)
-    return _
+    if dev:
+        transport=CachedRequestHTTPTransport(url=gql_url, auth=TokenAuth())
+        _ = Client(
+            transport=transport,
+            fetch_schema_from_transport=True)
+        return _
+    
+    else: 
+        default_transport = RequestsHTTPTransport(url=gql_url, auth=TokenAuth())
+        _ = Client(transport = default_transport, fetch_schema_from_transport=True)
+        return _
 
 
 
