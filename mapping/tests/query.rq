@@ -1,0 +1,12 @@
+construct {?s ?p ?o }
+    where {
+    ?s ?p ?o.
+    FILTER(
+       regex(str(?p), "data.ashrae.org/standard223" ) 
+    || regex(str(?o), "data.ashrae.org/standard223" )
+    || regex(str(?p), "www.w3.org/2000/01/rdf-schema" ) 
+    || regex(str(?o), "www.w3.org/2000/01/rdf-schema" )
+    || regex(str(?p), "www.w3.org/1999/02/22-rdf-syntax-ns" )
+    || regex(str(?o), "www.w3.org/1999/02/22-rdf-syntax-ns" )
+    )
+}
