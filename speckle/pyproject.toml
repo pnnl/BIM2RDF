@@ -3,6 +3,7 @@ name = "speckle"
 version = "0.1.0"
 description = "Add a short description here"
 authors = [
+    {name =  "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
     { name = "Bilal Faye", email = "bilal.faye@pnnl.gov" }
 ]
 dependencies = [
@@ -12,8 +13,6 @@ dependencies = [
     "jsonpath-ng",
     "requests-cache",
     "rdflib",
-    "syrupy~=4.0.4",
-    "pytest~=7.4.0",
 ]
 readme = "README.md"
 
@@ -23,7 +22,7 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = ["pytest","pytest-watcher", "ipdb", "requests-cache"]
+dev-dependencies = ["pytest","pytest-watcher", "ipdb",  "syrupy","requests-cache"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

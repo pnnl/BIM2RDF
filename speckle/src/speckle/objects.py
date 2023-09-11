@@ -15,7 +15,6 @@ parsing = NS(
 
 def find_list_fields(d: dict):
     #d = {'n': 3, 'nested': {'nl': [], 'n':3 } }
-
     for m in parsing.fields.find(d):
         k = str(m.path)
         if isinstance(m.value, list):
@@ -31,7 +30,7 @@ def sample_json():
 def remove_at(d: dict) -> dict:
     # can't have @. collides with jsonld.
     # need copy? functional programming rules
-    d = d.copy()
+    # d = d.copy()
     for m in parsing.fields.find(d):
         k = str(m.path)
         if k.startswith('@'):
@@ -42,7 +41,7 @@ def remove_at(d: dict) -> dict:
 
 def url_quote(d: dict) -> dict:
     from urllib.parse import quote 
-    d = d.copy()
+    # d = d.copy()
     for m in parsing.fields.find(d):
         k = str(m.path)
         v = m.context.value.pop(k)
@@ -56,16 +55,20 @@ from . import base_uri
 def contextualize(d: dict) -> dict:
     #"@context": {"@vocab": "http://speckle.systems/", "@base":"http://speckle.systems/", "id": "@id", "referencedId": "@id" },
     # this works in jsonld playground
-    d = d.copy()
+    #d = d.copy()
     context = {
         '@vocab':       base_uri(),
         '@base':        base_uri(),
         'referencedId': '@id',
         'id':           '@id',
-        #"data":         {"@container": "@list"}  # assumption: all data keys are lists!
+        #"data":         {"@container": "@list"} most (almost all?) of these are the data lists
         }
-    # assumption: keys are consistantly lists
-    for lf in find_list_fields(d): context[lf] = {"@container": "@list"}; del lf
+    #    make lists rdf lists
+    for lf in find_list_fields(d):
+        context[lf] = {"@container": "@list"}; del lf
+    # perhaps there might be just one list keyed as 'data' close to the root...
+    # ..but then encode_data_lists handles the majority of cases where
+    # the lists have the coord data.
     if isinstance(d, dict):
         d['@context'] =  context
     elif isinstance(d, list):
@@ -75,14 +78,69 @@ def contextualize(d: dict) -> dict:
     # speckle specific
     return d
 
+def encode_data_lists(d: dict) -> dict:
+    # need copy? functional programming rules
+    # d = d.copy()
+    for m in parsing.fields.find(d):
+        k = str(m.path)
+        if k == 'data':
+            _ = m.context.value[k]
+            if not (isinstance(_, list)): # like stream/object/data
+                continue
+            else:
+                assert(isinstance(_, list))
+                _ = m.context.value.pop(k)
+                m.context.value[k] = data_encode(_) # is this ok? channging while iterating
+        if k == 'matrix':
+            _ = m.context.value[k]
+            assert(isinstance(_, list))
+            _ = m.context.value.pop(k)
+            m.context.value[k] = data_encode(_) # is this ok? channging while iterating
+    return d
+
+
+def data_encode(d: list) -> str:
+    from numpy import savez_compressed as save, array
+    #from numpy import save
+    _ = d
+    _ = array(d, dtype='float16')
+    from io import BytesIO
+    def sv(d):
+        _ = BytesIO()
+        #save(_, d)
+        save(_, array=d)
+        return _
+    _ = sv(_)
+    _.seek(0)
+    _ = _.read()
+    from base64 import b64encode
+    _ = b64encode(_)
+    _ = _.decode()
+    return _
+
+
+def data_decode(d: str) -> 'array':
+    _ = d
+    from base64 import b64decode
+    _ = b64decode(_,)
+    from numpy import load
+    from io import BytesIO
+    _ = BytesIO(_)
+    _ = load(_)
+    _ = _['array']
+    return _
+
+
 
 
 # can take json or speckleid
-def rdf(d):
+def rdf(d): 
     #_ = sample_json()
     _ = d
     _ = remove_at(_)
     _ = url_quote(_)
+    _ = encode_data_lists(_)
+    # the num lists wont show
     _ = contextualize(_)
     #from pyld import jsonld as lj
     #_ = lj.flatten(_)
@@ -97,7 +155,7 @@ def rdf(d):
     # maybe not compliant!
     from rdflib import Graph
     from json import dumps
-    _ = dumps(_)
+    _ = dumps(_) # TODO: how to say base64 encoded?
     _ = Graph().parse(data=_, format='json-ld')
     from io import BytesIO
     o = BytesIO()
