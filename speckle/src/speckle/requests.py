@@ -19,7 +19,7 @@ def get_session(dev = True):
     db_file = root / 'speckle' /'http_cache'
     db_file = str(db_file)
     import requests_cache
-    from requests_cache import DO_NOT_CACHE,EXPIRE_IMMEDIATELY
+    from requests_cache import DO_NOT_CACHE, EXPIRE_IMMEDIATELY
     if dev:
         _ = requests_cache.CachedSession(
                 cache_name=db_file,
@@ -32,3 +32,4 @@ def get_session(dev = True):
             allowable_methods={'GET', 'HEAD', 'POST'},
             expire_after= EXPIRE_IMMEDIATELY)
         return exp_session
+        
