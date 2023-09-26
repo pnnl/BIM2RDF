@@ -1,0 +1,85 @@
+
+
+```{python}
+q = r"""
+construct {?s ?p ?o }
+    where {
+    ?s ?p ?o.
+    <<?s ?p ?o>> <http://meta>  <<?ms <http://mmeta/query> ?mo>> .
+    filter(
+        regex(str(?p), "data.ashrae.org/standard223" )
+    || regex(str(?o), "data.ashrae.org/standard223" ))
+}
+"""
+q = r"""
+  construct {?s ?p ?o }
+    where {
+    ?s ?p ?o.
+    FILTER(regex(str(?p), "data.ashrae.org/standard223") || regex(str(?o), "data.ashrae.org/standard223") || regex(str(?p), "www.w3.org/2000/01/rdf-schema") || regex(str(?o), "www.w3.org/2000/01/rdf-schema") || regex(str(?p), "www.w3.org/1999/02/22-rdf-syntax-ns") || regex(str(?o), "www.w3.org/1999/02/22-rdf-syntax-ns") )
+    }
+"""
+
+q = r"""
+PREFIX spkl: <http://speckle.systems/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+#construct {
+#  ?this a s223:Luminaire.
+  #?oc a s223:_conn.
+#}
+select ?this ?b ?bp ?x
+where {
+    ?this spkl:Connectors ?b.
+    ?b ?bp ?x.
+}
+  #?cid  spkl:connectedConnectorIds/rdf:rest*/rdf:first ?ccid.
+"""
+
+q = open('test.rq').read() # need to trivially change this cell so it executes.
+# is there a quarto feature that makes this cell always execute?
+```
+
+
+
+```{python}
+#| echo: false
+from pathlib import Path
+def test(query: Path|str, dir: Path=None, ttl: Path=None, ):
+    # query testing util.
+    from pyoxigraph import Store
+    if dir:
+        if ttl:
+            if Path(dir).exists():
+                from shutil import rmtree
+                rmtree(dir)
+            s = Store(str(dir))
+            s.bulk_load(str(ttl), 'text/turtle')
+        else:
+            s = Store(str(dir))
+    else:
+        s = Store()
+        s.bulk_load(str(ttl), 'text/turtle')
+    
+    if isinstance(query, Path):
+        _ = Path(query)
+        _ = _.read_text()
+    else:
+        assert(isinstance(query, str))
+        _ = query
+    _ = s.query(_)
+    import pandas as pd
+    if hasattr(_, 'variables'):
+        columns = [v.value for v in _.variables]
+    else:
+        # ie is a construct query
+        columns = ['subject', 'predicate', 'object']
+    _ = pd.DataFrame(
+            tuple( #                                  nested triple
+                tuple( (c.value if hasattr(c, 'value') else str(c))
+                    for c in qs)
+                for qs in _),
+            columns=columns)
+    return _
+
+test(q, ttl='../work/out.ttl')
+```
+
