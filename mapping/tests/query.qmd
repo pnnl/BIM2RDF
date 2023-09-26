@@ -44,6 +44,7 @@ q = open('test.rq').read() # need to trivially change this cell so it executes.
 #| echo: false
 from pathlib import Path
 def test(query: Path|str, dir: Path=None, ttl: Path=None, ):
+    # dir: is pyoxigraph data dir
     # query testing util.
     from pyoxigraph import Store
     if dir:
