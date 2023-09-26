@@ -42,12 +42,14 @@ parts = {
 
 def make_regex_parts(parts):
     for part in parts:
-        for sp in ('p', 'o'):
-            yield f"""regex(str(?{sp}), "{part}")"""
+        for po in ('p', 'o'):
+            #       uri cast as string so that regex can be applied
+            yield f"""regex(str(?{po}), "{part}")"""
 
 
 mapped_pattern = "<<?s ?p ?o>> <http://meta> <<?ms <http://mmeta/query> ?mo>> ."
-ontology_pattern = '<<?s ?p ?o>> <http://meta> <<<http://mmeta/python#function> <http://mmeta/python#name> "get_ontology">> .'
+# need to use filter
+full_ontology_pattern = '<<?s ?p ?o>> <http://meta> <<<http://mmeta/python#function> <http://mmeta/python#name> "get_ontology">> .'
 
 def filter_mapped():
     # so then these could just be used for the inferencing
@@ -72,7 +74,7 @@ def filter_ontology():
     construct {{?s ?p ?o }}
     where {{
     ?s ?p ?o.
-    {{{ontology_pattern}}}
+    {{{full_ontology_pattern}}}
     union
     {{{mapped_pattern}}}
     }}
