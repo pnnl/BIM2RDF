@@ -1,0 +1,36 @@
+PREFIX spkl: <http://speckle.systems/>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX meta: <http://meta>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+construct {
+   ?b s223:connectedTo ?l.
+}
+#select ?b ?n ?l 
+where {
+    ?b a s223:ElectricBreaker. #?b s223:hasConnectionPoint ?bc.
+    ?b  spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?n.
+
+    ?l a s223:Luminaire.       #?l s223:hasConnectionPoint ?lc.
+    <<?thisconn spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>. # TODO branchName could be used here
+    # connect the branches through elementid
+    # b/c the speckle ids will not be the same 
+    # b/c one export has 'Connection' info.
+    ?l spkl:elementId ?eid.
+    ?thisconn spkl:elementId ?eid.
+    ?thisconn spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM/spkl:value ?n
+
+    # attempt at connecting via connectors but applicationids not matching always
+    # soln: more investigate data.
+    # poor connection is through name due to non uniqueness.
+
+    #?lc spkl:connectedConnectorIds/rdf:rest*/rdf:first ?lai.
+    #bind(SUBSTR( ?lai, 1, 10 ) as ?lai_).
+    #?bc spkl:applicationId ?bai.
+    #bind(SUBSTR( ?bai, 1, 10 ) as ?bai_).
+    #filter strstarts(?lai_, "0102e7b2")
+    #filter strstarts(?bai_, "f")
+    #filter(?lai_=?bai_)
+}
