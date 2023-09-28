@@ -7,6 +7,7 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 construct {
    ?b s223:connectedTo ?l.
+   # TODO: fake wire connection
 }
 #select ?b ?n ?l 
 where {
@@ -21,6 +22,7 @@ where {
     ?l spkl:elementId ?eid.
     ?thisconn spkl:elementId ?eid.
     ?thisconn spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM/spkl:value ?n
+
 
     # attempt at connecting via connectors but applicationids not matching always
     # soln: more investigate data.
