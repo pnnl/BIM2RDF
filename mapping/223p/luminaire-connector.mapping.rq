@@ -1,0 +1,27 @@
+PREFIX spkl: <http://speckle.systems/>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX meta: <http://meta>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+construct {
+   # input
+  ?this s223:hasConnectionPoint ?conn.
+  ?conn  a s223:InletConnectionPoint.
+  ?conn s223:hasMedium s223:Medium-Electricity. #later we can add the value of voltage  TODO
+}
+where {
+#<<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
+    #?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types'
+    # why the above doesn't work?!
+    ?this a s223:Luminaire. # issue #26
+    <<?thisconn spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>. # TODO branchName could be used here
+    # connect the branches through elementid
+    # b/c the speckle ids will not be the same 
+    # b/c one export has 'Connection' info.
+    ?this spkl:elementId ?eid.
+    ?thisconn spkl:elementId ?eid.
+    ?thisconn spkl:Connectors/rdf:rest*/rdf:first ?conn.
+}
+#?cid  spkl:connectedConnectorIds/rdf:rest*/rdf:first ?ccid.

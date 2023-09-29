@@ -8,15 +8,9 @@ PREFIX meta: <http://meta>
 
 construct {
   ?this a s223:ElectricBreaker.
-  ?this rdfs:label ?name .
-  ?this s223:hasConnectionPoint ?cp.
-   ?cp  a s223:OutletConnectionPoint.
-    ?cp s223:hasMedium s223:Medium-Electricity. # can this be inferred?
-    }
+  ?this rdfs:label ?name .}
 where {
 <<?this spkl:category  "Electrical Equipment">> meta: <<?mi spkl:name "electrical/panels">>. # TODO branchName could be used here
     ?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types'
     ?this spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?name.
-    bind(uri(concat(str(?this),("/connection") )) as ?cp)   # TODO create a better uri using spklx.
-    # if more details about the connections are to be made, then it's best to create a new mapping
 }
