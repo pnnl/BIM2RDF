@@ -22,7 +22,11 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = ["pytest","pytest-watcher", "ipdb",  "syrupy","requests-cache"]
+dev-dependencies = [
+    "ipdb",
+    "pytest","pytest-watcher", "syrupy",
+    "requests-cache" ,
+    "fire"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

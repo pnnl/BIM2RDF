@@ -166,7 +166,21 @@ def rdf(d):
 
 
 if __name__ == '__main__':
-    ...
 
-
+    def write_json(stream_id, object_id, path='data.json', safe=True):
+        # for debugging
+        from speckle.graphql import queries, query
+        _ = queries()
+        _ = _.objects(stream_id, object_id)
+        _ = query(_) # dict
+        if not safe:
+            _ = remove_at(_)
+            _ = url_quote(_)
+            _ = encode_data_lists(_)
+        from json import dump
+        from pathlib import Path
+        dump(_, open(Path(path), 'w'),)
+    
+    import fire
+    fire.Fire(write_json)
 
