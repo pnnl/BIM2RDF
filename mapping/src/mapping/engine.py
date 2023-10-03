@@ -104,17 +104,16 @@ class PyRule(_PyRule):
     def meta(self, data: Triples) -> Triples:
         yield from super().meta(data)
         from pyoxigraph import NamedNode, Triple, Literal
-        from inspect import getsource
+        from inspect import getfile
+        from project import root
+        from pathlib import Path
+        _ = getfile(self.spec)
+        _ = (Path(_) / self.spec.__name__).relative_to(root).as_posix()
         p = meta_prefix
         yield from Triples([
-            Triple(
-                NamedNode(f'{p}/python#function'),
-                NamedNode(f'{p}/python#source'),
-                Literal(getsource(self.spec)),),
-            # could redundant bc the name can be seen in the source
             Triple(NamedNode(f'{p}/python#function'),
                 NamedNode(f'{p}/python#name'),
-                Literal((self.spec.__name__)),)
+                Literal(( _ )),)
         ])
 
 
