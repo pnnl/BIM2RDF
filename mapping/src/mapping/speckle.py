@@ -3,18 +3,21 @@ from .engine import Rules, OxiGraph, Triples, PyRule
 from typing import Callable
 
 
-def rules(inference = True) -> Rules:
-    from .engine import ConstructRule, Rules
-    from . import mapping_dir
-    from pathlib import Path
-    # mappings
-    _ = Path(mapping_dir).glob('**/223p/*.rq') 
-    _ = map(ConstructRule,              _)
-    _ = list(_)
+def rules(inference = True, mapping = True) -> Rules:
+    _ = []
+    from .engine import Rules
+    if mapping:
+        from .engine import ConstructRule
+        from . import mapping_dir
+        from pathlib import Path
+        # mappings
+        _ = Path(mapping_dir).glob('**/223p/*.rq') 
+        _ = map(ConstructRule,              _)
+        _ = list(_)
 
-    # geometry calcs
-    from .geometry import overlap
-    _ = _ + [PyRule(overlap)]
+        # geometry calcs
+        from .geometry import overlap
+        _ = _ + [PyRule(overlap)]
 
     # inference
     if inference:
@@ -201,6 +204,7 @@ def fengine(*, validation=True, rules=rules) -> 'Engine':
 
 from pathlib import Path
 def engine(stream_id, *, branch_id=None, object_id=None,
+           mapping = True,
            validation=True,
            inference=True,
            out=Path('out.ttl')) -> Path:
@@ -221,7 +225,9 @@ def engine(stream_id, *, branch_id=None, object_id=None,
     _ = fengine(
             rules=lambda: (
                     data_rules
-                    +rules(inference=inference,)
+                    +rules(
+                        inference=inference,
+                        mapping=mapping)
                     ),
             validation=validation,
         )
