@@ -89,6 +89,10 @@ def encode_data_lists(d: dict) -> dict:
                 continue
             else:
                 assert(isinstance(_, list))
+                #if _ == # [["Key Name", "Comments"]]: # some exception that showed up.
+                # [["Lighting Fixture Schedule", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], ["Lighting Control Zone ID", "Daylight Harvesting Sequence Designation
+                if not all(isinstance(i, (int, float)) for i in _):
+                    continue
                 _ = m.context.value.pop(k)
                 m.context.value[k] = data_encode(_) # is this ok? channging while iterating
         if k == 'matrix':
