@@ -22,6 +22,7 @@ def og2rg(og: Store,) -> Graph:
 
         else:
             un_star.add(q)
+    # can just oxigraph backend?
     un_star.dump(_, to)
     _.seek(0)
     _ = Graph().parse(_, to)
