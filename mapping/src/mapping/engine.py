@@ -85,6 +85,15 @@ class ConstructRule(_ConstructRule):
         # for the mapping case, we're starting from the file
         spec = open(path).read()
         super().__init__(spec)
+    
+    @property
+    def name(self):
+        from project import root
+        _ = self.path.relative_to(root).as_posix()
+        return _
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.name})"
 
     def meta(self, data: Triples) -> Triples:
         yield from super().meta(data)
@@ -104,16 +113,11 @@ class PyRule(_PyRule):
     def meta(self, data: Triples) -> Triples:
         yield from super().meta(data)
         from pyoxigraph import NamedNode, Triple, Literal
-        from inspect import getfile
-        from project import root
-        from pathlib import Path
-        _ = getfile(self.spec)
-        _ = (Path(_) / self.spec.__name__).relative_to(root).as_posix()
         p = meta_prefix
         yield from Triples([
             Triple(NamedNode(f'{p}/python#function'),
                 NamedNode(f'{p}/python#name'),
-                Literal(( _ )),)
+                Literal(( self.name )),)
         ])
 
 

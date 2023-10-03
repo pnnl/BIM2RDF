@@ -294,6 +294,13 @@ class PyRule(Rule):
 
     def __init__(self, spec: PyRuleCallable) -> None:
         self._spec = spec
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.name})"
+    
+    @property
+    def name(self):
+        return f"{self.spec.__module__}.{self.spec.__name__}"
     
     @property
     def spec(self) -> PyRuleCallable:
@@ -418,8 +425,8 @@ class Engine(b.Engine): # rule app on Store
                 delta = self.logging.delta(before, len(self.db))
                 self.logging.log[r.spec].append(delta)
                 if self.logging.print:
-                    logger.info(
-                        f"{repr(r)}: # triples before {delta.before }  after {delta.after } => {delta.after-delta.before}")
+                    logger.info(f"{repr(r)}")
+                    logger.info(f"# triples before {delta.before } \t after {delta.after } => {delta.after-delta.before}")
             
         return self.db
 

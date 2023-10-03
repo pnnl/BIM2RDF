@@ -41,9 +41,19 @@ def get_ontology(_: OxiGraph) -> Triples:
 class SpeckleGetter(PyRule):
 
     def __init__(self, stream_id, branch_id=None, object_id=None) -> None:
+        self.stream_id = stream_id
+        self.branch_id = branch_id
+        self.object_id = object_id
         _ = get_speckle(stream_id, branch_id=branch_id, object_id=object_id)
         super().__init__(_.objects)
         self._getters = _
+
+    def __repr__(self) -> str:
+        _ = f"{self.__class__.__name__}"
+        _ = _ + f"(stream_id={self.stream_id},"
+        _ = _ + f"branch_id={self.branch_id},"
+        _ = _ + f"object_id={self.object_id})"
+        return _
 
     @staticmethod
     def get_branches(stream_id):
