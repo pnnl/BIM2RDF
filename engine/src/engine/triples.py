@@ -413,7 +413,9 @@ class Engine(b.Engine): # rule app on Store
         return self._db
     
     def validate(self) -> Result:
-        raise NotImplementedError    
+        if hasattr(self, 'logging'):
+            logger.info('validating')
+        raise NotImplementedError
     
     def crank_once(self) -> OxiGraph:
         for r in self.rules:
@@ -440,10 +442,12 @@ class Engine(b.Engine): # rule app on Store
     def __iter__(self) -> Iterable[OxiGraph]:
         MAX_ITER = self.MAX_ITER
         i = 0
+        logger.info(f"CYCLE {i}")
         while (not self.stop()):
             if i > MAX_ITER:
                 logger.warning('reached max iter')
                 break
+            logger.info(f"CYCLE {i+1}")
             yield self.db
             i += 1
         else: # for case when nothing needs to happen
