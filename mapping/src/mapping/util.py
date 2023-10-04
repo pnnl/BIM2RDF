@@ -130,4 +130,6 @@ def combine_ttls(dir: Path, out=Path('out.ttl')):
 
 if __name__ == '__main__':
     from fire import Fire
-    Fire(combine_ttls)
+    Fire({
+       f.__name__:f
+       for f in (combine_ttls, split_triples)})
