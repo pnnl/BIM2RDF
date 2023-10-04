@@ -217,7 +217,7 @@ def engine(stream_id, *, branch_id=None, object_id=None,
            mapping = True,
            validation=True,
            inference=True,
-           out=Path('out.ttl')) -> Path:
+           out=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
     # data/config for args
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
@@ -243,7 +243,18 @@ def engine(stream_id, *, branch_id=None, object_id=None,
         )
     _()
     _ = _.db._store
-    _.dump(str(out), 'text/turtle')
+    out = Path(out)
+    if split_out:
+        out = Path('/'.join((out).parts[:-1] + (out.stem,)))
+        if out.exists:
+            from shutil import rmtree
+            rmtree(out)
+        from .util import split_triples, sort_triples, Triples
+        split_triples(
+            sort_triples(Triples(t.triple for t in _)),
+            chunk_size=nsplit_out)
+    else:
+        _.dump(str(out), 'text/turtle')
     return out
 
 
