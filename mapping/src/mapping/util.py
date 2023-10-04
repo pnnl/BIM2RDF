@@ -5,7 +5,7 @@ from typing import Callable
 from .engine import Triples
 ttl = str
 from io import BytesIO
-def get_data(src: BytesIO | ttl | Path | Callable[[], ttl ]  ) -> Triples:
+def get_data(src: BytesIO | ttl | Path | Triples | Callable[[], ttl ]  ) -> Triples:
     from pyoxigraph import Store
     if isinstance(src, BytesIO):
         s = Store()
@@ -24,6 +24,8 @@ def get_data(src: BytesIO | ttl | Path | Callable[[], ttl ]  ) -> Triples:
         _ = BytesIO(_)
         _ = get_data(_)
         return _
+    elif isinstance(src, Triples):
+        return src
     elif callable(src):
         _ = src()
         _ = get_data(_)
@@ -97,15 +99,35 @@ def batched(iterable, n):
         yield batch
 
 
-def split_ttl(ttl, chunk_size=1000, odir='out'):
+def split_triples(triples, chunk_size=1000, odir='out'):
     from pathlib import Path
     odir = Path(odir)
     if not odir.exists() or odir.is_file():
         odir.mkdir()
     from pyoxigraph import serialize
-    for i, chunk in enumerate(batched(get_data(ttl), chunk_size)):
+    for i, chunk in enumerate(batched(get_data(triples), chunk_size)):
         serialize(
             chunk,
             f"{odir}/{i}.ttl",
             'text/turtle')
 
+
+def sort_triples(triples):
+    _ = get_data(triples)
+    _ = sorted(_, key=lambda t: str(t) )
+    return Triples(_)
+
+
+def combine_ttls(dir: Path, out=Path('out.ttl')):
+        dir = Path(dir)
+        from pyoxigraph import Store
+        s = Store()
+        for f in dir.glob('*.ttl'):
+            s.bulk_load(str(f), 'text/turtle')
+        s.dump(str(out), 'text/turtle')
+        return out
+
+
+if __name__ == '__main__':
+    from fire import Fire
+    Fire(combine_ttls)
