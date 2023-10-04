@@ -85,3 +85,27 @@ def filter_ontology():
     return _
 
 
+def batched(iterable, n):
+    # this is a built in in python 3.12
+    "Batch data into tuples of length n. The last batch may be shorter."
+    # batched('ABCDEFG', 3) --> ABC DEF G
+    if n < 1:
+        raise ValueError('n must be at least one')
+    it = iter(iterable)
+    from itertools import islice
+    while batch := tuple(islice(it, n)):
+        yield batch
+
+
+def split_ttl(ttl, chunk_size=1000, odir='out'):
+    from pathlib import Path
+    odir = Path(odir)
+    if not odir.exists() or odir.is_file():
+        odir.mkdir()
+    from pyoxigraph import serialize
+    for i, chunk in enumerate(batched(get_data(ttl), chunk_size)):
+        serialize(
+            chunk,
+            f"{odir}/{i}.ttl",
+            'text/turtle')
+
