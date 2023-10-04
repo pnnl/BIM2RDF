@@ -104,9 +104,9 @@ class ConstructRule(_ConstructRule):
         yield from Triples([Triple(
                 # TODO: add a name here to be like the pyrule
                 #        watch that the fn is unique enough
-                NamedNode(f'{p}/construct/query/{fp}'),
-                NamedNode(f'{p}/query'), # ?
-                Literal(str(self.spec))
+                NamedNode(f'{p}/constructquery'),
+                NamedNode(f'{p}/constructquery#name'),
+                Literal(str(self.name))
                      )])
 
 class PyRule(_PyRule):
