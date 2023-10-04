@@ -428,7 +428,7 @@ class Engine(b.Engine): # rule app on Store
                 self.logging.log[r.spec].append(delta)
                 if self.logging.print:
                     logger.info(f"{repr(r)}")
-                    logger.info(f"# triples before {delta.before } \t after {delta.after } => {delta.after-delta.before}")
+                    logger.info(f"# triples before {delta.before }, after {delta.after } => {delta.after-delta.before}")
             
         return self.db
 
