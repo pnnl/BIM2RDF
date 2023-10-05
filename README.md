@@ -40,7 +40,7 @@ but non-Python tools have to be installed separately.
 
 0. **Before** getting code, install:
     * `rye`
-    * `git`. Use your system manager: `winget` on Windows, `homebrew` on Mac.
+    * `git`. Use your system manager: `winget` on Windows, `homebrew` on Mac. Figure it out on Linux.
     * `quarto`. Pre-release.
     * optional: devenv
 
@@ -49,7 +49,8 @@ Clone under your personal folder outside of your OneDrive. On Windows this is c:
 
 2. **Setup**:
     1. Install **dependencies**: cd into `semint`. Then `rye sync`.
-    2. **configure**: `python -m project.config`
+    2. **activate**: mac & linux `.venv/bin/activate`, Windows `.venv\Scripts\activate`
+    3. **configure**: `python -m project.config`
 
 
 ## Workflow
