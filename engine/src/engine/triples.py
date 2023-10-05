@@ -442,12 +442,13 @@ class Engine(b.Engine): # rule app on Store
     def __iter__(self) -> Iterable[OxiGraph]:
         MAX_ITER = self.MAX_ITER
         i = 0
-        logger.info(f"CYCLE {i}")
+        line = '-'*10
+        logger.info(f"CYCLE {i} {line}")
         while (not self.stop()):
             if i > MAX_ITER:
                 logger.warning('reached max iter')
                 break
-            logger.info(f"CYCLE {i+1}")
+            logger.info(f"CYCLE {i+1} {line}")
             yield self.db
             i += 1
         else: # for case when nothing needs to happen
