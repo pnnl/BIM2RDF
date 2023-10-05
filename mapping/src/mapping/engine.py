@@ -121,18 +121,7 @@ class PyRule(_PyRule):
         ])
 
 
-from rdflib import Literal, Graph as _Graph
-class Graph(_Graph):
-
-    def __init__(self, *p, **k):
-        self._offensive = set()
-        super().__init__(*p, **k)
-
-    def add(self, t):
-        if isinstance(t[0], Literal):
-            self._offensive.add(t)
-        # so that it keeps working as usual
-        return super().add(t)
+from .graphfix import Graph
 
 
 import logging 

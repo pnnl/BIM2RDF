@@ -18,13 +18,14 @@ def ontology():
 
 
 def _shacl_validation(db: OxiGraph):
-    _ = og2rg(OxiGraph()._store)#db._store)
+    from mapping.engine import get_filtered
+    _ = get_filtered(db._store)
+    #_ = OxiGraph()._store #gets stuck  here?!
+    _ = og2rg(_)
     o = ontology()
-    # have the same ns in both graphs
-    for p,n in o.namespaces(): _.bind(p, n)
     #_ = shacl(_, shacl=None, mangling happens, so just taking it direcly from ontology
-    _ = shacl(_, shacl=o,
-              ontology=None, advanced=False)
+    _ = shacl(_, namespaces=o.namespaces(), shacl=o,
+              ontology=None, advanced=False, )
     return _
 
 def shacl_validation(db: OxiGraph) -> Triples:
@@ -35,14 +36,14 @@ def shacl_validation(db: OxiGraph) -> Triples:
     _ = Triples((q.triple for q in _))
     return _
 
+import logging
+logger = logging.getLogger('validation')
 
 class Engine(_Engine):
 
-
     def validate(self) -> Result:
-        # validation is getting stuck.
-        return Result(OxiGraph(), None)
-        _ = shacl_validation(self.db)
+        logger.info('validating...')
+        _ = _shacl_validation(self.db)
         conforms = _.validation.conforms
         assert(isinstance(conforms, bool))
         _ = _.validation.report

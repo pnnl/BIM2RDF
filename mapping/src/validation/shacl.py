@@ -3,26 +3,31 @@
 
 
 
-from rdflib import Graph
-def graph(g) -> Graph:
+from mapping.graphfix import Graph as FGraph
+from rdflib import Graph as RGraph
+def graph(g, mem=True) -> FGraph:
     from pathlib import Path
     if isinstance(g, Path) and Path(g).exists():
-        g = Graph().parse(Path(g))
+        g = FGraph().parse(Path(g))
     elif isinstance(g, str):
         if g.startswith('http'):
-            g = Graph().parse(g)
+            g = FGraph().parse(g)
         else: # take it as ttl
-            g = Graph().parse(data=g, format='ttl')
-    elif isinstance(g, Graph):
+            g = FGraph().parse(data=g, format='ttl')
+    elif isinstance(g, (FGraph, RGraph) ):
         g = g
     else:
         raise TypeError('data source')
+    if mem:
+        # do your horrible mess in memory
+        _ = FGraph() # but make it fixable
+        for d in g: _.add(d)
+        g = _
     return g
 
 
-
 def shacl(
-    data, shacl=None, ontology=None,
+    data, namespaces=(), shacl=None, ontology=None,
     advanced=False, iterate_rules=False):
     #    self,
     #     data_graph: GraphLike,
@@ -33,6 +38,7 @@ def shacl(
     #     **kwargs,
     from pyshacl.validate import Validator as _Validator
     data = graph(data)
+    for p,n in namespaces: data.bind(p, n)
     v = _Validator(
             data,
             shacl_graph=graph(shacl,)   if shacl    else None,
@@ -50,10 +56,11 @@ def shacl(
     GraphDiff = namedtuple('GraphDiff', ['in_both', 'in_data', 'in_generated'])
     def graph_diff(data, generated):
         return GraphDiff(*_graph_diff(data, generated))
+    # clean the generated data, v.target_graph, after this
     return NS(
         validation=validation,
         #data=v.target_graph,
-        generated=graph_diff(data, v.target_graph).in_generated
+        generated=(graph_diff(data, v.target_graph).in_generated)
     )
     #if out
     #_ = v.run()

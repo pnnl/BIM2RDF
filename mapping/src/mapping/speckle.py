@@ -215,7 +215,7 @@ def fengine(*, validation=True, rules=rules) -> 'Engine':
 from pathlib import Path
 def engine(stream_id, *, branch_id=None, object_id=None,
            mapping = True,
-           validation=True,
+           validation=False,
            inference=True,
            out=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
     # data/config for args
@@ -265,6 +265,8 @@ if __name__ == '__main__':
     from engine.triples import logger
     logger.setLevel(logging.INFO)
     from .engine import logger
+    logger.setLevel(logging.INFO)
+    from validation.engine import logger
     logger.setLevel(logging.INFO)
     fire.Fire(engine) # HAHH!!
 
