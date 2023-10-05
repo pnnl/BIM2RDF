@@ -300,7 +300,10 @@ class PyRule(Rule):
     
     @property
     def name(self):
-        return f"{self.spec.__module__}.{self.spec.__name__}"
+        from inspect import getmodule
+        mn = getmodule(self.spec).__spec__.name
+        assert('__main__' not in mn)
+        return f"{mn}.{self.spec.__name__}"
     
     @property
     def spec(self) -> PyRuleCallable:
