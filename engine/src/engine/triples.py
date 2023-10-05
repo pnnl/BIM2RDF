@@ -324,9 +324,9 @@ class PyRule(Rule):
         return _
 
 
-def _idf(db: OxiGraph): return Triples([])
-idf: PyRuleCallable = _idf
-NoEffect = PyRule(idf)
+def _(db: OxiGraph): return Triples([])
+noeffect_pyfunc: PyRuleCallable = _
+noeffect_constructquery: ConstructQuery = ConstructQuery('construct ?s ?p ?o where {} limit 0')
 
 
 Spec = PyRuleCallable | ConstructQuery
