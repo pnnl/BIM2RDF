@@ -49,4 +49,6 @@ Clone under your personal folder outside of your OneDrive. On Windows this is c:
     2. **configure**: `python -m project.config`
 
 
+## Workflow
 
+tbd but standard git branching is used as a mechanism to isolate code changes from the 'main' branch.
