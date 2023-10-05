@@ -14,10 +14,13 @@ Each top-level folder is a component or workspace.
 
 ### Tools
 
+These tools are standardized due to their high utility.
+
 * Source code is managed by [`git`](https://git-scm.com/).
 * Non-source code files (like data) and pipelines are managed by [dvc](http://dvc.org).
 As such the [.gitignore](./.gitignore) only allows source code files.
 * Documentation is generated with [Quarto](https://quarto.org/).
+* dev: [fire](https://github.com/google/python-fire) to create command line interfaces
 
 ## Setup
 
