@@ -33,6 +33,8 @@ As such the [.gitignore](./.gitignore) only allows source code files.
 
 * Speckle: create [API key](https://speckle.xyz/profile). The key will be used to [programmatically access Speckle](https://gitlab.pnnl.gov/conlight/semint/-/blob/fb2960ab43177540daacb3e5be4eaaecd6fae525/speckle/src/speckle/requests.py#L3).
 
+* GitLab: check access to [S223 repo](https://gitlab.pnnl.gov/conlight/223standard).
+
 ### Code
 
 The Python-based setup is highly automated
@@ -51,8 +53,8 @@ but non-Python tools have to be installed separately.
 Clone under your personal folder outside of your OneDrive. On Windows this is c:\Users\myusername.
 
 2. **Setup**:
-    1. Install **dependencies**: cd into `semint`. Then `rye sync`.
-    2. **activate**: mac & linux `.venv/bin/activate`, Windows `.venv\Scripts\activate`
+    1. Install **dependencies**: cd into `semint`. Then `rye sync --no-lock`.
+    2. **activate**: mac & linux `.venv/bin/activate`, Windows `.venv\Scripts\activate.bat`
     3. **configure**: `python -m project.config`
 
 
