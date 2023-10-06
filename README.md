@@ -43,7 +43,7 @@ but non-Python tools have to be installed separately.
     On PNNL Windows machines, you may need to manually add `%USERPROFILE%\.
     rye\shims` to your `PATH`.
     Developer mode recommended.
-    * `git`. Use your system manager: `winget` on Windows, `homebrew` on Mac. Figure it out on Linux.
+    * `git`. Use your system manager: `winget install git.git` on Windows, `homebrew` on Mac. Figure it out on Linux.
     * `quarto`. Pre-release.
     * optional: devenv
 
