@@ -33,6 +33,8 @@ As such the [.gitignore](./.gitignore) only allows source code files.
 
 * Speckle: create [API key](https://speckle.xyz/profile). The key will be used to [programmatically access Speckle](https://gitlab.pnnl.gov/conlight/semint/-/blob/fb2960ab43177540daacb3e5be4eaaecd6fae525/speckle/src/speckle/requests.py#L3).
 
+* GitLab: check access to [S223 repo](https://gitlab.pnnl.gov/conlight/223standard).
+
 ### Code
 
 The Python-based setup is highly automated
