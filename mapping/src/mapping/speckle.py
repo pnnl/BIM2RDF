@@ -31,7 +31,7 @@ def rules(inference = True, mapping = True) -> Rules:
 
 
 def get_ontology(_: OxiGraph) -> Triples:
-    from .util import get_data
+    from .utils.data import get_data
     from ontologies import get
     _ = get('223p')
     _ = get_data(_)
@@ -99,7 +99,7 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     _ = ordf(_) #
     _ = _.read()
     d = _.decode()
-    from .util import get_data
+    from .utils.data import get_data
     _ = lambda _: get_data(d)
     return _
 
@@ -249,7 +249,7 @@ def engine(stream_id, *, branch_id=None, object_id=None,
         if out.exists:
             from shutil import rmtree
             rmtree(out)
-        from .util import split_triples, sort_triples, Triples
+        from .utils.data import split_triples, sort_triples, Triples
         split_triples(
             sort_triples(Triples(t.triple for t in _)),
             chunk_size=nsplit_out)
@@ -269,5 +269,3 @@ if __name__ == '__main__':
     from validation.engine import logger
     logger.setLevel(logging.INFO)
     fire.Fire(engine) # HAHH!!
-
-

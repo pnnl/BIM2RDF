@@ -18,8 +18,8 @@ def ontology():
 
 
 def _shacl_validation(db: OxiGraph):
-    from mapping.engine import get_filtered
-    _ = get_filtered(db._store)
+    from mapping.engine import get_applicable
+    _ = get_applicable(db._store)
     #_ = OxiGraph()._store #gets stuck  here?!
     _ = og2rg(_)
     o = ontology()

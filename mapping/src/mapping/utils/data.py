@@ -1,8 +1,7 @@
-
-
 from pathlib import Path
 from typing import Callable
-from .engine import Triples
+from ..engine import Triples
+
 ttl = str
 from io import BytesIO
 def get_data(src: BytesIO | ttl | Path | Triples | Callable[[], ttl ]  ) -> Triples:
@@ -32,59 +31,6 @@ def get_data(src: BytesIO | ttl | Path | Triples | Callable[[], ttl ]  ) -> Trip
         return _
     else:
         raise ValueError('dont know how to get data')
-    
-parts = {
-    's223': "standard223",
-    'rdfs': "rdf-schema",
-    'rdf': '22-rdf-syntax-ns',
-    'qudt': 'qudt',
-    'shacl': 'shacl',
-    }
-
-
-def make_regex_parts(parts):
-    for part in parts:
-        for po in ('p', 'o'):
-            #       uri cast as string so that regex can be applied
-            yield f"""regex(str(?{po}), "{part}")"""
-
-
-mapped_pattern = "<<?s ?p ?o>> <http://meta> <<?ms <http://mmeta/query> ?mo>> ."
-# need to use filter
-full_ontology_pattern = '<<?s ?p ?o>> <http://meta> <<<http://mmeta/python#function> <http://mmeta/python#name> "get_ontology">> .'
-
-def filter_mapped():
-    # so then these could just be used for the inferencing
-    _ = f"""
-    construct {{?s ?p ?o }}
-    where {{
-    ?s ?p ?o.
-    # since all data went through a query to be mapped, this applies.
-    # but check if still applies when queries are used for something else.
-    {mapped_pattern}
-    }}
-    """
-    # or can filter out
-    # <http://meta> <<<http://mmeta/python#function> <http://mmeta/python#name> "overlap">> .
-    return _
-
-
-
-def filter_ontology():
-    # query to get data belonging to the ontology
-    _ = f"""
-    construct {{?s ?p ?o }}
-    where {{
-    ?s ?p ?o.
-    {{{full_ontology_pattern}}}
-    union
-    {{{mapped_pattern}}}
-    }}
-    """
-    # or could say NOT speckle.
-    # or filter FOR the 
-    # FILTER({ ' || '.join(make_regex_parts(parts.values())) } )
-    return _
 
 
 def batched(iterable, n):

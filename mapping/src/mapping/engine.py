@@ -110,6 +110,7 @@ class ConstructRule(_ConstructRule):
                      )])
 
 class PyRule(_PyRule):
+
     def meta(self, data: Triples) -> Triples:
         yield from super().meta(data)
         from pyoxigraph import NamedNode, Triple, Literal
@@ -208,7 +209,7 @@ from .conversions import og2rg, rg2og
 
 
 def rdflib_semantics(db: OxiGraph) -> Triples:
-    _ = get_filtered(db._store)
+    _ = get_applicable(db._store)
     g1 = og2rg(_) 
     g2 = Graph()
     for t in g1: g2.add(t) # copy to get the above 'features'
@@ -260,11 +261,10 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
 
 
 from pyoxigraph import Store
-# TODO: filter mapped, ontology, by uri or rdfstar
-def get_filtered(store: Store, *p, **k) -> Store:
+def get_applicable(store: Store) -> Store:
     _ = store
-    from .util import filter_mapped
-    _ = _.query(filter_mapped(*p, **k))
+    from .utils.queries import queries
+    _ = _.query(queries.mapped)
     s = Store()
     from pyoxigraph import Quad
     _ = tuple(_) # got an error if empty!
@@ -289,7 +289,7 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     #data, shacl=None, ontology=None,
     #advanced=False):
     _ = db._store
-    _ = get_filtered(_)
+    _ = get_applicable(_)
     _ = og2rg(_)
     _ = shacl(_, shacl=rgontology(), advanced=True, iterate_rules=True )
     _ = _.generated
