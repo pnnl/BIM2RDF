@@ -54,6 +54,7 @@ Clone under your personal folder outside of your OneDrive. On Windows this is c:
 
 2. **Setup**:
     1. Install **dependencies**: cd into `semint`. Then `rye sync --no-lock`.
+    If there is a connectivity issue on the PNNL network, follow [instructions](https://sslfix.pnl.gov).
     2. **activate**: mac & linux `.venv/bin/activate`, Windows `.venv\Scripts\activate.bat`
     3. **configure**: `python -m project.config`
 
