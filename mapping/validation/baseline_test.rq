@@ -1,0 +1,24 @@
+# Here Lies The Baseline Test SPARQL Query (IN PROGRESS)
+
+# Level 1 
+
+## Rooms 
+
+## Spaces
+
+## HVAC Zones
+
+## Luminaires
+
+## Electric Equipment 
+
+# Level 2 
+
+# Rooms in Spaces
+
+# Rooms in HVAC Zones  
+
+
+select * where { 
+	?s ?p ?o .
+} limit 100 
