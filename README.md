@@ -53,7 +53,7 @@ but non-Python tools have to be installed separately.
 Clone under your personal folder outside of your OneDrive. On Windows this is c:\Users\myusername.
 
 2. **Setup**:
-    1. Install **dependencies**: cd into `semint`. Then `rye sync`.
+    1. Install **dependencies**: cd into `semint`. Then `rye sync --no-lock`.
     2. **activate**: mac & linux `.venv/bin/activate`, Windows `.venv\Scripts\activate`
     3. **configure**: `python -m project.config`
 
