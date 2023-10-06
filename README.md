@@ -39,7 +39,8 @@ The Python-based setup is highly automated
 but non-Python tools have to be installed separately.
 
 0. **Before** getting code, install:
-    * `rye`
+    * `rye`.
+    On PNNL Windows machines, you may need to manually add `%USERPROFILE%\.rye\shims` to your `PATH`.
     * `git`. Use your system manager: `winget` on Windows, `homebrew` on Mac. Figure it out on Linux.
     * `quarto`. Pre-release.
     * optional: devenv
