@@ -169,3 +169,8 @@ class queries:
         _ = self.q.querymaker(get_speckle)
         return _.maker(_.pattern, _.filter)
 queries = queries()
+
+
+if __name__ == '__main__':
+    import fire
+    fire.Fire(queries)
