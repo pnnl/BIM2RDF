@@ -11,7 +11,6 @@ dependencies = [
     "urllib3<2",
     #https://github.com/psf/requests/releases/tag/v2.30.0
     "jsonpath-ng",
-    "requests-cache",
     "rdflib",
 ]
 readme = "README.md"
@@ -27,6 +26,7 @@ dev-dependencies = [
     "pytest","pytest-watcher", "syrupy",
     "requests-cache" ,
     "fire"]
+
 
 [tool.hatch.metadata]
 allow-direct-references = true

@@ -10,6 +10,7 @@ def config(dev = True):
             json.dump(json_object,f)
     else: 
         return None
-    
+
+
 if __name__ == '__main__':
     config()
