@@ -1,20 +1,27 @@
 from engine.triples import PyRuleCallable, Triples
 from .engine import Rules, OxiGraph, Triples, PyRule
 from typing import Callable
+from pathlib import Path
 
 
-def rules(inference = True, mapping = True) -> Rules:
+from . import mapping_dir
+maps_dir = mapping_dir / 's223'
+def maps(maps_dir=maps_dir):
+    from .engine import ConstructRule
+    # mappings
+    _ = Path(maps_dir).glob('**/*.rq') 
+    _ = map(ConstructRule,              _)
+    _ = list(_)
+    return _
+
+
+def rules(inference = True, maps_dir: Path | None = maps_dir) -> Rules:
+    maps_dir = Path(maps_dir)
+    assert(maps_dir.is_dir())
     _ = []
     from .engine import Rules
-    if mapping:
-        from .engine import ConstructRule
-        from . import mapping_dir
-        from pathlib import Path
-        # mappings
-        _ = Path(mapping_dir).glob('**/223p/*.rq') 
-        _ = map(ConstructRule,              _)
-        _ = list(_)
-
+    if maps_dir:
+        _ = maps(maps_dir)
         # geometry calcs
         from .geometry import overlap
         _ = _ + [PyRule(overlap)]
@@ -214,7 +221,7 @@ def fengine(*, validation=True, rules=rules) -> 'Engine':
 
 from pathlib import Path
 def engine(stream_id, *, branch_id=None, object_id=None,
-           mapping = True,
+           maps_dir: Path | None = maps_dir,
            validation=False,
            inference=True,
            out=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
@@ -237,7 +244,7 @@ def engine(stream_id, *, branch_id=None, object_id=None,
                     data_rules
                     +rules(
                         inference=inference,
-                        mapping=mapping)
+                        maps_dir=maps_dir)
                     ),
             validation=validation,
         )
