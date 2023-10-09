@@ -11,7 +11,7 @@ class CachedRequestHTTPTransport(RequestsHTTPTransport):
         if self.session is None:
             from .requests import get_session
             # Creating a session that can later be re-use to configure custom mechanisms
-            self.session = get_session()
+            self.session = get_session(cached=True)
             # If we specified some retries, we provide a predefined retry-logic
             if self.retries > 0:
                 adapter = HTTPAdapter(
@@ -27,18 +27,14 @@ class CachedRequestHTTPTransport(RequestsHTTPTransport):
         else:
             raise TransportAlreadyConnected("Transport is already connected")
 
-    def xconnect(self):
-        # not annoying version
-        if self.session is None:
-            self.session = requests_cache.CachedSession('http_cache')
 
 gql_url = 'https://speckle.xyz/graphql'
 
 
-def client(dev=True):
+def client(cached=False):
     from gql import Client
     from .requests import TokenAuth
-    if dev:
+    if cached:
         transport=CachedRequestHTTPTransport(url=gql_url, auth=TokenAuth())
         _ = Client(
             transport=transport,
@@ -52,7 +48,7 @@ def client(dev=True):
 
 
 
-def get_schema():
+def get_schema(client=client):
     from gql import gql
     #transport.session = requests_cache.CachedSession('http_cache')
     #from requests import Session
@@ -65,16 +61,17 @@ def get_schema():
     _ = print_schema(_)
     return _
 
+
 import gql.dsl as dsl
 
-def get_dsl_schema() -> dsl.DSLSchema:
-    _ = get_schema()
+def get_dsl_schema(client=client) -> dsl.DSLSchema:
+    _ = get_schema(client=client)
     _ = dsl.DSLSchema(_)
     return _
 
 
-def get_void_query():
-    _ = get_dsl_schema()
+def get_void_query(client=client):
+    _ = get_dsl_schema(client=client)
     _ = _.Query._
     return _
 
@@ -103,7 +100,7 @@ biglim = 99999
 # Queries
 # def query1
 # def execute
-def queries():
+def queries(client=client):
     from types import SimpleNamespace as NS
     _q = """
     {
@@ -113,7 +110,7 @@ def queries():
     }
     """
     from .graphql import get_dsl_schema
-    s = get_dsl_schema()
+    s = get_dsl_schema(client=client)
     
     def general_meta():
         return s.Query.streams.args(limit=biglim).select(
@@ -149,6 +146,5 @@ def queries():
                         )))
     
     return NS(general_meta=general_meta, objects=objects)
-
 
 
