@@ -65,10 +65,10 @@ class SpeckleGetter(PyRule):
     @staticmethod
     def get_branches(stream_id):
         assert(stream_id)
-        from speckle.graphql import queries, query
+        from speckle.graphql import queries, query, client
         _ = queries()
         _ = _.general_meta()
-        _ = query(_)
+        _ = query(_, lambda: client(cached=False))
         _ = _['streams']['items']
         for d in _:
             if stream_id in {d['id'], d['name']}:
@@ -98,10 +98,11 @@ class SpeckleGetter(PyRule):
 
 # args will be stream, commit
 def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
-    from speckle.graphql import queries, query
+    from speckle.graphql import queries, query, client
     _ = queries()
     _ = _.objects(stream_id, object_id)
-    _ = query(_) # dict
+    # TODO: if dev=False: cached=False
+    _ = query(_, client=lambda: client(cached=True)) # dict
     from speckle.objects import rdf as ordf
     _ = ordf(_) #
     _ = _.read()
@@ -111,12 +112,13 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     return _
 
 
-
+# TODO: sparql query the full general_meta
+# instead of writing python
 def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
-    from speckle.graphql import queries, query
+    from speckle.graphql import queries, query, client
     _ = queries()
     _ = _.general_meta()
-    _ = query(_)
+    _ = query(_, client=lambda: client(cached=False))
     id = 'id'
     name = 'name'
     items = 'items'
@@ -150,14 +152,13 @@ def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
     return _
 
 
-#TODO: sparql query the full general_meta
 
 def get_speckle(stream_id, *, branch_id=None, object_id=None):
     assert(stream_id)
-    from speckle.graphql import queries, query
+    from speckle.graphql import queries, query, client
     _ = queries()
     _ = _.general_meta()
-    _ = query(_)
+    _ = query(_, client=lambda: client(cached=False))
     _ = _['streams']['items']
     for d in _:
         if stream_id in {d['id'], d['name']}:
