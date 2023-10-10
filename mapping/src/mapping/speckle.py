@@ -40,7 +40,7 @@ def rules(inference = True, maps_dir: Path | None = maps_dir) -> Rules:
 def get_ontology(_: OxiGraph) -> Triples:
     from .utils.data import get_data
     from ontologies import get
-    _ = get('223p')
+    _ = get('s223')
     _ = get_data(_)
     return _
 

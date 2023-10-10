@@ -12,6 +12,19 @@ parts = {
     'shacl': 'shacl',
     }
 
+
+from functools import lru_cache
+@lru_cache
+def namespaces():
+    from ontologies import namespaces, namespace
+    def _():
+        for nss in namespaces():
+            if 'imported' in str(nss.path):
+                for pfx, ns in nss.namespaces():
+                    yield namespace(pfx, ns)
+    return tuple(_())
+
+
 def make_regex_parts(parts):
     for part in parts:
         for po in ('p', 'o'):

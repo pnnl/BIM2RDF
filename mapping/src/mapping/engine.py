@@ -276,7 +276,7 @@ from functools import lru_cache
 @lru_cache(1)
 def rgontology(): # rdflib graph ontology
     from ontologies import get
-    _ = get('223p')
+    _ = get('s223')
     from rdflib import Graph
     g = Graph()
     g.parse(_)
@@ -288,10 +288,11 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     #def shacl(
     #data, shacl=None, ontology=None,
     #advanced=False):
+    from .utils.queries import namespaces
     _ = db._store
     _ = get_applicable(_)
     _ = og2rg(_)
-    _ = shacl(_, shacl=rgontology(), advanced=True, iterate_rules=True )
+    _ = shacl(_, namespaces=namespaces(), shacl=rgontology(), advanced=True, iterate_rules=True )
     _ = _.generated
     _ = rg2og(_)
     _ = Triples(q.triple for q in _)
