@@ -1,4 +1,4 @@
-base_uri = f"http://speckle.systems/"
+base_uri = lambda: f"http://speckle.systems/"
 meta_uri = lambda: 'http://meta'
 
 
