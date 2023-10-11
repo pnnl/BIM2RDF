@@ -58,9 +58,9 @@ def split_triples(triples, chunk_size=1000, odir='out'):
             'text/turtle')
 
 
-def sort_triples(triples):
+def sort_triples(triples, key=lambda t: str(t)):
     _ = get_data(triples)
-    _ = sorted(_, key=lambda t: str(t) )
+    _ = sorted(_, key=key)
     return Triples(_)
 
 
