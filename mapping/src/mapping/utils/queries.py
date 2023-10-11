@@ -16,13 +16,17 @@ parts = {
 from functools import lru_cache
 @lru_cache
 def namespaces():
-    from ontologies import namespaces, namespace
-    def _():
+    from ontologies import namespace
+    def o():
+        from ontologies import namespaces
         for nss in namespaces():
             if 'imported' in str(nss.path):
                 for pfx, ns in nss.namespaces():
                     yield namespace(pfx, ns)
-    return tuple(_())
+    def s():
+        from speckle import namespaces
+        return namespaces()
+    return tuple(o())+tuple(s())
 
 
 def make_regex_parts(parts):
