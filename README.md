@@ -17,6 +17,7 @@ Each top-level folder is a component or workspace.
 These tools are standardized due to their high utility.
 
 * Source code is managed by [`git`](https://git-scm.com/).
+* Project Python structure is managed by [Rye](https://rye-up.com/).
 * Non-source code files (like data) and pipelines are managed by [dvc](http://dvc.org).
 As such the [.gitignore](./.gitignore) only allows source code files.
 * Documentation is generated with [Quarto](https://quarto.org/).
