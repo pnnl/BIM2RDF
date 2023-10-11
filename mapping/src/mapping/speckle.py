@@ -63,7 +63,7 @@ class SpeckleGetter(PyRule):
         return _
 
     @staticmethod
-    def get_branches(stream_id):
+    def get_branches(stream_id)-> 'branch names':
         assert(stream_id)
         from speckle.graphql import queries, query, client
         _ = queries()
@@ -78,7 +78,7 @@ class SpeckleGetter(PyRule):
         
         _ = d['branches']['items']
         _ = sorted(_, key=lambda i: i['createdAt'] )
-        _ = tuple(d['id'] for d in _)
+        _ = tuple(d['name'] for d in _)
         return _
 
     @classmethod
