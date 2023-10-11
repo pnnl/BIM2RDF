@@ -3,14 +3,13 @@ stages:
 # use foreach? param sweep discussion https://github.com/iterative/dvc/pull/8187
 
   map:
-    #                                        set to false for testing.
-    cmd: python -m mapping.speckle --inference=True --validation=False --stream_id=${building}
+    cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=${building}
     wdir: work
     deps:
-      - ../../ontologies/imported/223p.ttl
-      - ../223p
+      - ../../ontologies/imported/s223.ttl
+      - ../s223
       - ../src/mapping
-      # ../src/validation?
+      - ../src/validation
     outs:
       - out.ttl # need to keep tracking this?
 
@@ -19,6 +18,6 @@ stages:
     wdir: work
     deps:
       - out.ttl
-  
+
 
 # test here? to actually error out if check?
