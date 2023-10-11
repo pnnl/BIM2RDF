@@ -61,6 +61,14 @@ Clone under your personal folder outside of your OneDrive. On Windows this is c:
     3. **configure**: `python -m project.config`
 
 
+### Visual Studio Code
+
+(optional)
+
+Install plugins for Python, SPARQL/Turtle, and dvc.
+TODO: make a .vscode config
+
+
 ## Workflow
 
 tbd but standard git branching is used as a mechanism to isolate code changes from the 'main' branch.
