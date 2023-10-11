@@ -43,7 +43,7 @@ but non-Python tools have to be installed separately.
 0. **Before** getting code, install:
     * [`rye`](https://rye-up.com/guide/installation/).
     Note instructions for getting `rye` to your `PATH`.
-    Developer mode recommended.
+    Developer mode recommended for Windows.
     * `git`. Use your system manager: `winget install git.git` on Windows, `homebrew` on Mac. Figure it out on Linux.
     * `quarto`. Pre-release.
     * optional: devenv
