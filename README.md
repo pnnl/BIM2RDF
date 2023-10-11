@@ -65,7 +65,7 @@ Clone under your personal folder outside of your OneDrive. On Windows this is c:
 
 (optional)
 
-Install plugins for Python, SPARQL/Turtle, and dvc.
+Install plugins for Python, SPARQL/Turtle, quarto, and dvc.
 TODO: make a .vscode config
 
 
