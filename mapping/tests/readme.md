@@ -1,0 +1,1 @@
+[query.qmd](./query.qmd) is a tool to develop queries with.
