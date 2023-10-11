@@ -12,7 +12,7 @@ Each top-level folder is a component or workspace.
 * Each component should have a configuration program: `python -m <component>.config`. `python -m project.config` should trigger all.
 * There may be a command line interface for functionality defined in modules.
 
-### Tools
+### Development Tools
 
 These tools are standardized due to their high utility.
 
@@ -21,6 +21,8 @@ These tools are standardized due to their high utility.
 As such the [.gitignore](./.gitignore) only allows source code files.
 * Documentation is generated with [Quarto](https://quarto.org/).
 * dev: [fire](https://github.com/google/python-fire) to create command line interfaces
+
+Generally, these tools are assumed to be at their latest version.
 
 ## Setup
 
