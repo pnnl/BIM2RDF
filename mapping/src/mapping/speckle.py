@@ -223,7 +223,7 @@ def fengine(*, validation=True, rules=rules) -> 'Engine':
 from pathlib import Path
 def engine(stream_id, *, branch_id=None, object_id=None,
            maps_dir: Path | None = maps_dir,
-           validation=False,
+           validation=True,
            inference=True,
            out=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
     # data/config for args
