@@ -13,6 +13,11 @@ class ConstructQuery:#(base class in engine)
         self.prefixes = prefixes
         self.constructbody = constructbody
         self.wherebody = wherebody
+
+    # classmethod
+    # def from_string 
+    # parse a string
+    # TODO:  
     
     # def known namespaces
     # TODO
