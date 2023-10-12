@@ -76,6 +76,13 @@ from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Sema
 
 meta_prefix = 'http://mmeta'
 
+def namespaces():
+    from ontologies import namespace
+    from rdflib import URIRef
+    return (
+        namespace('meta', URIRef(meta_prefix)),
+    )
+
 class ConstructRule(_ConstructRule):
 
     def __init__(self, path) -> None:

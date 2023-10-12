@@ -26,7 +26,10 @@ def namespaces():
     def s():
         from speckle import namespaces
         return namespaces()
-    return tuple(o())+tuple(s())
+    def m():
+        from ..engine import namespaces
+        return namespaces()
+    return tuple(o())+tuple(s())+tuple(m())
 
 
 def make_regex_parts(parts):
