@@ -3,15 +3,6 @@ programmatic generation of queries
 """
 from ..engine import Triples, PyRule, ConstructRule as _ConstructRule, OxiGraph
 
-# these could come from ontology.
-parts = {
-    's223': "standard223",
-    'rdfs': "rdf-schema",
-    'rdf': '22-rdf-syntax-ns',
-    'qudt': 'qudt',
-    'shacl': 'shacl',
-    }
-
 
 from functools import lru_cache
 @lru_cache
@@ -31,12 +22,6 @@ def namespaces():
         return namespaces()
     return tuple(o())+tuple(s())+tuple(m())
 
-
-def make_regex_parts(parts):
-    for part in parts:
-        for po in ('p', 'o'):
-            #       uri cast as string so that regex can be applied
-            yield f"""regex(str(?{po}), "{part}")"""
 
 
 def sample_data():
