@@ -112,14 +112,15 @@ class Queries:
     def query_template(self, pattern, filter):
         assert('filter' in filter)
         _ = f"""
-        construct {{?s ?p ?o }}
-        where {{
         ?s ?p ?o.
         {pattern}
         {filter}
-        }}
         """
-        return _
+        from .query import ConstructQuery
+        _ = ConstructQuery(
+            constructbody='?s ?p ?o',
+            wherebody=_)
+        return str(_)
     
     #from ..engine import ConstructQuery, PyRuleCallable
     def querymaker(self, rule_arg, *p, **k,):
