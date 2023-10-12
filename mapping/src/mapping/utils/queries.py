@@ -17,10 +17,10 @@ def namespaces():
     def s():
         from speckle import namespaces
         return namespaces()
-    def m():
+    def e():
         from ..engine import namespaces
         return namespaces()
-    return tuple(o())+tuple(s())+tuple(m())
+    return tuple(o())+tuple(s())+tuple(e())
 
 
 
