@@ -55,7 +55,7 @@ but non-Python tools have to be installed separately.
 Clone under your personal folder outside of your OneDrive. On Windows this is c:\Users\myusername.
 
 2. **Setup**:
-    1. Install **dependencies**: cd into `semint`. Then `rye sync --no-lock`.
+    1. Install **dependencies**: `cd` into `semint`. Then `rye sync --no-lock`.
     If there is a connectivity issue on the PNNL network, follow [instructions](https://sslfix.pnl.gov).
     2. **activate**: `rye shell`.
     3. **configure**: `python -m project.config`
