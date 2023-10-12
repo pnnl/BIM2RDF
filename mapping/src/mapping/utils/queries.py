@@ -20,8 +20,9 @@ def namespaces():
     def e():
         from ..engine import namespaces
         return namespaces()
-    return tuple(o())+tuple(s())+tuple(e())
-
+    _ = tuple(o())+tuple(s())+tuple(e())
+    _ = sorted(_, key=lambda ns: ns.prefix )
+    return _
 
 
 def sample_data():

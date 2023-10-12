@@ -203,8 +203,7 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
     return N(
         objects=_get_speckle(stream_id, object_id),
         meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )
-    
-    
+        
 
 def fengine(*, validation=True, rules=rules) -> 'Engine':
     # functions for args

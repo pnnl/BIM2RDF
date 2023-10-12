@@ -37,7 +37,7 @@ class ConstructQuery:#(base class in engine)
         f"{prefixes} \n\n\n"
         "construct { \n"
         f"{self.constructbody} \n"
-        "}"
+        "} \n"
         "where { \n"
         f"{self.wherebody} \n"
         "}" )
