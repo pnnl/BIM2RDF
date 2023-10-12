@@ -169,22 +169,32 @@ class queries:
     """queries relevant to project"""
     def __init__(self) -> None:
         self.q = Queries()
+
     @property
     def mapped(self):
         pattern = QueryRuleType('constructrule').pattern()
         filter = f'filter contains(?mo, ".mapping." )'
         _ = self.q.query_template(pattern, filter)
         return _
+    
     @property
     def ontology(self,):
         from ..speckle import get_ontology
         _ = self.q.querymaker(get_ontology)
         return _.maker(_.pattern, _.filter)
+    
     @property
     def speckle(self):
         from ..speckle import get_speckle
         _ = self.q.querymaker(get_speckle)
         return _.maker(_.pattern, _.filter)
+    
+    @property
+    def shacl(self):
+        from validation.engine import shacl_validation
+        _ = self.q.querymaker(shacl_validation)
+        return _.maker(_.pattern, _.filter)
+
 queries = queries()
 
 
