@@ -108,7 +108,7 @@ class QueryRuleType:
         return f"<<?s ?p ?o>> {_.m} <<{_.ms} {_.mp} ?mo>>." # ?mo is variable
 
 
-class Queries:
+class RuleQueries:
 
     def query_template(self, pattern, filter):
         assert('filter' in filter)
@@ -155,10 +155,10 @@ class Queries:
         # FILTER({' || '.join(make_regex_parts(parts.values())) } )
         return _
     
-class queries:
+class rulequeries:
     """queries relevant to project"""
     def __init__(self) -> None:
-        self.q = Queries()
+        self.q = RuleQueries()
 
     @property
     def mapped(self):
@@ -185,8 +185,29 @@ class queries:
         _ = self.q.querymaker(shacl_validation)
         return _.maker(_.pattern, _.filter)
 
-queries = queries()
+class queries:
+    rules = rulequeries()
 
+    @property
+    def shacl_report(self):
+        from .query import Prefixes, Node
+        S = lambda n: Node('sh', n)
+        vr = S('ValidationResult')
+        fn = S('focusNode')
+        rm = S('resultMessage')
+        _ = Prefixes(p for p in Prefixes() if 'shacl' in str(p.uri) )
+        _ = str(_)
+        _ = _ + f"""
+        select {vr.var} {fn.var} {rm.var} where {{
+        {vr.var} a {vr}.
+        {vr.var} {fn} {fn.var}.
+        {vr.var} {rm} {rm.var}.
+        }}
+        """
+        return _    
+        
+    
+queries = queries()
 
 if __name__ == '__main__':
     import fire

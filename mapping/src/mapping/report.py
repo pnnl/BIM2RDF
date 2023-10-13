@@ -5,7 +5,8 @@ class Report:
 
     def validation(self):
         from .utils.queries import queries
-        _ = queries.shacl
+        #_ = queries.rules.shacl#_report
+        _ = queries.shacl_report
         return _
         
 
