@@ -32,13 +32,13 @@ class ConstructQuery:#(base class in engine)
                 return uri
             else:
                 return uri
-        prefixes = '\n'.join(f"{p.prefix}: {turi(p.uri)}" for p in self.prefixes)
+        prefixes = '\n'.join(f"PREFIX {p.prefix}: {turi(p.uri)}" for p in self.prefixes)
         _ = (
         f"{prefixes} \n\n\n"
-        "construct { \n"
+        "CONSTRUCT { \n"
         f"{self.constructbody} \n"
         "} \n"
-        "where { \n"
+        "WHERE { \n"
         f"{self.wherebody} \n"
         "}" )
         return _
