@@ -86,3 +86,8 @@ def make_regex_parts(parts):
             #       uri cast as string so that regex can be applied
             yield f"""regex(str(?{po}), "{part}")"""
 
+
+if __name__ == '__main__':
+    import fire
+    fire.Fire({'prefixes': lambda: str(Prefixes()) } )
+
