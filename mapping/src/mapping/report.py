@@ -4,9 +4,11 @@ class Report:
         self.store = store
 
     def validation(self):
-        from .utils.queries import queries
-        #_ = queries.rules.shacl#_report
-        _ = queries.shacl_report
+        from mapping.utils.queries import queries
+        from mapping.utils.tables import query_table
+        _ = query_table(self.store, queries.shacl_report )
         return _
+
+
         
 

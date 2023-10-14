@@ -195,13 +195,18 @@ class queries:
         vr = S('ValidationResult')
         fn = S('focusNode')
         rm = S('resultMessage')
+        vl = S('value')
+        rp = S('resultPath')
+        ss = S('sourceShape')
         _ = Prefixes(p for p in Prefixes() if 'shacl' in str(p.uri) )
         _ = str(_)
         _ = _ + f"""
-        select {vr.var} {fn.var} {rm.var} where {{
+        select  {fn.var} {rm.var} {vl.var} {rp.var}  where {{
         {vr.var} a {vr}.
         {vr.var} {fn} {fn.var}.
         {vr.var} {rm} {rm.var}.
+        {vr.var} {vl} {vl.var}.
+        {vr.var} {rp} {rp.var}.
         }}
         """
         return _    
