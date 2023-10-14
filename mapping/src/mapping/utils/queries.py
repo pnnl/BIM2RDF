@@ -20,7 +20,10 @@ def namespaces():
     def e():
         from ..engine import namespaces
         return namespaces()
-    _ = tuple(o())+tuple(s())+tuple(e())
+    def g():
+        from ..geometry import namespaces
+        return namespaces()
+    _ = tuple(o())+tuple(s())+tuple(e())+tuple(g())
     _ = sorted(_, key=lambda ns: ns.prefix )
     return _
 

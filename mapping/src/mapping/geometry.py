@@ -306,8 +306,17 @@ def compare(store: 'og.Store',
 
 # geometry above
 
+geometry_uri = 'http://mapping/geo#'#fracInside'
+
+def namespaces():
+    from ontologies import namespace
+    from rdflib import URIRef
+    return [
+        namespace('geom', URIRef(geometry_uri))
+    ]
+
 class Comparison:
-    uri = 'http://mapping/geo#'#fracInside'
+    uri = geometry_uri
     def __init__(self, o1: Object, fracInside, o2: Object) -> None:
         self.o1 = o1
         self.fracInside = fracInside
