@@ -79,6 +79,10 @@ class ConstructQuery:#(base class in engine)
         "}" )
         return _
 
+# parsing. case insensitive
+# "prefix (?P<prefix>.*?)\s*:\s* <(?P<uri>.*)>" re.IGNORECASE
+#  r"construct\s*\n*{(?P<constructbody>.*?)}"  re.IGNORECASE | re.DOTALL)
+#  ...where....
 
 def make_regex_parts(parts):
     for part in parts:
