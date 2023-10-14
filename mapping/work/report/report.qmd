@@ -1,0 +1,20 @@
+---
+title: Building Semantic Model Report
+echo: false
+---
+
+validation report.
+```{python}
+import pandas as pd
+pd.set_option('display.max_rows', 100)
+pd.set_option('display.max_colwidth', 30)
+
+
+import mapping.report as mr
+from project import root
+import pyoxigraph as og
+store = og.Store()
+store.bulk_load(str(root / 'mapping' / 'work' / 'out.ttl'), 'text/turtle')
+r = mr.Report(store)
+r.validation().to_dict(orient='records')
+```
