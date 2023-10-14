@@ -200,16 +200,20 @@ class queries:
         rm = S('resultMessage')
         vl = S('value')
         rp = S('resultPath')
-        ss = S('sourceShape')
+        ss = S('sourceShape')  
+        sv = S('resultSeverity')
+        sc = S('sourceConstraintComponent')
         _ = Prefixes(p for p in Prefixes() if 'shacl' in str(p.uri) )
         _ = str(_)
         _ = _ + f"""
-        select  {fn.var} {rm.var} {vl.var} {rp.var}  where {{
+        select  {fn.var} {rm.var} {vl.var} {rp.var} {sv.var} {ss.var} where {{
         {vr.var} a {vr}.
         {vr.var} {fn} {fn.var}.
         {vr.var} {rm} {rm.var}.
         {vr.var} {vl} {vl.var}.
         {vr.var} {rp} {rp.var}.
+        {vr.var} {sv} {sv.var}.
+        {vr.var} {ss} {ss.var}.
         }}
         """
         return _    

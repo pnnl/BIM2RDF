@@ -1,0 +1,50 @@
+schema: '2.0'
+stages:
+  map:
+    cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=Pritoni
+    deps:
+    - path: ../../ontologies/imported/s223.ttl
+      hash: md5
+      md5: 19bef1d78890c2d2601a3ebe17a5893e
+      size: 4870664
+    - path: ../s223
+      hash: md5
+      md5: 3ae56378d92938c1b76b29d3564c0ce6.dir
+      size: 8496
+      nfiles: 12
+    - path: ../src/mapping
+      hash: md5
+      md5: fb114408b8aeba6e6bc0c4b85d90c6c4.dir
+      size: 123395
+      nfiles: 25
+    - path: ../src/validation
+      hash: md5
+      md5: e77ab8132f6bfc9ebc98ca23ffeee148.dir
+      size: 19050
+      nfiles: 13
+    outs:
+    - path: out.ttl
+      hash: md5
+      md5: b31050bd02abba56d755c291bf7f2be0
+      size: 318069189
+  report:
+    cmd: quarto render report.qmd
+    deps:
+    - path: ../out.ttl
+      hash: md5
+      md5: b31050bd02abba56d755c291bf7f2be0
+      size: 318069189
+    - path: report.qmd
+      hash: md5
+      md5: f1cbce6c4a41e8bf9a2be1abfb46ae0e
+      size: 450
+    outs:
+    - path: report.html
+      hash: md5
+      md5: c62720e8f610a3d6b689874c116ddc8f
+      size: 16784
+    - path: report_files
+      hash: md5
+      md5: c23a202d212df0d663443b14391e17a2.dir
+      size: 722661
+      nfiles: 11
