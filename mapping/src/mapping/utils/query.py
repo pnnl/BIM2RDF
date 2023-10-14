@@ -83,6 +83,7 @@ class ConstructQuery:#(base class in engine)
 # "prefix (?P<prefix>.*?)\s*:\s* <(?P<uri>.*)>" re.IGNORECASE
 #  r"construct\s*\n*{(?P<constructbody>.*?)}"  re.IGNORECASE | re.DOTALL)
 #  ...where....
+# (?<usedprefix>[a-z|0-9|.|A-Z|_]*):.*? 
 
 def make_regex_parts(parts):
     for part in parts:
