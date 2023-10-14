@@ -13,11 +13,19 @@ stages:
     outs:
       - out.ttl # need to keep tracking this?
 
-  upload:
-    cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
-    wdir: work
+  report:
+    cmd: quarto render report.qmd
+    wdir: work/report
     deps:
-      - out.ttl
+      - ../out.ttl
+      - report.qmd
+    outs:
+      - report.html
+      - report_files
 
-
+  # upload:
+  #   cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
+  #   wdir: work
+  #   deps:
+  #     - out.ttl
 # test here? to actually error out if check?
