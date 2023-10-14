@@ -271,7 +271,7 @@ from pyoxigraph import Store
 def get_applicable(store: Store) -> Store:
     _ = store
     from .utils.queries import queries
-    _ = _.query(queries.mapped)
+    _ = _.query(queries.rules.mapped)
     s = Store()
     from pyoxigraph import Quad
     _ = tuple(_) # got an error if empty!
