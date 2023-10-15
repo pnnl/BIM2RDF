@@ -235,6 +235,7 @@ class Rule(CachedRuleCall, b.Rule):
 
     def __hash__(self) -> int:
         return hash(self.spec)
+    meta_uri = 'http://meta'
 
     def add_meta(self, data: Triples) -> Triples:
         def nest(data):
@@ -246,7 +247,7 @@ class Rule(CachedRuleCall, b.Rule):
                 for t in data:
                     for m in ms:
                         #            ('data'triple,    meta  ,   'meta'triple)
-                        yield g.Triple(t, g.NamedNode('http://meta'), m)
+                        yield g.Triple(t, g.NamedNode(self.meta_uri), m)
             yield from data
         _ = nest(data)
         _ = Triples(_)

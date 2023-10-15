@@ -23,8 +23,12 @@ def namespaces():
     def g():
         from ..geometry import namespaces
         return namespaces()
-    _ = tuple(o())+tuple(s())+tuple(e())+tuple(g())
+    def e():
+        from engine.triples import PyRule
+        return (namespace('meta', PyRule.meta_uri,) ,)
+    _ = tuple(o())+tuple(s())+tuple(e())+tuple(g())+tuple(e())
     _ = sorted(_, key=lambda ns: ns.prefix )
+    _ = tuple(frozenset(_))
     return _
 
 
@@ -193,7 +197,7 @@ class queries:
 
     @property
     def shacl_report(self):
-        from .query import Prefixes, Node
+        from .query import Prefixes, Node, known_prefixes
         S = lambda n: Node('sh', n)
         vr = S('ValidationResult')
         fn = S('focusNode')
@@ -203,7 +207,7 @@ class queries:
         ss = S('sourceShape')  
         sv = S('resultSeverity')
         sc = S('sourceConstraintComponent')
-        _ = Prefixes(p for p in Prefixes() if 'shacl' in str(p.uri) )
+        _ = Prefixes(p for p in known_prefixes if 'shacl' in str(p.uri) )
         _ = str(_)
         _ = _ + f"""
         select  {fn.var} {rm.var} {vl.var} {rp.var} {sv.var} {ss.var} where {{

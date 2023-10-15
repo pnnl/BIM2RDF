@@ -80,7 +80,7 @@ def namespaces():
     from ontologies import namespace
     from rdflib import URIRef
     return (
-        namespace('meta', URIRef(meta_prefix)),
+        namespace('mmeta', URIRef(meta_prefix)),
     )
 
 class ConstructRule(_ConstructRule):
