@@ -198,7 +198,7 @@ if __name__ == '__main__':
 
     import fire
     fire.Fire({
-        'prefixes': lambda: str(Prefixes()),
+        'prefixes': lambda: known_prefixes,
         'parse_files': parse_files,
           } )
 
