@@ -83,7 +83,7 @@ class SelectQuery:#(base class in engine)
         vs = tuple(vs)
         w = findall("where\s*\n*{(?P<wherebody>.*?)}", s, IGNORECASE | DOTALL )
         w = w[0].strip()
-        up = findall("(?P<usedprefix>[a-z|A-Z|.|0-9]*):.*?", w,)
+        up = findall("(?P<usedprefix>[a-z|A-Z|.|0-9]*):.*?", '\n'.join(l for l in (w).split('\n') if not l.strip().startswith('#')  ), )
         up = frozenset(up)
         def_prefixes = {p for p,_ in ps}
         for p in up:
@@ -131,7 +131,7 @@ class ConstructQuery:#(base class in engine)
         c = c[0].strip()
         w = findall("where\s*\n*{(?P<wherebody>.*?)}", s, IGNORECASE | DOTALL )
         w = w[0].strip()
-        up = findall("(?P<usedprefix>[a-z|A-Z|.|0-9]*):.*?", c+'\n'+w, )
+        up = findall("(?P<usedprefix>[a-z|A-Z|.|0-9]*):.*?", '\n'.join(l for l in (c+'\n'+w).split('\n') if not l.strip().startswith('#')  ), )
         up = frozenset(up)
         def_prefixes = {p for p,_ in ps}
         for p in up:
