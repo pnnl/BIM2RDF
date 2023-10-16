@@ -2,10 +2,13 @@
 from ontologies import namespace
 
 class Prefixes:
-    def __init__(self, prefixes=()) -> None:
+    def __init__(self, prefixes=(), check_unique=True) -> None:
         from rdflib import URIRef
         _ = (namespace(p,URIRef(u)) for p,u in prefixes) # normalize
         _ = frozenset(_)
+        if check_unique:
+            if len(frozenset(p for p,_ in _)) != len(_):
+                raise ValueError('prefixes not unique')
         _ = sorted(_, key=lambda ns:ns.prefix)
         _ = tuple(_)
         self.prefixes = _
@@ -179,7 +182,7 @@ def make_regex_parts(parts):
 
 
 if __name__ == '__main__':
-    def parse_files(file_or_dir):
+    def parse_files(file_or_dir, ):
         from pathlib import Path
         p = Path(file_or_dir); del file_or_dir
         assert(p.exists())
