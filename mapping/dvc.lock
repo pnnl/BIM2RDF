@@ -5,8 +5,8 @@ stages:
     deps:
     - path: ../../ontologies/imported/s223.ttl
       hash: md5
-      md5: 19bef1d78890c2d2601a3ebe17a5893e
-      size: 4870664
+      md5: 4ae08ea16e12b5380b19d95a04204871
+      size: 4870663
     - path: ../s223
       hash: md5
       md5: 3ae56378d92938c1b76b29d3564c0ce6.dir
@@ -14,8 +14,8 @@ stages:
       nfiles: 12
     - path: ../src/mapping
       hash: md5
-      md5: fb114408b8aeba6e6bc0c4b85d90c6c4.dir
-      size: 123395
+      md5: 11cd5a00fd52fc80b9579e9306bf3acf.dir
+      size: 129330
       nfiles: 25
     - path: ../src/validation
       hash: md5
@@ -25,15 +25,15 @@ stages:
     outs:
     - path: out.ttl
       hash: md5
-      md5: b31050bd02abba56d755c291bf7f2be0
-      size: 318069189
+      md5: 3a34bc29c19e96c28fa3bd72917ab292
+      size: 318070991
   report:
     cmd: quarto render report.qmd
     deps:
     - path: ../out.ttl
       hash: md5
-      md5: b31050bd02abba56d755c291bf7f2be0
-      size: 318069189
+      md5: 8fd56e0cd102e5ab4bbfcce5e29e61bd
+      size: 318055635
     - path: report.qmd
       hash: md5
       md5: f1cbce6c4a41e8bf9a2be1abfb46ae0e
@@ -41,7 +41,7 @@ stages:
     outs:
     - path: report.html
       hash: md5
-      md5: c62720e8f610a3d6b689874c116ddc8f
+      md5: 02502cdec9d5243e89afdbf2fe2ab1d5
       size: 16784
     - path: report_files
       hash: md5

@@ -71,9 +71,9 @@ class ConstructQuery:#(base class in engine)
         _ = findall("prefix (?P<prefix>.*?)\s*:\s* <(?P<uri>.*)>", s, IGNORECASE)
         ps = Prefixes(namespace(p,u) for p,u in _) + known_prefixes
         c = findall("construct\s*\n*{(?P<constructbody>.*?)}", s, IGNORECASE | DOTALL )
-        c = c[0]
+        c = c[0].strip()
         w = findall("where\s*\n*{(?P<wherebody>.*?)}", s, IGNORECASE | DOTALL )
-        w = w[0]
+        w = w[0].strip()
         up = findall("(?P<usedprefix>[a-z|0-9|.|A-Z|_]*):.*?", c+'\n'+w, )
         up = frozenset(up)
         def_prefixes = {p for p,_ in ps}
@@ -98,6 +98,8 @@ class ConstructQuery:#(base class in engine)
         "WHERE { \n"
         f"{self.wherebody} \n"
         "}" )
+        _ = _.strip()
+        _ = _.strip('\n')
         return _
 
 
@@ -109,6 +111,26 @@ def make_regex_parts(parts):
 
 
 if __name__ == '__main__':
+    def parse_construct_query(file_or_dir):
+        from pathlib import Path
+        p = Path(file_or_dir); del file_or_dir
+        assert(p.exists())
+        def write(f):
+            _ = f.open().read()
+            _ = ConstructQuery.parse(_)
+            _ = str(_)
+            open(f, 'w').write(_)
+            return p
+        if p.is_dir():
+            for f in p.glob('**/*.rq'):
+                write(f,)
+        else:
+            assert(p.is_file())
+            write(p)
+
     import fire
-    fire.Fire({'prefixes': lambda: str(Prefixes()) } )
+    fire.Fire({
+        'prefixes': lambda: str(Prefixes()),
+        'parse_construct_query': parse_construct_query,
+          } )
 
