@@ -309,14 +309,14 @@ def compare(store: 'og.Store',
 geometry_uri = 'http://mapping/geo#'#fracInside'
 
 def namespaces():
-    from ontologies import namespace
-    from rdflib import URIRef
     return [
-        namespace('geom', URIRef(geometry_uri))
+        Comparison.ns
     ]
 
 class Comparison:
-    uri = geometry_uri
+    from ontologies import namespace
+    from rdflib import URIRef
+    ns = namespace('geom', URIRef(geometry_uri))
     def __init__(self, o1: Object, fracInside, o2: Object) -> None:
         self.o1 = o1
         self.fracInside = fracInside
@@ -326,8 +326,8 @@ class Comparison:
         # map these triples to ontology in a sparql construct 
         from pyoxigraph import parse
         _ = f"""
-        PREFIX geo: <{self.uri}>
-        {self.o1.uri} geo:fracInside [
+        PREFIX {self.ns.prefix}: <{self.ns.uri}>
+        {self.o1.uri} geom:fracInside [
                         {self.o2.uri}  {self.fracInside}  ].
         """
         _ = _.encode()
