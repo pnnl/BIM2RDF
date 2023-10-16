@@ -35,5 +35,6 @@ Use GraphDB or [this utility](./tests/query.qmd).
 A query can processed/checked for project logic by a parsing program `python -m mapping.utils.query`.
 The main check is that prefixes are defined either in the query itself or as part of a known list (`python -m mapping.utils.query prefixes`).
 If a known prefix is used in a query, it will be added to the prefix list.
+Otherwise, it has to be declared.
 Also, the prefixes should be unique.
 
