@@ -1,13 +1,15 @@
-PREFIX spkl: <http://speckle.systems/>
-PREFIX unit: <http://qudt.org/vocab/unit/>
-PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX meta: <http://meta>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix meta: <http://meta>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
 
-construct {
-  ?this a s223:DomainSpace.
+
+CONSTRUCT { 
+?this a s223:DomainSpace.
   ?this s223:hasDomain s223:Domain-Lighting.
-  ?this rdfs:label ?name.} 
-where {
-    <<?this spkl:category  "Spaces">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
-    ?this spkl:name ?name.}
+  ?this rdfs:label ?name. 
+} 
+WHERE { 
+<<?this spkl:category  "Spaces">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
+    ?this spkl:name ?name. 
+}

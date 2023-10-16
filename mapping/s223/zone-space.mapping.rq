@@ -1,17 +1,13 @@
-PREFIX spkl: <http://speckle.systems/>
-PREFIX unit: <http://qudt.org/vocab/unit/>
-PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix meta: <http://meta>
-PREFIX spklx: <http://speckle.systems/ext/>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
 
 
-construct 
-{
-    ?z s223:contains ?ds.
-}
-where {
-    ?z a s223:Zone.
+CONSTRUCT { 
+?z s223:contains ?ds. 
+} 
+WHERE { 
+?z a s223:Zone.
     # relationship:
     ?z rdfs:label ?zn.
     ?z a s223:Zone.

@@ -1,17 +1,14 @@
-PREFIX spkl: <http://speckle.systems/>
-PREFIX spklx: <http://speckle.systems/ext/>
-PREFIX unit: <http://qudt.org/vocab/unit/>
-PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX meta: <http://meta>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
 
-construct {
-  ?this s223:hasConnectionPoint ?conn.
+
+CONSTRUCT { 
+?this s223:hasConnectionPoint ?conn.
   ?conn  a s223:OutletConnectionPoint.
-  ?conn s223:hasMedium s223:Medium-Electricity. # can this be inferred?
-}
-where {
-    ?this a s223:ElectricBreaker.
-    ?this spkl:Connectors/rdf:rest*/rdf:first ?conn. # there are two for each.
+  ?conn s223:hasMedium s223:Medium-Electricity. # can this be inferred? 
+} 
+WHERE { 
+?this a s223:ElectricBreaker.
+    ?this spkl:Connectors/rdf:rest*/rdf:first ?conn. # there are two for each. 
 }

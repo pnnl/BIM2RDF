@@ -1,23 +1,22 @@
-PREFIX spkl: <http://speckle.systems/>
-PREFIX unit: <http://qudt.org/vocab/unit/>
-PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# see query in  geometry.py 
 PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
 
 
-# see query in  geometry.py
-construct {
-  ?this a s223:Luminaire.
+CONSTRUCT { 
+?this a s223:Luminaire.
   ?this rdfs:label ?number .
   # output
   ?this s223:hasConnectionPoint ?cpo.
   ?cpo  a s223:OutletConnectionPoint. #to domainspace  
-  ?cpo s223:hasMedium s223:EM-Light.
-}
-where {
-    # keep this mapping 'pure' to arch. elec stuff somewhere else.
+  ?cpo s223:hasMedium s223:EM-Light. 
+} 
+WHERE { 
+# keep this mapping 'pure' to arch. elec stuff somewhere else.
 <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
     ?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types'
     ?this spkl:elementId ?number.
-    bind(uri(concat(str(?this),("/oconnection") )) as ?cpo).
+    bind(uri(concat(str(?this),("/oconnection") )) as ?cpo). 
 }

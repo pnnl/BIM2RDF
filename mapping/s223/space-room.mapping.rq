@@ -1,16 +1,13 @@
-PREFIX spkl: <http://speckle.systems/>
-PREFIX unit: <http://qudt.org/vocab/unit/>
-PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix meta: <http://meta>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
 
-construct 
-{
-    ?p s223:encloses ?d.
-}
-#select ?rn ?rl
-where {
-	?p a s223:PhysicalSpace.
+
+CONSTRUCT { 
+?p s223:encloses ?d. 
+} 
+WHERE { 
+?p a s223:PhysicalSpace.
 	### relationship
     ?p rdfs:label ?rl.
     ?d spkl:parameters/spkl:ROOM_NAME/spkl:value ?_rn.
@@ -24,5 +21,5 @@ where {
     filter(?rl = ?rn)
     ?d spkl:category  "Spaces".
     ###
-    ?d a s223:DomainSpace.
+    ?d a s223:DomainSpace. 
 }

@@ -1,16 +1,15 @@
-PREFIX spkl: <http://speckle.systems/>
-PREFIX spklx: <http://speckle.systems/ext/>
-PREFIX unit: <http://qudt.org/vocab/unit/>
-PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
 
 
-construct {
-  ?this a s223:ElectricBreaker.
-  ?this rdfs:label ?name .}
-where {
+CONSTRUCT { 
+?this a s223:ElectricBreaker.
+  ?this rdfs:label ?name . 
+} 
+WHERE { 
 <<?this spkl:category  "Electrical Equipment">> meta: <<?mi spkl:name "electrical/panels">>. # TODO branchName could be used here
     ?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types'
-    ?this spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?name.
+    ?this spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?name. 
 }
