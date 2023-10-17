@@ -423,15 +423,21 @@ class Engine(b.Engine): # rule app on Store
     
     def crank_once(self) -> OxiGraph:
         for r in self.rules:
+            # before
             before = len(self.db)
+            if hasattr(self, 'logging'):
+                if self.logging.print:
+                    logger.info(f"{repr(r)}")
+
+            # do
             _ = r(self.db)
             _.insert(self.db)
 
+            # after
             if hasattr(self, 'logging'):
                 delta = self.logging.delta(before, len(self.db))
                 self.logging.log[r.spec].append(delta)
                 if self.logging.print:
-                    logger.info(f"{repr(r)}")
                     logger.info(f"# triples before {delta.before }, after {delta.after } => {delta.after-delta.before}")
             
         return self.db
