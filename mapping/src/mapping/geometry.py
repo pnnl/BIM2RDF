@@ -234,7 +234,7 @@ class Object:
         
         raise Exception('really should return vertices')
     
-    def get_volume_pts(self, n = 100, seed=123):
+    def get_volume_pts(self, n = 100, xn=3, seed=123):
         # generate random pts in hull
         _ = self.vertices()
         from numpy import array
@@ -244,16 +244,16 @@ class Object:
         r = random.default_rng(seed) # need a seed for deterministic,
         # ...otherwise process will keep generating (new) data
         pts = (
-            r.uniform(*bounds[0], n*2), # double is more than good
-            r.uniform(*bounds[1], n*2),
-            r.uniform(*bounds[2], n*2))
+            r.uniform(*bounds[0], n*xn), # 
+            r.uniform(*bounds[1], n*xn),
+            r.uniform(*bounds[2], n*xn))
         del bounds
         pts = array(pts)
         pts = pts.T
         assert(pts.shape[1] == 3)
         _ = in_hull(pts, self.hull)
         _ = pts[_][:n] # filtering Trues
-        assert(_.shape[0] == n)  # very unlikely to fail
+        assert(_.shape[0] == n)  # very unlikely to fail. but more likely for non-boxy objects.
         return _
     @cached_property
     def volume_pts(self): return self.get_volume_pts()
@@ -345,4 +345,5 @@ def overlap(db: OxiGraph) -> Triples:
     branch = 'architecture/rooms and lighting fixtures'
     for c in compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='inside'):
         yield from c.triples()
-    # add more: space, zone, room stuff
+    #for c in compare(db._store, 'Lighting Fixtures', 'Spaces', branch, branch, analysis='inside'):
+    #    yield from c.triples()
