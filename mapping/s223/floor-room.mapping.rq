@@ -1,0 +1,14 @@
+PREFIX meta: <http://meta>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+
+
+CONSTRUCT { 
+?this s223:contains ?room. 
+} 
+WHERE { 
+<<?this spkl:category  "Floors">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
+<<?room spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.   # TODO branchName could be used here
+?this spkl:level ?level.
+?room spkl:level ?level. 
+}

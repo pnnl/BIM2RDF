@@ -181,24 +181,25 @@ def make_regex_parts(parts):
             yield f"""regex(str(?{po}), "{part}")"""
 
 
-if __name__ == '__main__':
-    def parse_files(file_or_dir, ):
-        from pathlib import Path
-        p = Path(file_or_dir); del file_or_dir
-        assert(p.exists())
-        def write(f):
-            _ = f.open().read()
-            _ = parse(_)
-            _ = str(_)
-            open(f, 'w').write(_)
-            return p
-        if p.is_dir():
-            for f in p.glob('**/*.rq'):
-                write(f,)
-        else:
-            assert(p.is_file())
-            write(p)
+def parse_files(file_or_dir, ):
+    from pathlib import Path
+    p = Path(file_or_dir); del file_or_dir
+    assert(p.exists())
+    def write(f):
+        _ = f.open().read()
+        _ = parse(_)
+        _ = str(_)
+        open(f, 'w').write(_)
+        return p
+    if p.is_dir():
+        for f in p.glob('**/*.rq'):
+            write(f,)
+    else:
+        assert(p.is_file())
+        write(p)
 
+
+if __name__ == '__main__':
     import fire
     fire.Fire({
         'prefixes': lambda: known_prefixes,
