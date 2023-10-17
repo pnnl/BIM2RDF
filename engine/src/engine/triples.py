@@ -131,6 +131,7 @@ class Triples(b.Data):
     def insert(self, db: 'OxiGraph', graph=g.DefaultGraph()) -> None:
         if len(self):
             db._store.bulk_extend(g.Quad(*t) for t in self)
+            db._store.optimize()
 
 
 class OxiGraph(b.DataBase):
