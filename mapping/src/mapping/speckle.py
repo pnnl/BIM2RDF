@@ -16,6 +16,9 @@ def maps(maps_dir=maps_dir):
 
 
 def rules(inference = True, maps_dir: Path | None = maps_dir) -> Rules:
+    # from .geometry import overlap
+    # from .engine import Rules
+    # return Rules([PyRule(overlap)])
     maps_dir = Path(maps_dir)
     assert(maps_dir.is_dir())
     _ = []
@@ -97,6 +100,8 @@ class SpeckleGetter(PyRule):
 
 
 # args will be stream, commit
+# perhaps can get rid of http cache
+# since this function also transforms.
 def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     from speckle.graphql import queries, query, client
     _ = queries()
@@ -114,11 +119,13 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
 
 # TODO: sparql query the full general_meta
 # instead of writing python
+from functools import lru_cache
+@lru_cache # def dont need to repeat this in a session...
 def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
     from speckle.graphql import queries, query, client
     _ = queries()
     _ = _.general_meta()
-    _ = query(_, client=lambda: client(cached=False))
+    _ = query(_, client=lambda: client(cached=False)) # ...even though the call is not cached.
     id = 'id'
     name = 'name'
     items = 'items'
