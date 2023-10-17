@@ -15,17 +15,19 @@ def maps(maps_dir=maps_dir):
     return _
 
 
-def rules(inference = True, maps_dir: Path | None = maps_dir) -> Rules:
-    # from .geometry import overlap
-    # from .engine import Rules
-    # return Rules([PyRule(overlap)])
-    maps_dir = Path(maps_dir)
-    assert(maps_dir.is_dir())
+def rules(*,
+          maps_dir: Path | None = maps_dir,
+          inference = True, 
+          geometry = True,
+            ) -> Rules:
     _ = []
     from .engine import Rules
     if maps_dir:
-        _ = maps(maps_dir)
-        # geometry calcs
+        maps_dir = Path(maps_dir)
+        assert(maps_dir.is_dir())
+        _ = _ + maps(maps_dir)
+
+    if geometry:
         from .geometry import overlap
         _ = _ + [PyRule(overlap)]
 
@@ -229,8 +231,9 @@ def fengine(*, validation=True, rules=rules) -> 'Engine':
 from pathlib import Path
 def engine(stream_id, *, branch_id=None, object_id=None,
            maps_dir: Path | None = maps_dir,
-           validation=True,
+           geometry=True,
            inference=True,
+           validation=True,
            out=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
     # data/config for args
     if not (str(out).lower().endswith('ttl')):
@@ -250,6 +253,7 @@ def engine(stream_id, *, branch_id=None, object_id=None,
             rules=lambda: (
                     data_rules
                     +rules(
+                        geometry=geometry,
                         inference=inference,
                         maps_dir=maps_dir)
                     ),
