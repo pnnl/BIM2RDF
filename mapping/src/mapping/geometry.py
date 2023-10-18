@@ -1,6 +1,8 @@
 
 class query(str): pass
 
+from functools import lru_cache
+@lru_cache(maxsize=None)
 def has_property(store, property, category=None, subject=None):
     # objects in the speckle sense (not semantic)
     #no need for branch and graph specifiers
@@ -57,7 +59,6 @@ def lists_selector(subject: str,
 
 def from_graph(graph:str=''):
     return ('from'+graph) if graph else ''
-
 
 
 from speckle import base_uri, meta_uri
@@ -125,6 +126,7 @@ def geoq(subject, list_selector, branch_selector='', graph=None, ) -> query:  # 
     return _
 
 
+#@lru_cache(maxsize=None) 'low' level. cache 'higher' level
 def get_geometry(store,
                  subject, lst2arr: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'],
                  branch, graph=None):
@@ -133,7 +135,8 @@ def get_geometry(store,
         lists_selector(subject, lst2arr,),
         geo_branch_selector(branch))
     _ = geoq(*_, graph=graph)
-    _ = store.query(_) # slow!!! TODO? can just cache the hull result
+    _ = store.query(_) # slow part ...
+    # ...stuff below is fast otherwise.
     if   'vertices' in lst2arr:     shape = (-1, 3)
     elif lst2arr == 'transform':    shape = ( 4, 4)
     else:                           #shape = (-1,) # nothing. makes no sense to keep going
@@ -178,8 +181,7 @@ def hull(pts):
     return Delaunay(pts)
 
 
-objects_cache = {} # TODO: could set an item limit
-
+objects_cache = {} 
 from functools import cached_property
 class Object:
     # perhaps the speckle sdk is useful here,
@@ -201,15 +203,16 @@ class Object:
         return hash(self.uri)
     
     @classmethod
-    def get_objects(cls, store, category, branch):
-        for uri in get_objects(store, category, branch=branch, ):
-            if uri in objects_cache:
-                yield objects_cache[uri]
+    def get_objects(cls, store, category, branch, use_cache=True):
+        for uri in get_objects(store, category, branch=branch,):
+            if not use_cache: yield cls(uri, store, branch)
             else:
-                _ = cls(uri, store, branch)
-                objects_cache[uri] = _
-                yield _
-
+                if uri in objects_cache:
+                    yield objects_cache[uri]
+                else:
+                    _ = cls(uri, store, branch)
+                    objects_cache[uri] = _
+                    yield _
     
     def __str__(self) -> str:
         return str(self.uri)
@@ -217,7 +220,7 @@ class Object:
     def has(self, property) -> 'node':
         _ = has_property(self.store, property, subject=self.uri)
         if _: return _ # or _.value since it's wrapped
-    
+    @cached_property
     def vertices(self):
         if self.has('definition',) and self.has('transform'):
             v = get_geometry(self.store, self.uri, 'definition/vertices', self.branch)
@@ -236,7 +239,7 @@ class Object:
     
     def get_volume_pts(self, n = 100, xn=3, seed=123):
         # generate random pts in hull
-        _ = self.vertices()
+        _ = self.vertices
         from numpy import array
         bounds = array([_.min(axis=0), _.max(axis=0)]).T
         assert(bounds.shape == (3,2))
@@ -265,7 +268,7 @@ class Object:
     def transform(self): return self.get_transform()
     @cached_property
     def hull(self):
-        _ = hull(self.vertices())
+        _ = hull(self.vertices)
         return _
     
     def frac_inside(self, other: 'Object', **kw) -> float:
@@ -287,7 +290,8 @@ def compare(store: 'og.Store',
         branch1, branch2,
         analysis: Literal['fracInside'] | Literal['inside'] = 'inside', tol=.9, ) -> Iterable['Comparison']:
     C = Comparison
-    for o1 in Object.get_objects(store, cat1, branch1):
+    from tqdm import tqdm
+    for o1 in tqdm(tuple(Object.get_objects(store, cat1, branch1)), desc=f"{cat1}-{cat2}"):
         for o2 in Object.get_objects(store, cat2, branch2):
             if analysis == 'fracInside':
                 f = o1.frac_inside(o2)
@@ -346,4 +350,4 @@ def overlap(db: OxiGraph) -> Triples:
     for c in compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='inside'):
         yield from c.triples()
     #for c in compare(db._store, 'Lighting Fixtures', 'Spaces', branch, branch, analysis='inside'):
-    #    yield from c.triples()
+    #   yield from c.triples()
