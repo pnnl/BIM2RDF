@@ -181,7 +181,7 @@ def hull(pts):
     return Delaunay(pts)
 
 
-objects_cache = {} 
+objects_cache = {}
 from functools import cached_property
 class Object:
     # perhaps the speckle sdk is useful here,
@@ -275,6 +275,22 @@ class Object:
         _ = in_hull(self.volume_pts, other.hull, **kw)
         _ = sum(_) / len(_)
         return _
+    
+    @cached_property
+    def med_pt(self):
+        # a shortcut
+        if self.transform  is not None:
+            return self.transform[:,-1][:3]
+        from numpy import median
+        return median(self.vertices, axis=0)
+
+    def med_distance(self, other):
+        sp = self.med_pt
+        op = other.med_pt
+        _ = ((sp[i]-op[i])**2 for i in range(3))
+        _ = sum(_)
+        _ = _**.5
+        return _
         
     def __contains__(self, other: 'Object'):
         if other.frac_inside(self) == 1: # precisely. otherwise, use frac_inside
@@ -283,6 +299,13 @@ class Object:
             return False
 
 
+def calc_distances(o1s, o2s):
+    for o1 in o1s:
+        for o2 in o2s:
+            yield frozenset((o1, o2)), lambda: o1.med_distance(o2)
+
+
+distances = {}
 
 from typing import Iterable
 def compare(store: 'og.Store',
@@ -291,8 +314,30 @@ def compare(store: 'og.Store',
         analysis: Literal['fracInside'] | Literal['inside'] = 'inside', tol=.9, ) -> Iterable['Comparison']:
     C = Comparison
     from tqdm import tqdm
-    for o1 in tqdm(tuple(Object.get_objects(store, cat1, branch1)), desc=f"{cat1}-{cat2}"):
-        for o2 in Object.get_objects(store, cat2, branch2):
+    o1s = Object.get_objects(store, cat1, branch1)
+    o1s = tuple(o1s)
+    o2s = Object.get_objects(store, cat2, branch2)
+    o2s = tuple(o2s)
+    
+    ### optimization for when we're looking for the 'location' of things.
+    if analysis == 'inside':
+        def ddistances():
+            for p,df in tqdm(calc_distances(o1s, o2s), total=len(o1s)*len(o2s), desc='distances'):
+                if p not in distances:
+                    distances[p] = df()
+        ddistances()
+        
+    def sorter(o1, o2s):
+        if analysis == 'inside':
+            return sorted(o2s, key=lambda o2: distances[frozenset((o1, o2))] )
+        else:
+            return o2s
+    ###
+        
+    for i, o1 in enumerate(tqdm(o1s, desc=f"{cat1}-{cat2}")):
+        for j, o2 in enumerate(sorter(o1, o2s)):
+            # can verify optimization if progress does not proceed far
+            #print(j)
             if analysis == 'fracInside':
                 f = o1.frac_inside(o2)
                 yield                       C(o1, f, o2)
@@ -346,6 +391,7 @@ class Comparison:
 
 from .engine import OxiGraph, Triples
 def overlap(db: OxiGraph) -> Triples:
+    #import heartrate; heartrate.trace(browser=True)
     branch = 'architecture/rooms and lighting fixtures'
     for c in compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='inside'):
         yield from c.triples()
