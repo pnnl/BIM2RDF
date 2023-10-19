@@ -1,51 +1,15 @@
-from gql.transport.requests import RequestsHTTPTransport
-from requests.adapters import HTTPAdapter, Retry
-from gql.transport.exceptions import TransportAlreadyConnected
-
-
-class CachedRequestHTTPTransport(RequestsHTTPTransport):
-
-    def connect(self):
-        #https://github.com/graphql-python/gql/issues/387#issuecomment-1435323862
-        # copypaste
-        if self.session is None:
-            from .requests import get_session
-            # Creating a session that can later be re-use to configure custom mechanisms
-            self.session = get_session(cached=True)
-            # If we specified some retries, we provide a predefined retry-logic
-            if self.retries > 0:
-                adapter = HTTPAdapter(
-                    max_retries=Retry(
-                        total=self.retries,
-                        backoff_factor=0.1,
-                        status_forcelist=[500, 502, 503, 504],
-                        allowed_methods=None,
-                    )
-                )
-                for prefix in "http://", "https://":
-                    self.session.mount(prefix, adapter)
-        else:
-            raise TransportAlreadyConnected("Transport is already connected")
 
 
 gql_url = 'https://speckle.xyz/graphql'
 
 
-def client(cached=False):
+def client():
     from gql import Client
     from .requests import TokenAuth
-    if cached:
-        transport=CachedRequestHTTPTransport(url=gql_url, auth=TokenAuth())
-        _ = Client(
-            transport=transport,
-            fetch_schema_from_transport=True)
-        return _
-    
-    else: 
-        default_transport = RequestsHTTPTransport(url=gql_url, auth=TokenAuth())
-        _ = Client(transport = default_transport, fetch_schema_from_transport=True)
-        return _
-
+    from gql.transport.requests import RequestsHTTPTransport
+    default_transport = RequestsHTTPTransport(url=gql_url, auth=TokenAuth())
+    _ = Client(transport = default_transport, fetch_schema_from_transport=True)
+    return _
 
 
 def get_schema(client=client):
@@ -86,8 +50,6 @@ def query(q=get_void_query(), client=client) -> dict: # json
         q = dsl_gql(q)
     else:
         raise TypeError('not a query')
-    #  #https://requests-cache.readthedocs.io/en/stable/user_guide/expiration.html#precedence
-    # somehow control cache expiry w/ timely queries TODO
     _ = client()
     _ = _.execute(q)
     return _

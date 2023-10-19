@@ -50,6 +50,11 @@ def get_ontology(_: OxiGraph) -> Triples:
     return _
 
 
+def query(q):
+    from speckle.graphql import query, client
+    _ = query(q, lambda: client()) # need this to be 'live'
+    return _
+
 class SpeckleGetter(PyRule):
 
     def __init__(self, stream_id, branch_id=None, object_id=None) -> None:
@@ -70,10 +75,7 @@ class SpeckleGetter(PyRule):
     @staticmethod
     def get_branches(stream_id)-> 'branch names':
         assert(stream_id)
-        from speckle.graphql import queries, query, client
-        _ = queries()
-        _ = _.general_meta()
-        _ = query(_, lambda: client(cached=False))
+        _ = query_speckle_meta()
         _ = _['streams']['items']
         for d in _:
             if stream_id in {d['id'], d['name']}:
@@ -100,14 +102,14 @@ class SpeckleGetter(PyRule):
         #_ = Triples()
         return _
 
+
 from .cache import get_cache
 @get_cache('speckle')
 def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
-    from speckle.graphql import queries, query, client
+    from speckle.graphql import queries
     _ = queries()
     _ = _.objects(stream_id, object_id)
-    # TODO: if dev=False: cached=False
-    _ = query(_, client=lambda: client(cached=True)) # dict
+    _ = query(_,)
     from speckle.objects import rdf as ordf
     _ = ordf(_) #
     _ = _.read()
@@ -117,14 +119,18 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     return _
 
 
-# TODO: sparql query the full general_meta instead of writing python
 from .cache import get_cache
-@get_cache('specklemeta')
-def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
-    from speckle.graphql import queries, query, client
+@get_cache('specklemeta') # TODO: expire meta
+def query_speckle_meta():  
+    from speckle.graphql import queries
     _ = queries()
     _ = _.general_meta()
-    _ = query(_, client=lambda: client(cached=False)) # ...even though the call is not cached.
+    _ = query(_)
+    return _
+
+# TODO: sparql query the full general_meta instead of writing python
+def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
+    _ = query_speckle_meta()
     id = 'id'
     name = 'name'
     items = 'items'
@@ -160,10 +166,7 @@ def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
 
 def get_speckle(stream_id, *, branch_id=None, object_id=None):
     assert(stream_id)
-    from speckle.graphql import queries, query, client
-    _ = queries()
-    _ = _.general_meta()
-    _ = query(_, client=lambda: client(cached=False))
+    _ = query_speckle_meta()
     _ = _['streams']['items']
     for d in _:
         if stream_id in {d['id'], d['name']}:
@@ -187,7 +190,7 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
     from types import SimpleNamespace as N
     if not len(_):  # if there are no items
         return N(
-            objects=lambda _: Triples(),
+            objects=lambda db: Triples(),
             meta=lambda: Triples(),
         )
 
