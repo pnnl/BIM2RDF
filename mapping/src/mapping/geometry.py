@@ -358,7 +358,14 @@ class Object:
     def transform(self): return self.get_transform()
     @cached_property
     def hull(self):
-        _ = hull(self.vertices)
+        _ = self.vertices
+        toomuch = 10_000
+        if len(self.vertices) > toomuch:
+            import numpy.random as random
+            r = random.default_rng(123) # need a seed for deterministic,
+            r = r.integers(0, len(_), toomuch)
+            _ = _[r]
+        _ = hull(_)
         return _
     
     def frac_inside(self, other: 'Object', **kw) -> float:
