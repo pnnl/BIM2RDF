@@ -100,10 +100,8 @@ class SpeckleGetter(PyRule):
         #_ = Triples()
         return _
 
-
-# args will be stream, commit
-# perhaps can get rid of http cache
-# since this function also transforms.
+from .cache import get_cache
+@get_cache('speckle')
 def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     from speckle.graphql import queries, query, client
     _ = queries()
@@ -115,14 +113,13 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     _ = _.read()
     d = _.decode()
     from .utils.data import get_data
-    _ = lambda _: get_data(d)
+    _ = get_data(d)
     return _
 
 
-# TODO: sparql query the full general_meta
-# instead of writing python
-from functools import lru_cache
-@lru_cache # def dont need to repeat this in a session...
+# TODO: sparql query the full general_meta instead of writing python
+from .cache import get_cache
+@get_cache('specklemeta')
 def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
     from speckle.graphql import queries, query, client
     _ = queries()
@@ -159,7 +156,6 @@ def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
     _ = parse(_, 'text/turtle')
     _ = Triples(_) # ! important! has blank nodes  but handled  centrally by '.deanon()' in PyRule.
     return _
-
 
 
 def get_speckle(stream_id, *, branch_id=None, object_id=None):
@@ -210,7 +206,7 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
     assert(stream_id)
     assert(object_id)
     return N(
-        objects=_get_speckle(stream_id, object_id),
+        objects=lambda db: _get_speckle(stream_id, object_id),
         meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )
         
 

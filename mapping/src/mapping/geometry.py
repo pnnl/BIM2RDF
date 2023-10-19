@@ -126,10 +126,19 @@ def geoq(subject, list_selector, branch_selector='', graph=None, ) -> query:  # 
     return _
 
 
-#@lru_cache(maxsize=None) 'low' level. cache 'higher' level
+
+
+#@lru_cache(maxsize=None) 'low' level. 'higher' level is in memory
+from .cache import get_cache
+def geomkey(*p, **k):
+    # skip the first arg bc it doesn't hash and dont want it to be part of the key
+    from cachetools.keys import hashkey
+    return hashkey(*p[1:], **k)
+@get_cache('geometry', key=geomkey)
 def get_geometry(store,
                  subject, lst2arr: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'],
                  branch, graph=None):
+    # TODO: if definition/vertices..go to definition/vertices id
     _ = (
         subject,
         lists_selector(subject, lst2arr,),
@@ -320,6 +329,7 @@ def compare(store: 'og.Store',
     o2s = tuple(o2s)
     
     ### optimization for when we're looking for the 'location' of things.
+    # can be 'smarter'
     if analysis == 'inside':
         def ddistances():
             for p,df in tqdm(calc_distances(o1s, o2s), total=len(o1s)*len(o2s), desc='distances'):
