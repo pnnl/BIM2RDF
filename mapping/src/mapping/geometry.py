@@ -370,7 +370,7 @@ class Object:
     def med_pt(self):
         # a shortcut
         if self.transform  is not None:
-            return self.transform[:,-1][:3]
+           return self.transform[:,-1][:3]
         from numpy import median
         return median(self.vertices, axis=0)
 
@@ -401,7 +401,7 @@ from typing import Iterable
 def compare(store: 'og.Store',
         cat1, cat2,
         branch1, branch2,
-        analysis: Literal['fracInside'] | Literal['inside'] = 'inside', tol=.9, ) -> Iterable['Comparison']:
+        analysis:Literal['fracInside']='fracInside', top=10 ) -> Iterable['Comparison']:
     C = Comparison
     from tqdm import tqdm
     o1s = Object.get_objects(store, cat1, branch1)
@@ -411,7 +411,7 @@ def compare(store: 'og.Store',
     
     ### optimization for when we're looking for the 'location' of things.
     # can be 'smarter'
-    if analysis == 'inside':
+    if analysis == 'fracInside':
         def ddistances():
             for p,df in tqdm(calc_distances(o1s, o2s), total=len(o1s)*len(o2s), desc='distances'):
                 if p not in distances:
@@ -419,30 +419,19 @@ def compare(store: 'og.Store',
         ddistances()
         
     def sorter(o1, o2s):
-        if analysis == 'inside':
-            return sorted(o2s, key=lambda o2: distances[frozenset((o1, o2))] )
+        if analysis == 'fracInside':
+            return sorted(o2s, key=lambda o2: distances[frozenset((o1, o2))] )[:top] # is enough
         else:
-            return o2s
+            raise ValueError('whats the analysis?')
     ###
         
     for i, o1 in enumerate(tqdm(o1s, desc=f"{cat1}-{cat2}")):
         for j, o2 in enumerate(sorter(o1, o2s)):
             if analysis == 'fracInside':
                 f = o1.frac_inside(o2)
-                yield                       C(o1, f, o2)
+                yield C(o1, f, o2)
                 continue
-            elif analysis == 'inside':
-                f = o1.frac_inside(o2)
-                if f > tol:
-                    # found its (1) location...
-                    yield                   C(o1, f, o2)
-                    # can verify optimization if progress does not proceed far
-                    #print(j, o1, o2)
-                    break # ...no need to go through the rest.
-                else:
-                    continue
             raise ValueError('what analysis?')
-
 
 # geometry above
 
@@ -479,12 +468,11 @@ class Comparison:
 
 # semantic stuff below
 
-
 from .engine import OxiGraph, Triples
 def overlap(db: OxiGraph) -> Triples:
     #import heartrate; heartrate.trace(browser=True)
     branch = 'architecture/rooms and lighting fixtures'
-    for c in compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='inside'):
+    for c in compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='fracInside'):
         yield from c.triples()
     #for c in compare(db._store, 'Lighting Fixtures', 'Spaces', branch, branch, analysis='inside'):
     #   yield from c.triples()
