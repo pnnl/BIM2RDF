@@ -3,9 +3,14 @@ class query(str): pass
 
 from functools import lru_cache
 @lru_cache(maxsize=None)
-def has_property(store, property, category=None, subject=None):
+def has_property(store, property: str|tuple, category=None, subject=None, limit=1):
     # objects in the speckle sense (not semantic)
     #no need for branch and graph specifiers
+    if isinstance(property, str):
+        property = f"spkl:{property}"
+    else:
+        assert(isinstance(property, tuple))
+        property = '/'.join(f"spkl:{p}" for p in property)
     if (not category) and (not subject):
         raise ValueError('supply either cat or subject')
     if subject:
@@ -22,10 +27,10 @@ def has_property(store, property, category=None, subject=None):
     {prefixes()}
     select ?v
     where {{
-        {subject} spkl:{property} ?v.
+        {subject} {property} ?v.
         {categoryline}
     }}
-    limit 1
+    limit {limit}
     """
     _ = query(_)
     _ = store.query(_)
@@ -33,36 +38,10 @@ def has_property(store, property, category=None, subject=None):
     assert(len(_) in {0, 1})
     if _: return _[0]
 
-
-from typing import Literal
-def lists_selector(subject: str,
-                   cat_to_list: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'], ) -> str:
-    #                                    could still add faces here TODO
-    # when encountering a list
-    # /path/to/list/rdf:rest*/rdf:first ?item.
-    s = subject
-    #                 displayValue -->   List -->         Vertices -->     List -->      base64data --> str
-    _to_list = 'spkl:displayValue/rdf:rest*/rdf:first/spkl:vertices/rdf:rest*/rdf:first/spkl:data ?vl.'
-    if 'vertices' == cat_to_list:
-        to_list = f"{s} " +  _to_list
-    elif cat_to_list == 'definition/vertices':
-        # if has transform, then need to go through def
-    #if (cat == 'Lighting Fixtures') and (cat_to_list == 'vertices'):
-        to_list = f"{s} spkl:definition/"+_to_list
-    else:
-        assert(cat_to_list == 'transform')
-        #                    transform ->  maxtrix ->  ?List
-        to_list = f"{s} spkl:transform/spkl:matrix ?vl."
-    assert(f"{s}" in to_list)
-    return '\n'.join([to_list])
-
-
 def from_graph(graph:str=''):
     return ('from'+graph) if graph else ''
 
-
 from speckle import base_uri, meta_uri
-
 
 def prefixes():
     _ = f"""
@@ -108,61 +87,142 @@ def geo_branch_selector(branch=None):
     return _
 
 
-def geoq(subject, list_selector, branch_selector='', graph=None, ) -> query:  # add to group, the export
+from typing import Literal
+def listsp_selector(subject: str,
+                   cat_to_list: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'], ) -> str:
+    #                                    could still add faces here TODO
+    # when encountering a list
+    # /path/to/list/rdf:rest*/rdf:first ?item.
+    s = subject
+    #                 displayValue -->   List -->         Vertices -->     List -->      base64data --> str
+    _to_list = 'spkl:displayValue/rdf:rest*/rdf:first/spkl:vertices/rdf:rest*/rdf:first ?vl.' # spkl:data
+    if 'vertices' == cat_to_list:
+        to_list = f"{s} " +  _to_list
+        p = 'spkl:data'
+    elif cat_to_list == 'definition/vertices':
+        # if has transform, then need to go through def
+    #if (cat == 'Lighting Fixtures') and (cat_to_list == 'vertices'):
+        to_list = f"{s} spkl:definition/"+_to_list
+        p = 'spkl:data'
+    else:
+        assert(cat_to_list == 'transform')
+        #                    transform ->  maxtrix ->  ?List
+        to_list = f"{s} spkl:transform ?vl." # spkl:matrix
+        p = 'spkl:matrix'
+    assert(f"{s}" in to_list)
+    from types import SimpleNamespace as NS
+    return NS(node='\n'.join([to_list]), predicate=p)
+
+def geoq(subjects: str|tuple, list_selector, graph=None, ) -> query:  # add to group, the export
+    if isinstance(subjects, str):
+        subjects = (subjects,)
+    else:
+        assert(isinstance(subjects, (tuple, list, frozenset, set)))
     # single object at a time to not load all geometry in one query
     # using values seems to help with performance. (using filter was too slow)
     # need branch selector if have subject?
     _ = f"""
     {prefixes()}
 
-    select ?vl  {from_graph(graph)}
+    # idk why i need distinct
+    select distinct ?s ?vl  {from_graph(graph)}
     where {{
-    values ?s {{ {subject} }}
+    values ?s {{ {' '.join(str(s) for s in subjects)} }}
     {list_selector}
-    {branch_selector}
+    #{'branch_selector'} HUGE difference!!!!
     }}
     """
     _ = query(_)
     return _
 
-
-
-
-#@lru_cache(maxsize=None) 'low' level. 'higher' level is in memory
-from .cache import get_cache
-def geomkey(*p, **k):
-    # skip the first arg bc it doesn't hash and dont want it to be part of the key
-    from cachetools.keys import hashkey
-    return hashkey(*p[1:], **k)
-@get_cache('geometry', key=geomkey)
-def get_geometry(store,
-                 subject, lst2arr: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'],
-                 branch, graph=None):
-    # TODO: if definition/vertices..go to definition/vertices id
+def get_geom_ptrs(store,
+        subjects, lst2arr: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'],
+        graph=None):
     _ = (
-        subject,
-        lists_selector(subject, lst2arr,),
-        geo_branch_selector(branch))
+        subjects,
+        listsp_selector('?s', lst2arr,).node)
     _ = geoq(*_, graph=graph)
-    _ = store.query(_) # slow part ...
-    # ...stuff below is fast otherwise.
-    if   'vertices' in lst2arr:     shape = (-1, 3)
-    elif lst2arr == 'transform':    shape = ( 4, 4)
-    else:                           #shape = (-1,) # nothing. makes no sense to keep going
-        raise ValueError(f"converting {lst2arr} list to array not defined")
+    _ = store.query(_) # FAST!.
+    # _ = tuple(_) query returns non-evaluated iter
+    return _
+
+def get_lists_from_ptrs(store, ptrs, path):
+    if not isinstance(ptrs, (tuple, list, set, frozenset)):
+        ptrs = (ptrs, )
+    _ = f"""
+    {prefixes()}
+
+    select ?vlp ?vl
+    where {{
+        values ?vlp {{{' '.join(str(p) for p in ptrs)}}}
+        ?vlp {path} ?vl.
+    }}
+    """
+    _ = store.query(_)
+    return _
+
+def geometry_getter(store,
+        subjects: tuple, lst2arr: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'],
+         graph=None):
+    # multiple subjects: means array data can be retrieved and held at once.
+    # data storage: subject --> array ptr --> array
+    # more efficient than subject --> array bc geometries may be repeated in the definition/vertices case
+    _ = get_geom_ptrs(store, subjects, lst2arr, graph=graph)
     from collections import defaultdict
-    g = defaultdict(list)
-    for i,lst in enumerate(_): g[i].append(lst[0].value)
-    _ = g
-    assert(_) # need to have data for a subject
-    from itertools import chain
-    _ = chain.from_iterable(_.values())
-    from speckle.objects import data_decode
-    _ = map(lambda _: data_decode(_), _)
-    _ = map(lambda _: (_).reshape(*shape), _)
-    from numpy import vstack
-    _ = tuple(_) # need to pass in a 'real' sequence ..
-    _ = vstack(_) # ...bc this gives a FutureWarning
+    ptrs = defaultdict(list)
+    for s,p in _: ptrs[s].append(p)
+    ptrs = {k:v for k,v in ptrs.items()}
+    _ = get_lists_from_ptrs(store, tuple(p for pl in ptrs.values() for p in pl) , listsp_selector('?s', lst2arr).predicate )
+    lists = defaultdict(list)
+    for p,l in _: lists[p].append(l)
+    lists = {k:v for k,v in lists.items()}
+    def get_lists(s,):# ptrs=ptrs, lists=lists):
+        ps = ptrs[s]
+        def _(ps):
+            for p in ps:
+                for l in lists[p]:
+                    yield l
+        _ = (l.value for l in _(ps))
+        #_ = tuple(_)
+        return _
+    
+    def mk_array(ls, lst2arr=lst2arr):
+        if   'vertices' in lst2arr:     shape = (-1, 3)
+        elif lst2arr == 'transform':    shape = ( 4, 4)
+        else:                           #shape = (-1,) # nothing. makes no sense to keep going
+            raise ValueError(f"converting {lst2arr} list to array not defined")
+        from speckle.objects import data_decode
+        _ = ls; del ls
+        _ = map(lambda _: data_decode(_), _)
+        _ = map(lambda _: (_).reshape(*shape), _)
+        from numpy import vstack
+        _ = tuple(_) # need to pass in a 'real' sequence ..
+        _ = vstack(_) # ...bc this gives a FutureWarning
+        return _
+
+    def get_array(subject, ):#ptrs=ptrs, lists=lists):
+        _ = get_lists(subject,)# ptrs=ptrs, lists=lists)
+        _ = mk_array(_)
+        return _
+    return get_array
+
+
+#@'low' level. 'higher' level is in memory
+#from .cache import get_cache
+#def geomkey(*p, **k):
+# skip the first arg bc it doesn't hash and dont want it to be part of the key
+#from cachetools.keys import hashkey
+#return hashkey(*p[1:], **k)
+#@get_cache('geometry', key=geomkey)
+@lru_cache(maxsize=None)
+def category_geom_getter(store,
+                 cat, lst2arr: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'],
+                 branch=None,
+                 graph=None):
+    os = get_objects(store, cat, branch=branch, graph=graph)
+    _ = geometry_getter(store, os, lst2arr, graph=graph)
+    from types import SimpleNamespace as NS
+    _ = NS(objects=os, getter=_)
     return _
 
 
@@ -195,15 +255,20 @@ from functools import cached_property
 class Object:
     # perhaps the speckle sdk is useful here,
     # so that i dont have to query
-    def __init__(self, uri, store, branch) -> None:
+    def __init__(self, uri, store, branch,
+            geom_getter_type:Literal['single']|Literal['category']='single') -> None:
         uri = str(uri)
-        if not (uri.startswith('<')):
-            uri = '<'+uri
-        if not (uri.endswith(  '>')):
-            uri = uri+'>'
+        if (uri.startswith('<')):
+            uri = uri[1:]
+        if (uri.endswith(  '>')):
+            uri = uri[:-1]
         self.uri = uri
         self.store = store
         self.branch = branch # reqd to filter
+        self.geom_getter_type = geom_getter_type
+    
+    def __str__(self) -> str:
+        return f"<{self.uri}>"
     
     def __repr__(self) -> str:
         return f"Object({self.uri})"
@@ -211,28 +276,44 @@ class Object:
     def __hash__(self) -> int:
         return hash(self.uri)
     
+    def get_geometry(self, store, lst2arr):
+        from pyoxigraph import NamedNode
+        s = NamedNode(self.uri)
+        if self.geom_getter_type == 'single':
+            _ = geometry_getter(store, (self,), lst2arr,  )
+            _ = _(s)
+            return _
+        else:
+            assert('category' == self.geom_getter_type)
+            _ = self.has('category')
+            _ = _.value
+            _ = category_geom_getter(store, _, lst2arr, self.branch, )
+            _ = _.getter
+            _ = _(s)
+            return _
+        raise NotImplementedError('how to get geometry?')
+    
     @classmethod
     def get_objects(cls, store, category, branch, use_cache=True):
         for uri in get_objects(store, category, branch=branch,):
-            if not use_cache: yield cls(uri, store, branch)
+            if not use_cache:
+                _ = cls(uri, store, branch, geom_getter_type='category')
+                yield _
             else:
                 if uri in objects_cache:
                     yield objects_cache[uri]
                 else:
-                    _ = cls(uri, store, branch)
+                    _ = cls(uri, store, branch, geom_getter_type='category')
                     objects_cache[uri] = _
                     yield _
     
-    def __str__(self) -> str:
-        return str(self.uri)
-    
     def has(self, property) -> 'node':
-        _ = has_property(self.store, property, subject=self.uri)
+        _ = has_property(self.store, property, subject=self)
         if _: return _ # or _.value since it's wrapped
     @cached_property
     def vertices(self):
         if self.has('definition',) and self.has('transform'):
-            v = get_geometry(self.store, self.uri, 'definition/vertices', self.branch)
+            v = self.get_geometry(self.store, 'definition/vertices',  )
             from numpy import stack, ones
             v = stack((v[:, 0], v[:, 1], v[:, 2], ones(len(v))), axis=-1)
             v = v.reshape(len(v), 4, 1)
@@ -242,7 +323,7 @@ class Object:
             v = v.reshape(len(v), 3)
             return v
         elif self.has('displayValue'):
-            return get_geometry(self.store, self.uri, 'vertices', self.branch)
+            return self.get_geometry(self.store, 'vertices',  )
         
         raise Exception('really should return vertices')
     
@@ -272,7 +353,7 @@ class Object:
     
     def get_transform(self,):
         if self.has('transform'):
-            return get_geometry(self.store, self.uri, 'transform', self.branch)
+            return self.get_geometry(self.store, 'transform', )
     @cached_property
     def transform(self): return self.get_transform()
     @cached_property
@@ -346,8 +427,6 @@ def compare(store: 'og.Store',
         
     for i, o1 in enumerate(tqdm(o1s, desc=f"{cat1}-{cat2}")):
         for j, o2 in enumerate(sorter(o1, o2s)):
-            # can verify optimization if progress does not proceed far
-            #print(j)
             if analysis == 'fracInside':
                 f = o1.frac_inside(o2)
                 yield                       C(o1, f, o2)
@@ -357,6 +436,8 @@ def compare(store: 'og.Store',
                 if f > tol:
                     # found its (1) location...
                     yield                   C(o1, f, o2)
+                    # can verify optimization if progress does not proceed far
+                    #print(j, o1, o2)
                     break # ...no need to go through the rest.
                 else:
                     continue
@@ -386,8 +467,8 @@ class Comparison:
         from pyoxigraph import parse
         _ = f"""
         PREFIX {self.ns.prefix}: <{self.ns.uri}>
-        {self.o1.uri} geom:fracInside [
-                        {self.o2.uri}  {self.fracInside}  ].
+        {self.o1} geom:fracInside [
+                        {self.o2}  {self.fracInside}  ].
         """
         _ = _.encode()
         from io import BytesIO
