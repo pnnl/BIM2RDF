@@ -310,15 +310,21 @@ class Object:
     def has(self, property) -> 'node':
         _ = has_property(self.store, property, subject=self)
         if _: return _ # or _.value since it's wrapped
+
     @cached_property
-    def vertices(self):
-        if self.has('definition',) and self.has('transform'):
+    def class_vertices(self):
+        if self.has('definition'):
             v = self.get_geometry(self.store, 'definition/vertices',  )
             from numpy import stack, ones
             v = stack((v[:, 0], v[:, 1], v[:, 2], ones(len(v))), axis=-1)
             v = v.reshape(len(v), 4, 1)
+            return v
+
+    @property #@cached_property # fast enough i'm assuming
+    def vertices(self):
+        if self.has('definition',) and self.has('transform'):
             t = self.transform  # why is it 4x4 instead of 3x3?
-            v = t @ v
+            v = t @ self.class_vertices
             v = v[:, (0, 1, 2)]
             v = v.reshape(len(v), 3)
             return v
@@ -329,7 +335,7 @@ class Object:
     
     def get_volume_pts(self, n = 100, xn=3, seed=123):
         # generate random pts in hull
-        _ = self.vertices
+        _ = self.vertices # optimized
         from numpy import array
         bounds = array([_.min(axis=0), _.max(axis=0)]).T
         assert(bounds.shape == (3,2))
@@ -356,11 +362,12 @@ class Object:
             return self.get_geometry(self.store, 'transform', )
     @cached_property
     def transform(self): return self.get_transform()
+
     @cached_property
     def hull(self):
         _ = self.vertices
         toomuch = 10_000
-        if len(self.vertices) > toomuch:
+        if len(_) > toomuch:
             import numpy.random as random
             r = random.default_rng(123) # need a seed for deterministic,
             r = r.integers(0, len(_), toomuch)
