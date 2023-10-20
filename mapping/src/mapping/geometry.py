@@ -48,6 +48,7 @@ def prefixes():
     PREFIX spkl: <{base_uri()}>
     PREFIX meta: <{meta_uri()}>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     """
     return _
 
@@ -154,8 +155,9 @@ def get_lists_from_ptrs(store, ptrs, path):
 
     select ?vlp ?vl
     where {{
-        values ?vlp {{{' '.join(str(p) for p in ptrs)}}}
+        values ?vlp {{{' '.join(str(p) for p in ptrs)}}}.
         ?vlp {path} ?vl.
+        filter(datatype(?vl)=xsd:string ) # idk why had to put this 
     }}
     """
     _ = store.query(_)
@@ -250,8 +252,52 @@ def hull(pts):
     return Delaunay(pts)
 
 
-objects_cache = {}
 from functools import cached_property
+
+class Definition:
+    def __init__(self, uri, obj: 'Object' ) -> None:
+        assert(uri)
+        self.uri = uri
+        self.obj = obj
+    
+
+    @cached_property
+    def transform(self):
+        # reset 'object' transform
+        _ = self.obj.get_geometry(self.obj.store, 'transform', )
+        assert(_.shape == (4,4) ) # why is it 4x4 instead of 3x3?
+        _ = _.copy()
+        _[:3, -1] = 0 # zero the translation
+        return _
+    
+    @cached_property
+    def vertices(self):
+        v = self.obj.get_geometry(self.obj.store, 'definition/vertices', )
+        t = self.transform
+        _ = self.obj.calc_vertices(v, t)
+        return _
+    @cached_property
+    def downsampled_vertices(self):
+        return self.obj.downsample(self.vertices)
+
+    
+    def get_volume_pts(self, n = 100, xn=3, seed=123):
+        return self.obj.calc_volume_pts(self.vertices, self.hull, n=n, xn=xn, seed=seed)
+    @cached_property
+    def volume_pts(self): return self.get_volume_pts()
+
+    @cached_property
+    def hull(self):
+        _ = self.downsampled_vertices
+        if _ is None: _ = self.vertices
+        _ = hull(_)
+        return _
+
+    #def translate(self, object):
+        
+
+
+objects_cache = {}
 class Object:
     # perhaps the speckle sdk is useful here,
     # so that i dont have to query
@@ -310,32 +356,66 @@ class Object:
     def has(self, property) -> 'node':
         _ = has_property(self.store, property, subject=self)
         if _: return _ # or _.value since it's wrapped
+    
+    @property
+    def definition(self) -> 'Definition | None':
+        cls = self.__class__
+        if not hasattr(cls, 'definitions'): cls.defs = {}
+        d = self.has('definition')
+        if d is None: return
+        if d not in cls.defs:
+            cls.defs[d] = Definition(d, self)
+        return cls.defs[d]
+
+    @staticmethod
+    def downsample(vertices, seed=123, toomuch=10_000):
+        _ = vertices
+        if len(_) > toomuch:
+            import numpy.random as random
+            r = random.default_rng(seed) # need a seed for deterministic,
+            r = r.integers(0, len(_), toomuch)
+            _ = _[r]
+            return _
+    
+    @staticmethod
+    def calc_vertices(v, t):
+        from numpy import stack, ones
+        #                                    need to put in a 1 col to be compatible with t @ v
+        v = stack((v[:, 0], v[:, 1], v[:, 2], ones(len(v))), axis=-1)
+        v = v.reshape(len(v), 4, 1)
+        v = t @ v
+        v = v[:, (0, 1, 2)]
+        v = v.reshape(len(v), 3)
+        return v
+    
+    @cached_property
+    def translation(self):
+        _ = self.transform
+        return _[:3, -1] 
 
     @cached_property
-    def class_vertices(self):
-        if self.has('definition'):
-            v = self.get_geometry(self.store, 'definition/vertices',  )
-            from numpy import stack, ones
-            v = stack((v[:, 0], v[:, 1], v[:, 2], ones(len(v))), axis=-1)
-            v = v.reshape(len(v), 4, 1)
-            return v
+    def transform(self):
+        if self.definition:
+            _ = self.get_geometry(self.store, 'transform', )
+            assert(_.shape == (4,4) ) # why is it 4x4 instead of 3x3?
+            return _
 
     @property #@cached_property # fast enough i'm assuming
     def vertices(self):
-        if self.has('definition',) and self.has('transform'):
-            t = self.transform  # why is it 4x4 instead of 3x3?
-            v = t @ self.class_vertices
-            v = v[:, (0, 1, 2)]
-            v = v.reshape(len(v), 3)
-            return v
+        if self.definition:
+            _ = self.calc_vertices(
+                    self.definition.vertices,
+                    self.transform,)
+            return _
         elif self.has('displayValue'):
-            return self.get_geometry(self.store, 'vertices',  )
+            return self.get_geometry(self.store, 'vertices', )
         
         raise Exception('really should return vertices')
-    
-    def get_volume_pts(self, n = 100, xn=3, seed=123):
+
+    @staticmethod
+    def calc_volume_pts(vertices, hull, n = 100, xn=3, seed=123):
         # generate random pts in hull
-        _ = self.vertices # optimized
+        _ = vertices
         from numpy import array
         bounds = array([_.min(axis=0), _.max(axis=0)]).T
         assert(bounds.shape == (3,2))
@@ -350,33 +430,37 @@ class Object:
         pts = array(pts)
         pts = pts.T
         assert(pts.shape[1] == 3)
-        _ = in_hull(pts, self.hull)
+        _ = in_hull(pts, hull)
         _ = pts[_][:n] # filtering Trues
         assert(_.shape[0] == n)  # very unlikely to fail. but more likely for non-boxy objects.
         return _
+    
+    def get_volume_pts(self, n = 100, xn=3, seed=123):
+        if self.definition:
+            _ = self.definition.volume_pts
+            _ = _ + self.translation
+            return _
+        else:
+            return self.calc_volume_pts(self.vertices, self.hull, n=n, xn=xn, seed=seed)
     @cached_property
     def volume_pts(self): return self.get_volume_pts()
-    
-    def get_transform(self,):
-        if self.has('transform'):
-            return self.get_geometry(self.store, 'transform', )
-    @cached_property
-    def transform(self): return self.get_transform()
 
     @cached_property
     def hull(self):
-        _ = self.vertices
-        toomuch = 10_000
-        if len(_) > toomuch:
-            import numpy.random as random
-            r = random.default_rng(123) # need a seed for deterministic,
-            r = r.integers(0, len(_), toomuch)
-            _ = _[r]
-        _ = hull(_)
-        return _
+        if not self.definition:
+            _ = self.downsample(self.vertices)
+            if _ is None: _ = self.vertices
+            _ = hull(_)
+            return _
     
     def frac_inside(self, other: 'Object', **kw) -> float:
-        _ = in_hull(self.volume_pts, other.hull, **kw)
+        if other.definition:#.hull:
+            # translate to hull
+            v = self.volume_pts + self.translation
+            _ = in_hull(v, other.definition.hull, **kw)
+        else:
+            assert(other.hull is not None)
+            _ = in_hull(self.volume_pts, other.hull)
         _ = sum(_) / len(_)
         return _
     
@@ -415,7 +499,7 @@ from typing import Iterable
 def compare(store: 'og.Store',
         cat1, cat2,
         branch1, branch2,
-        analysis:Literal['fracInside']='fracInside', top=10 ) -> Iterable['Comparison']:
+        analysis:Literal['fracInside']='fracInside', top=10, tol=.1 ) -> Iterable['Comparison']:
     C = Comparison
     from tqdm import tqdm
     o1s = Object.get_objects(store, cat1, branch1)
@@ -427,7 +511,7 @@ def compare(store: 'og.Store',
     # can be 'smarter'
     if analysis == 'fracInside':
         def ddistances():
-            for p,df in tqdm(calc_distances(o1s, o2s), total=len(o1s)*len(o2s), desc='distances'):
+            for p,df in calc_distances(o1s, o2s):#, pretty fast. doesnt need progress bar total=len(o1s)*len(o2s), desc='distances'):
                 if p not in distances:
                     distances[p] = df()
         ddistances()
@@ -443,7 +527,7 @@ def compare(store: 'og.Store',
         for j, o2 in enumerate(sorter(o1, o2s)):
             if analysis == 'fracInside':
                 f = o1.frac_inside(o2)
-                yield C(o1, f, o2)
+                if f>tol: yield C(o1, f, o2)
                 continue
             raise ValueError('what analysis?')
 
