@@ -572,5 +572,5 @@ def overlap(db: OxiGraph) -> Triples:
     branch = 'architecture/rooms and lighting fixtures'
     for c in compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='fracInside'):
         yield from c.triples()
-    #for c in compare(db._store, 'Lighting Fixtures', 'Spaces', branch, branch, analysis='inside'):
-    #   yield from c.triples()
+    for c in compare(db._store, 'Lighting Fixtures', 'Spaces', branch, branch, analysis='fracInside'):
+      yield from c.triples()
