@@ -525,7 +525,7 @@ def compare(store: 'og.Store',
         
     for i, o1 in enumerate(tqdm(o1s, desc=f"{cat1}-{cat2}")):
         for j, o2 in enumerate(sorter(o1, o2s)):
-            yield C(o1, 'rank', j, o2)
+            yield C(o1, 'distanceRank', j, o2)
             if analysis == 'fracInside':
                 f = o1.frac_inside(o2)
                 if f>tol: yield C(o1, 'fracInside', f, o2)
