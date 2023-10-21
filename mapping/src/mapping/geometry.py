@@ -525,9 +525,10 @@ def compare(store: 'og.Store',
         
     for i, o1 in enumerate(tqdm(o1s, desc=f"{cat1}-{cat2}")):
         for j, o2 in enumerate(sorter(o1, o2s)):
+            yield C(o1, 'rank', j, o2)
             if analysis == 'fracInside':
                 f = o1.frac_inside(o2)
-                if f>tol: yield C(o1, f, o2)
+                if f>tol: yield C(o1, 'fracInside', f, o2)
                 continue
             raise ValueError('what analysis?')
 
@@ -544,9 +545,10 @@ class Comparison:
     from ontologies import namespace
     from rdflib import URIRef
     ns = namespace('geom', URIRef(geometry_uri))
-    def __init__(self, o1: Object, fracInside, o2: Object) -> None:
+    def __init__(self, o1: Object, name, fig, o2: Object) -> None:
         self.o1 = o1
-        self.fracInside = fracInside
+        self.name = name
+        self.fig = fig
         self.o2 = o2
 
     def triples(self) -> 'Triples':
@@ -554,8 +556,8 @@ class Comparison:
         from pyoxigraph import parse
         _ = f"""
         PREFIX {self.ns.prefix}: <{self.ns.uri}>
-        {self.o1} geom:fracInside [
-                        {self.o2}  {self.fracInside}  ].
+        {self.o1} geom:{self.name} [
+                        {self.o2}  {self.fig}  ].
         """
         _ = _.encode()
         from io import BytesIO
