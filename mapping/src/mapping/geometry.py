@@ -456,7 +456,7 @@ class Object:
     def frac_inside(self, other: 'Object', **kw) -> float:
         if other.definition:#.hull:
             # translate to hull
-            v = self.volume_pts + self.translation
+            v = self.volume_pts - self.translation # plus or minus? i think minus bc o1.frac_inside(o1)=>1
             _ = in_hull(v, other.definition.hull, **kw)
         else:
             assert(other.hull is not None)
