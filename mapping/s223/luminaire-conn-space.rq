@@ -2,6 +2,9 @@ PREFIX s223: <http://data.ashrae.org/standard223#>
 
 CONSTRUCT { 
 ?o1     s223:connectedThrough   _:conn.
+#  no em-light connection equivalent like pipe and wire
+_:conn  a                       s223:Connection.
+_:conn  s223:hasMedium          s223:EM-Light.
 _:conn  s223:connectsTo         ?o2.
 } 
 WHERE { 
