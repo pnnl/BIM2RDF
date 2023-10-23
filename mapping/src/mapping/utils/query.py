@@ -57,15 +57,17 @@ class Node:
     def __str__(self) -> str:
         return f"{self.prefix}:{self.name}"
 
-
+# use rdflib parsing maybe
 
 # base class might be better in 'engine'
 class SelectQuery:#(base class in engine)
     def __init__(self, *,
                  comments='',
-                 prefixes=Prefixes(),
+                 prefixes=Prefixes(), 
                  variables =(Variable('s'), Variable('p'), Variable('o') ),
+                 # selectbody
                  wherebody='?s ?p ?o.') -> None:
+                # stuff after like groupby
         self.prefixes = Prefixes(prefixes)
         self.variables = variables
         self.wherebody = wherebody
@@ -78,7 +80,7 @@ class SelectQuery:#(base class in engine)
         ps = Prefixes(namespace(p,u) for p,u in ps) + known_prefixes
         vs = findall("select(.*)where", s, IGNORECASE | DOTALL )
         vs = vs[0].strip()
-        vs = findall("\?(?P<var>\S*)", s, )
+        vs = findall("\?(?P<var>\S*)", s, ) # does it capture like (f(?v)  as ?v)
         vs = map(Variable, vs)
         vs = tuple(vs)
         w = findall("where\s*\n*{(?P<wherebody>.*?)}", s, IGNORECASE | DOTALL )
