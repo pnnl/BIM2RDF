@@ -4,11 +4,10 @@ PREFIX spkl: <http://speckle.systems/>
 
 
 CONSTRUCT { 
-?b s223:connectedTo ?l.
-   # TODO: fake wire connection 
+    ?b s223:connectedTo ?l.
 } 
 WHERE { 
-?b a s223:ElectricBreaker. #?b s223:hasConnectionPoint ?bc.
+    ?b a s223:ElectricBreaker. #?b s223:hasConnectionPoint ?bc.
     ?b  spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?n.
 
     ?l a s223:Luminaire.       #?l s223:hasConnectionPoint ?lc.
@@ -19,7 +18,6 @@ WHERE {
     ?l spkl:elementId ?eid.
     ?thisconn spkl:elementId ?eid.
     ?thisconn spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM/spkl:value ?n
-
 
     # attempt at connecting via connectors but applicationids not matching always
     # soln: more investigate data.
