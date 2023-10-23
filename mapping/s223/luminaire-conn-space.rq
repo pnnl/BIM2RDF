@@ -1,0 +1,9 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+
+CONSTRUCT { 
+?o1     s223:connectedThrough   _:conn.
+_:conn  s223:connectsTo         ?o2.
+} 
+WHERE { 
+?o1 s223:connectedTo ?o2.
+}
