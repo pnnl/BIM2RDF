@@ -227,13 +227,13 @@ def fengine(*, validation=True, rules=rules) -> 'Engine':
     return _
 
 
-
 from pathlib import Path
-def engine(stream_id, *, branch_id=None,
+def engine(stream_id, *, branch_ids=None,
            maps_dir: Path | None = maps_dir,
            geometry=True,
            inference=True,
            validation=True,
+           out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
            out=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
     object_id=None
     # data/config for args
@@ -241,13 +241,13 @@ def engine(stream_id, *, branch_id=None,
         raise ValueError('just use ttl fmt')
     
     # parsing of branch_id is relegated to 
-    if branch_id is None:
+    if branch_ids is None:
         # figuring this is the default mode of working from now.
         data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id) ])
-    elif isinstance(branch_id, (list, tuple)):
-        data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id, branch_id)])
-    elif isinstance(branch_id, str):
-        data_rules = Rules([SpeckleGetter(stream_id, branch_id=branch_id, object_id=object_id),])
+    elif isinstance(branch_ids, (list, tuple)):
+        data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id, branch_ids)])
+    elif isinstance(branch_ids, str):
+        data_rules = Rules([SpeckleGetter(stream_id, branch_id=branch_ids, object_id=object_id),])
     else:
         raise TypeError('branch id not processed')
     _ = fengine(
@@ -262,6 +262,24 @@ def engine(stream_id, *, branch_id=None,
         )
     _()
     _ = _.db._store
+
+    if out_selections:
+        from pyoxigraph import Store, Quad
+        s = Store()
+        if isinstance(out_selections, str):
+            out_selections = (out_selections,)
+        else:
+            assert(isinstance(out_selections, (tuple, list, set, frozenset)) )
+
+        from .utils.queries import queries
+        for q in out_selections:
+            q = getattr(queries.rules, q)
+            q = _.query(q)
+            q = tuple(q) # why do i have to do this?!
+            if q: s.bulk_extend(Quad(*t) for t in q)
+            del q
+        _ = s; del s
+
     out = Path(out)
     if split_out:
         out = Path('/'.join((out).parts[:-1] + (out.stem,)))
