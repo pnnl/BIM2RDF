@@ -229,12 +229,13 @@ def fengine(*, validation=True, rules=rules) -> 'Engine':
 
 
 from pathlib import Path
-def engine(stream_id, *, branch_id=None, object_id=None,
+def engine(stream_id, *, branch_id=None,
            maps_dir: Path | None = maps_dir,
            geometry=True,
            inference=True,
            validation=True,
            out=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
+    object_id=None
     # data/config for args
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
