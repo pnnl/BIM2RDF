@@ -227,6 +227,10 @@ def fengine(*, validation=True, rules=rules) -> 'Engine':
     return _
 
 
+allowed_branches = {
+    'architecture', 'electrical', 'mechanical', 'plumbing',
+}
+
 from pathlib import Path
 def engine(stream_id, *, branch_ids=None,
            maps_dir: Path | None = maps_dir,
@@ -243,7 +247,7 @@ def engine(stream_id, *, branch_ids=None,
     # parsing of branch_id is relegated to 
     if branch_ids is None:
         # figuring this is the default mode of working from now.
-        data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id) ])
+        data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id) if sg.branch_id.split('/')[0].lower() in allowed_branches ])
     elif isinstance(branch_ids, (list, tuple)):
         data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id, branch_ids)])
     elif isinstance(branch_ids, str):
