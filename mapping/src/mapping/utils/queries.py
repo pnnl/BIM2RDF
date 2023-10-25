@@ -224,12 +224,12 @@ class queries:
         _ = _ + f"""
         select  {fn.var} {rm.var} {vl.var} {rp.var} {sv.var} {ss.var} where {{
         {vr.var} a {vr}.
-        {vr.var} {fn} {fn.var}.
-        {vr.var} {rm} {rm.var}.
-        {vr.var} {vl} {vl.var}.
-        {vr.var} {rp} {rp.var}.
-        {vr.var} {sv} {sv.var}.
-        {vr.var} {ss} {ss.var}.
+        optional {{{vr.var} {fn} {fn.var}}}.
+        optional {{{vr.var} {rm} {rm.var}}}.
+        optional {{{vr.var} {vl} {vl.var}}}.
+        optional {{{vr.var} {rp} {rp.var}}}.
+        optional {{{vr.var} {sv} {sv.var}}}.
+        optional {{{vr.var} {ss} {ss.var}}}.
         }}
         """
         return _    
