@@ -292,9 +292,6 @@ def rgontology(): # rdflib graph ontology
 
 def pyshacl_rules(db: OxiGraph) -> Triples:
     from validation.shacl import shacl
-    #def shacl(
-    #data, shacl=None, ontology=None,
-    #advanced=False):
     from .utils.queries import namespaces
     _ = db._store
     _ = get_applicable(_)
