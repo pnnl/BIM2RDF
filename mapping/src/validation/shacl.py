@@ -40,7 +40,9 @@ def graph_diff(data, generated):
 
 def shacl(
     data, namespaces=(), shacl=None, ontology=None,
-    advanced=False, iterate_rules=False, logger=None):
+    advanced=False, iterate_rules=False,
+    # logger=None doesn't work.
+    ):
     #    self,
     #     data_graph: GraphLike,
     #     *args,
@@ -55,7 +57,7 @@ def shacl(
             data,
             shacl_graph=addnss(graph(shacl))   if shacl    else None,
             ont_graph=addnss(graph(ontology))   if ontology else None,
-            options={'advanced': advanced, 'iterate_rules': iterate_rules, 'logger':logger}
+            options={'advanced': advanced, 'iterate_rules': iterate_rules,}# 'logger':logger}
             )
     from types import SimpleNamespace as NS
     validation = v.run() # (not nonconform), report:graph, text
