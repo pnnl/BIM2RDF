@@ -4,7 +4,8 @@ PREFIX spkl: <http://speckle.systems/>
 
 
 CONSTRUCT { 
-?z s223:contains ?ds. 
+?z  s223:contains        ?ds. 
+?z  s223:hasDomainSpace  ?ds.
 } 
 WHERE { 
 ?z a s223:Zone.

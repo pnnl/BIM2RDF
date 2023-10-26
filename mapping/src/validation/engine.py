@@ -66,6 +66,7 @@ class Engine(_Engine):
         else:
             assert(conforms == 'false' )
             conforms = False
+        logger.info(f"conforms: {conforms}")
         assert(isinstance(conforms, bool))
         return Result(_, conforms)
     

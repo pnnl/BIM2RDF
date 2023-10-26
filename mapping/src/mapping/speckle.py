@@ -104,7 +104,7 @@ class SpeckleGetter(PyRule):
 
 
 from .cache import get_cache
-@get_cache('speckle')
+@get_cache('speckle', maxsize=100)
 def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     # stream_id is not a name here so caching is fine.
     from speckle.graphql import queries
@@ -119,9 +119,9 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     _ = get_data(d)
     return _
 
-
+from datetime import timedelta
 from .cache import get_cache
-@get_cache('specklemeta') # TODO: expire meta
+@get_cache('specklemeta', type='TTLCache', maxsize=1, ttl=timedelta(hours=1).seconds, ) # 
 def query_speckle_meta():  
     from speckle.graphql import queries
     _ = queries()

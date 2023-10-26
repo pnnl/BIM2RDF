@@ -2,15 +2,16 @@ PREFIX meta: <http://meta>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX spkl: <http://speckle.systems/>
-PREFIX spklx: <http://speckle.systems/ext/> 
+
 
 
 CONSTRUCT { 
-?this a s223:Zone.
-    ?this rdfs:label ?zn. # as it's a name 
+?this   a                 s223:Zone.
+?this   s223:hasDomain    s223:EM-Light.
+?this   rdfs:label        ?zn. # as it's a name
 } 
 WHERE { 
 <<?s spkl:category  "Spaces">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
-?s spkl:zoneName ?zn.
-bind( iri(concat( str(spklx:), "zone/", encode_for_uri(?zn) )) AS ?this). 
+?s      spkl:zoneName ?zn.
+bind(bnode(?zn) as ?this)
 }

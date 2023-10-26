@@ -7,13 +7,13 @@ def get_dir():
     return dir
 
 
-def get_cache(name, *, dev=True, key=None, type='LFUCache', maxsize=1_000_000, **k):
+def get_cache(name, *p, dev=True, key=None, type='LRUCache', **k):
     if dev:
         fp = get_dir() / name
         from shelved_cache import PersistentCache
         import cachetools
         _ = getattr(cachetools, type)
-        _ = PersistentCache(_, filename=fp, maxsize=maxsize, **k)
+        _ = PersistentCache(_, fp, *p, **k)
         if not key:
             _ = cachetools.cached(_)
         else:
