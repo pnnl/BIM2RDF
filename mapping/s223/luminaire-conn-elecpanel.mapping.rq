@@ -2,12 +2,13 @@ PREFIX s223: <http://data.ashrae.org/standard223#>
 
 
 CONSTRUCT { 
-    ?b      s223:connectedThrough   _:conn.
-    _:conn      a                       s223:ElectricWire.
-    _:conn  s223:connectsTo         ?l.
+    ?b      s223:connectedThrough   ?conn.
+    ?conn      a                       s223:ElectricWire.
+    ?conn  s223:connectsTo         ?l.
 } 
 WHERE { 
     ?b s223:connectedTo ?l.
     ?b a s223:ElectricBreaker.
     ?l a s223:Luminaire.
+    BIND( IRI(CONCAT("http://specklex/",str(?b))) as ?conn)
 }
