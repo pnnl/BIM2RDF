@@ -30,6 +30,14 @@ def addnss(g, namespaces=()):
     for p,n in namespaces: g.bind(p, n)
     return g
 
+
+def graph_diff(data, generated):
+    from collections import namedtuple
+    GraphDiff = namedtuple('GraphDiff', ['in_both', 'in_data', 'in_generated'])
+    from rdflib.compare import graph_diff as _graph_diff
+    return GraphDiff(*_graph_diff(data, generated))
+
+
 def shacl(
     data, namespaces=(), shacl=None, ontology=None,
     advanced=False, iterate_rules=False, logger=None):
@@ -55,11 +63,6 @@ def shacl(
         conforms=   validation[0],
         report=     validation[1],
         text=       validation[2])
-    from collections import namedtuple
-    def graph_diff(data, generated):
-        GraphDiff = namedtuple('GraphDiff', ['in_both', 'in_data', 'in_generated'])
-        from rdflib.compare import graph_diff as _graph_diff
-        return GraphDiff(*_graph_diff(data, generated))
     gd = graph_diff(data, v.target_graph).in_generated
     # clean the generated data, v.target_graph, after this
     return NS(

@@ -290,14 +290,33 @@ def rgontology(): # rdflib graph ontology
     return g
 
 
+from functools import lru_cache
+@lru_cache(1)
+def shape_graph():
+    from pyshacl.shapes_graph import ShapesGraph
+    _ = rgontology()
+    #_ = _.skolemize()
+    _ = ShapesGraph(_)
+    _.shapes # finds rules. otherwise gather_rules errors
+    return _
+
+
 def pyshacl_rules(db: OxiGraph) -> Triples:
-    from validation.shacl import shacl
-    from .utils.queries import namespaces
+    from validation.shacl import graph, graph_diff
+    from pyshacl.rules import apply_rules, gather_rules
+    from pyshacl.functions import gather_functions, apply_functions
+    from pyshacl.shapes_graph import ShapesGraph
+    shacl = shape_graph()
+    functions = gather_functions(shacl)
+    rules =  gather_rules(shacl, iterate_rules=True)
     _ = db._store
     _ = get_applicable(_)
     _ = og2rg(_)
-    _ = shacl(_, namespaces=namespaces(), shacl=rgontology(), advanced=True, iterate_rules=True )
-    _ = _.generated
+    before = graph(_)
+    after = graph(_)
+    apply_functions(functions, after)
+    apply_rules(rules, after, iterate=True)
+    _ = graph_diff(before, after).in_generated
     _ = rg2og(_)
     _ = Triples(q.triple for q in _)
     return _
