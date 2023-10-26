@@ -12,4 +12,5 @@ WHERE {
     ?b s223:connectedTo ?l.
     ?b a s223:ElectricBreaker.
     ?l a s223:Luminaire.
+    BIND( IRI(CONCAT("http://specklex/",str(?b))) as ?conn)
 }
