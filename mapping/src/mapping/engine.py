@@ -297,10 +297,9 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     _ = get_applicable(_)
     _ = og2rg(_)
     _ = shacl(_, namespaces=namespaces(), shacl=rgontology(), advanced=True, iterate_rules=True )
-    _ = _.data
+    _ = _.generated
     _ = rg2og(_)
     _ = Triples(q.triple for q in _)
     return _
-
 
 

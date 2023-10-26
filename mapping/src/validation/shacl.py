@@ -21,14 +21,18 @@ def graph(g, mem=True) -> FGraph:
     if mem:
         # do your horrible mess in memory
         _ = FGraph() # but make it fixable
-        for d in g: _.add(d)
+        for d in g: _.add(d) # (copying to memory)
         g = _
     return g
 
 
+def addnss(g, namespaces=()):
+    for p,n in namespaces: g.bind(p, n)
+    return g
+
 def shacl(
     data, namespaces=(), shacl=None, ontology=None,
-    advanced=False, iterate_rules=False):
+    advanced=False, iterate_rules=False, logger=None):
     #    self,
     #     data_graph: GraphLike,
     #     *args,
@@ -36,17 +40,14 @@ def shacl(
     #     ont_graph: Optional[GraphLike] = None,
     #     options: Optional[dict] = None,
     #     **kwargs,
-    def addnss(g):
-        for p,n in namespaces: g.bind(p, n)
-        return g
 
     from pyshacl.validate import Validator as _Validator
     data = addnss(graph(data))
     v = _Validator(
             data,
-            shacl_graph=addnss(graph(shacl,))   if shacl    else None,
+            shacl_graph=addnss(graph(shacl))   if shacl    else None,
             ont_graph=addnss(graph(ontology))   if ontology else None,
-            options={'advanced': advanced, 'iterate_rules': iterate_rules}
+            options={'advanced': advanced, 'iterate_rules': iterate_rules, 'logger':logger}
             )
     from types import SimpleNamespace as NS
     validation = v.run() # (not nonconform), report:graph, text
@@ -54,17 +55,15 @@ def shacl(
         conforms=   validation[0],
         report=     validation[1],
         text=       validation[2])
-    return NS(validation=validation, data=data)
-    # just let the db handle the diff.
-    from rdflib.compare import graph_diff as _graph_diff
     from collections import namedtuple
-    GraphDiff = namedtuple('GraphDiff', ['in_both', 'in_data', 'in_generated'])
     def graph_diff(data, generated):
+        GraphDiff = namedtuple('GraphDiff', ['in_both', 'in_data', 'in_generated'])
+        from rdflib.compare import graph_diff as _graph_diff
         return GraphDiff(*_graph_diff(data, generated))
+    gd = graph_diff(data, v.target_graph).in_generated
     # clean the generated data, v.target_graph, after this
     return NS(
         validation=validation,
-        #data=v.target_graph,
-        generated=(graph_diff(data, v.target_graph).in_generated)
+        generated=gd,
     )
 
