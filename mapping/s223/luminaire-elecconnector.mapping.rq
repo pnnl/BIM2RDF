@@ -1,4 +1,3 @@
-#?cid  spkl:connectedConnectorIds/rdf:rest*/rdf:first ?ccid. 
 PREFIX meta: <http://meta>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX s223: <http://data.ashrae.org/standard223#>
@@ -6,11 +5,13 @@ PREFIX spkl: <http://speckle.systems/>
 
 
 CONSTRUCT { 
-# input
   ?this s223:hasConnectionPoint ?conn.
   ?conn  a s223:InletConnectionPoint.
-  ?conn s223:hasMedium s223:Medium-Electricity. #later we can add the value of voltage  TODO 
-} 
+  #_:myelectricity a s223:Medium-Electricity. works
+  #?conn s223:hasMedium _:myelectricity.
+  #?conn s223:hasMedium s223:Medium-Electricity. complaint
+  ?conn s223:hasMedium s223:AC-120VLN-1Ph-60Hz. # TODO: map this value
+}
 WHERE { 
 #<<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
     #?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types'
@@ -22,5 +23,5 @@ WHERE {
     # b/c one export has 'Connection' info.
     ?this spkl:elementId ?eid.
     ?thisconn spkl:elementId ?eid.
-    ?thisconn spkl:Connectors/rdf:rest*/rdf:first ?conn. 
+    ?thisconn spkl:Connectors/rdf:rest*/rdf:first ?conn.
 }
