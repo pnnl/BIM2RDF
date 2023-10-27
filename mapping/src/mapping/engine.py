@@ -11,6 +11,70 @@ from engine.triples import (
         Engine, OxiGraph)
 
 
+meta_prefix = 'http://mmeta'
+
+def namespaces():
+    from ontologies import namespace
+    from rdflib import URIRef
+    return (
+        namespace('mmeta', URIRef(meta_prefix)),
+    )
+
+class ConstructRule(_ConstructRule):
+
+    def __init__(self, path) -> None:
+        from pathlib import Path
+        path = Path(path).absolute()
+        self.path = path
+        # for the mapping case, we're starting from the file
+        spec = open(path).read()
+        super().__init__(spec)
+    
+    @property
+    def name(self):
+        from project import root
+        _ = self.path.relative_to(root).as_posix()
+        return _
+    
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.name})"
+
+    def meta(self, data: Triples) -> Triples:
+        yield from super().meta(data)
+        from pyoxigraph import NamedNode, Triple, Literal
+        p = meta_prefix
+        fp = self.path.parts[-2:] # get the file plus its parent dir
+        fp = '/'.join(fp)
+        yield from Triples([Triple(
+                # TODO: add a name here to be like the pyrule
+                #        watch that the fn is unique enough
+                NamedNode(f'{p}/constructquery'),
+                NamedNode(f'{p}/constructquery#name'),
+                Literal(str(self.name))
+                     )])
+
+class PyRule(_PyRule):
+
+    def meta(self, data: Triples) -> Triples:
+        yield from super().meta(data)
+        from pyoxigraph import NamedNode, Triple, Literal
+        p = meta_prefix
+        yield from Triples([
+            Triple(NamedNode(f'{p}/python#function'),
+                NamedNode(f'{p}/python#name'),
+                Literal(( self.name )),)
+        ])
+
+
+from .graphfix import Graph
+
+
+import logging 
+logger = logging.getLogger('mapping_engine')
+
+
+
+
 #https://github.com/RDFLib/OWL-RL/issues/53
 # really want to sparql  this. TODO
 # def rules(self, t, cycle_num):
@@ -74,66 +138,6 @@ from engine.triples import (
 from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Semantics, OWLRL_Semantics
 #from owlrl.CombinedClosure import RDFS_Semantics as Semantics
 
-meta_prefix = 'http://mmeta'
-
-def namespaces():
-    from ontologies import namespace
-    from rdflib import URIRef
-    return (
-        namespace('mmeta', URIRef(meta_prefix)),
-    )
-
-class ConstructRule(_ConstructRule):
-
-    def __init__(self, path) -> None:
-        from pathlib import Path
-        path = Path(path).absolute()
-        self.path = path
-        # for the mapping case, we're starting from the file
-        spec = open(path).read()
-        super().__init__(spec)
-    
-    @property
-    def name(self):
-        from project import root
-        _ = self.path.relative_to(root).as_posix()
-        return _
-    
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.name})"
-
-    def meta(self, data: Triples) -> Triples:
-        yield from super().meta(data)
-        from pyoxigraph import NamedNode, Triple, Literal
-        p = meta_prefix
-        fp = self.path.parts[-2:] # get the file plus its parent dir
-        fp = '/'.join(fp)
-        yield from Triples([Triple(
-                # TODO: add a name here to be like the pyrule
-                #        watch that the fn is unique enough
-                NamedNode(f'{p}/constructquery'),
-                NamedNode(f'{p}/constructquery#name'),
-                Literal(str(self.name))
-                     )])
-
-class PyRule(_PyRule):
-
-    def meta(self, data: Triples) -> Triples:
-        yield from super().meta(data)
-        from pyoxigraph import NamedNode, Triple, Literal
-        p = meta_prefix
-        yield from Triples([
-            Triple(NamedNode(f'{p}/python#function'),
-                NamedNode(f'{p}/python#name'),
-                Literal(( self.name )),)
-        ])
-
-
-from .graphfix import Graph
-
-
-import logging 
-logger = logging.getLogger('mapping_engine')
 
 def closure(self):
     """
@@ -212,7 +216,6 @@ def closure(self):
 Semantics.closure = closure
 
 
-from .conversions import og2rg, rg2og
 
 
 def rdflib_semantics(db: OxiGraph) -> Triples:
@@ -222,6 +225,7 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
         queries.rules.mapped,
         #queries.rules.rdfs_inferred,
         queries.rules.shacl_inferred) )
+    from .conversions import og2rg
     g1 = og2rg(_) 
     g2 = Graph()
     for t in g1: g2.add(t) # copy to get the above 'features'
@@ -320,6 +324,7 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
         queries.rules.rdfs_inferred,
         ))
         #queries.rules.shacl_inferred) 
+    from .conversions import og2rg, rg2og
     _ = og2rg(_)
     before = graph(_)
     after = graph(_)
