@@ -216,7 +216,12 @@ from .conversions import og2rg, rg2og
 
 
 def rdflib_semantics(db: OxiGraph) -> Triples:
-    _ = get_applicable(db._store)
+    _ = db._store
+    from .utils.queries import queries
+    _ = select(_, (
+        queries.rules.mapped,
+        #queries.rules.rdfs_inferred,
+        queries.rules.shacl_inferred) )
     g1 = og2rg(_) 
     g2 = Graph()
     for t in g1: g2.add(t) # copy to get the above 'features'
@@ -268,13 +273,13 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
 
 
 from pyoxigraph import Store
-def get_applicable(store: Store) -> Store:
-    _ = store
-    from .utils.queries import queries
-    _ = _.query(queries.rules.mapped)
+def select(store: Store, construct_queries) -> Store:
+    queries = construct_queries
+    _ = []
+    for q in queries:
+        _.extend(store.query( q  ))
     s = Store()
     from pyoxigraph import Quad
-    _ = tuple(_) # got an error if empty!
     if len(_): s.bulk_extend(Quad(*t) for t in _)
     return s
 
@@ -305,12 +310,16 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     from validation.shacl import graph, graph_diff
     from pyshacl.rules import apply_rules, gather_rules
     from pyshacl.functions import gather_functions, apply_functions
-    from pyshacl.shapes_graph import ShapesGraph
-    shacl = shape_graph()
+    shacl = shape_graph() #queries.rules.ontology,
     functions = gather_functions(shacl)
     rules =  gather_rules(shacl, iterate_rules=True)
     _ = db._store
-    _ = get_applicable(_)
+    from .utils.queries import queries
+    _ = select(_, (
+        queries.rules.mapped,
+        queries.rules.rdfs_inferred,
+        ))
+        #queries.rules.shacl_inferred) 
     _ = og2rg(_)
     before = graph(_)
     after = graph(_)
@@ -320,5 +329,4 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     _ = rg2og(_)
     _ = Triples(q.triple for q in _)
     return _
-
 
