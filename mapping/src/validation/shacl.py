@@ -50,13 +50,16 @@ def shacl(
     #     ont_graph: Optional[GraphLike] = None,
     #     options: Optional[dict] = None,
     #     **kwargs,
-
-    from pyshacl.validate import Validator as _Validator
-    data = addnss(graph(data))
-    v = _Validator(
+    def mg(g):
+        g = graph(g)
+        g = addnss(g, namespaces=namespaces)
+        return g
+    data = mg(data)
+    from pyshacl.validate import Validator
+    v = Validator(
             data,
-            shacl_graph=addnss(graph(shacl))   if shacl    else None,
-            ont_graph=addnss(graph(ontology))   if ontology else None,
+            shacl_graph=mg(shacl)       if shacl    else None,
+            ont_graph=  mg(ontology)    if ontology else None,
             options={'advanced': advanced, 'iterate_rules': iterate_rules,}# 'logger':logger}
             )
     from types import SimpleNamespace as NS
