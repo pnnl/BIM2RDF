@@ -45,7 +45,7 @@ def batched(iterable, n):
         yield batch
 
 
-def split_triples(triples, chunk_size=1000, odir='out'):
+def split_triples(triples, chunk_size=500_000, odir='out'):
     from pathlib import Path
     odir = Path(odir)
     if not odir.exists() or odir.is_file():
@@ -76,6 +76,12 @@ def combine_ttls(dir: Path, out=Path('out.ttl')):
 
 if __name__ == '__main__':
     from fire import Fire
+    def split_triples_(triples: Path, chunk_size=500_000, odir='out'):
+        # adding this layer to better interpret cmd line args...
+        # ...b/c triples arg gets interpreted as bytes.
+        triples = Path(triples)
+        return split_triples(triples, chunk_size=chunk_size, odir=odir)
+
     Fire({
        f.__name__:f
-       for f in (combine_ttls, split_triples)})
+       for f in (combine_ttls, split_triples_)})
