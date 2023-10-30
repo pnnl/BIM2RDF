@@ -2,10 +2,64 @@
 
 ```{python}
 from project import root
-q = open('query.rq' ).read() # need to trivially change this cell so it executes.
+q = """
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX meta: <http://meta>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+select ?this ?name  where {
+<<?this spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+?this spkl:name ?name.
+}
+"""
+q = """
+# see query in  geometry.py 
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+
+
+#CONSTRUCT { 
+ #   ?this a s223:Luminaire.
+    #?this rdfs:label ?number .
+#} 
+select ?this 
+WHERE { 
+    # keep this mapping 'pure' to arch. elec stuff somewhere else.
+    <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
+    ?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types'
+    #?this spkl:elementId ?number.
+}
+"""
+q = """
+PREFIX geom: <http://mapping/geo#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+
+
+#CONSTRUCT { 
+#?o1 s223:hasPhysicalLocation ?o2. 
+#} 
+select ?o2n ?f ?o1n
+#select (count(*) as ?o1 )
+WHERE { 
+?o1 geom:fracInside [
+    ?o2  ?f].
+# keep this direct. but interesting that, after inference,
+# this could be o1 Equipment, and o2 PhysicalSpace
+?o1 spkl:category "Lighting Fixtures".
+?o1 spkl:elementId ?o1n.
+?o2 spkl:category  "Rooms".
+?o2 spkl:number ?o2n.
+#filter(?f > .9)  # ...maybe a part of it is inside the ceiling?
+}
+order by ?o2n
+"""
+#q = open('query.rq' ).read() # need to trivially change this cell so it executes.
 # is there a quarto feature that makes this cell always execute?
 ```
-
 
 
 ```{python}
@@ -49,6 +103,11 @@ def test(query: Path|str, dir: Path=None, ttl: Path=None, ):
             columns=columns)
     return _
 
-test(q, ttl='../work/out.ttl')
+import pandas as pd
+pd.set_option('display.max_colwidth', None)
+pd.set_option('display.max_rows', 500)
+test(q,
+#ttl='../work/proto-medoffice.ttl',
+dir='../work/proto-medoffice')
 ```
 
