@@ -572,7 +572,8 @@ from .engine import OxiGraph, Triples
 def overlap(db: OxiGraph) -> Triples:
     #import heartrate; heartrate.trace(browser=True)
     branch = 'architecture/rooms and lighting fixtures'
-    for c in compare(db._store, 'Lighting Fixtures', 'Rooms', branch, branch, analysis='fracInside'):
-        yield from c.triples()
-    for c in compare(db._store, 'Lighting Fixtures', 'Spaces', branch, branch, analysis='fracInside'):
-      yield from c.triples()
+    from itertools import product
+    combos = product({'Lighting Fixtures', 'Lighting Devices'}, {'Rooms', 'Spaces'}, {branch}  )
+    for o1s, o2s, b in combos:
+        for c in compare(db._store, o1s, o2s, b, b, analysis='fracInside'):
+            yield from c.triples()
