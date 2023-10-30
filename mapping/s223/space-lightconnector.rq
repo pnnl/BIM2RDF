@@ -8,5 +8,5 @@ CONSTRUCT {
 }
 WHERE {
     ?this a s223:DomainSpace.
-    ?this s223:hasDomain s223:Domain-Lighting.
+    ?this s223:hasDomain s223:Light-Visible.
 }
