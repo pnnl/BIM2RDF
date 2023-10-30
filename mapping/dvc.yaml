@@ -2,6 +2,8 @@ stages:
 # or just have it as a manual cmd?
 # use foreach? param sweep discussion https://github.com/iterative/dvc/pull/8187
 
+# maybe delete cache for "production run"
+
   map:
     cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=${building}
     wdir: work

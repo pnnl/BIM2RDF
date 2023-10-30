@@ -1,0 +1,13 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT { 
+?o1 a s223:OccupancySensor. # TODO: there are specific types
+?o1 rdfs:label ?f.
+} 
+WHERE { 
+?o1 spkl:category "Lighting Devices".
+?o1 spkl:definition/spkl:family ?f.
+filter(contains(lcase(?f), "occupancy"))
+}
