@@ -119,9 +119,13 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     _ = get_data(d)
     return _
 
-from datetime import timedelta
-from .cache import get_cache
-@get_cache('specklemeta', type='TTLCache', maxsize=1, ttl=timedelta(hours=1).seconds, ) # 
+# from datetime import timedelta, datetime
+# from .cache import get_cache
+# def my_ttu(_key, value, now):
+#     # assume value.ttl contains the item's time-to-live in hours
+#     return now + timedelta(hours=value.ttl)
+# @get_cache('specklemeta', type='TLRUCache', maxsize=1, ttu=my_ttu, timer=datetime.now ) #
+# IDK TODO:
 def query_speckle_meta():  
     from speckle.graphql import queries
     _ = queries()

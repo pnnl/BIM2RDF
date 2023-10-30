@@ -3,34 +3,35 @@ from engine.triples import (
         Triples,
         OxiGraph)
 
-from .shacl import shacl
-from mapping.conversions import og2rg, rg2og
-from ontologies import get
-
-
-from functools import lru_cache
-@lru_cache(1)
-def ontology():
-    _ = get('s223')
-    from rdflib import Graph
-    g = Graph()
-    g.parse(_)
-    return g
 
 
 def _shacl_validation(db: OxiGraph):
-    from mapping.engine import get_applicable
-    _ = get_applicable(db._store)
+    _ = db._store
+    from mapping.engine import select
+    from mapping.utils.queries import queries
+    _ = select(_,
+            (queries.rules.mapped,
+             queries.rules.shacl_inferred,
+             queries.rules.rdfs_inferred,))
+    from mapping.conversions import og2rg
     _ = og2rg(_)
-    o = ontology()
+    from ontologies.collect import collect
+    o = collect(
+            {'validation/',
+            '~validation/schema', # this is ontology 'self' validation. don't need this.
+            'models/',
+            'vocab/' # 
+            }  )
+    from .shacl import shacl
     _ = shacl(_, namespaces=o.namespaces(), shacl=o,
-              ontology=None, advanced=False, )
+              ontology=o, advanced=False, )
     return _
 
 
 def shacl_validation(db: OxiGraph,) -> Triples:
     _ = _shacl_validation(db)
     _ = _.validation.report
+    from mapping.conversions import rg2og
     _ = rg2og(_)
     _ = Triples((q.triple for q in _))
     return _

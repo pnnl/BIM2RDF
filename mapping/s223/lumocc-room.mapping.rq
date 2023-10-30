@@ -1,0 +1,18 @@
+PREFIX geom: <http://mapping/geo#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+
+
+CONSTRUCT { 
+?o1 s223:hasPhysicalLocation ?o2. 
+} 
+WHERE { 
+?o1 geom:fracInside [
+    ?o2  ?f].
+# keep this direct. but interesting that, after inference,
+# this could be o1 Equipment, and o2 PhysicalSpace
+?o1 spkl:category "Lighting Devices".
+?o2 spkl:category  "Rooms".
+filter(?f > .9)  # ...maybe a part of it is inside the ceiling? 
+}
+
