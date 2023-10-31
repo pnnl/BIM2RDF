@@ -90,20 +90,29 @@ def geo_branch_selector(branch=None):
 
 from typing import Literal
 def listsp_selector(subject: str,
-                   cat_to_list: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'], ) -> str:
+        cat_to_list: (Literal['vertices'] | Literal['transform'] | Literal['faces'] |
+                      Literal['definition/vertices'],
+                      Literal['definition/faces']
+                      ) ) -> str:
     #                                    could still add faces here TODO
     # when encountering a list
     # /path/to/list/rdf:rest*/rdf:first ?item.
     s = subject
     #                 displayValue -->   List -->         Vertices -->     List -->      base64data --> str
-    _to_list = 'spkl:displayValue/rdf:rest*/rdf:first/spkl:vertices/rdf:rest*/rdf:first ?vl.' # spkl:data
+    _to_list = lambda p: f'spkl:displayValue/rdf:rest*/rdf:first/spkl:{p}/rdf:rest*/rdf:first ?vl.' # spkl:data
     if 'vertices' == cat_to_list:
-        to_list = f"{s} " +  _to_list
+        to_list = f"{s} " +  _to_list('vertices')
+        p = 'spkl:data'
+    elif 'faces' == cat_to_list:
+        to_list = f"{s} " +  _to_list('faces')
         p = 'spkl:data'
     elif cat_to_list == 'definition/vertices':
         # if has transform, then need to go through def
     #if (cat == 'Lighting Fixtures') and (cat_to_list == 'vertices'):
-        to_list = f"{s} spkl:definition/"+_to_list
+        to_list = f"{s} spkl:definition/"+_to_list('vertices')
+        p = 'spkl:data'
+    elif cat_to_list == 'definition/faces':
+        to_list = f"{s} spkl:definition/"+_to_list('faces')
         p = 'spkl:data'
     else:
         assert(cat_to_list == 'transform')
@@ -137,7 +146,11 @@ def geoq(subjects: str|tuple, list_selector, graph=None, ) -> query:  # add to g
     return _
 
 def get_geom_ptrs(store,
-        subjects, lst2arr: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'],
+        subjects,
+        lst2arr: (Literal['vertices'] | Literal['transform'] | Literal['faces'] |
+                      Literal['definition/vertices'],
+                      Literal['definition/faces']
+                      ),
         graph=None):
     _ = (
         subjects,
@@ -164,7 +177,11 @@ def get_lists_from_ptrs(store, ptrs, path):
     return _
 
 def geometry_getter(store,
-        subjects: tuple, lst2arr: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'],
+        subjects: tuple,
+        lst2arr: (Literal['vertices'] | Literal['transform'] | Literal['faces'] |
+                      Literal['definition/vertices'],
+                      Literal['definition/faces']
+                      ),
          graph=None):
     # multiple subjects: means array data can be retrieved and held at once.
     # data storage: subject --> array ptr --> array
@@ -190,6 +207,7 @@ def geometry_getter(store,
     
     def mk_array(ls, lst2arr=lst2arr):
         if   'vertices' in lst2arr:     shape = (-1, 3)
+        elif 'faces'    in lst2arr:     shape = (-1,1)  # nothing
         elif lst2arr == 'transform':    shape = ( 4, 4)
         else:                           #shape = (-1,) # nothing. makes no sense to keep going
             raise ValueError(f"converting {lst2arr} list to array not defined")
@@ -294,7 +312,6 @@ class Definition:
         return _
 
     #def translate(self, object):
-        
 
 
 objects_cache = {}
@@ -411,6 +428,13 @@ class Object:
             return self.get_geometry(self.store, 'vertices', )
         
         raise Exception('really should return vertices')
+    
+    @property
+    def faces(self):
+        if self.definition:
+            return self.get_geometry(self.store, 'definition/faces')
+        elif self.has('displayValue'):
+            return self.get_geometry(self.store, 'faces')
 
     @staticmethod
     def calc_volume_pts(vertices, hull, n = 100, xn=3, seed=123):
@@ -573,7 +597,7 @@ def overlap(db: OxiGraph) -> Triples:
     #import heartrate; heartrate.trace(browser=True)
     branch = 'architecture/rooms and lighting fixtures'
     from itertools import product
-    combos = product({'Lighting Fixtures', 'Lighting Devices'}, {'Rooms', 'Spaces'}, {branch}  )
+    combos = product({'Lighting Fixtures', }, {'Rooms', 'Spaces'}, {branch}  )
     for o1s, o2s, b in combos:
         for c in compare(db._store, o1s, o2s, b, b, analysis='fracInside'):
             yield from c.triples()
