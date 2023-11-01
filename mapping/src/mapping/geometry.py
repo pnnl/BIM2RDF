@@ -88,12 +88,7 @@ def geo_branch_selector(branch=None):
     return _
 
 
-from typing import Literal
-def listsp_selector(subject: str,
-        cat_to_list: (
-            Literal['vertices'] | Literal['definition/vertices'] 
-            | Literal['faces'] | Literal['definition/faces']
-            | Literal['transform'] ) ):
+def list_selector_lines():
     from types import SimpleNamespace as NS
     displayValue = NS(
         # subject -> displayValueS
@@ -108,33 +103,15 @@ def listsp_selector(subject: str,
         return f"{s} spkl:transform{'/spkl:matrix' if p else ''} ?l."
     return NS(displayValue=displayValue, transform=transform)
 
-    s = subject
-    #                 displayValue -->   List -->         Vertices -->     List -->      base64data --> str
-    _to_list = lambda p: f'spkl:displayValue/rdf:rest*/rdf:first/spkl:{p}/rdf:rest*/rdf:first ?vl.' # spkl:data
-    if 'vertices' == cat_to_list:
-        to_list = f"{s} " +  _to_list('vertices')
-        p = 'spkl:data'
-    elif 'faces' == cat_to_list:
-        to_list = f"{s} " +  _to_list('faces')
-        p = 'spkl:data'
-    elif cat_to_list == 'definition/vertices':
-        # if has transform, then need to go through def
-    #if (cat == 'Lighting Fixtures') and (cat_to_list == 'vertices'):
-        to_list = f"{s} spkl:definition/"+_to_list('vertices')
-        p = 'spkl:data'
-    elif cat_to_list == 'definition/faces':
-        to_list = f"{s} spkl:definition/"+_to_list('faces')
-        p = 'spkl:data'
-    else:
-        assert(cat_to_list == 'transform')
-        #                    transform ->  maxtrix ->  ?List
-        to_list = f"{s} spkl:transform ?vl." # spkl:matrix
-        p = 'spkl:matrix'
-    assert(f"{s}" in to_list)
-    from types import SimpleNamespace as NS
-    return NS(node='\n'.join([to_list]), predicate=p)
 
-def geoq(subjects: str|tuple, list_selector, graph=None, ) -> query:  # add to group, the export
+from typing import Literal
+def geoq(subjects: str|tuple,
+         list_selector: (
+            Literal['vertices'] | Literal['definition/vertices'] 
+            | Literal['faces'] | Literal['definition/faces']
+            | Literal['transform'],  ),
+        data: bool,
+         graph=None, ) -> query:  # add to group, the export
     # https://stackoverflow.com/questions/17523804/is-it-possible-to-get-the-position-of-an-element-in-an-rdf-collection-in-sparql
     # prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     # select ?element (count(?mid)-1 as ?position) where { 
@@ -149,31 +126,46 @@ def geoq(subjects: str|tuple, list_selector, graph=None, ) -> query:  # add to g
     # single object at a time to not load all geometry in one query
     # using values seems to help with performance. (using filter was too slow)
     # need branch selector if have subject?
+    if 'transform' == list_selector:
+        select = f"select distinct ?s ?l"
+        lines = list_selector_lines().transform
+        lines = (
+            lines('?s', data),
+        )
+        grouping = ''
+    else:
+        assert(('vertices' in list_selector) or ('faces' in list_selector) )
+        select = f"select distinct ?s (count(?mid)-1 as ?i ) ?l {from_graph(graph)}"
+        lines = list_selector_lines().displayValue
+        lines = (
+            lines.dvs('?s', True if 'definition' in list_selector else False),
+            lines.ctr(),
+            lines.dv(),
+            lines.l('faces' if 'faces' in list_selector else 'vertices', data) )
+        grouping = f"group by ?s ?dvl ?dv ?l \n order by ?s ?i"
     _ = f"""
     {prefixes()}
-
-    # idk why i need distinct
-    select distinct ?s ?vl  {from_graph(graph)}
+    {select}
     where {{
     values ?s {{ {' '.join(str(s) for s in subjects)} }}
-    {list_selector}
+    {' '.join(lines)}
     #{'branch_selector'} HUGE difference!!!!
     }}
+    {grouping}
     """
     _ = query(_)
     return _
 
-def get_geom_ptrs(store,
+
+def query_geometry(store,
         subjects,
-        lst2arr: (Literal['vertices'] | Literal['transform'] | Literal['faces'] |
-                      Literal['definition/vertices'],
-                      Literal['definition/faces']
-                      ),
+        list_selector: (
+            Literal['vertices'] | Literal['definition/vertices'] 
+            | Literal['faces'] | Literal['definition/faces']
+            | Literal['transform'],  ),
+        data:bool, 
         graph=None):
-    _ = (
-        subjects,
-        listsp_selector('?s', lst2arr,).node)
-    _ = geoq(*_, graph=graph)
+    _ = geoq(subjects, list_selector, data=data, graph=graph)
     _ = store.query(_) # FAST!.
     # _ = tuple(_) query returns non-evaluated iter
     return _

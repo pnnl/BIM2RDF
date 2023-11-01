@@ -1,6 +1,6 @@
 
-def query_table(store: 'oxigraphstore', query): # TODO: put in docs?
-    _ = store.query(query)
+def query_table(query_result): # TODO: put in docs?
+    _ = query_result
     import pandas as pd
     if hasattr(_, 'variables'):
         columns = [v.value for v in _.variables]
