@@ -214,11 +214,10 @@ def geometry_getter(store,
         if 'faces' in lst2arr:
             _ = (v.astype('int') for v in _)
         _ = map(lambda _: (_).reshape(*shape), _)
-        _ = tuple(_)
-        return _
-        from numpy import vstack
         _ = tuple(_) # need to pass in a 'real' sequence ..
-        _ = vstack(_) # ...bc this gives a FutureWarning
+        return _
+        #from numpy import vstack
+        _ = array(_) # ...bc this gives a FutureWarning
         return _
     
     def arrays():
@@ -228,22 +227,17 @@ def geometry_getter(store,
             for s,p in q:   ptrs[s].append(p)
         else:
             for s,i,p in q: ptrs[s].append(p)  #don't need i bc it's going in ordered
-        # a copy to get rid of dd
-        # need KeyError
-        ptrs = {k:v for k,v in ptrs.items()}
-        _ = get_lists_from_ptrs(store, tuple(p for pl in ptrs.values() for p in pl) , path )
-        lists = defaultdict(list)
-        for p,l in _: lists[p].append(l)
-        lists = {k:mk_array(s.value for s in v) for k,v in lists.items()}
-        return lists
-    return arrays()
-    
-
-    def get_array(subject, ):#ptrs=ptrs, lists=lists):
-        _ = get_lists(subject,)# ptrs=ptrs, lists=lists)
-        _ = mk_array(_)
+        #                               flattening
+        from itertools import chain
+        lps = get_lists_from_ptrs(store, tuple(chain.from_iterable(ptrs.values()) ) , path )
+        lps = [(p,l) for (p,l) in lps]
+        _ = {}
+        # subject -> arrays/lists
+        for k,ps in ptrs.items():
+            lists = [l for (p,l) in lps if p in ps]
+            _[k] = mk_array(s.value for s in lists)
         return _
-    return get_array
+    return arrays
 
 
 #@'low' level. 'higher' level is in memory
@@ -255,7 +249,7 @@ def geometry_getter(store,
 #@get_cache('geometry', key=geomkey)
 @lru_cache(maxsize=None)
 def category_geom_getter(store,
-                 cat, lst2arr: Literal['vertices'] | Literal['transform'] | Literal['definition/vertices'],
+                 cat, lst2arr: list_selection,
                  branch=None,
                  graph=None):
     os = get_objects(store, cat, branch=branch, graph=graph)
@@ -302,6 +296,8 @@ class Definition:
     def transform(self):
         # reset 'object' transform
         _ = self.obj.get_geometry(self.obj.store, 'transform', )
+        return _
+        _ = _()
         assert(_.shape == (4,4) ) # why is it 4x4 instead of 3x3?
         _ = _.copy()
         _[:3, -1] = 0 # zero the translation
@@ -309,9 +305,9 @@ class Definition:
     
     @cached_property
     def vertices(self):
-        v = self.obj.get_geometry(self.obj.store, 'definition/vertices', )
+        vs = self.obj.get_geometry(self.obj.store, 'definition/vertices', )
         t = self.transform
-        _ = self.obj.calc_vertices(v, t)
+        _ = tuple(self.obj.calc_vertices(v, t) for v in vs)
         return _
     @cached_property
     def downsampled_vertices(self):
@@ -358,12 +354,13 @@ class Object:
     def __hash__(self) -> int:
         return hash(self.uri)
     
-    def get_geometry(self, store, lst2arr):
+    def get_geometry(self, store, lst2arr: list_selection):
         from pyoxigraph import NamedNode
         s = NamedNode(self.uri)
         if self.geom_getter_type == 'single':
-            _ = geometry_getter(store, (self,), lst2arr,  )
-            _ = _(s)
+            _ = geometry_getter(store, (self,), lst2arr,)
+            _ = _()
+            _ = _[s]
             return _
         else:
             assert('category' == self.geom_getter_type)
@@ -371,7 +368,8 @@ class Object:
             _ = _.value
             _ = category_geom_getter(store, _, lst2arr, self.branch, )
             _ = _.getter
-            _ = _(s)
+            _ = _()
+            _ = _[s]
             return _
         raise NotImplementedError('how to get geometry?')
     
@@ -433,15 +431,18 @@ class Object:
     def transform(self):
         if self.definition:
             _ = self.get_geometry(self.store, 'transform', )
+            _ = _[0]
             assert(_.shape == (4,4) ) # why is it 4x4 instead of 3x3?
             return _
 
     @property #@cached_property # fast enough i'm assuming
     def vertices(self):
         if self.definition:
-            _ = self.calc_vertices(
-                    self.definition.vertices,
-                    self.transform,)
+            _ = lambda vl: self.calc_vertices(
+                            vl,
+                            self.transform,)
+            _ = map(_, self.definition.vertices)
+            _ = tuple(_)
             return _
         elif self.has('displayValue'):
             return self.get_geometry(self.store, 'vertices', )
