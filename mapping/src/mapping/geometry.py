@@ -156,13 +156,13 @@ def geoq(subjects: str|tuple,
     _ = query(_)
     return _
 
-
+list_selection = (
+    Literal['vertices'] | Literal['definition/vertices'] 
+    | Literal['faces'] | Literal['definition/faces']
+    | Literal['transform'],  )
 def query_geometry(store,
         subjects,
-        list_selector: (
-            Literal['vertices'] | Literal['definition/vertices'] 
-            | Literal['faces'] | Literal['definition/faces']
-            | Literal['transform'],  ),
+        list_selector: list_selection,
         data:bool, 
         graph=None):
     _ = geoq(subjects, list_selector, data=data, graph=graph)
@@ -186,59 +186,58 @@ def get_lists_from_ptrs(store, ptrs, path):
     _ = store.query(_)
     return _
 
+
 def geometry_getter(store,
         subjects: tuple,
-        lst2arr: (Literal['vertices'] | Literal['transform'] | Literal['faces'] |
-                      Literal['definition/vertices'],
-                      Literal['definition/faces']
-                      ),
+        list_selector: list_selection,
          graph=None):
     # multiple subjects: means array data can be retrieved and held at once.
     # data storage: subject --> array ptr --> array
     # more efficient than subject --> array bc geometries may be repeated in the definition/vertices case
-    _ = get_geom_ptrs(store, subjects, lst2arr, graph=graph)
-    from collections import defaultdict
-    ptrs = defaultdict(list)
-    for s,p in _: ptrs[s].append(p)
-    ptrs = {k:v for k,v in ptrs.items()}
-    _ = get_lists_from_ptrs(store, tuple(p for pl in ptrs.values() for p in pl) , listsp_selector('?s', lst2arr).predicate )
-    lists = defaultdict(list)
-    for p,l in _: lists[p].append(l)
-    lists = {k:v for k,v in lists.items()}
-    return lists
-    def get_lists(s,):# ptrs=ptrs, lists=lists):
-        ps = ptrs[s]
-        def _(ps):
-            for p in ps:
-                for l in lists[p]:
-                    yield l
-        _ = (l.value for l in _(ps))
-        #_ = tuple(_)
-        return _
-    
-    def mk_array(ls, lst2arr=lst2arr):
+    q = query_geometry(store, subjects, list_selector, False, graph=graph)
+    if any(w in list_selector for w in {'vertices', 'faces'}):
+        path = 'data'
+    else:
+        assert('transform' in list_selector)
+        path = 'matrix'
+    path = f"spkl:{path}"
+
+    def mk_array(ls, lst2arr=list_selector):
         if   'vertices' in lst2arr:     shape = (-1, 3)
-        elif 'faces'    in lst2arr:     shape = (-1, 1)  # nothing
+        elif 'faces'    in lst2arr:     shape = (-1,  )  # nothing
         elif lst2arr == 'transform':    shape = ( 4, 4)
         else:                           #shape = (-1,) # nothing. makes no sense to keep going
             raise ValueError(f"converting {lst2arr} list to array not defined")
         from speckle.objects import data_decode
         _ = ls; del ls
         _ = map(lambda _: data_decode(_), _)
-        def shift(ls):
-            i = 0
-            for l in ls:
-                l = l + i
-                i += len(l)
-                yield l
         if 'faces' in lst2arr:
             _ = (v.astype('int') for v in _)
-            #_ = shift(_)
         _ = map(lambda _: (_).reshape(*shape), _)
+        _ = tuple(_)
+        return _
         from numpy import vstack
         _ = tuple(_) # need to pass in a 'real' sequence ..
         _ = vstack(_) # ...bc this gives a FutureWarning
         return _
+    
+    def arrays():
+        from collections import defaultdict
+        ptrs = defaultdict(list)
+        if 'matrix' in path:
+            for s,p in q:   ptrs[s].append(p)
+        else:
+            for s,i,p in q: ptrs[s].append(p)  #don't need i bc it's going in ordered
+        # a copy to get rid of dd
+        # need KeyError
+        ptrs = {k:v for k,v in ptrs.items()}
+        _ = get_lists_from_ptrs(store, tuple(p for pl in ptrs.values() for p in pl) , path )
+        lists = defaultdict(list)
+        for p,l in _: lists[p].append(l)
+        lists = {k:mk_array(s.value for s in v) for k,v in lists.items()}
+        return lists
+    return arrays()
+    
 
     def get_array(subject, ):#ptrs=ptrs, lists=lists):
         _ = get_lists(subject,)# ptrs=ptrs, lists=lists)
