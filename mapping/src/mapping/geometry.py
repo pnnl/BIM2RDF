@@ -90,13 +90,24 @@ def geo_branch_selector(branch=None):
 
 from typing import Literal
 def listsp_selector(subject: str,
-        cat_to_list: (Literal['vertices'] | Literal['transform'] | Literal['faces'] |
-                      Literal['definition/vertices'],
-                      Literal['definition/faces']
-                      ) ) -> str:
-    #                                    could still add faces here TODO
-    # when encountering a list
-    # /path/to/list/rdf:rest*/rdf:first ?item.
+        cat_to_list: (
+            Literal['vertices'] | Literal['definition/vertices'] 
+            | Literal['faces'] | Literal['definition/faces']
+            | Literal['transform'] ) ):
+    from types import SimpleNamespace as NS
+    displayValue = NS(
+        # subject -> displayValueS
+        dvs = lambda s, d: f"{s} {'spkl:definition/' if d else ''}spkl:displayValue ?dvl.",
+        # just for counting
+        ctr = lambda : f'?dvl rdf:rest* ?mid. ?mid rdf:rest* ?_.',
+        # displayValue
+        dv = lambda : f'?_ rdf:first ?dv.',
+        # dv to the data list. p is for vertices|faces, d is for data
+        l = lambda p, d: f"?dv spkl:{p}/rdf:rest*/rdf:first{'/spkl:data' if d else ''} ?l.")
+    def transform(s, p):
+        return f"{s} spkl:transform{'/spkl:matrix' if p else ''} ?l."
+    return NS(displayValue=displayValue, transform=transform)
+
     s = subject
     #                 displayValue -->   List -->         Vertices -->     List -->      base64data --> str
     _to_list = lambda p: f'spkl:displayValue/rdf:rest*/rdf:first/spkl:{p}/rdf:rest*/rdf:first ?vl.' # spkl:data
@@ -124,6 +135,13 @@ def listsp_selector(subject: str,
     return NS(node='\n'.join([to_list]), predicate=p)
 
 def geoq(subjects: str|tuple, list_selector, graph=None, ) -> query:  # add to group, the export
+    # https://stackoverflow.com/questions/17523804/is-it-possible-to-get-the-position-of-an-element-in-an-rdf-collection-in-sparql
+    # prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    # select ?element (count(?mid)-1 as ?position) where { 
+    # [] :list/rdf:rest* ?mid . ?mid rdf:rest* ?node .
+    # ?node rdf:first ?element .
+    # }
+    # group by ?node ?element
     if isinstance(subjects, str):
         subjects = (subjects,)
     else:
@@ -195,6 +213,7 @@ def geometry_getter(store,
     lists = defaultdict(list)
     for p,l in _: lists[p].append(l)
     lists = {k:v for k,v in lists.items()}
+    return lists
     def get_lists(s,):# ptrs=ptrs, lists=lists):
         ps = ptrs[s]
         def _(ps):
@@ -207,13 +226,22 @@ def geometry_getter(store,
     
     def mk_array(ls, lst2arr=lst2arr):
         if   'vertices' in lst2arr:     shape = (-1, 3)
-        elif 'faces'    in lst2arr:     shape = (-1,1)  # nothing
+        elif 'faces'    in lst2arr:     shape = (-1, 1)  # nothing
         elif lst2arr == 'transform':    shape = ( 4, 4)
         else:                           #shape = (-1,) # nothing. makes no sense to keep going
             raise ValueError(f"converting {lst2arr} list to array not defined")
         from speckle.objects import data_decode
         _ = ls; del ls
         _ = map(lambda _: data_decode(_), _)
+        def shift(ls):
+            i = 0
+            for l in ls:
+                l = l + i
+                i += len(l)
+                yield l
+        if 'faces' in lst2arr:
+            _ = (v.astype('int') for v in _)
+            #_ = shift(_)
         _ = map(lambda _: (_).reshape(*shape), _)
         from numpy import vstack
         _ = tuple(_) # need to pass in a 'real' sequence ..
