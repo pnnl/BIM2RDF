@@ -204,7 +204,7 @@ def geometry_getter(store,
 
     def mk_array(ls, lst2arr=list_selector):
         if   'vertices' in lst2arr:     shape = (-1, 3)
-        elif 'faces'    in lst2arr:     shape = (-1,  )  # nothing
+        elif 'faces'    in lst2arr:     shape = (-1, 3)
         elif lst2arr == 'transform':    shape = ( 4, 4)
         else:                           #shape = (-1,) # nothing. makes no sense to keep going
             raise ValueError(f"converting {lst2arr} list to array not defined")
@@ -449,12 +449,32 @@ class Object:
         
         raise Exception('really should return vertices')
     
+    #@cached_property
     @property
     def faces(self):
         if self.definition:
-            return self.get_geometry(self.store, 'definition/faces')
+            fss = self.get_geometry(self.store, 'definition/faces')
         elif self.has('displayValue'):
-            return self.get_geometry(self.store, 'faces')
+            fss = self.get_geometry(self.store, 'faces')
+        # fss : (i, v->f )
+        vss = self.vertices # i, (n,3)
+        _ = {} # face->vertices
+        assert(len(fss) == len(vss))
+        for i, (fs,vs) in enumerate(zip(fss, vss)):
+            #  face, vertex
+            return fs
+            for f, iv in enumerate(fs):
+                #assert(iv in range(len(vs)) )
+                #v = vs[iv]
+                v = iv # 'ptr'
+                f = (i, f)
+                if f not in _:
+                    _[f] = [v]
+                else:
+                    _[f].append(v)
+        return _
+        _ = {k:tuple(v) for k,v in _.items()}
+        return _
 
     @staticmethod
     def calc_volume_pts(vertices, hull, n = 100, xn=3, seed=123):
