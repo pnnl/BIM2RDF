@@ -204,7 +204,7 @@ def geometry_getter(store,
 
     def mk_array(ls, lst2arr=list_selector):
         if   'vertices' in lst2arr:     shape = (-1, 3)
-        elif 'faces'    in lst2arr:     shape = (-1, 3)
+        elif 'faces'    in lst2arr:     shape = (-1, 4)
         elif lst2arr == 'transform':    shape = ( 4, 4)
         else:                           #shape = (-1,) # nothing. makes no sense to keep going
             raise ValueError(f"converting {lst2arr} list to array not defined")
@@ -457,23 +457,15 @@ class Object:
         elif self.has('displayValue'):
             fss = self.get_geometry(self.store, 'faces')
         # fss : (i, v->f )
-        vss = self.vertices # i, (n,3)
+        #vss = self.vertices # i, (n,3)
+        #assert(len(fss) == len(vss))
         _ = {} # face->vertices
-        assert(len(fss) == len(vss))
-        for i, (fs,vs) in enumerate(zip(fss, vss)):
-            #  face, vertex
-            return fs
-            for f, iv in enumerate(fs):
-                #assert(iv in range(len(vs)) )
-                #v = vs[iv]
-                v = iv # 'ptr'
+        for i, fs in enumerate(fss):
+            #  face, 3 vertices
+            for f, vis in enumerate(fs):
                 f = (i, f)
-                if f not in _:
-                    _[f] = [v]
-                else:
-                    _[f].append(v)
-        return _
-        _ = {k:tuple(v) for k,v in _.items()}
+                _[f] = vis
+                #_[f] = vss[i][vis]
         return _
 
     @staticmethod
