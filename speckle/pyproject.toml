@@ -12,7 +12,7 @@ dependencies = [
     #https://github.com/psf/requests/releases/tag/v2.30.0
     "jsonpath-ng",
     "rdflib",
-]
+    "numpy",]
 readme = "README.md"
 
 [build-system]
@@ -24,7 +24,7 @@ managed = true
 dev-dependencies = [
     "ipdb",
     "pytest","pytest-watcher", "syrupy",
-    "fire"]
+    "fire"] # the cmd only applies in the dev situation
 
 
 [tool.hatch.metadata]

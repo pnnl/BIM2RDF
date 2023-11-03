@@ -1,5 +1,5 @@
 
-class query(str): pass
+class Query(str): pass
 
 from functools import lru_cache
 @lru_cache(maxsize=None)
@@ -32,7 +32,7 @@ def has_property(store, property: str|tuple, category=None, subject=None, limit=
     }}
     limit {limit}
     """
-    _ = query(_)
+    _ = Query(_)
     _ = store.query(_)
     _ = tuple(r[0] for r in _)
     assert(len(_) in {0, 1})
@@ -69,7 +69,7 @@ def objectsq(cat, branch=None, graph=None):
         {bl}
     }}
     """ # branchName could be used here TODO
-    _ = query(_)
+    _ = Query(_)
     return _
 
 
@@ -111,7 +111,7 @@ def geoq(subjects: str|tuple,
             | Literal['faces'] | Literal['definition/faces']
             | Literal['transform'],  ),
         data: bool,
-         graph=None, ) -> query:  # add to group, the export
+         graph=None, ) -> Query:  # add to group, the export
     # https://stackoverflow.com/questions/17523804/is-it-possible-to-get-the-position-of-an-element-in-an-rdf-collection-in-sparql
     # prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     # select ?element (count(?mid)-1 as ?position) where { 
@@ -153,7 +153,7 @@ def geoq(subjects: str|tuple,
     }}
     {grouping}
     """
-    _ = query(_)
+    _ = Query(_)
     return _
 
 list_selection = (
@@ -276,30 +276,6 @@ def category_geom_getter(store,
     return _
 
 
-def in_hull(pts, hull): # -> list/array of bool
-    #https://stackoverflow.com/questions/16750618/whats-an-efficient-way-to-find-if-a-point-lies-in-the-convex-hull-of-a-point-cl/16898636#16898636
-    """
-    Test if points in `p` are in `hull`
-
-    `p` should be a `NxK` coordinates of `N` points in `K` dimensions
-    `hull` is either a scipy.spatial.Delaunay object or the `MxK` array of the 
-    coordinates of `M` points in `K`dimensions for which Delaunay triangulation
-    will be computed
-    """
-    return hull.find_simplex(pts)>=0 # test if inside
-# general checking enclosing procedure:
-# for some obj, get its vertices
-# if the obj is has transform property 
-# then the associated vertices should be transformed,
-# or, as a shortcut, just the translation pt is used.
-# (but then the translation pt should be in the enclosure).
-
-def hull(pts):
-    # TODO: concave hull
-    from scipy.spatial import Delaunay
-    return Delaunay(pts)
-
-
 from functools import cached_property
 
 class Definition:
@@ -314,11 +290,7 @@ class Definition:
         # reset 'object' transform
         _ = self.obj.get_geometry(self.obj.store, 'transform', )
         return _
-        _ = _()
-        assert(_.shape == (4,4) ) # why is it 4x4 instead of 3x3?
-        _ = _.copy()
-        _[:3, -1] = 0 # zero the translation
-        return _
+        
     
     @cached_property
     def vertices(self):
@@ -326,24 +298,6 @@ class Definition:
         t = self.transform
         _ = tuple(self.obj.calc_vertices(v, t) for v in vs)
         return _
-    @cached_property
-    def downsampled_vertices(self):
-        return self.obj.downsample(self.vertices)
-
-    
-    def get_volume_pts(self, n = 100, xn=3, seed=123):
-        return self.obj.calc_volume_pts(self.vertices, self.hull, n=n, xn=xn, seed=seed)
-    @cached_property
-    def volume_pts(self): return self.get_volume_pts()
-
-    @cached_property
-    def hull(self):
-        _ = self.downsampled_vertices
-        if _ is None: _ = self.vertices
-        _ = hull(_)
-        return _
-
-    #def translate(self, object):
 
 
 
@@ -419,15 +373,6 @@ class Object:
             cls.defs[d] = Definition(d, self)
         return cls.defs[d]
 
-    @staticmethod
-    def downsample(vertices, seed=123, toomuch=10_000):
-        _ = vertices
-        if len(_) > toomuch:
-            import numpy.random as random
-            r = random.default_rng(seed) # need a seed for deterministic,
-            r = r.integers(0, len(_), toomuch)
-            _ = _[r]
-            return _
     
     @staticmethod
     def calc_vertices(v, t):
@@ -488,158 +433,5 @@ class Object:
                 #_[f] = vss[i][vis] # to get at the data
             shift += max(vss)+1 # *sigh*        
         return _
-
-    @staticmethod
-    def calc_volume_pts(vertices, hull, n = 100, xn=3, seed=123):
-        # generate random pts in hull
-        _ = vertices
-        from numpy import array
-        bounds = array([_.min(axis=0), _.max(axis=0)]).T
-        assert(bounds.shape == (3,2))
-        import numpy.random as random
-        r = random.default_rng(seed) # need a seed for deterministic,
-        # ...otherwise process will keep generating (new) data
-        pts = (
-            r.uniform(*bounds[0], n*xn), # 
-            r.uniform(*bounds[1], n*xn),
-            r.uniform(*bounds[2], n*xn))
-        del bounds
-        pts = array(pts)
-        pts = pts.T
-        assert(pts.shape[1] == 3)
-        _ = in_hull(pts, hull)
-        _ = pts[_][:n] # filtering Trues
-        assert(_.shape[0] == n)  # very unlikely to fail. but more likely for non-boxy objects.
-        return _
     
-    def get_volume_pts(self, n = 100, xn=3, seed=123):
-        if self.definition:
-            _ = self.definition.volume_pts
-            _ = _ + self.translation
-            return _
-        else:
-            return self.calc_volume_pts(self.vertices, self.hull, n=n, xn=xn, seed=seed)
-    @cached_property
-    def volume_pts(self): return self.get_volume_pts()
-
-    @cached_property
-    def hull(self):
-        if not self.definition:
-            _ = self.downsample(self.vertices)
-            if _ is None: _ = self.vertices
-            _ = hull(_)
-            return _
-    
-    def frac_inside(self, other: 'Object', **kw) -> float:
-        if other.definition:#.hull:
-            # translate to hull
-            v = self.volume_pts - self.translation # plus or minus? i think minus bc o1.frac_inside(o1)=>1
-            _ = in_hull(v, other.definition.hull, **kw)
-        else:
-            assert(other.hull is not None)
-            _ = in_hull(self.volume_pts, other.hull)
-        _ = sum(_) / len(_)
-        return _
-    
-    @cached_property
-    def med_pt(self):
-        # a shortcut
-        if self.transform  is not None:
-           return self.transform[:,-1][:3]
-        from numpy import median
-        return median(self.vertices, axis=0)
-
-    def med_distance(self, other):
-        sp = self.med_pt
-        op = other.med_pt
-        _ = ((sp[i]-op[i])**2 for i in range(3))
-        _ = sum(_)
-        _ = _**.5
-        return _
-        
-    def __contains__(self, other: 'Object'):
-        if other.frac_inside(self) == 1: # precisely. otherwise, use frac_inside
-            return True
-        else:
-            return False
-
-
-def calc_distances(o1s, o2s):
-    for o1 in o1s:
-        for o2 in o2s:
-            yield frozenset((o1, o2)), lambda: o1.med_distance(o2)
-
-
-distances = {}
-
-from typing import Iterable
-def compare(store: 'og.Store',
-        cat1, cat2,
-        branch1, branch2,
-        analysis:Literal['fracInside']='fracInside', top=10, tol=.1 ) -> Iterable['Comparison']:
-    C = Comparison
-    from tqdm import tqdm
-    o1s = Object.get_objects(store, cat1, branch1)
-    o1s = tuple(o1s)
-    o2s = Object.get_objects(store, cat2, branch2)
-    o2s = tuple(o2s)
-    
-    ### optimization for when we're looking for the 'location' of things.
-    # can be 'smarter'
-    if analysis == 'fracInside':
-        def ddistances():
-            for p,df in calc_distances(o1s, o2s):#, pretty fast. doesnt need progress bar total=len(o1s)*len(o2s), desc='distances'):
-                if p not in distances:
-                    distances[p] = df()
-        ddistances()
-        
-    def sorter(o1, o2s):
-        if analysis == 'fracInside':
-            return sorted(o2s, key=lambda o2: distances[frozenset((o1, o2))] )[:top] # is enough
-        else:
-            raise ValueError('whats the analysis?')
-    ###
-        
-    for i, o1 in enumerate(tqdm(o1s, desc=f"{cat1}-{cat2}")):
-        for j, o2 in enumerate(sorter(o1, o2s)):
-            yield C(o1, 'distanceRank', j, o2)
-            if analysis == 'fracInside':
-                f = o1.frac_inside(o2)
-                if f>tol: yield C(o1, 'fracInside', f, o2)
-                continue
-            raise ValueError('what analysis?')
-
-# geometry above
-
-geometry_uri = 'http://mapping/geo#'#fracInside'
-
-def namespaces():
-    return [
-        Comparison.ns
-    ]
-
-class Comparison:
-    from ontologies import namespace
-    from rdflib import URIRef
-    ns = namespace('geom', URIRef(geometry_uri))
-    def __init__(self, o1: Object, name, fig, o2: Object) -> None:
-        self.o1 = o1
-        self.name = name
-        self.fig = fig
-        self.o2 = o2
-
-    def triples(self) -> 'Triples':
-        # map these triples to ontology in a sparql construct 
-        from pyoxigraph import parse
-        _ = f"""
-        PREFIX {self.ns.prefix}: <{self.ns.uri}>
-        {self.o1} geom:{self.name} [
-                        {self.o2}  {self.fig}  ].
-        """
-        _ = _.encode()
-        from io import BytesIO
-        _ = parse(BytesIO(_), 'text/turtle')
-        _ = tuple(_)
-        return _
-
 
