@@ -202,9 +202,27 @@ def geometry_getter(store,
         path = 'matrix'
     path = f"spkl:{path}"
 
+    def faces(seq):
+        # interpreted as:
+        # [nVertices, v1, v2, vn, nVertices, v1, v2, ...]
+        # list(
+        # faces([
+        #     3,    1, 1, 1,
+        #     3,    2, 1, 1,
+        #     5,    1 , 2 , 3 ,4 ,5,
+        #     1,    111])
+        # = >  [[1, 1, 1], [2, 1, 1], [1, 2, 3, 4, 5], [111]]
+        nexti = 0
+        for i, e in enumerate(seq):
+            if nexti == i:
+                n = seq[i]
+                # 
+                yield seq[i+1:i+1+n]
+                nexti = i+1+n
+
     def mk_array(ls, lst2arr=list_selector):
         if   'vertices' in lst2arr:     shape = (-1, 3)
-        elif 'faces'    in lst2arr:     shape = (-1, 4)
+        elif 'faces'    in lst2arr:     shape = (-1, )  # interpreted as nVertices, v1, v2, vn, nVertices, v1, ...
         elif lst2arr == 'transform':    shape = ( 4, 4)
         else:                           #shape = (-1,) # nothing. makes no sense to keep going
             raise ValueError(f"converting {lst2arr} list to array not defined")
@@ -214,10 +232,9 @@ def geometry_getter(store,
         if 'faces' in lst2arr:
             _ = (v.astype('int') for v in _)
         _ = map(lambda _: (_).reshape(*shape), _)
+        if 'faces' in lst2arr:
+            _ = map(lambda l:tuple(faces(l)), _)
         _ = tuple(_) # need to pass in a 'real' sequence ..
-        return _
-        #from numpy import vstack
-        _ = array(_) # ...bc this gives a FutureWarning
         return _
     
     def arrays():
@@ -327,6 +344,7 @@ class Definition:
         return _
 
     #def translate(self, object):
+
 
 
 objects_cache = {}
@@ -443,11 +461,13 @@ class Object:
                             self.transform,)
             _ = map(_, self.definition.vertices)
             _ = tuple(_)
-            return _
         elif self.has('displayValue'):
-            return self.get_geometry(self.store, 'vertices', )
+            _ = self.get_geometry(self.store, 'vertices', )
+        else:
+            raise Exception('really should return vertices')
         
-        raise Exception('really should return vertices')
+        from numpy import vstack
+        return vstack(_)
     
     #@cached_property
     @property
@@ -456,16 +476,17 @@ class Object:
             fss = self.get_geometry(self.store, 'definition/faces')
         elif self.has('displayValue'):
             fss = self.get_geometry(self.store, 'faces')
-        # fss : (i, v->f )
-        #vss = self.vertices # i, (n,3)
-        #assert(len(fss) == len(vss))
         _ = {} # face->vertices
+        shift = 0
+        #assert(sum(fs for fs in fss) == len(self.vertices))
         for i, fs in enumerate(fss):
-            #  face, 3 vertices
+            vss = set()
             for f, vis in enumerate(fs):
                 f = (i, f)
-                _[f] = vis
-                #_[f] = vss[i][vis]
+                _[f] = vis + shift
+                vss.update(vis)
+                #_[f] = vss[i][vis] # to get at the data
+            shift += max(vss)+1 # *sigh*        
         return _
 
     @staticmethod
