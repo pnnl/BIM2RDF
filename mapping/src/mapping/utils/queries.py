@@ -20,13 +20,10 @@ def namespaces():
     def e():
         from ..engine import namespaces
         return namespaces()
-    def g():
-        from ..geometry import namespaces
-        return namespaces()
     def e():
         from engine.triples import PyRule
         return (namespace('meta', PyRule.meta_uri,) ,)
-    _ = tuple(o())+tuple(s())+tuple(e())+tuple(g())+tuple(e())
+    _ = tuple(o())+tuple(s())+tuple(e())+tuple(e())
     _ = sorted(_, key=lambda ns: ns.prefix )
     _ = tuple(frozenset(_))
     return _

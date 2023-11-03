@@ -18,7 +18,6 @@ def maps(maps_dir=maps_dir):
 def rules(*,
           maps_dir: Path | None = maps_dir,
           inference = True, 
-          geometry = True,
             ) -> Rules:
     _ = []
     from .engine import Rules
@@ -26,10 +25,6 @@ def rules(*,
         maps_dir = Path(maps_dir)
         assert(maps_dir.is_dir())
         _ = _ + maps(maps_dir)
-
-    if geometry:
-        from .geometry import overlap
-        _ = _ + [PyRule(overlap)]
 
     # inference
     if inference:
@@ -238,7 +233,6 @@ allowed_branches = {
 from pathlib import Path
 def engine(stream_id, *, branch_ids=None,
            maps_dir: Path | None = maps_dir,
-           geometry=True,
            inference=True,
            validation=True,
            out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
@@ -262,7 +256,6 @@ def engine(stream_id, *, branch_ids=None,
             rules=lambda: (
                     data_rules
                     +rules(
-                        geometry=geometry,
                         inference=inference,
                         maps_dir=maps_dir)
                     ),
