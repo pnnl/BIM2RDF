@@ -17,7 +17,7 @@ def maps(maps_dir=maps_dir):
 
 def rules(*,
           maps_dir: Path | None = maps_dir,
-          inference = True, 
+          inference = False, 
             ) -> Rules:
     _ = []
     from .engine import Rules
@@ -233,7 +233,7 @@ allowed_branches = {
 from pathlib import Path
 def engine(stream_id, *, branch_ids=None,
            maps_dir: Path | None = maps_dir,
-           inference=True,
+           inference=False,
            validation=True,
            out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
            out=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
