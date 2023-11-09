@@ -286,7 +286,7 @@ def engine(stream_id, *, branch_ids=None,
     out = Path(out)
     if split_out:
         out = Path('/'.join((out).parts[:-1] + (out.stem,)))
-        if out.exists:
+        if out.exists():
             from shutil import rmtree
             rmtree(out)
         from .utils.data import split_triples, sort_triples, Triples
