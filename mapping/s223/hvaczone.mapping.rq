@@ -7,7 +7,7 @@ PREFIX spkl: <http://speckle.systems/>
 
 CONSTRUCT { 
 ?this   a                 s223:Zone.
-?this   s223:hasDomain    s223:Medium-Air. #not sure about the medium
+?this   s223:hasDomain    s223:Domain-HVAC. 
 ?this   rdfs:label        ?zn. # as it's a name
 
 } 
