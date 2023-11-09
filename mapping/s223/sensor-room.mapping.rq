@@ -4,7 +4,7 @@ PREFIX spkl: <http://speckle.systems/>
 PREFIX meta: <http://meta>
 
 CONSTRUCT { 
-?o1 s223:hasPhysicalLoaction ?o2.
+?o1 s223:hasPhysicalLocation ?o2.
 } 
 WHERE { 
 ?o1 spkl:category "Lighting Devices".
