@@ -66,12 +66,9 @@ class PyRule(_PyRule):
         ])
 
 
-from .graphfix import Graph
-
 
 import logging 
 logger = logging.getLogger('mapping_engine')
-
 
 
 
@@ -135,11 +132,9 @@ logger = logging.getLogger('mapping_engine')
 # RDFS_Semantics.rules = rules
 
 
-from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Semantics, OWLRL_Semantics
-#from owlrl.CombinedClosure import RDFS_Semantics as Semantics
-
 
 def closure(self):
+    # adding for logging and controlling error messages
     """
     Generate the closure the graph. This is the real 'core'.
 
@@ -213,12 +208,92 @@ def closure(self):
             self.graph.add((message, RDF.type, ERRNS.ErrorMessage))
             self.graph.add((message, ERRNS.error, Literal(m)))
 
-Semantics.closure = closure
+from typing import Literal
+def get_rdflib_semantics(semantics:Literal['owlrl']|Literal['rdfs']  ):
+    #from owlrl import (
+    #RDFS_OWLRL_Semantics,  below problem. plus better to have the two separate
+    # OWLRL_Extension_Trimming, does not add illegal triples?
+    #RDFS_Semantics,
+    #OWLRL_Semantics, 
+    #)
+    #return_closure_class(owl_closure, rdfs_closure, owl_extras, trimming=False)
+    if semantics == 'owlrl':
+        from owlrl import OWLRL_Semantics as S
+    elif semantics == 'rdfs':
+        from owlrl import RDFS_Semantics as S
+        # it messes up these!
+            # sh:maxCount true, 
+            #     1,  <== original 
+            #     1.0 ;
+        # stop the nonsense
+        def _(*a, **p): ...
+        S.one_time_rules = _ 
+    else:
+        raise ValueError('semantics not selected')
+    S.closure = closure
+    return S
+
+def get_closure(g, semantics='rdfs',
+        improved_datatypes=True,
+        axiomatic_triples=True,
+        datatype_axioms=False,
+                ):
+    semantics = get_rdflib_semantics(semantics)
+    from owlrl import DeductiveClosure
+    DeductiveClosure(
+        semantics,
+        # fixed
+        rdfs_closure=False,  #only used with non-rdfs semantics.
+        # could vary
+        improved_datatypes=improved_datatypes,
+        axiomatic_triples=axiomatic_triples,
+        datatype_axioms=datatype_axioms,
+        ).expand(g)
+    g = fix(g) #put it here or in the rule
+    return g
 
 
+from rdflib import Graph
+def fix(g: Graph) -> Graph:
+    from rdflib import Literal
+    def bad(t):
+        s, p, o = t
+        if isinstance(s, Literal):
+            return True
+        return False        
+    bads = {t for t in g if bad(t) }
+    for t in bads: g.remove(t)
+    return g
+
+# could have created a class
+# class OWLRL(PyRule):
+#     def __init__(self, spec: PyRuleCallable) -> None:
+#         super().__init__(spec)
 
 
-def rdflib_semantics(db: OxiGraph) -> Triples:
+def rdflib_rdfs(db: OxiGraph) -> Triples:
+    _ = db._store
+    from .utils.queries import queries
+    _ = select(_, (
+            queries.rules.mapped,
+            queries.rules.ontology, # need all right?
+            #queries.rules.rdfs_inferred,
+            queries.rules.shacl_inferred) )
+    from .conversions import og2rg
+    _ = og2rg(_) # backed by oxygraph
+    from .utils.rdflibgraph import copy
+    _ = copy(_) # backed by rdflib..which is 'safer'
+    #before = copy(_)
+    _ = get_closure(_, semantics='rdfs')
+    # from .utils.rdflibgraph import graph_diff
+    # _ = graph_diff(before, _).in_generated
+    #_ = fix(_) put it here or in rdfs?
+    from .conversions import rg2triples
+    _ = rg2triples(_)
+    return _
+
+
+def xrdflib_semantics(db: OxiGraph) -> Triples:
     _ = db._store
     from .utils.queries import queries
     _ = select(_, (
@@ -252,7 +327,7 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
     from pyoxigraph import parse
     _ = parse(_, to)
     _ = (t for t in _ if 0 == len(tuple(db._store.quads_for_pattern(*t))))
-    return _ 
+    return _
     from rdflib.compare import graph_diff
     _ = graph_diff(g1, g2)
     diff = _[2] - _[1]
@@ -268,11 +343,6 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
     _ = Triples(q.triple for q in _)
     return _
 
-
-# could have created a class
-# class OWLRL(PyRule):
-#     def __init__(self, spec: PyRuleCallable) -> None:
-#         super().__init__(spec)
 
 
 
@@ -292,7 +362,7 @@ from functools import lru_cache
 @lru_cache(1)
 def rgontology(): # rdflib graph ontology
     from ontologies import get
-    _ = get('s223')
+    _ = get('defs')
     from rdflib import Graph
     g = Graph()
     g.parse(_)
@@ -335,3 +405,16 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     _ = Triples(q.triple for q in _)
     return _
 
+
+if __name__ == '__main__':
+    from pathlib import Path
+    def infer(ttl:Path, semantics='rdfs', o:Path=Path('inferred.ttl')):
+        from rdflib import Graph
+        _ = Graph()
+        _.parse(ttl)
+        _ = get_closure(_, semantics=semantics)
+        _.serialize(o)
+        return _
+
+    from fire import Fire
+    Fire({'infer': infer})

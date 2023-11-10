@@ -30,17 +30,22 @@ def rules(*,
     if inference:
         _ = _ + [PyRule(get_ontology)]
         #                     223p rules
-        from .engine import pyshacl_rules, rdflib_semantics
-        _ = _ + [PyRule(rdflib_semantics), PyRule(pyshacl_rules)]
+        from .engine import rdflib_rdfs
+        _ = _ + [
+            PyRule(rdflib_rdfs),
+            #PyRule(pyshacl_rules)
+                 ]
 
     _ = Rules(_)
     return _
 
 
+from functools import lru_cache
+@lru_cache
 def get_ontology(_: OxiGraph) -> Triples:
     from .utils.data import get_data
-    from ontologies import get
-    _ = get('s223')
+    from project import root
+    _ = root / 'mapping' / 'work' / 'ontology.ttl'
     _ = get_data(_)
     return _
 
