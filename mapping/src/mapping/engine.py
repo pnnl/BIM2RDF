@@ -271,6 +271,19 @@ def fix(g: Graph) -> Graph:
 #         super().__init__(spec)
 
 
+from pyoxigraph import Store
+# put in utils/queries.py TODO:
+def select(store: Store, construct_queries) -> Store:
+    queries = construct_queries
+    _ = []
+    for q in queries:
+        _.extend(store.query( q  ))
+    s = Store()
+    from pyoxigraph import Quad
+    if len(_): s.bulk_extend(Quad(*t) for t in _)
+    return s
+
+
 def rdflib_rdfs(db: OxiGraph) -> Triples:
     _ = db._store
     from .utils.queries import queries
@@ -283,33 +296,29 @@ def rdflib_rdfs(db: OxiGraph) -> Triples:
     _ = og2rg(_) # backed by oxygraph
     from .utils.rdflibgraph import copy
     _ = copy(_) # backed by rdflib..which is 'safer'
-    #before = copy(_)
+    before = copy(_)
     _ = get_closure(_, semantics='rdfs')
-    # from .utils.rdflibgraph import graph_diff
-    # _ = graph_diff(before, _).in_generated
-    #_ = fix(_) put it here or in rdfs?
+    #_ = fix(_) put it here or in semantics?
     from .conversions import rg2triples
+    _ = generated(before, _)
     _ = rg2triples(_)
     return _
 
 
+def generated(before, after):
+    #before = copy(_)
+    # make sure 'before' is a copy of the orignial
+    _ = (t for t in after if t not in before)
+    from rdflib import Graph
+    g = Graph()
+    for t in _: g.add(t)
+    return g
+    # below is incredibly slow
+    from .utils.rdflibgraph import graph_diff
+    return graph_diff(before, after).in_generated
 
 
-from pyoxigraph import Store
-def select(store: Store, construct_queries) -> Store:
-    queries = construct_queries
-    _ = []
-    for q in queries:
-        _.extend(store.query( q  ))
-    s = Store()
-    from pyoxigraph import Quad
-    if len(_): s.bulk_extend(Quad(*t) for t in _)
-    return s
-
-
-from functools import lru_cache
-@lru_cache(1)
-def rgontology(): # rdflib graph ontology
+def defs(): 
     from ontologies import get
     _ = get('defs')
     from rdflib import Graph
@@ -322,17 +331,20 @@ from functools import lru_cache
 @lru_cache(1)
 def shape_graph():
     from pyshacl.shapes_graph import ShapesGraph
-    _ = rgontology()
+    _ = defs()
     #_ = _.skolemize()
     _ = ShapesGraph(_)
     _.shapes # finds rules. otherwise gather_rules errors
     return _
 
 
+def addnss(g, namespaces=()):
+    for p,n in namespaces: g.bind(p, n)
+    return g
+
 def pyshacl_rules(db: OxiGraph) -> Triples:
-    from validation.shacl import graph, graph_diff
     from pyshacl.rules import apply_rules, gather_rules
-    from pyshacl.functions import gather_functions, apply_functions
+    from pyshacl.functions import gather_functions, apply_functions# , unapply_functions have to do these?
     shacl = shape_graph() #queries.rules.ontology,
     functions = gather_functions(shacl)
     rules =  gather_rules(shacl, iterate_rules=True)
@@ -340,18 +352,21 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     from .utils.queries import queries
     _ = select(_, (
         queries.rules.mapped,
+        #queries.rules.shacl_inferred)
         queries.rules.rdfs_inferred,
         ))
-        #queries.rules.shacl_inferred) 
-    from .conversions import og2rg, rg2og
+    from .conversions import og2rg
     _ = og2rg(_)
-    before = graph(_)
-    after = graph(_)
-    apply_functions(functions, after)
-    apply_rules(rules, after, iterate=True)
-    _ = graph_diff(before, after).in_generated
-    _ = rg2og(_)
-    _ = Triples(q.triple for q in _)
+    from .utils.rdflibgraph import copy
+    _ = copy(_) # backed by rdflib..which is 'safer'
+    before = copy(_)
+    apply_functions(functions, _)
+    from .utils.queries import namespaces
+    _ = addnss(_, namespaces=namespaces())
+    apply_rules(rules, _, iterate=True)
+    from .conversions import rg2triples
+    _ = generated(before, _)
+    _ = rg2triples(_)
     return _
 
 

@@ -11,7 +11,7 @@ def namespaces():
     def o():
         from ontologies import namespaces
         for nss in namespaces():
-            if 'imported' in str(nss.path):
+            if 'collected' in str(nss.path):
                 for pfx, ns in nss.namespaces():
                     yield namespace(pfx, ns)
     def s():

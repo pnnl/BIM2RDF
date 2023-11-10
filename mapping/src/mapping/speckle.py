@@ -30,10 +30,10 @@ def rules(*,
     if inference:
         _ = _ + [PyRule(get_ontology)]
         #                     223p rules
-        from .engine import rdflib_rdfs
+        from .engine import rdflib_rdfs, pyshacl_rules
         _ = _ + [
             PyRule(rdflib_rdfs),
-            #PyRule(pyshacl_rules)
+            PyRule(pyshacl_rules)
                  ]
 
     _ = Rules(_)
