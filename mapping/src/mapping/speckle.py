@@ -218,7 +218,7 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )
         
 
-def fengine(*, validation=True, rules=rules) -> 'Engine':
+def fengine(*, validation=True, rules=rules, max_cycles=20) -> 'Engine':
     # functions for args
     from .engine import OxiGraph
     if validation:
@@ -227,7 +227,7 @@ def fengine(*, validation=True, rules=rules) -> 'Engine':
         from .engine import Engine
     _ = Engine(
             rules(),
-            OxiGraph(), MAX_ITER=20)
+            OxiGraph(), MAX_ITER=max_cycles)
     return _
 
 
@@ -238,6 +238,7 @@ allowed_branches = {
 from pathlib import Path
 def engine(stream_id, *, branch_ids=None,
            maps_dir: Path | None = maps_dir,
+           max_cycles=20,
            inference=False,
            validation=False,
            out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
@@ -265,6 +266,7 @@ def engine(stream_id, *, branch_ids=None,
                         maps_dir=maps_dir)
                     ),
             validation=validation,
+            max_cycles=max_cycles,
         )
     _()
     _ = _.db._store
