@@ -293,57 +293,6 @@ def rdflib_rdfs(db: OxiGraph) -> Triples:
     return _
 
 
-def xrdflib_semantics(db: OxiGraph) -> Triples:
-    _ = db._store
-    from .utils.queries import queries
-    _ = select(_, (
-        queries.rules.mapped,
-        #queries.rules.rdfs_inferred,
-        queries.rules.shacl_inferred) )
-    from .conversions import og2rg
-    g1 = og2rg(_) 
-    g2 = Graph()
-    for t in g1: g2.add(t) # copy to get the above 'features'
-    _ = Semantics(g2, True, True, rdfs=True)
-    # _._debug = True generates waaay to much.
-    # i think these are the datatype axioms (3rd arg)
-    # false a rdfs:Literal,
-    #     rdfs:Resource,
-    #     xsd:boolean,
-    #     owl:Thing ;
-    # owl:sameAs false .
-    # seems 'bad' https://www.w3.org/TR/rdf11-concepts/#section-triples
-    #_.closure()
-    #_ = OWLRL_Extension_Trimming(g2, True, True, rdfs=True)
-    _.closure()
-    # take out _offensive triples
-    for bad in g2._offensive: g2.remove(bad)
-    to = 'text/turtle'
-    from io import BytesIO
-    _ = BytesIO()
-    g2.serialize(_, to)
-    del g2
-    _.seek(0)
-    from pyoxigraph import parse
-    _ = parse(_, to)
-    _ = (t for t in _ if 0 == len(tuple(db._store.quads_for_pattern(*t))))
-    return _
-    from rdflib.compare import graph_diff
-    _ = graph_diff(g1, g2)
-    diff = _[2] - _[1]
-    _ = BytesIO()
-    diff.serialize(_, to)
-    del diff
-    from pyoxigraph import Store
-    _.seek(0)
-    diff = _
-    _ = Store()
-    _.load(diff, to) # where illegal rdf with literal subjects is an issue
-    del diff
-    _ = Triples(q.triple for q in _)
-    return _
-
-
 
 
 from pyoxigraph import Store
