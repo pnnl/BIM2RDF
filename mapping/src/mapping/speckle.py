@@ -233,8 +233,8 @@ allowed_branches = {
 from pathlib import Path
 def engine(stream_id, *, branch_ids=None,
            maps_dir: Path | None = maps_dir,
-           inference=True,
-           validation=True,
+           inference=False,
+           validation=False,
            out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
            out=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
     object_id=None
