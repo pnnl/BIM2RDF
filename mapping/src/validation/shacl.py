@@ -8,8 +8,10 @@ def addnss(g, namespaces=()):
     return g
 
 
+from mapping.utils.queries import namespaces
+
 def shacl(
-    data, namespaces=(), shacl=None, ontology=None,
+    data, namespaces=namespaces(), shacl=None, ontology=None,
     advanced=False, iterate_rules=False,
     # logger=None doesn't work.
     ):

@@ -15,25 +15,21 @@ def _shacl_validation(db: OxiGraph):
              queries.rules.rdfs_inferred,))
     from mapping.conversions import og2rg
     _ = og2rg(_)
-    from ontologies.collect import collect
-    o = collect(
-            {'validation/',
-            '~validation/schema', # this is ontology 'self' validation. don't need this.
-            'models/',
-            'vocab/' # 
-            }  )
+    from ontologies import get
+    _.parse(get('defs'))
     from .shacl import shacl
-    _ = shacl(_, namespaces=o.namespaces(), shacl=o,
-              ontology=o, advanced=False, )
+    from mapping.utils.queries import namespaces
+    _ = shacl(_, namespaces=namespaces(),
+              shacl=_,
+              advanced=False, )
     return _
 
 
 def shacl_validation(db: OxiGraph,) -> Triples:
     _ = _shacl_validation(db)
     _ = _.validation.report
-    from mapping.conversions import rg2og
-    _ = rg2og(_)
-    _ = Triples((q.triple for q in _))
+    from mapping.conversions import rg2triples
+    _ = rg2triples(_)
     return _
 
 
