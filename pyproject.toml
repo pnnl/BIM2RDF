@@ -25,6 +25,7 @@ allow-direct-references = true
 
 [tool.rye.workspace]
 members = [
+    "dev", 
     "project",
     "project_azure", 
     "project_dvc",

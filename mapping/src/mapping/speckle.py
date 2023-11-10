@@ -236,7 +236,7 @@ def engine(stream_id, *, branch_ids=None,
            inference=False,
            validation=False,
            out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
-           out=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
+           out:Path|None=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
     object_id=None
     # data/config for args
     if not (str(out).lower().endswith('ttl')):
@@ -281,10 +281,12 @@ def engine(stream_id, *, branch_ids=None,
             del q
         _ = s; del s
 
+    if not out:
+        return _
     out = Path(out)
     if split_out:
         out = Path('/'.join((out).parts[:-1] + (out.stem,)))
-        if out.exists:
+        if out.exists():
             from shutil import rmtree
             rmtree(out)
         from .utils.data import split_triples, sort_triples, Triples
