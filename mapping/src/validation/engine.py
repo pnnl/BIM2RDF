@@ -15,6 +15,8 @@ def _shacl_validation(db: OxiGraph):
              queries.rules.rdfs_inferred,))
     from mapping.conversions import og2rg
     _ = og2rg(_)
+    from mapping.utils.rdflibgraph import copy
+    _ = copy(_)
     from ontologies import get
     _.parse(get('defs'))
     from .shacl import shacl
