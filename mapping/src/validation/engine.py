@@ -18,11 +18,21 @@ def _shacl_validation(db: OxiGraph):
     from mapping.utils.rdflibgraph import copy
     _ = copy(_)
     from ontologies import get
-    _.parse(get('defs'))
+    from ontologies.collect import collect
+    o = collect(
+            {'validation/',
+            '~validation/schema', # this is ontology 'self' validation. don't need this.
+            'models/',
+            'vocab/' # 
+            }  )
+    # from rdflib import Graph
+    # o = Graph()
+    # o.parse(get('defs'))
+    for t in o: _.add(t)
     from .shacl import shacl
     from mapping.utils.queries import namespaces
     _ = shacl(_, namespaces=namespaces(),
-              shacl=_,
+              shacl=o,
               advanced=False, )
     return _
 

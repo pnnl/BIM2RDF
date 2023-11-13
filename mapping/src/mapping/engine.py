@@ -329,12 +329,18 @@ def defs():
 
 from functools import lru_cache
 @lru_cache(1)
-def shape_graph():
+def shacl_defs():
     from pyshacl.shapes_graph import ShapesGraph
     _ = defs()
     #_ = _.skolemize()
     _ = ShapesGraph(_)
     _.shapes # finds rules. otherwise gather_rules errors
+    from pyshacl.rules import gather_rules
+    from pyshacl.functions import gather_functions
+    class _():
+        functions = gather_functions(_)
+        rules =  gather_rules(_, iterate_rules=True)
+    _ = _()
     return _
 
 
@@ -344,10 +350,8 @@ def addnss(g, namespaces=()):
 
 def pyshacl_rules(db: OxiGraph) -> Triples:
     from pyshacl.rules import apply_rules, gather_rules
-    from pyshacl.functions import gather_functions, apply_functions# , unapply_functions have to do these?
-    shacl = shape_graph() #queries.rules.ontology,
-    functions = gather_functions(shacl)
-    rules =  gather_rules(shacl, iterate_rules=True)
+    functions = shacl_defs().functions
+    rules =  shacl_defs().rules
     _ = db._store
     from .utils.queries import queries
     _ = select(_, (
@@ -360,6 +364,7 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     from .utils.rdflibgraph import copy
     _ = copy(_) # backed by rdflib..which is 'safer'
     before = copy(_)
+    from pyshacl.functions import gather_functions, apply_functions# , unapply_functions have to do these?
     apply_functions(functions, _)
     from .utils.queries import namespaces
     _ = addnss(_, namespaces=namespaces())
