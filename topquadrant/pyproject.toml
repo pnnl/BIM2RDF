@@ -1,0 +1,20 @@
+[project]
+name = "topquadrant"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
+]
+dependencies = []
+readme = "README.md"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
