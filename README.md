@@ -50,6 +50,7 @@ but non-Python tools have to be installed separately.
     * `git`. Use your system manager: `winget install git.git` on Windows, `homebrew` on Mac. Figure it out on Linux.
     * `quarto`. Pre-release.
     * optional: devenv
+    * `java`: [`Microsoft's way`](https://learn.microsoft.com/en-us/java/openjdk/install) for various platforms.
 
 1. **Get code**: `git clone --recursive https://gitlab.pnnl.gov/conlight/semint.git`.
 Clone under your personal folder outside of your OneDrive. On Windows this is c:\Users\myusername.
