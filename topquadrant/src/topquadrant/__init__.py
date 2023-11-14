@@ -1,1 +1,1 @@
-from .bin import validate, infer
+from .run import validate, infer

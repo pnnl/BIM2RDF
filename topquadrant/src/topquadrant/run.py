@@ -28,16 +28,39 @@ def env():
           }
 
 
+
+
+
 def validate(data: Path, shapes:Path=None):
     from subprocess import run
     return run(
-        cmd('validate', data, shapes), env=env(),
+        cmd('validate', data, shapes), env=env(), shell=True,
         capture_output=True, text=True )
 
 def infer(data: Path, shapes:Path=None):
     from subprocess import run
     return run(
-        cmd('infer', data, shapes), env=env(),
+        cmd('infer', data, shapes), env=env(), shell=True,
         capture_output=True, text=True )
 
 
+if __name__ == '__main__':
+    from fire import Fire
+    def printerrs(s):
+        print(s.stderr)
+        return s.stdout
+    def cinfer(data: Path, shapes:Path=None, out=Path('shacl-infer.ttl')):
+        _ = infer(data, shapes)
+        _ = printerrs(_)
+        open(out, 'w').write(_)
+        return out
+    def cvalidate(data: Path, shapes:Path=None, out=Path('shac-validate.ttl')):
+        _ = validate(data, shapes)
+        _ = printerrs(_)
+        open(out, 'w').write(_)
+        return out
+
+    Fire({
+        'validate': cvalidate,
+        'infer': cinfer
+    })
