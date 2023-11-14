@@ -10,6 +10,6 @@ _:conn  s223:hasMedium          s223:Light-Visible.
 WHERE { 
 # or use rdfstar to refer to luminaire-space mapping output?
 ?o1 a s223:OutletConnectionPoint.
-?o1? s223:hasMedium s223:Light-Visible.
+?o1 s223:hasMedium s223:Light-Visible.
 
 }
