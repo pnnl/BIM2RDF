@@ -3,12 +3,18 @@ stages:
 # use foreach? param sweep discussion https://github.com/iterative/dvc/pull/8187
 
 # maybe delete cache for "production run"
+  ontology:
+    cmd: python -m mapping.engine infer ../../ontologies/collected/all.ttl -s rdfs -o ontology.ttl
+    wdir: work
+    deps:
+      - ../../ontologies/collected/all.ttl
+    outs:
+      - ontology.ttl
 
   map:
     cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=${building}
     wdir: work
     deps:
-      - ../../ontologies/imported/s223.ttl
       - ../s223
       - ../src/mapping
       - ../src/validation

@@ -11,7 +11,7 @@ def namespaces():
     def o():
         from ontologies import namespaces
         for nss in namespaces():
-            if 'imported' in str(nss.path):
+            if 'collected' in str(nss.path):
                 for pfx, ns in nss.namespaces():
                     yield namespace(pfx, ns)
     def s():
@@ -196,8 +196,8 @@ class rulequeries:
         return _.maker(_.pattern, _.filter)
     @property
     def rdfs_inferred(self):
-        from ..engine import rdflib_semantics
-        _ = self.q.querymaker(rdflib_semantics)
+        from ..engine import rdflib_rdfs
+        _ = self.q.querymaker(rdflib_rdfs)
         return _.maker(_.pattern, _.filter)
     
 

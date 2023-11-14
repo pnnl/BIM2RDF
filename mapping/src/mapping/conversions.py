@@ -1,9 +1,10 @@
-from .graphfix import Graph, ConjunctiveGraph
-from pyoxigraph import Store, Triple, Quad, Literal
 
+
+from pyoxigraph import Store
 def unstar(og: Store, quote=True):
     # quote and deal w/ isinstance(q.object, Triple)
     # for the general case
+    from pyoxigraph import Store, Triple, Quad
     _ = Store()
     for q in og:
         if isinstance(q.subject, Triple):
@@ -22,9 +23,11 @@ def unstar(og: Store, quote=True):
     return _
 
 
+from rdflib import Graph
 def og2rg(og: Store, unstar_=True) -> Graph:
     from oxrdflib import OxigraphStore
     if unstar_: og = unstar(og)
+    from rdflib import ConjunctiveGraph
     _ = OxigraphStore(store=og)
     # https://github.com/oxigraph/oxrdflib/issues/22#issuecomment-1499547525
     _ = ConjunctiveGraph(_)
@@ -70,3 +73,18 @@ def rg2og(r: Graph) -> Store:
     r.load(_, to) # where illegal rdf with literal subjects is an issue
     return r
 
+
+
+from engine.triples import Triples
+def rg2triples(r: Graph) -> Triples:
+    to = 'text/turtle'
+    from io import BytesIO
+    _ = BytesIO()
+    ## should blank node regen be addressed here...
+    #  ... with a r.skolemize()?
+    r.serialize(_, to)  
+    _.seek(0)
+    from pyoxigraph import parse
+    _ = parse(_, to)
+    _ = (t for t in _)
+    return _

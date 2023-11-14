@@ -30,17 +30,22 @@ def rules(*,
     if inference:
         _ = _ + [PyRule(get_ontology)]
         #                     223p rules
-        from .engine import pyshacl_rules, rdflib_semantics
-        _ = _ + [PyRule(rdflib_semantics), PyRule(pyshacl_rules)]
+        from .engine import rdflib_rdfs, pyshacl_rules
+        _ = _ + [
+            PyRule(rdflib_rdfs),
+            PyRule(pyshacl_rules)
+                 ]
 
     _ = Rules(_)
     return _
 
 
+from functools import lru_cache
+@lru_cache
 def get_ontology(_: OxiGraph) -> Triples:
     from .utils.data import get_data
-    from ontologies import get
-    _ = get('s223')
+    from project import root
+    _ = root / 'mapping' / 'work' / 'ontology.ttl'
     _ = get_data(_)
     return _
 
@@ -213,7 +218,7 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )
         
 
-def fengine(*, validation=True, rules=rules) -> 'Engine':
+def fengine(*, validation=True, rules=rules, max_cycles=20) -> 'Engine':
     # functions for args
     from .engine import OxiGraph
     if validation:
@@ -222,7 +227,7 @@ def fengine(*, validation=True, rules=rules) -> 'Engine':
         from .engine import Engine
     _ = Engine(
             rules(),
-            OxiGraph(), MAX_ITER=20)
+            OxiGraph(), MAX_ITER=max_cycles)
     return _
 
 
@@ -233,6 +238,7 @@ allowed_branches = {
 from pathlib import Path
 def engine(stream_id, *, branch_ids=None,
            maps_dir: Path | None = maps_dir,
+           max_cycles=20,
            inference=False,
            validation=False,
            out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
@@ -260,6 +266,7 @@ def engine(stream_id, *, branch_ids=None,
                         maps_dir=maps_dir)
                     ),
             validation=validation,
+            max_cycles=max_cycles,
         )
     _()
     _ = _.db._store

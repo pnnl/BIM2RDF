@@ -66,12 +66,9 @@ class PyRule(_PyRule):
         ])
 
 
-from .graphfix import Graph
-
 
 import logging 
 logger = logging.getLogger('mapping_engine')
-
 
 
 
@@ -135,11 +132,9 @@ logger = logging.getLogger('mapping_engine')
 # RDFS_Semantics.rules = rules
 
 
-from owlrl.CombinedClosure import RDFS_OWLRL_Semantics  as Semantics#, RDFS_Semantics, OWLRL_Semantics
-#from owlrl.CombinedClosure import RDFS_Semantics as Semantics
-
 
 def closure(self):
+    # adding for logging and controlling error messages
     """
     Generate the closure the graph. This is the real 'core'.
 
@@ -213,61 +208,62 @@ def closure(self):
             self.graph.add((message, RDF.type, ERRNS.ErrorMessage))
             self.graph.add((message, ERRNS.error, Literal(m)))
 
-Semantics.closure = closure
+from typing import Literal
+def get_rdflib_semantics(semantics:Literal['owlrl']|Literal['rdfs']  ):
+    #from owlrl import (
+    #RDFS_OWLRL_Semantics,  below problem. plus better to have the two separate
+    # OWLRL_Extension_Trimming, does not add illegal triples?
+    #RDFS_Semantics,
+    #OWLRL_Semantics, 
+    #)
+    #return_closure_class(owl_closure, rdfs_closure, owl_extras, trimming=False)
+    if semantics == 'owlrl':
+        from owlrl import OWLRL_Semantics as S
+    elif semantics == 'rdfs':
+        from owlrl import RDFS_Semantics as S
+        # it messes up these!
+            # sh:maxCount true, 
+            #     1,  <== original 
+            #     1.0 ;
+        # stop the nonsense
+        def _(*a, **p): ...
+        S.one_time_rules = _ 
+    else:
+        raise ValueError('semantics not selected')
+    S.closure = closure
+    return S
+
+def get_closure(g, semantics='rdfs',
+        improved_datatypes=True,
+        axiomatic_triples=True,
+        datatype_axioms=False,
+                ):
+    semantics = get_rdflib_semantics(semantics)
+    from owlrl import DeductiveClosure
+    DeductiveClosure(
+        semantics,
+        # fixed
+        rdfs_closure=False,  #only used with non-rdfs semantics.
+        # could vary
+        improved_datatypes=improved_datatypes,
+        axiomatic_triples=axiomatic_triples,
+        datatype_axioms=datatype_axioms,
+        ).expand(g)
+    g = fix(g) #put it here or in the rule
+    return g
 
 
-
-
-def rdflib_semantics(db: OxiGraph) -> Triples:
-    _ = db._store
-    from .utils.queries import queries
-    _ = select(_, (
-        queries.rules.mapped,
-        #queries.rules.rdfs_inferred,
-        queries.rules.shacl_inferred) )
-    from .conversions import og2rg
-    g1 = og2rg(_) 
-    g2 = Graph()
-    for t in g1: g2.add(t) # copy to get the above 'features'
-    _ = Semantics(g2, True, True, rdfs=True)
-    # _._debug = True generates waaay to much.
-    # i think these are the datatype axioms (3rd arg)
-    # false a rdfs:Literal,
-    #     rdfs:Resource,
-    #     xsd:boolean,
-    #     owl:Thing ;
-    # owl:sameAs false .
-    # seems 'bad' https://www.w3.org/TR/rdf11-concepts/#section-triples
-    #_.closure()
-    #_ = OWLRL_Extension_Trimming(g2, True, True, rdfs=True)
-    _.closure()
-    # take out _offensive triples
-    for bad in g2._offensive: g2.remove(bad)
-    to = 'text/turtle'
-    from io import BytesIO
-    _ = BytesIO()
-    g2.serialize(_, to)
-    del g2
-    _.seek(0)
-    from pyoxigraph import parse
-    _ = parse(_, to)
-    _ = (t for t in _ if 0 == len(tuple(db._store.quads_for_pattern(*t))))
-    return _ 
-    from rdflib.compare import graph_diff
-    _ = graph_diff(g1, g2)
-    diff = _[2] - _[1]
-    _ = BytesIO()
-    diff.serialize(_, to)
-    del diff
-    from pyoxigraph import Store
-    _.seek(0)
-    diff = _
-    _ = Store()
-    _.load(diff, to) # where illegal rdf with literal subjects is an issue
-    del diff
-    _ = Triples(q.triple for q in _)
-    return _
-
+from rdflib import Graph
+def fix(g: Graph) -> Graph:
+    from rdflib import Literal
+    def bad(t):
+        s, p, o = t
+        if isinstance(s, Literal):
+            return True
+        return False        
+    bads = {t for t in g if bad(t) }
+    for t in bads: g.remove(t)
+    return g
 
 # could have created a class
 # class OWLRL(PyRule):
@@ -275,8 +271,8 @@ def rdflib_semantics(db: OxiGraph) -> Triples:
 #         super().__init__(spec)
 
 
-
 from pyoxigraph import Store
+# put in utils/queries.py TODO:
 def select(store: Store, construct_queries) -> Store:
     queries = construct_queries
     _ = []
@@ -288,11 +284,43 @@ def select(store: Store, construct_queries) -> Store:
     return s
 
 
-from functools import lru_cache
-@lru_cache(1)
-def rgontology(): # rdflib graph ontology
+def rdflib_rdfs(db: OxiGraph) -> Triples:
+    _ = db._store
+    from .utils.queries import queries
+    _ = select(_, (
+            queries.rules.mapped,
+            queries.rules.ontology, # need all right?
+            #queries.rules.rdfs_inferred,
+            queries.rules.shacl_inferred) )
+    from .conversions import og2rg
+    _ = og2rg(_) # backed by oxygraph
+    from .utils.rdflibgraph import copy
+    _ = copy(_) # backed by rdflib..which is 'safer'
+    before = copy(_)
+    _ = get_closure(_, semantics='rdfs')
+    #_ = fix(_) put it here or in semantics?
+    from .conversions import rg2triples
+    _ = generated(before, _)
+    _ = rg2triples(_)
+    return _
+
+
+def generated(before, after):
+    #before = copy(_)
+    # make sure 'before' is a copy of the orignial
+    _ = (t for t in after if t not in before)
+    from rdflib import Graph
+    g = Graph()
+    for t in _: g.add(t)
+    return g
+    # below is incredibly slow
+    from .utils.rdflibgraph import graph_diff
+    return graph_diff(before, after).in_generated
+
+
+def defs(): 
     from ontologies import get
-    _ = get('s223')
+    _ = get('defs')
     from rdflib import Graph
     g = Graph()
     g.parse(_)
@@ -301,37 +329,61 @@ def rgontology(): # rdflib graph ontology
 
 from functools import lru_cache
 @lru_cache(1)
-def shape_graph():
+def shacl_defs():
     from pyshacl.shapes_graph import ShapesGraph
-    _ = rgontology()
+    _ = defs()
     #_ = _.skolemize()
     _ = ShapesGraph(_)
     _.shapes # finds rules. otherwise gather_rules errors
+    from pyshacl.rules import gather_rules
+    from pyshacl.functions import gather_functions
+    class _():
+        functions = gather_functions(_)
+        rules =  gather_rules(_, iterate_rules=True)
+    _ = _()
     return _
 
 
+def addnss(g, namespaces=()):
+    for p,n in namespaces: g.bind(p, n)
+    return g
+
 def pyshacl_rules(db: OxiGraph) -> Triples:
-    from validation.shacl import graph, graph_diff
     from pyshacl.rules import apply_rules, gather_rules
-    from pyshacl.functions import gather_functions, apply_functions
-    shacl = shape_graph() #queries.rules.ontology,
-    functions = gather_functions(shacl)
-    rules =  gather_rules(shacl, iterate_rules=True)
+    functions = shacl_defs().functions
+    rules =  shacl_defs().rules
     _ = db._store
     from .utils.queries import queries
     _ = select(_, (
         queries.rules.mapped,
+        #queries.rules.shacl_inferred)
         queries.rules.rdfs_inferred,
         ))
-        #queries.rules.shacl_inferred) 
-    from .conversions import og2rg, rg2og
+    from .conversions import og2rg
     _ = og2rg(_)
-    before = graph(_)
-    after = graph(_)
-    apply_functions(functions, after)
-    apply_rules(rules, after, iterate=True)
-    _ = graph_diff(before, after).in_generated
-    _ = rg2og(_)
-    _ = Triples(q.triple for q in _)
+    from .utils.rdflibgraph import copy
+    _ = copy(_) # backed by rdflib..which is 'safer'
+    before = copy(_)
+    from pyshacl.functions import gather_functions, apply_functions# , unapply_functions have to do these?
+    apply_functions(functions, _)
+    from .utils.queries import namespaces
+    _ = addnss(_, namespaces=namespaces())
+    apply_rules(rules, _, iterate=True)
+    from .conversions import rg2triples
+    _ = generated(before, _)
+    _ = rg2triples(_)
     return _
 
+
+if __name__ == '__main__':
+    from pathlib import Path
+    def infer(ttl:Path, semantics='rdfs', o:Path=Path('inferred.ttl')):
+        from rdflib import Graph
+        _ = Graph()
+        _.parse(ttl)
+        _ = get_closure(_, semantics=semantics)
+        _.serialize(o)
+        return _
+
+    from fire import Fire
+    Fire({'infer': infer})

@@ -3,40 +3,19 @@
 
 
 
-from mapping.graphfix import Graph as FGraph
-from rdflib import Graph as RGraph
-def graph(g, mem=True) -> FGraph:
-    from pathlib import Path
-    if isinstance(g, Path) and Path(g).exists():
-        g = FGraph().parse(Path(g))
-    elif isinstance(g, str):
-        if g.startswith('http'):
-            g = FGraph().parse(g)
-        else: # take it as ttl
-            g = FGraph().parse(data=g, format='ttl')
-    elif isinstance(g, (FGraph, RGraph) ):
-        g = g
-    else:
-        raise TypeError('data source')
-    if mem:
-        # do your horrible mess in memory
-        _ = FGraph() # but make it fixable
-        for d in g: _.add(d) # (copying to memory)
-        g = _
-    return g
-
-
 def addnss(g, namespaces=()):
     for p,n in namespaces: g.bind(p, n)
     return g
 
 
+from mapping.utils.queries import namespaces
 
 def shacl(
-    data, namespaces=(), shacl=None, ontology=None,
+    data, namespaces=namespaces(), shacl=None, ontology=None,
     advanced=False, iterate_rules=False,
     # logger=None doesn't work.
     ):
+    # adding a thin layer of conveniences
     #    self,
     #     data_graph: GraphLike,
     #     *args,
@@ -45,7 +24,6 @@ def shacl(
     #     options: Optional[dict] = None,
     #     **kwargs,
     def mg(g):
-        g = graph(g)
         g = addnss(g, namespaces=namespaces)
         return g
     data = mg(data)
@@ -62,11 +40,10 @@ def shacl(
         conforms=   validation[0],
         report=     validation[1],
         text=       validation[2])
-    from mapping.utils.graph import graph_diff
+    from mapping.utils.rdflibgraph import graph_diff
     gd = graph_diff(data, v.target_graph).in_generated
     # clean the generated data, v.target_graph, after this
     return NS(
         validation=validation,
-        generated=gd,
-    )
+        generated=gd,)
 
