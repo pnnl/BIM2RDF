@@ -11,5 +11,5 @@ CONSTRUCT {
 WHERE { 
     
     ?b a s223:OutletConnectionPoint.
-    ?b s223:hasMedium a s223:AC-120VLN-1Ph-60Hz.
+    ?b s223:hasMedium s223:AC-120VLN-1Ph-60Hz.
 }
