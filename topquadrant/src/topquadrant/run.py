@@ -10,7 +10,6 @@ def env():
     #l = str(l).replace("\\", "\\\\")
     assert(si.home.exists())
     assert(si.lib.exists())
-    
     return {**environ,
         'SHACL_HOME': str(si.home),
         'SHACL_CP': f"{si.lib}/*", # need a star for some reason
@@ -26,7 +25,6 @@ def cmd(
     assert(cmd in {'validate', 'infer'})
     cmd = cmd[0].upper()+cmd[1:]
     cmd = f"java {jvm_args} -Dlog4j.configurationFile={logging} -cp {shacl_cp} org.topbraid.shacl.tools.{cmd}"
-    print(cmd)
     _ = f"{cmd} -datafile {datafile} "
     if shapesfile:
         _ = _+f"-shapesfile {shapesfile}"
