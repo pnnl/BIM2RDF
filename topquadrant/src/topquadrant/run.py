@@ -5,9 +5,9 @@ def env():
     from os import environ
     from .install import ShaclInstallation
     si = ShaclInstallation()
-    l = (si.dir/'log4j2.properties')
+    l = (si.home/'log4j2.properties') 
+    #l = (si.dir/'log4j2.properties') # idk how to set logging
     assert(l.exists())
-    #l = (si.home/'log4j2.properties') idk how to set logging
     l = ''
     #l = str(l).replace("\\", "\\\\")
     assert(si.home.exists())
