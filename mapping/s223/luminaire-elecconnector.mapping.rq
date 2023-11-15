@@ -5,7 +5,7 @@ PREFIX spkl: <http://speckle.systems/>
 
 
 CONSTRUCT { 
-  ?this s223:cnx ?conn.
+  ?conn s223:cnx ?this.
   ?conn  a s223:InletConnectionPoint.
   #_:myelectricity a s223:Medium-Electricity. works
   #?conn s223:hasMedium _:myelectricity.
