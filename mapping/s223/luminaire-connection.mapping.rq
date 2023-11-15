@@ -13,6 +13,6 @@ WHERE {
 
 ?o1 a s223:OutletConnectionPoint.
 ?o1 s223:hasMedium s223:Light-Visible.
-s223:Luminaire s223:cnx ?o1.
+
 
 }
