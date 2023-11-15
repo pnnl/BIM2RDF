@@ -1,12 +1,12 @@
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX spkl: <http://speckle.systems/> 
-
+PREFIX meta: <http://meta>
 
 CONSTRUCT { 
-  ?this s223:cnx _:cp.
+  ?this s223:cnx  _:cp.
   _:cp  a s223:OutletConnectionPoint.
   _:cp s223:hasMedium s223:Light-Visible.
 } 
 WHERE { 
-    <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
+    ?this a s223:Luminaire.
 }
