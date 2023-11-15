@@ -5,8 +5,10 @@ def env():
     from os import environ
     from .install import ShaclInstallation
     si = ShaclInstallation()
-    l = (si.home/'log4j2.properties')
+    l = (si.home/'log4j2.properties') 
+    #l = (si.dir/'log4j2.properties') # idk how to set logging
     assert(l.exists())
+    l = ''
     #l = str(l).replace("\\", "\\\\")
     assert(si.home.exists())
     assert(si.lib.exists())
@@ -23,13 +25,14 @@ def cmd(
         shacl_cp=env()['SHACL_CP'], jvm_args='', logging=env()['LOGGING'],
         ):
     assert(cmd in {'validate', 'infer'})
+    logging = f"-Dlog4j.configurationFile={logging}" if logging else ''
+    shacl_cp = f"-cp {shacl_cp}"
     cmd = cmd[0].upper()+cmd[1:]
-    cmd = f"java {jvm_args} -Dlog4j.configurationFile={logging} -cp {shacl_cp} org.topbraid.shacl.tools.{cmd}"
+    cmd = f"java {jvm_args} {logging} {shacl_cp} org.topbraid.shacl.tools.{cmd}"
     _ = f"{cmd} -datafile {datafile} "
     if shapesfile:
         _ = _+f"-shapesfile {shapesfile}"
     return _
-
 
 def validate(data: Path, shapes:Path=None):
     from subprocess import run
@@ -47,7 +50,9 @@ def infer(data: Path, shapes:Path=None):
 if __name__ == '__main__':
     from fire import Fire
     def printerrs(s):
-        print(s.stderr)
+        if (s.stderr):
+            print('ERRORS')
+            print(s.stderr)
         return s.stdout
     def cinfer(data: Path, shapes:Path=None, out=Path('shacl-infer.ttl')):
         _ = infer(data, shapes)
