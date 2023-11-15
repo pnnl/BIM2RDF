@@ -8,5 +8,5 @@ CONSTRUCT {
   _:cp s223:hasMedium s223:Light-Visible.
 } 
 WHERE { 
-    ?this a s223:Luminaire. 
+    <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
 }

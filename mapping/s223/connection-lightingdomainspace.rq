@@ -2,11 +2,12 @@ PREFIX s223: <http://data.ashrae.org/standard223#>
 
 
 CONSTRUCT {
-    _:cp s223:cnx ?this.
-    _:cp  a s223:InletConnectionPoint.
-    _:cp s223:hasMedium s223:Light-Visible.
+    ?cp s223:cnx ?this.
+  
 }
 WHERE {
+    ?cp a s223:InletConnectionPoint.
+    ?cp s223:hasMedium s223:Light-Visible.
     ?this a s223:DomainSpace.
     ?this s223:hasDomain s223:Domain-Lighting.
 }
