@@ -2,7 +2,7 @@ PREFIX s223: <http://data.ashrae.org/standard223#>
 
 
 CONSTRUCT { 
-    ?b      s223:cnx   _:conn.
+    _:conn      s223:cnx   ?b.
     _:conn      a                   s223:ElectricWire.
     # why is this not inferred??
     _:conn  s223:hasMedium          s223:AC-120VLN-1Ph-60Hz.
@@ -10,6 +10,6 @@ CONSTRUCT {
 } 
 WHERE { 
     
-    ?b a s223:OutletConnectionPoint.
+    ?b a s223:InletConnectionPoint.
     ?b s223:hasMedium s223:AC-120VLN-1Ph-60Hz.
 }

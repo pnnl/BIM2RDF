@@ -10,6 +10,7 @@ CONSTRUCT {
 } 
 WHERE { 
     
-    ?b a s223:InletConnectionPoint.
+    ?b a s223:OutletConnectionPoint.
     ?b s223:hasMedium s223:AC-120VLN-1Ph-60Hz.
+    #?l s s223:Luminaire.
 }
