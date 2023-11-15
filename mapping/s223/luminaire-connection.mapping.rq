@@ -1,4 +1,5 @@
 PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX meta: <http://meta>
 
 CONSTRUCT { 
 ?o1     s223:cnx   _:conn.
