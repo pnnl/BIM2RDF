@@ -1,0 +1,18 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+
+
+CONSTRUCT { 
+    ?b      s223:cnx   _:conn.
+    _:conn      a                   s223:ElectricWire.
+    # why is this not inferred??
+    _:conn  s223:hasMedium          s223:AC-120VLN-1Ph-60Hz.
+    
+    #_:conn  s223:connectsTo         ?l.
+} 
+WHERE { 
+    
+    ?b a s223:OutletConnectionPoint.
+    ?b s223:hasMedium s223:AC-120VLN-1Ph-60Hz.
+    
+    #?l s s223:Luminaire.
+}
