@@ -2,7 +2,7 @@ PREFIX s223: <http://data.ashrae.org/standard223#>
 
 
 CONSTRUCT { 
-    ?e      a  s223:ElectricWire
+    ?e      a  s223:ElectricWire.
     ?e  s223:hasMedium          s223:AC-120VLN-1Ph-60Hz.
     
     
