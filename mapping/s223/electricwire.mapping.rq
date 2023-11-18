@@ -5,7 +5,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 CONSTRUCT { 
     ?e      a  s223:ElectricWire.
-    ?e  s223:hasMedium  s223:AC-120VLN-1Ph-60Hz.
+    ?e  s223:hasMedium  s223:Medium-Electricity.
     } 
 WHERE { 
     <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>.
