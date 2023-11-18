@@ -1,0 +1,17 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+
+
+CONSTRUCT { 
+    ?e      a  s223:ElectricWire
+    ?e  s223:hasMedium          s223:AC-120VLN-1Ph-60Hz.
+    
+    
+} 
+WHERE { 
+    
+     <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
+     ?this spkl:parameters/spkl:RBS_ELEC_CIRCUIT_NUMBER/spkl:value ?e.
+     
+    
+   
+}
