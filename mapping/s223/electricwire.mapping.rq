@@ -6,14 +6,8 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 CONSTRUCT { 
     ?e      a  s223:ElectricWire.
     ?e  s223:hasMedium  s223:AC-120VLN-1Ph-60Hz.
-    
-    
-} 
+    } 
 WHERE { 
-    
-     <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
-     ?this spkl:parameters/spkl:RBS_ELEC_CIRCUIT_NUMBER/spkl:value ?e.
-     
-    
-   
+    <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>.
+         ?this spkl:parameters/spkl:RBS_ELEC_CIRCUIT_NUMBER/spkl:value ?e.
 }
