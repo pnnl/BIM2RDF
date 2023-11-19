@@ -1,0 +1,30 @@
+PREFIX geom: <http://mapping/geo#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX meta: <http://meta>
+
+
+CONSTRUCT { 
+?o s223:cnx ?e.
+?e s223:cnx ?i.
+
+} 
+WHERE { 
+?o  a s223:OutletConnectionPoint.
+?o s223:hasMedium s223:AC-120VLN-1Ph-60Hz.
+?eb s223:cnx ?o.
+?eb a s223:ElectricBreaker.
+?eb rdfs:label ?n.
+?e a  s223:ElectricWire.
+?e s223:hasMedium  s223:Medium-Electricity.
+?e rdfs:label ?n.
+<<?thisconn spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>
+?thisconn spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM/spkl:value ?n.
+ ?thisconn spkl:Connectors/rdf:rest*/rdf:first ?i.
+?i  a s223:InletConnectionPoint.
+?i s223:hasMedium s223:AC-120VLN-1Ph-60Hz. 
+}
+
+
+
+
