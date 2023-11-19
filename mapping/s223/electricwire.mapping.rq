@@ -11,5 +11,5 @@ CONSTRUCT {
     } 
 WHERE { 
     <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>.
-         ?this spkl:parameters/spkl:RBS_ELEC_CIRCUIT_NUMBER/spkl:value ?f.
+         ?this spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM/spkl:value ?f.
 }
