@@ -6,8 +6,8 @@ PREFIX meta: <http://meta>
 CONSTRUCT { 
 ?o1 a s223:OccupancySensor. # TODO: there are specific types
 ?o1 rdfs:label ?f.
-?o1 s223:observes _:q.
-_:q a s223:QuantifiableObservableProperty. 
+#?o1 s223:observes _:q.
+#_:q a s223:QuantifiableObservableProperty. 
 } 
 WHERE { 
 <<?o1 spkl:category "Lighting Devices">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
