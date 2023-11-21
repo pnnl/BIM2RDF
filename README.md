@@ -36,6 +36,8 @@ Generally, these tools are assumed to be at their latest version.
 
 * Speckle: create [API key](https://speckle.xyz/profile). The key will be used to [programmatically access Speckle](https://gitlab.pnnl.gov/conlight/semint/-/blob/fb2960ab43177540daacb3e5be4eaaecd6fae525/speckle/src/speckle/requests.py#L3).
 
+* Speckle: Need permissions to accesss the Speckle Stream. At minimum you should have access to the "Pritoni" stream.
+
 * GitLab: check access to [S223 repo](https://gitlab.pnnl.gov/conlight/223standard).
 
 ### Code
