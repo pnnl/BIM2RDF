@@ -35,8 +35,7 @@ Generally, these tools are assumed to be at their latest version.
     * **secrets**: check access to [secrets](https://portal.azure.com/#@PNNL.onmicrosoft.com/resource/subscriptions/945ae372-bdd3-442f-83b2-6f5f6ff1eee2/resourceGroups/prototypemodels/providers/Microsoft.KeyVault/vaults/semint/secrets).
 
 * Speckle: create [API key](https://speckle.xyz/profile). The key will be used to [programmatically access Speckle](https://gitlab.pnnl.gov/conlight/semint/-/blob/fb2960ab43177540daacb3e5be4eaaecd6fae525/speckle/src/speckle/requests.py#L3).
-
-* Speckle: Need permissions to accesss the Speckle Stream. At minimum you should have access to the "Pritoni" stream.
+    * Need permissions to accesss the Speckle Stream. At minimum you should have access to the "Pritoni" stream.
 
 * GitLab: check access to [S223 repo](https://gitlab.pnnl.gov/conlight/223standard).
 
