@@ -5,11 +5,10 @@ from ..engine import Triples
 ttl = str
 from io import BytesIO
 def get_data(src: BytesIO | ttl | Path | Triples | Callable[[], ttl ]  ) -> Triples:
-    from pyoxigraph import Store
     if isinstance(src, BytesIO):
-        s = Store()
-        s.bulk_load(src, 'text/turtle')
-        _ = Triples(q.triple for q in s)
+        from pyoxigraph import parse
+        _ = parse(src, 'text/turtle')
+        _ = Triples(_)
         return _
     elif isinstance(src, ttl):
         _ = src.encode()
