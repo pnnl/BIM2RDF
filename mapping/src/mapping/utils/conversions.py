@@ -95,6 +95,7 @@ def triples2ttl(ts: Triples) -> 'ttl':
     from io import BytesIO
     _ = BytesIO()
     serialize(ts, _, 'text/turtle'); del ts
+    _.seek(0)
     _ = _.read().decode()
     return _
 

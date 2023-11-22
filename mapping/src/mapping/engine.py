@@ -286,16 +286,18 @@ def rdflib_rdfs(db: OxiGraph) -> Triples:
     from .utils.queries import queries
     _ = select(_, (
             queries.rules.mapped,
-            #queries.rules.ontology, #
+            queries.rules.ontology, #
             #queries.rules.rdfs_inferred,
             queries.rules.shacl_inferred) )
-    from .conversions import triples2ttl
+    from .utils.conversions import triples2ttl
     _ = triples2ttl(_)
     from rdflib import Graph
     before = Graph()
-    before.parse(data=_,format='text/turtle')
-    _ = get_closure(before, semantics='rdfs')
-    from .conversions import rg2triples
+    before.parse(data=_, format='text/turtle')
+    from .utils.rdflibgraph import copy
+    _ = copy(before)
+    _ = get_closure(_, semantics='rdfs')
+    from .utils.conversions import rg2triples
     _ = generated(before, _)
     _ = rg2triples(_)
     return _
@@ -332,7 +334,7 @@ def generated(before, after):
 
 from functools import lru_cache
 @lru_cache(1)
-def shacl_defs():
+def shacl_defs(ontology_collection='defs'):
     from pyshacl.shapes_graph import ShapesGraph
     _ = get_ontology_collection('defs')
     #_ = _.skolemize()
@@ -345,7 +347,6 @@ def shacl_defs():
         rules =  gather_rules(_, iterate_rules=True)
     _ = _()
     return _
-
 
 def addnss(g, namespaces=()):
     for p,n in namespaces: g.bind(p, n)
@@ -379,5 +380,18 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     return _
 
 
-if __name__ == '__main__':
-    ...
+if __name__ == '__main__': ...
+    # from pathlib import Path
+    # def rdfs(ipth: Path, opath=None):
+    #     ipth = Path(ipth)
+    #     if not opath:
+    #         opath = Path(ipth.parts[:-1]) / ipth.stem+'-rdfs.ttl'
+    #     db = OxiGraph()
+    #     db._store.bulk_load(ipth, 'text/turtle')
+    #     _ = rdflib_rdfs(db)
+    #     from pyoxigraph import serialize
+    #     from .conversions import triples2ttl
+    #     _ = triples2ttl()
+    #     return opath
+
+    #...

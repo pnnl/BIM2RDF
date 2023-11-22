@@ -42,7 +42,7 @@ def rules(*,
 
 from functools import lru_cache
 @lru_cache
-def get_ontology(_: OxiGraph, collection='applicable') -> Triples:
+def get_ontology(_: OxiGraph, collection='all') -> Triples:
     from ontologies import get
     _ = get(collection)
     from .utils.data import get_data
