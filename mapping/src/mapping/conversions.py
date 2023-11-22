@@ -88,3 +88,13 @@ def rg2triples(r: Graph) -> Triples:
     _ = parse(_, to)
     _ = (t for t in _)
     return _
+
+
+def triples2ttl(ts: Triples) -> 'ttl':
+    from pyoxigraph import serialize
+    from io import BytesIO
+    _ = BytesIO()
+    serialize(ts, _, 'text/turtle'); del ts
+    _ = _.read().decode()
+    return _
+

@@ -185,14 +185,15 @@ class rulequeries:
     
     @property
     def shacl_validation(self):
+        fsfsdf
         from validation.engine import shacl_validation
         _ = self.q.querymaker(shacl_validation)
         return _.maker(_.pattern, _.filter)
 
     @property
     def shacl_inferred(self):
-        from ..engine import pyshacl_rules
-        _ = self.q.querymaker(pyshacl_rules)
+        from ..engine import topquadrant_rules
+        _ = self.q.querymaker(topquadrant_rules)
         return _.maker(_.pattern, _.filter)
     @property
     def rdfs_inferred(self):
