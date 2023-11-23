@@ -43,10 +43,9 @@ def rules(*,
 from functools import lru_cache
 @lru_cache
 def get_ontology(_: OxiGraph, collection='all') -> Triples:
-    from ontologies import get
-    _ = get(collection)
     from .utils.data import get_data
-    _ = get_data(_)
+    from project import root
+    _ = get_data(root / 'mapping' / 'work' / 'ontology.ttl'  ) # collection
     return _
 
 
