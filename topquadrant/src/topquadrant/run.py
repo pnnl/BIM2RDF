@@ -39,6 +39,7 @@ def cmd(
 def raisee(s: str):
     # further guard to fail
     # in case topquadrant does not exit with an error
+    # that's why check is false below
     if 'exception' in s.stderr.lower():
         from sys import stderr
         print(s.stderr, file=stderr)
@@ -49,7 +50,7 @@ def raisee(s: str):
 def validate(data: Path, shapes:Path=None):
     from subprocess import run
     _ = run(
-            cmd('validate', data, shapes), check=True, env=env(), shell=True,
+            cmd('validate', data, shapes), check=False, env=env(), shell=True,
             capture_output=True, text=True )
     _ = raisee(_)
     return _
@@ -57,7 +58,7 @@ def validate(data: Path, shapes:Path=None):
 def infer(data: Path, shapes:Path=None):
     from subprocess import run
     _ = run(
-            cmd('infer', data, shapes), check=True, env=env(), shell=True,
+            cmd('infer', data, shapes), check=False, env=env(), shell=True,
             capture_output=True, text=True )
     _ = raisee(_)
     return _
