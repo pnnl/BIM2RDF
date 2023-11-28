@@ -8,6 +8,7 @@ PREFIX spkl: <http://speckle.systems/>
 CONSTRUCT { 
     ?this a s223:Luminaire.
     ?this rdfs:label ?number .
+
 } 
 WHERE { 
     # keep this mapping 'pure' to arch. elec stuff somewhere else.

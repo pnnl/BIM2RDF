@@ -5,6 +5,7 @@ CONSTRUCT {
 ?o1     s223:cnx  _:c.
 _:c a s223:InletConnectionPoint.
 _:c s223:hasMedium s223:Light-Visible.
+_:c rdfs:label s223:InletConnectionPoint.
 #  no em-light connection equivalent like pipe and wire
 
 } 
