@@ -6,7 +6,7 @@ PREFIX spkl: <http://speckle.systems/>
 CONSTRUCT { 
 ?this s223:cnx ?conn.
   ?conn  a s223:OutletConnectionPoint.
-  ?conn rdfs:label "OutletConnectionPoint".
+  ?conn rdfs:label s223:OutletConnectionPoint.
   ?conn s223:hasMedium s223:AC-120VLN-1Ph-60Hz. # can this be inferred? 
 } 
 WHERE { 
