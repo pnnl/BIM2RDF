@@ -8,10 +8,12 @@ CONSTRUCT {
 } 
 WHERE { 
 ?o1 a s223:Luminaire.
-<<?o2 spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
-?o2 spkl:elementId ?rl.
 <<?o1 spkl:category "Lighting Fixtures">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
 ?o1 spkl:roomId ?rl.
+?o2 a s223:PhysicalSpace.
+<<?o2 spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+?o2 spkl:elementId ?rl.
+
 
 
 }
