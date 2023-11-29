@@ -9,7 +9,7 @@ maps_dir = mapping_dir / 's223'
 def maps(maps_dir=maps_dir):
     from .engine import ConstructRule
     # mappings
-    _ = Path(maps_dir).glob('**/*.rq') 
+    _ = Path(maps_dir).glob('**/*.mapping.rq') 
     _ = map(ConstructRule,              _)
     _ = list(_)
     return _
@@ -253,7 +253,7 @@ def engine(stream_id, *, branch_ids=None,
     if branch_ids is None:
         # figuring this is the default mode of working from now.
         data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id) if sg.branch_id.split('/')[0].lower() in allowed_branches ])
-    elif isinstance(branch_ids, (list, tuple)):
+    elif isinstance(branch_ids, (list, tuple, set)):
         data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id, branch_ids)])
     elif isinstance(branch_ids, str):
         data_rules = Rules([SpeckleGetter(stream_id, branch_id=branch_ids, object_id=object_id),])
