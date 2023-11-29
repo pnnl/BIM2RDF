@@ -399,6 +399,7 @@ class Engine(b.Engine): # rule app on Store
         self._rules = rules
         self._db = db
         self.MAX_ITER = MAX_ITER
+        self.i = 0
         
         # logging
         if log:
@@ -423,6 +424,11 @@ class Engine(b.Engine): # rule app on Store
         raise NotImplementedError
     
     def crank_once(self) -> OxiGraph:
+        if hasattr(self, 'logging'):
+            if self.logging.print:
+                line = '-'*10
+                logger.info(f"CYCLE {self.i} {line}")
+
         for r in self.rules:
             # before
             before = len(self.db)
@@ -440,10 +446,13 @@ class Engine(b.Engine): # rule app on Store
                 self.logging.log[r.spec].append(delta)
                 if self.logging.print:
                     logger.info(f"# triples before {delta.before }, after {delta.after } => {delta.after-delta.before}")
-            
+        
+        self.i += 1
         return self.db
 
     def stop(self) -> bool:
+        if self.MAX_ITER <= 0:
+           return False
         # could put validations here
         if len(self.db) == len(self.crank_once()):
             return True
@@ -451,30 +460,19 @@ class Engine(b.Engine): # rule app on Store
             return False
     
     def __iter__(self) -> Iterable[OxiGraph]:
-        MAX_ITER = self.MAX_ITER
-        i = 0
-        line = '-'*10
-        logger.info(f"CYCLE {i} {line}")
         while (not self.stop()):
-            if i > MAX_ITER:
-                logger.warning('reached max iter')
+            if self.i >= self.MAX_ITER:
+                if hasattr(self, 'logging'):
+                    if self.logging.print:
+                        logger.warning('reached max iter')
                 break
-            logger.info(f"CYCLE {i+1} {line}")
             yield self.db
-            i += 1
         else: # for case when nothing needs to happen
             yield self.db
 
     def final(self) -> OxiGraph:
-        from collections import deque
-        def tail(n, iterable):
-            "Return an iterator over the last n items"
-            # tail(3, 'ABCDEFG') --> E F G
-            return iter(deque(iterable, maxlen=n))
-        _ = tail(1, self)
-        _ = tuple(_)
-        _ = _[0]
-        return _
+        for _ in self: continue
+        return self.db
     
     def __call__(self) -> Result:
         db = self.final()
