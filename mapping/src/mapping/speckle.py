@@ -9,7 +9,7 @@ maps_dir = mapping_dir / 's223'
 def maps(maps_dir=maps_dir):
     from .engine import ConstructRule
     # mappings
-    _ = Path(maps_dir).glob('**/*.rq') 
+    _ = Path(maps_dir).glob('**/*.mapping.rq') 
     _ = map(ConstructRule,              _)
     _ = list(_)
     return _
