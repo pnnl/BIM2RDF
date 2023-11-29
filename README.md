@@ -34,7 +34,9 @@ Generally, these tools are assumed to be at their latest version.
     * **dvc storage**: check access to [container](https://portal.azure.com/#view/Microsoft_Azure_Storage/ContainerMenuBlade/~/overview/storageAccountId/%2Fsubscriptions%2F945ae372-bdd3-442f-83b2-6f5f6ff1eee2%2FresourceGroups%2Fprototypemodels%2Fproviders%2FMicrosoft.Storage%2FstorageAccounts%2Fprototypemodelsstorage/path/dvc/etag/%220x8DA87B93CA25E97%22/defaultEncryptionScope/%24account-encryption-key/denyEncryptionScopeOverride~/false/defaultId//publicAccessVal/None).
     * **secrets**: check access to [secrets](https://portal.azure.com/#@PNNL.onmicrosoft.com/resource/subscriptions/945ae372-bdd3-442f-83b2-6f5f6ff1eee2/resourceGroups/prototypemodels/providers/Microsoft.KeyVault/vaults/semint/secrets).
 
-* Speckle: create [API key](https://speckle.xyz/profile). The key will be used to [programmatically access Speckle](https://gitlab.pnnl.gov/conlight/semint/-/blob/fb2960ab43177540daacb3e5be4eaaecd6fae525/speckle/src/speckle/requests.py#L3).
+* Speckle:
+    * create [API key](https://speckle.xyz/profile).
+    The key will be used to [programmatically access Speckle](https://gitlab.pnnl.gov/conlight/semint/-/blob/fb2960ab43177540daacb3e5be4eaaecd6fae525/speckle/src/speckle/requests.py#L3).
     * Need permissions to accesss the Speckle Stream. At minimum you should have access to the "Pritoni" stream.
 
 * GitLab: check access to [S223 repo](https://gitlab.pnnl.gov/conlight/223standard).
