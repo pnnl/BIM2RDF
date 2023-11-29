@@ -6,26 +6,28 @@ from ..engine import Triples, PyRule, ConstructRule as _ConstructRule, OxiGraph
 
 from functools import lru_cache
 @lru_cache
-def namespaces():
+def namespaces(unique=True):
     from ontologies import namespace
     def o():
         from ontologies import namespaces
-        for nss in namespaces():
-            if 'collected' in str(nss.path):
-                for pfx, ns in nss.namespaces():
-                    yield namespace(pfx, ns)
+        for nss in namespaces(collection='applicable'):
+            for pfx, ns in nss.namespaces():
+                yield namespace(pfx, ns)
     def s():
         from speckle import namespaces
         return namespaces()
     def e():
         from ..engine import namespaces
         return namespaces()
-    def e():
+    def em():
         from engine.triples import PyRule
         return (namespace('meta', PyRule.meta_uri,) ,)
-    _ = tuple(o())+tuple(s())+tuple(e())+tuple(e())
+    _ = tuple(o())+tuple(s())+tuple(e())+tuple(em())
     _ = sorted(_, key=lambda ns: ns.prefix )
     _ = tuple(frozenset(_))
+    if unique:
+        _ = {p:n for p,n in _}
+        _ = tuple(_.items())
     return _
 
 
@@ -185,7 +187,6 @@ class rulequeries:
     
     @property
     def shacl_validation(self):
-        fsfsdf
         from validation.engine import shacl_validation
         _ = self.q.querymaker(shacl_validation)
         return _.maker(_.pattern, _.filter)
