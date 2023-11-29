@@ -62,6 +62,11 @@ Clone under your personal folder outside of your OneDrive. On Windows this is c:
     2. **activate**: `rye shell` or use the activation scripts in the [virtual environment folder](.venv).
     3. **configure**: `python -m project.config`. (run twice on windows. it will fail the first time.)
 
+3. **Test by running a basic mapping**:
+    1. `cd` into `mapping`. Then `python -m mapping.speckle --help`. This will show the basic funtionality of the mapping.
+    2. While still in the `mapping` directory run `python -m mapping.speckle Pritoni --branch_ids="electrical/panels"`. 
+        * In this case `Pritoni` is the stream_id and `electrical/panels` is the branch_ids.
+    3. You should see some output in the terminal about each cycle. The result should be an output file called `out.ttl` that contains all the triples in the given branch_ids. 
 
 ### Visual Studio Code
 
