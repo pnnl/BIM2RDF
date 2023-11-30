@@ -12,5 +12,6 @@ CONSTRUCT {
 WHERE { 
 <<?o1 spkl:category "Lighting Devices">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
 ?o1 spkl:definition/spkl:family ?f.
+?o1 spkl:phaseCreated "New Construction".
 filter(contains(lcase(?f), "occupancy"))
 }
