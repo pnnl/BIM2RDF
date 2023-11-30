@@ -18,15 +18,22 @@ stages:
       - ../../ontologies/.ontoenv # 
     outs:
      - ontology.ttl  #/${item}.ttl
+    
+  validation: # if there was a separate validation step, i'd use the verb, validATE
+    cmd: python -m ontologies.collect --collection_name defs --import_deps False --remove_owl_imports True -p validation.ttl 
+    wdir: work
+    deps:
+      - ../../ontologies/.ontoenv
+    outs:
+      - validation.ttl
 
   map:
     cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=${building}
     wdir: work
     deps:
       - ../s223
-      - ../src/mapping
-      - ../src/validation
       - ontology.ttl
+      - validation.ttl
     outs:
       - out.ttl # need to keep tracking this?
 
