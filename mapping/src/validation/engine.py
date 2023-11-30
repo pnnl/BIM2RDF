@@ -40,9 +40,26 @@ def _shacl_validation(db: OxiGraph):
 def shacl_validation(db: OxiGraph,) -> Triples:
     _ = _shacl_validation(db)
     _ = _.validation.report
-    from mapping.conversions import rg2triples
+    from mapping.utils.conversions import rg2triples
     _ = rg2triples(_)
     return _
+
+
+def shacl_validation(db: OxiGraph) -> Triples:
+    s = db._store
+    from mapping.utils.queries import queries
+    from mapping.engine import select
+    _ = select(s, (
+            queries.rules.mapped,
+            queries.rules.rdfs_inferred,
+            queries.rules.shacl_inferred,
+            ) ) #
+    shapes = select(s, 
+            (queries.rules.ontology,  ) )
+    from validation.shacl import tqshacl
+    _ = tqshacl('validate', _, shapes)
+    return _
+
 
 
 import logging

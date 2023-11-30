@@ -223,8 +223,8 @@ def get_rdflib_semantics(semantics:Literal['owlrl']|Literal['rdfs']  ):
         from owlrl import RDFS_Semantics as S
         # it messes up these!
             # sh:maxCount true, 
-            #     1,  <== original 
-            #     1.0 ;
+            #     1,    <== original 
+            #     1.0 ; <== adds
         # stop the nonsense
         def _(*a, **p): ...
         S.one_time_rules = _ 
@@ -273,15 +273,12 @@ def fix(g: Graph) -> Graph:
 
 from pyoxigraph import Store
 # put in utils/queries.py TODO:
-def select(store: Store, construct_queries) -> Store:
-    queries = construct_queries
-    _ = []
-    for q in queries:
-        _.extend(store.query( q  ))
-    s = Store()
-    from pyoxigraph import Quad
-    if len(_): s.bulk_extend(Quad(*t) for t in _)
-    return s
+def select(store: Store, construct_queries) -> Triples:
+    _ = map(lambda q: store.query(q) , construct_queries )
+    from itertools import chain
+    _ = chain.from_iterable(_)
+    _ = Triples(_)
+    return _
 
 
 def rdflib_rdfs(db: OxiGraph) -> Triples:
@@ -289,19 +286,35 @@ def rdflib_rdfs(db: OxiGraph) -> Triples:
     from .utils.queries import queries
     _ = select(_, (
             queries.rules.mapped,
-            queries.rules.ontology, # need all right?
+            queries.rules.ontology, #
             #queries.rules.rdfs_inferred,
             queries.rules.shacl_inferred) )
-    from .conversions import og2rg
-    _ = og2rg(_) # backed by oxygraph
+    from .utils.conversions import triples2ttl
+    _ = triples2ttl(_)
+    from rdflib import Graph
+    before = Graph()
+    before.parse(data=_, format='text/turtle')
     from .utils.rdflibgraph import copy
-    _ = copy(_) # backed by rdflib..which is 'safer'
-    before = copy(_)
+    _ = copy(before)
     _ = get_closure(_, semantics='rdfs')
-    #_ = fix(_) put it here or in semantics?
-    from .conversions import rg2triples
+    from .utils.conversions import rg2triples
     _ = generated(before, _)
     _ = rg2triples(_)
+    return _
+
+
+def topquadrant_rules(db: OxiGraph) -> Triples:
+    s = db._store
+    from .utils.queries import queries
+    _ = select(s, (
+            queries.rules.mapped,
+            queries.rules.rdfs_inferred,) ) #
+    shapes = select(s, 
+            (queries.rules.ontology,  ) )
+    from validation.shacl import tqshacl
+    _ = tqshacl('infer', _, shapes)
+    # could get some bnode issues b/c of
+    # ttl reading back bnodse as different!!!
     return _
 
 
@@ -318,20 +331,12 @@ def generated(before, after):
     return graph_diff(before, after).in_generated
 
 
-def defs(): 
-    from ontologies import get
-    _ = get('defs')
-    from rdflib import Graph
-    g = Graph()
-    g.parse(_)
-    return g
-
 
 from functools import lru_cache
 @lru_cache(1)
-def shacl_defs():
+def shacl_defs(ontology_collection='defs'):
     from pyshacl.shapes_graph import ShapesGraph
-    _ = defs()
+    _ = get_ontology_collection('defs')
     #_ = _.skolemize()
     _ = ShapesGraph(_)
     _.shapes # finds rules. otherwise gather_rules errors
@@ -343,12 +348,12 @@ def shacl_defs():
     _ = _()
     return _
 
-
 def addnss(g, namespaces=()):
     for p,n in namespaces: g.bind(p, n)
     return g
 
 def pyshacl_rules(db: OxiGraph) -> Triples:
+    # not working. needs to be wired back up. 
     from pyshacl.rules import apply_rules, gather_rules
     functions = shacl_defs().functions
     rules =  shacl_defs().rules
@@ -375,15 +380,18 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     return _
 
 
-if __name__ == '__main__':
-    from pathlib import Path
-    def infer(ttl:Path, semantics='rdfs', o:Path=Path('inferred.ttl')):
-        from rdflib import Graph
-        _ = Graph()
-        _.parse(ttl)
-        _ = get_closure(_, semantics=semantics)
-        _.serialize(o)
-        return _
+if __name__ == '__main__': ...
+    # from pathlib import Path
+    # def rdfs(ipth: Path, opath=None):
+    #     ipth = Path(ipth)
+    #     if not opath:
+    #         opath = Path(ipth.parts[:-1]) / ipth.stem+'-rdfs.ttl'
+    #     db = OxiGraph()
+    #     db._store.bulk_load(ipth, 'text/turtle')
+    #     _ = rdflib_rdfs(db)
+    #     from pyoxigraph import serialize
+    #     from .conversions import triples2ttl
+    #     _ = triples2ttl()
+    #     return opath
 
-    from fire import Fire
-    Fire({'infer': infer})
+    #...

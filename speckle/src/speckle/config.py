@@ -5,7 +5,7 @@ def config(dev = True):
     if dev:
         if not _.exists():
             import json
-            input_data = input("enter your token: ")
+            input_data = input("enter your Speckle API token: ")
             json_object = {"speckl_token": input_data}
             with open(_,"w") as f:
                 json.dump(json_object,f)

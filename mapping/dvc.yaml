@@ -2,14 +2,22 @@ stages:
 # or just have it as a manual cmd?
 # use foreach? param sweep discussion https://github.com/iterative/dvc/pull/8187
 
-# maybe delete cache for "production run"
-  ontology:
-    cmd: python -m mapping.engine infer ../../ontologies/collected/all.ttl -s rdfs -o ontology.ttl
+  # all:
+  #   foreach:
+  #     - defs
+  #     - all
+  #     - applicable
+    #do:
+  ontology: # need to process ontology a bit more than just collecting files
+  # this step is here instead of in 'ontologies' b/c of recursion issues.
+  #                                                   param coll name?
+    cmd: python -m ontologies.collect --collection_name applicable --import_deps True --remove_owl_imports True -p ontology.ttl  # ${item}.ttl
     wdir: work
     deps:
-      - ../../ontologies/collected/all.ttl
+      #- ../../ontologies/223standard.hash
+      - ../../ontologies/.ontoenv # 
     outs:
-      - ontology.ttl
+     - ontology.ttl  #/${item}.ttl
 
   map:
     cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=${building}
@@ -18,6 +26,7 @@ stages:
       - ../s223
       - ../src/mapping
       - ../src/validation
+      - ontology.ttl
     outs:
       - out.ttl # need to keep tracking this?
 

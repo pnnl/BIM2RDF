@@ -9,7 +9,7 @@ maps_dir = mapping_dir / 's223'
 def maps(maps_dir=maps_dir):
     from .engine import ConstructRule
     # mappings
-    _ = Path(maps_dir).glob('**/*.rq') 
+    _ = Path(maps_dir).glob('**/*.mapping.rq') 
     _ = map(ConstructRule,              _)
     _ = list(_)
     return _
@@ -30,11 +30,11 @@ def rules(*,
     if inference:
         _ = _ + [PyRule(get_ontology)]
         #                     223p rules
-        from .engine import rdflib_rdfs, pyshacl_rules
+        from .engine import rdflib_rdfs, topquadrant_rules
         _ = _ + [
             PyRule(rdflib_rdfs),
-            PyRule(pyshacl_rules)
-                 ]
+            PyRule(topquadrant_rules)
+                ]
 
     _ = Rules(_)
     return _
@@ -42,11 +42,10 @@ def rules(*,
 
 from functools import lru_cache
 @lru_cache
-def get_ontology(_: OxiGraph) -> Triples:
+def get_ontology(_: OxiGraph, collection='all') -> Triples:
     from .utils.data import get_data
     from project import root
-    _ = root / 'mapping' / 'work' / 'ontology.ttl'
-    _ = get_data(_)
+    _ = get_data(root / 'mapping' / 'work' / 'ontology.ttl'  ) # collection
     return _
 
 
@@ -134,6 +133,8 @@ def query_speckle_meta():
     return _
 
 # TODO: sparql query the full general_meta instead of writing python
+from functools import lru_cache
+@lru_cache
 def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
     _ = query_speckle_meta()
     id = 'id'
@@ -238,7 +239,7 @@ allowed_branches = {
 from pathlib import Path
 def engine(stream_id, *, branch_ids=None,
            maps_dir: Path | None = maps_dir,
-           max_cycles=20,
+           max_cycles=10,
            inference=False,
            validation=False,
            out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
@@ -248,11 +249,11 @@ def engine(stream_id, *, branch_ids=None,
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
     
-    # parsing of branch_id is relegated to 
+    # parsing of branch_id is relegated to
     if branch_ids is None:
         # figuring this is the default mode of working from now.
         data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id) if sg.branch_id.split('/')[0].lower() in allowed_branches ])
-    elif isinstance(branch_ids, (list, tuple)):
+    elif isinstance(branch_ids, (list, tuple, set)):
         data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id, branch_ids)])
     elif isinstance(branch_ids, str):
         data_rules = Rules([SpeckleGetter(stream_id, branch_id=branch_ids, object_id=object_id),])
@@ -286,7 +287,7 @@ def engine(stream_id, *, branch_ids=None,
             q = tuple(q) # why do i have to do this?!
             if q: s.bulk_extend(Quad(*t) for t in q)
             del q
-        _ = s; del s
+        _ = s; del s        
 
     if not out:
         return _

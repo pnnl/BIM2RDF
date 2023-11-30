@@ -16,8 +16,12 @@ build-backend = "hatchling.build"
 [tool.rye]
 managed = true
 dev-dependencies = [
-    "ipython", "ipdb",
-     "pip" # careful! only for one-offs!
+    "ipython", 
+    "pip", # careful! only for one-offs!
+    # dbging
+    "ipdb", 
+    "icecream",
+     "mypy", 
      ]
 
 [tool.hatch.metadata]

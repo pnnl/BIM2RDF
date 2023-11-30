@@ -10,7 +10,7 @@ def addnss(g, namespaces=()):
 
 from mapping.utils.queries import namespaces
 
-def shacl(
+def pyshacl(
     data, namespaces=namespaces(), shacl=None, ontology=None,
     advanced=False, iterate_rules=False,
     # logger=None doesn't work.
@@ -46,4 +46,36 @@ def shacl(
     return NS(
         validation=validation,
         generated=gd,)
+
+from pathlib import Path
+from typing import Literal
+from .engine import Triples
+# could cache
+def tqshacl(
+        mode:Literal['validate']|Literal['infer'],
+        data:'Triples', shapes:'Triples'=None,
+        dir=Path.cwd(),) ->Triples:
+    if mode == 'validate':
+        from topquadrant import validate as f
+    else:
+        assert(mode == 'infer')
+        from topquadrant import infer as f
+
+    datap = dir / 'tqshacl.data.tmp.ttl'
+    datap.unlink(missing_ok=True)
+    from pyoxigraph import serialize
+    serialize(data, datap, 'text/turtle')
+    if shapes:
+        shapesp = dir / 'tqshacl.shapes.tmp.ttl'
+        shapesp.unlink(missing_ok=True)
+        serialize(shapes, shapesp, 'text/turtle')
+        o = f(datap, shapesp,)
+    else:
+        o = f(datap, )
+    shapesp.unlink(missing_ok=True)
+    datap.unlink(missing_ok=True)
+    from mapping.utils.data import get_data
+    o = get_data(o.stdout, )
+    return o
+
 
