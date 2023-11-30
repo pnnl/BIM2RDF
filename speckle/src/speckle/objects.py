@@ -44,6 +44,10 @@ def url_quote(d: dict) -> dict:
     # d = d.copy()
     for m in parsing.fields.find(d):
         k = str(m.path)
+        # parens add an extra quotation.
+        # str(m.path.__class__('sdf()'))
+        # "'sdf()'"
+        k = k.strip("'")
         v = m.context.value.pop(k)
         k = quote(k)
         m.context.value[k] = v # is this ok? channging while iterating
