@@ -36,7 +36,6 @@ members = [
     "project_dvc",
     "doc",
     "ontologies",
-    "ontoenv",
     "graphdb",
     "speckle",
     "engine",
