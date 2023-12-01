@@ -1,0 +1,51 @@
+schema: '2.0'
+stages:
+  ontology:
+    cmd: python -m ontologies.collect --collection_name applicable --import_deps True
+      --remove_owl_imports True -p ontology.ttl
+    deps:
+    - path: ../../ontologies/.ontoenv
+      hash: md5
+      md5: 968434a2503037ae90dd4ecad61cbc11.dir
+      size: 56584
+      nfiles: 2
+    outs:
+    - path: ontology.ttl
+      hash: md5
+      md5: e828953611e7410fb6ef78f0cc80907b
+      size: 6718635
+  validation:
+    cmd: python -m ontologies.collect --collection_name defs --import_deps False --remove_owl_imports
+      True -p validation.ttl
+    deps:
+    - path: ../../ontologies/.ontoenv
+      hash: md5
+      md5: 968434a2503037ae90dd4ecad61cbc11.dir
+      size: 56584
+      nfiles: 2
+    outs:
+    - path: validation.ttl
+      hash: md5
+      md5: 910a84cc26080f74941888abfa6e25e4
+      size: 254250
+  map:
+    cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=Pritoni
+    deps:
+    - path: ../s223
+      hash: md5
+      md5: b912f812256da125886eb53a64e221d0.dir
+      size: 14961
+      nfiles: 26
+    - path: ontology.ttl
+      hash: md5
+      md5: e828953611e7410fb6ef78f0cc80907b
+      size: 6718635
+    - path: validation.ttl
+      hash: md5
+      md5: 910a84cc26080f74941888abfa6e25e4
+      size: 254250
+    outs:
+    - path: out.ttl
+      hash: md5
+      md5: ddd29e33f602ee303a61a595a0f3366d
+      size: 232897254
