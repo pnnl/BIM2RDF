@@ -5,26 +5,29 @@ def env():
     from os import environ
     from .install import ShaclInstallation
     si = ShaclInstallation()
-    l = (si.home/'log4j2.properties') 
-    #l = (si.dir/'log4j2.properties') # idk how to set logging
-    assert(l.exists())
-    l = ''
-    #l = str(l).replace("\\", "\\\\")
-    assert(si.home.exists())
-    assert(si.lib.exists())
     return {**environ,
         'SHACL_HOME': str(si.home),
         'SHACL_CP': f"{si.lib}/*", # need a star for some reason
-        'LOGGING': str(l),
+        'LOGGING': str(si.logging),
           }
+
+def tryenv(k):
+    # ugly
+    try:
+        return env()[k]
+    except:
+        return 'NOTSET'
 
 def cmd(
         cmd:Literal['validate']|Literal['infer'],
         datafile: Path,
         shapesfile: Path=None,
-        shacl_cp=env()['SHACL_CP'], jvm_args='', logging=env()['LOGGING'],
+        shacl_cp=tryenv('SHACL_CP'), jvm_args='', logging=tryenv('LOGGING'),
         ):
     """command passed to java to run topquadrant shacl"""
+    if (shacl_cp == 'NOTSET') or (logging == 'NOTSET'):
+        raise ValueError("shacl_cp or logging not set")
+
     assert(cmd in {'validate', 'infer'})
     logging = f"-Dlog4j.configurationFile={logging}" if logging else ''
     shacl_cp = f"-cp {shacl_cp}"

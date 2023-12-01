@@ -18,9 +18,12 @@ from pathlib import Path
 class ShaclInstallation:
     def __init__(self, ver=ver, overwrite=False) -> None:
         from project import root
-        dir = root / 'topquadrant' / 'shacl'
-        self.dir = self.download_shacl(ver, dir, overwrite=overwrite)
+        _ = root / 'topquadrant' / 'shacl'
+        self.dir = self.download_shacl(ver, _ / f'shacl-{ver}' , overwrite=overwrite)
         self.ver = ver
+        assert(self.home.exists())
+        assert(self.logging.exists())
+        assert(self.lib.exists())
 
     @staticmethod
     def download_shacl(ver, dir, overwrite=False) -> Path:
@@ -42,6 +45,9 @@ class ShaclInstallation:
     @property
     def home(self) -> Path:
         return self.dir / f"shacl-{self.ver}"
+    @property
+    def logging(self) -> Path:
+        return self.home / "log4j2.properties"
     @property
     def bin(self) -> Path:
         return self.home / 'bin'
