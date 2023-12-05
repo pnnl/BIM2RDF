@@ -8,7 +8,7 @@ CONSTRUCT {
 ?this a s223:PhysicalSpace.
   ?this rdfs:label ?name.
   ?this s223:hasValue ?v.
-  ?v a s223:QuantifiableActuatableProperty.
+  #?v a s223:QuantifiableActuatableProperty.
    
 } 
 WHERE { 
