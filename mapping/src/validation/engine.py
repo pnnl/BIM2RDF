@@ -53,6 +53,7 @@ def shacl_validation(db: OxiGraph) -> Triples:
             queries.rules.mapped,
             queries.rules.rdfs_inferred,
             queries.rules.shacl_inferred,
+            queries.rules.ontology,
             ) ) #
     from project import root
     shapes = root / 'mapping' / 'work' / 'validation.ttl'
