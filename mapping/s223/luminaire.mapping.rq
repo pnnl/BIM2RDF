@@ -8,8 +8,11 @@ PREFIX spkl: <http://speckle.systems/>
 CONSTRUCT { 
     ?this a s223:Luminaire.
     ?this rdfs:label ?name.
-    ?this s223:hasValue ?v.
-    #?v a s223:QuantifiableActuatableProperty.
+    ?this s223:hasProperty ?p.
+    ?p a s223:QuantifiableProperty.
+    ?p s223:hasValue ?v.
+    
+    
 
 } 
 WHERE { 
@@ -17,5 +20,6 @@ WHERE {
     <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
     ?this spkl:phaseCreated "New Construction".  # to say it's being 'used' in the plan and not part of the 'types'
     ?this spkl:definition/spkl:type ?name.
-    ?this spkl:parameters/spkl:FBX_LIGHT_WATTAGE/spkl:value ?v.
+    ?this spkl:parameters/spkl:FBX_LIGHT_WATTAGE ?p. 
+    ?p spkl:value ?v.
 }
