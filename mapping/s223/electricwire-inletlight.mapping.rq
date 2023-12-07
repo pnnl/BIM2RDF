@@ -1,0 +1,17 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX meta: <http://meta>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+?c s223:cnx ?D2in.
+}
+WHERE {
+?c a  s223:ElectricWire.
+?D2in a s223:InletConnectionPoint.
+?D2in s223:hasMedium s223:AC-120VLN-1Ph-60Hz.
+?D2in s223:cnx ?D2.
+?D2 a s223:Luminaire.
+?D2 s223:connectedThrough ?c.
+}
