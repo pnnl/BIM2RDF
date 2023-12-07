@@ -264,10 +264,11 @@ def engine(stream_id, *, branch_ids=None,
     else:
         raise TypeError('branch id not processed')
     
-    if isinstance(rules_dir, (list, tuple, set)):
-        rules_dir = tuple(Path(_) for _ in rules_dir)
-    else:
-        rules_dir = Path(rules_dir)
+    if rules_dir:
+        if isinstance(rules_dir, (list, tuple, set)):
+            rules_dir = tuple(Path(_) for _ in rules_dir)
+        else:
+            rules_dir = Path(rules_dir)
 
     _ = fengine(
             rules=lambda: (
