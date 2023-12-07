@@ -1,30 +1,33 @@
 from engine.triples import PyRuleCallable, Triples
 from .engine import Rules, OxiGraph, Triples, PyRule
-from typing import Callable
+from typing import Callable, Iterable
 from pathlib import Path
 
 
 from . import mapping_dir
 maps_dir = mapping_dir / 's223'
-def maps(maps_dir=maps_dir):
+def rules_from_dir(maps_dir=maps_dir):
     from .engine import ConstructRule
     # mappings
-    _ = Path(maps_dir).glob('**/*.mapping.rq') 
+    _ = Path(maps_dir).glob('**/*.rq')
     _ = map(ConstructRule,              _)
     _ = list(_)
     return _
 
 
 def rules(*,
-          maps_dir: Path | None = maps_dir,
+          rules_dir: Path | Iterable[Path] | None = maps_dir,
           inference = True, 
             ) -> Rules:
     _ = []
     from .engine import Rules
-    if maps_dir:
-        maps_dir = Path(maps_dir)
-        assert(maps_dir.is_dir())
-        _ = _ + maps(maps_dir)
+    if rules_dir:
+        if isinstance(rules_dir, Path):
+            rules_dir = [rules_dir]
+        else:
+            rules_dir = tuple(rules_dir)
+        for rd in rules_dir:
+            _ = _ + rules_from_dir(rd)
 
     # inference
     if inference:
@@ -237,8 +240,9 @@ allowed_branches = {
 }
 
 from pathlib import Path
+from typing import Iterable
 def engine(stream_id, *, branch_ids=None,
-           maps_dir: Path | None = maps_dir,
+           rules_dir: Path | Iterable[Path] | None = maps_dir,
            max_cycles=10,
            inference=False,
            validation=False,
@@ -259,12 +263,18 @@ def engine(stream_id, *, branch_ids=None,
         data_rules = Rules([SpeckleGetter(stream_id, branch_id=branch_ids, object_id=object_id),])
     else:
         raise TypeError('branch id not processed')
+    
+    if isinstance(rules_dir, (list, tuple, set)):
+        rules_dir = tuple(Path(_) for _ in rules_dir)
+    else:
+        rules_dir = Path(rules_dir)
+
     _ = fengine(
             rules=lambda: (
                     data_rules
                     +rules(
                         inference=inference,
-                        maps_dir=maps_dir)
+                        rules_dir=rules_dir)
                     ),
             validation=validation,
             max_cycles=max_cycles,
