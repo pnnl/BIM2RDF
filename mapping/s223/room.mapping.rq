@@ -7,13 +7,17 @@ PREFIX spkl: <http://speckle.systems/>
 CONSTRUCT { 
 ?this a s223:PhysicalSpace.
   ?this rdfs:label ?name.
-  ?this s223:hasValue ?v.
-  #?v a s223:QuantifiableActuatableProperty.
+  ?this s223:hasProperty ?p.
+  ?p a s223:QuantifiableProperty.
+  ?p s223:hasValue ?v.
+  
+  
    
 } 
 WHERE { 
 <<?this spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
     ?this spkl:name ?name. 
-    ?this spkl:parameters/spkl:ROOM_AREA/spkl:value ?v.
+    ?this spkl:parameters/spkl:ROOM_AREA ?p.
+    ?p spkl:value ?v.
    
 }
