@@ -26,7 +26,7 @@ class Triples(b.Data):
 
     def __init__(self, data: Iterable[g.Triple]=[]) -> None:
         if not isinstance(data, (tuple, list, set, frozenset)):
-            self._data = tuple((data))
+            self._data = frozenset(data)
         else:
             self._data = data
     
@@ -133,7 +133,7 @@ class Triples(b.Data):
 
     def insert(self, db: 'OxiGraph', graph=g.DefaultGraph()) -> None:
         if len(self):
-            db._store.bulk_extend(g.Quad(*t) for t in self)
+            db._store.bulk_extend(g.Quad(*t, graph) for t in self)
             db._store.optimize()
 
 
