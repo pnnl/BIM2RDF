@@ -8,18 +8,7 @@ import pyoxigraph as g
 from typing import Iterable, Iterator
 # meta/rdfstar inserstion somewhere TODO
 
-
-def it():
-    i = 0
-    while True:
-        yield i
-        i += 1
-
-
-# anon nodes break the repeatability
-# so this is a cache that associates
-# hash(namednodes) -> blanknodes
-deanoned = {}
+from uuid import uuid4 as uuid
 
 
 class Triples(b.Data):
@@ -46,92 +35,16 @@ class Triples(b.Data):
     def __add__(self, data: 'Triples' ) -> 'Triples':
         from itertools import chain 
         return Triples(chain(self._data, data._data))
-    
-    def known_hash(self) -> str:
-        # a hash based on the content. assumed to persist.
-        if not self._data: return ''
-        def tohash(triples):
-            # hash the 'constants' to id the set of triples.
-            # ...not the ones that can potentially change
-            for spo in triples:
-                for _ in spo:
-                    if isinstance(_, g.BlankNode):
-                        continue
-                    if str(_.value).startswith(self.deanon_uri):
-                        continue
-                    yield _
-
-        # do i need a hashing library??
-        from hashlib import md5 # md5 instead of __hash__ bc hash() changes bw program launches
-        tohash = (str(t.value) for t in tohash(self._data))
-        tohash = sorted(tohash)
-        tohash = ''.join(t for t in tohash)
-        tohash = tohash.encode()
-        tohash = md5(tohash)
-        tohash = tohash.hexdigest()
-        return tohash
-    
-    def anons(self):
-        for triple in self:
-            if any(map(lambda _: isinstance(_, g.BlankNode) , triple)):
-                yield triple
 
     def deanon(self) -> 'Triples':
-        # block newly generated anon nodes if they've already been seen.
-        # the 'id' is the context of named nodes in the triples 'batch'.
-        id = self.known_hash()
-        if not id: return Triples()
-        
-        if id in deanoned:
-            da = deanoned[id]
-            nn = []
-            for triple in self:
-                if all(map(lambda _: not isinstance(_, g.BlankNode) , triple)):
-                    nn.append(triple)
-        else:
-            da = []
-            nn = []
-            for triple in self:
-                if any(map(lambda _: isinstance(_, g.BlankNode) , triple)):
-                    da.append(triple)
-                else:
-                    nn.append(triple)
-            deanoned[id] = tuple(da)
-
-        r = self.__class__(nn) + self.__class__(da)
-        return r
-    deanon_uri = 'http://deanon' # {id}
-    def _deanon(self) -> 'Triples':
-        # not sure this is correct
-        id = self.known_hash()
-        if not id: return Triples()
-        url = f'{self.deanon_uri}/{id}'
-        iz = iter(it())
-        
-        if id in deanoned:
-            da = deanoned[id]
-            nn = []
-            for triple in self:
-                if all(map(lambda _: not isinstance(_, g.BlankNode) , triple)):
-                    nn.append(triple)
-        else:
-            da = []
-            nn = []
-            for triple in self:
-                if any(map(lambda _: isinstance(_, g.BlankNode) , triple)):
-                    s, p, o = triple
-                    s = g.NamedNode(f"{url}/{next(iz)}") if isinstance(s, g.BlankNode) else s
-                    p = g.NamedNode(f"{url}/{next(iz)}") if isinstance(p, g.BlankNode) else p
-                    o = g.NamedNode(f"{url}/{next(iz)}") if isinstance(o, g.BlankNode) else o
-                    triple = g.Triple(s, p, o)
-                    da.append(triple)
-                else:
-                    nn.append(triple)
-            deanoned[id] = tuple(da)
-
-        r = self.__class__(nn) + self.__class__(da)
-        return r
-    
+        _ = (
+            (s if not isinstance(s, g.BlankNode) else g.NamedNode(f'urn:uuid:{uuid()}') ,
+             p,
+             o if not isinstance(o, g.BlankNode) else g.NamedNode(f'urn:uuid:{uuid()}'),
+             )
+             for (s,p,o) in self)
+        _ = (g.Triple(s,p,o) for (s,p,o) in _)
+        return self.__class__(_)
 
     def insert(self, db: 'OxiGraph', graph=g.DefaultGraph()) -> None:
         if len(self):
