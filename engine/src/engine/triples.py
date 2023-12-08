@@ -25,9 +25,12 @@ deanoned = {}
 class Triples(b.Data):
 
     def __init__(self, data: Iterable[g.Triple]=[]) -> None:
-        if not isinstance(data, (tuple, list, set, frozenset)):
+        if isinstance(data, Iterator):
             self._data = frozenset(data)
+        elif isinstance(data, self.__class__):
+            self._data = data._data
         else:
+            assert(isinstance(data, Iterable  ))
             self._data = data
     
     def __hash__(self) -> int:
