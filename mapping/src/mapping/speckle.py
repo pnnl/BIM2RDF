@@ -222,16 +222,15 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )
         
 
-def fengine(*, validation=True, rules=rules, max_cycles=20) -> 'Engine':
-    # functions for args
+def fengine(og=OxiGraph(), validation=True, rules=rules, max_cycles=20) -> 'Engine':
     from .engine import OxiGraph
     if validation:
         from validation.engine import Engine
     else:
         from .engine import Engine
     _ = Engine(
-            rules(),
-            OxiGraph(), MAX_ITER=max_cycles)
+            rules,
+            og, MAX_ITER=max_cycles)
     return _
 
 
@@ -269,18 +268,30 @@ def engine(stream_id, *, branch_ids=None,
             rules_dir = tuple(Path(_) for _ in rules_dir)
         else:
             rules_dir = Path(rules_dir)
-
-    _ = fengine(
-            rules=lambda: (
-                    data_rules
-                    +rules(
-                        inference=inference,
-                        rules_dir=rules_dir)
-                    ),
-            validation=validation,
-            max_cycles=max_cycles,
-        )
-    _()
+    
+    # throw and forget mode. not optimized but don't have to manage.
+    # _ = fengine(
+    #         rules=(data_rules
+    #                 +rules(
+    #                     inference=inference,
+    #                     rules_dir=rules_dir)),
+    #         validation=validation,
+    #         max_cycles=max_cycles,
+    #     )
+    # _()
+    # some manual rules handling to optimize processing time
+    # 1. load data                                                                           ........no need to keep spinning
+    _ = fengine(            rules=data_rules,                                               validation=False, max_cycles=1)()
+    if rules_dir:
+    # 2. "mappings"
+        _ = fengine(og=_.db,    rules=rules(rules_dir=rules_dir,    inference=False),       validation=False,         max_cycles=max_cycles)()
+    # 3. inferencing 
+    if inference:                                                                                                     # or is just once cycle enough?
+        _ = fengine(og=_.db,    rules=rules(rules_dir=None,         inference=inference),    validation=False,        max_cycles=max_cycles)() 
+    # 4. validation
+    if validation:                                                                                                    # doesn't matter.
+        _ = fengine(og=_.db,    rules=rules(rules_dir=None,         inference=False),       validation=validation,    max_cycles=max_cycles)()
+    
     _ = _.db._store
 
     if out_selections:
