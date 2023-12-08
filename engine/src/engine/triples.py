@@ -134,7 +134,6 @@ class Triples(b.Data):
     def insert(self, db: 'OxiGraph', graph=g.DefaultGraph()) -> None:
         if len(self):
             db._store.bulk_extend(g.Quad(*t, graph) for t in self)
-            db._store.optimize()
 
 
 class OxiGraph(b.DataBase):
@@ -451,6 +450,7 @@ class Engine(b.Engine): # rule app on Store
                     logger.info(f"# triples before {delta.before }, after {delta.after } => {delta.after-delta.before}")
         
         self.i += 1
+        self.db._store.optimize()
         return self.db
 
     def stop(self) -> bool:
