@@ -35,9 +35,7 @@ class Triples(b.Data):
             else hash(frozenset(self._data))
     
     def __len__(self) -> int:
-        i = 0
-        for _ in self: i += 1
-        return i
+        return len(self._data)
 
     def __iter__(self) -> Iterable[g.Triple]:
         yield from self._data
