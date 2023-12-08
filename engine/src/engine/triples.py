@@ -31,7 +31,8 @@ class Triples(b.Data):
             self._data = data
     
     def __hash__(self) -> int:
-        return hash((self._data))
+        return hash((self._data)) if isinstance(self._data, (frozenset, set) ) \
+            else hash(frozenset(self._data))
     
     def __len__(self) -> int:
         i = 0
