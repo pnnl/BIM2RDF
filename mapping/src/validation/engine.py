@@ -97,7 +97,7 @@ class Engine(_Engine):
             conforms = False
         logger.info(f"conforms: {conforms}")
         assert(isinstance(conforms, bool))
-        return Result(_, conforms)
+        return Result(self.db, conforms)
     
     def __call__(self) -> Result:
         _ = super().__call__()
