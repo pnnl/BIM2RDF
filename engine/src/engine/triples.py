@@ -53,11 +53,11 @@ class Triples(b.Data):
     def __hash__(self) -> int:
         return hash((self._data)) if isinstance(self._data, (frozenset, set) ) \
             else hash(frozenset(self._data))
-    def namednode_hash(self) -> str:
+    def notanon_hash(self) -> str:
         # a hash based on the content. assumed to persist.
         if not self._data: return ''
 
-        _ = (str(t.value) for t in flatten(self) if isinstance(t, g.NamedNode) )
+        _ = (t for t in flatten(self) if isinstance(t, (g.NamedNode, g.Literal)) )
         _ = frozenset(_)
         return hash(_)
         
@@ -67,7 +67,7 @@ class Triples(b.Data):
     def unseen(self) -> Iterable[g.Triple]:
         # block newly generated anon nodes if they've already been seen.
         # the 'identifier' is the context of named nodes in the triples 'batch'.
-        id = self.namednode_hash()
+        id = self.notanon_hash()
         if not id: yield from []
         if id in seenbatches:
             yield from []
