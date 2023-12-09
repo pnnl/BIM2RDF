@@ -14,11 +14,8 @@ def it():
         yield i
         i += 1
 
-# anon nodes break the repeatability
-# so this is a cache that associates
-# hash(namednodes) -> blanknodes
-seenbatches = set()
 
+seenbatches = set()
 
 def flatten(triples,):
     for spo in triples:
