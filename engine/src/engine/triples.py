@@ -7,13 +7,7 @@ from .abstract import abstract as b
 import pyoxigraph as g
 from typing import Iterable, Iterator
 
-
-def it():
-    i = 0
-    while True:
-        yield i
-        i += 1
-
+from uuid import uuid4 as uuid
 
 seenbatches = set()
 
@@ -25,6 +19,30 @@ def flatten(triples,):
             else:
                 assert(isinstance(_, (g.BlankNode, g.NamedNode, g.Literal)))
                 yield _
+
+
+def isanon(n):
+    if isinstance(n, g.NamedNode):
+        if n.value.startswith(anon_uri):
+            return True
+        else:
+            return False
+    elif isinstance(n, g.Literal):
+        return False
+    else:
+        assert(isinstance(n, g.BlankNode))
+        return True
+    
+anon_uri = 'urn:uuid:anon:'
+
+def deanon(triples) -> Iterable[g.Triple]:
+    # wont recurse in rdfstar though
+    for s,p,o in triples:
+        yield g.Triple(
+            s if not isanon(s) else g.NamedNode(f"{anon_uri}{uuid()}"),
+            p,
+            o if not isanon(o) else g.NamedNode(f"{anon_uri}{uuid()}")
+        )
 
 
 class Triples(b.Data):
@@ -53,19 +71,18 @@ class Triples(b.Data):
     def __hash__(self) -> int:
         return hash((self._data)) if isinstance(self._data, (frozenset, set) ) \
             else hash(frozenset(self._data))
+   
     def notanon_hash(self) -> str:
         # a hash based on the content. assumed to persist.
         if not self._data: return ''
-
-        _ = (t for t in flatten(self) if isinstance(t, (g.NamedNode, g.Literal)) )
+        _ = flatten(self)
+        _ = (n for n in _ if not isanon(n))
         _ = frozenset(_)
         return hash(_)
-        
-    
-    #def deanon() a separate thing based on nameddnoded hash
+
    
     def unseen(self) -> Iterable[g.Triple]:
-        # block newly generated anon nodes if they've already been seen.
+        # only produce "new" triple batches
         # the 'identifier' is the context of named nodes in the triples 'batch'.
         id = self.notanon_hash()
         if not id: yield from []
