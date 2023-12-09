@@ -79,14 +79,6 @@ class Triples(b.Data):
             seenbatches.add(id)
 
 
-    def insert(self, db: 'OxiGraph', deanon=True, graph=g.DefaultGraph(),) -> None:
-        if len(self):
-            if deanon:
-                ts = self.deanon()
-            else:
-                ts = self
-            db._store.bulk_extend(g.Quad(*t, graph) for t in ts)
-
 
 class OxiGraph(b.DataBase):
     
