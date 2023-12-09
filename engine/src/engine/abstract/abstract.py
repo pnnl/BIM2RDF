@@ -41,7 +41,6 @@ class DataBase(ABC):#, Generic[DataBaseType, ]):
     #    ...
     
     #@abstractmethod
-    # looks cleaner if it's in Data
     #def insert(self, data: Data) -> None: # NoReturn the same thing?
     #    ...
 
