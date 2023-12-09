@@ -76,7 +76,8 @@ class Engine(_Engine):
         # one-time 'rule'
         _ = PyRule(shacl_validation)
         _ = _(self.db)
-        _.insert(self.db)
+        from pyoxigraph import Quad
+        self._db._store.bulk_extend(Quad(*t) for t in _)
         from mapping.utils.queries import namespaces
         sh = {p:ns for p,ns in  namespaces()}
         sh = sh['sh']
