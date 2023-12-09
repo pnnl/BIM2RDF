@@ -46,7 +46,7 @@ def mkttl(triples): # could use pyoxigraph serialize/deserialize but overkill
 def sample_pyfunc(db):
     _ = sample_data()
     return Triples(_)
-sample_pyrule_data = PyRule(sample_pyfunc)(OxiGraph())
+sample_pyrule_data = frozenset(PyRule(sample_pyfunc)(OxiGraph()))
 
 def sample_constructquery():
     _ = sample_data()
@@ -63,7 +63,7 @@ class ConstructRule(_ConstructRule):
         return Path('.') / self.name
     @property
     def name(self): return 'sample.rq'
-sample_constructrule_data = ConstructRule(sample_constructquery())(OxiGraph())
+sample_constructrule_data = frozenset(ConstructRule(sample_constructquery())(OxiGraph()))
 
 
 def sample_constructrule_meta():
