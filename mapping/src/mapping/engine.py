@@ -7,9 +7,9 @@ from engine.triples import (
         Rules,
         Rule ,  # for owlrl TODO
         PyRule as _PyRule, PyRuleCallable,
-        Triples,
+        Triples, Iterable,
         Engine, OxiGraph)
-
+from pyoxigraph import NamedNode, Triple, Literal as rdfLiteral
 
 meta_prefix = 'http://mmeta'
 
@@ -39,33 +39,29 @@ class ConstructRule(_ConstructRule):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.name})"
 
-    def meta(self, data: Triples) -> Triples:
-        yield from super().meta(data)
-        from pyoxigraph import NamedNode, Triple, Literal
+    def meta(self, ) -> Iterable[Triple]:
+        yield from super().meta()
         p = meta_prefix
         fp = self.path.parts[-2:] # get the file plus its parent dir
         fp = '/'.join(fp)
-        yield from Triples([Triple(
+        yield from [Triple(
                 # TODO: add a name here to be like the pyrule
                 #        watch that the fn is unique enough
                 NamedNode(f'{p}/constructquery'),
                 NamedNode(f'{p}/constructquery#name'),
-                Literal(str(self.name))
-                     )])
+                rdfLiteral(str(self.name))
+                     )]
 
 class PyRule(_PyRule):
 
-    def meta(self, data: Triples) -> Triples:
-        yield from super().meta(data)
-        from pyoxigraph import NamedNode, Triple, Literal
+    def meta(self, ) -> Iterable[Triple]:
+        yield from super().meta()
         p = meta_prefix
-        yield from Triples([
+        yield from [
             Triple(NamedNode(f'{p}/python#function'),
                 NamedNode(f'{p}/python#name'),
-                Literal(( self.name )),)
-        ])
-
-
+                rdfLiteral(( self.name )),)
+        ]
 
 import logging 
 logger = logging.getLogger('mapping_engine')

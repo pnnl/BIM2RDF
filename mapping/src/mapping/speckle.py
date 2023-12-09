@@ -99,7 +99,7 @@ class SpeckleGetter(PyRule):
             yield cls(stream_id, branch_id=b, )
 
 
-    def meta(self, data: Triples) -> Triples:
+    def meta(self, ) -> Triples:
         _ = self._getters.meta() 
         #_ = Triples()
         return _

@@ -6,9 +6,28 @@
 from .abstract import abstract as b
 import pyoxigraph as g
 from typing import Iterable, Iterator
-# meta/rdfstar inserstion somewhere TODO
 
-from uuid import uuid4 as uuid
+
+def it():
+    i = 0
+    while True:
+        yield i
+        i += 1
+
+# anon nodes break the repeatability
+# so this is a cache that associates
+# hash(namednodes) -> blanknodes
+seenbatches = set()
+
+
+def flatten(triples,):
+    for spo in triples:
+        for _ in spo:
+            if isinstance(_, g.Triple):
+                yield from flatten((_,))
+            else:
+                assert(isinstance(_, (g.BlankNode, g.NamedNode, g.Literal)))
+                yield _
 
 
 class Triples(b.Data):
@@ -22,33 +41,51 @@ class Triples(b.Data):
             assert(isinstance(data, Iterable  ))
             self._data = data
     
-    def __hash__(self) -> int:
-        return hash((self._data)) if isinstance(self._data, (frozenset, set) ) \
-            else hash(frozenset(self._data))
-    
     def __len__(self) -> int:
         return len(self._data)
+    def __bool__(self) -> bool:
+        return True if len(self) else False
 
     def __iter__(self) -> Iterable[g.Triple]:
         yield from self._data
-
+    
     def __add__(self, data: 'Triples' ) -> 'Triples':
         from itertools import chain 
         return Triples(chain(self._data, data._data))
+    
+    def __hash__(self) -> int:
+        return hash((self._data)) if isinstance(self._data, (frozenset, set) ) \
+            else hash(frozenset(self._data))
+    def namednode_hash(self) -> str:
+        # a hash based on the content. assumed to persist.
+        if not self._data: return ''
 
-    def deanon(self) -> 'Triples':
-        _ = (
-            (s if not isinstance(s, g.BlankNode) else g.NamedNode(f'urn:uuid:{uuid()}') ,
-             p,
-             o if not isinstance(o, g.BlankNode) else g.NamedNode(f'urn:uuid:{uuid()}'),
-             )
-             for (s,p,o) in self)
-        _ = (g.Triple(s,p,o) for (s,p,o) in _)
-        return self.__class__(_)
+        _ = (str(t.value) for t in flatten(self) if isinstance(t, g.NamedNode) )
+        _ = frozenset(_)
+        return hash(_)
+        
+    
+    #def deanon() a separate thing based on nameddnoded hash
+   
+    def unseen(self) -> Iterable[g.Triple]:
+        # block newly generated anon nodes if they've already been seen.
+        # the 'identifier' is the context of named nodes in the triples 'batch'.
+        id = self.namednode_hash()
+        if not id: yield from []
+        if id in seenbatches:
+            yield from []
+        else:
+            yield from self
+            seenbatches.add(id)
 
-    def insert(self, db: 'OxiGraph', graph=g.DefaultGraph()) -> None:
+
+    def insert(self, db: 'OxiGraph', deanon=True, graph=g.DefaultGraph(),) -> None:
         if len(self):
-            db._store.bulk_extend(g.Quad(*t, graph) for t in self)
+            if deanon:
+                ts = self.deanon()
+            else:
+                ts = self
+            db._store.bulk_extend(g.Quad(*t, graph) for t in ts)
 
 
 class OxiGraph(b.DataBase):
@@ -126,20 +163,19 @@ class ConstructQuery(b.Query):
     def __str__(self) -> str:
         return str(self._query)
 
-    def __call__(self, db: OxiGraph, **k) -> Triples:
+    def __call__(self, db: OxiGraph, **k) -> Iterable[g.Triple]:
         _ =  db._store.query(str(self),  **k)
         assert(isinstance(_, g.QueryTriples))
-        _ = Triples(_)
-        return _
+        yield from _
 
 
 called = set() # [(rule, dbstate), ...]
 
-class CachedRuleCall:
+class xCachedRuleCall:
 
-    def __call__(self, db: OxiGraph) -> Triples:
-        #h = hash((db)) # len(db) is risky
-        h = len(db)
+    def __call__(self, db: OxiGraph) -> Iterable[g.Triple]:
+        #h = hash((db)) 
+        h = len(db) # risky
         call = (hash(self), h)
         if call in called:
             return Triples([]) # was already captured
@@ -148,28 +184,25 @@ class CachedRuleCall:
             _ = self.do(db)
             return _
 
-        
-class Rule(CachedRuleCall, b.Rule):
+
+class RuleCall:
+    def __call__(self, db:OxiGraph) -> Iterable[g.Triple]:
+        yield from self.do(db)
+
+
+class Rule(RuleCall, b.Rule):
 
     def __hash__(self) -> int:
         return hash(self.spec)
     meta_uri = 'http://meta'
 
-    def add_meta(self, data: Triples) -> Triples:
-        def nest(data):
-            _ = self.meta(data)
-            _ = Triples(_)
-            _ = _.deanon()
-            ms = _
-            if ms: # metas
-                for t in data:
-                    for m in ms:
-                        #            ('data'triple,    meta  ,   'meta'triple)
-                        yield g.Triple(t, g.NamedNode(self.meta_uri), m)
-            yield from data
-        _ = nest(data)
-        _ = Triples(_)
-        return _
+    def add_star_meta(self, data: Iterable[g.Triple]) -> Iterable[g.Triple]:
+        # nest
+        for t in data:
+            yield t
+            for m in self.meta():
+                #    ('data'triple,    meta  ,   'meta'triple)
+                yield g.Triple(t, g.NamedNode(self.meta_uri), m)
     
 
 class ConstructRule(Rule):
@@ -183,23 +216,16 @@ class ConstructRule(Rule):
 
     def __add__(self, rule: 'Rule') -> 'Rules':
         return Rules([self, rule])
-    
-    def const_meta(self) -> Triples:
-        # something that doesn't depend on the data
-        return Triples([])
 
-    def meta(self, data: Triples) -> Triples:
+    def meta(self, ) -> Iterable[g.Triple]:
         # can add query str. or triples!
         # TODO
-        return Triples([])
+        yield from []
 
-    def do(self, db: OxiGraph) -> Triples:
+    def do(self, db: OxiGraph) -> Iterable[g.Triple]:
         _ = db._store.query(str(self.spec))
         assert(isinstance(_, g.QueryTriples))
-        _ = Triples(_)
-        _ = _.deanon()
-        _ = self.add_meta(_) 
-        return _
+        yield from self.add_star_meta(_)
 
 
 from typing import Protocol, runtime_checkable
@@ -228,19 +254,16 @@ class PyRule(Rule):
     def spec(self) -> PyRuleCallable:
         return self._spec
     
-    def meta(self, data: Triples) -> Triples:
+    def meta(self, ) -> Triples:
         # can add query str. or triples!
         return Triples([])
     
     def __add__(self, rule: 'Rule') -> 'Rules':
         return Rules([self, rule])
     
-    def do(self, db: OxiGraph) -> Triples:
+    def do(self, db: OxiGraph) -> Iterable[g.Triple]:
         _ = self.spec(db)
-        _ = Triples(_)
-        _ = _.deanon()
-        _ = self.add_meta(_)
-        return _
+        yield from self.add_star_meta(_)
 
 
 def _(db: OxiGraph): return Triples([])
@@ -311,11 +334,13 @@ logger = logging.getLogger('engine')
 class Engine(b.Engine): # rule app on Store
 
     def __init__(self, rules: Rules, db: OxiGraph, MAX_ITER=999,
+                 block_seen=True, #deanon=True,
                  log=True, print_log=True,
                  ) -> None:
         self._rules = rules
         self._db = db
         self.MAX_ITER = MAX_ITER
+        self.block_seen = block_seen
         self.i = 0
         
         # logging
@@ -346,7 +371,7 @@ class Engine(b.Engine): # rule app on Store
                 line = '-'*10
                 logger.info(f"CYCLE {self.i} {line}")
 
-        for r in self.rules:
+        for r in self.rules: # TODO: could be parallelized
             # before
             before = len(self.db)
             if hasattr(self, 'logging'):
@@ -355,7 +380,10 @@ class Engine(b.Engine): # rule app on Store
 
             # do
             _ = r(self.db)
-            _.insert(self.db)
+            if self.block_seen:
+                _ = Triples(_).unseen()
+            self.db._store.bulk_extend(g.Quad(*t) for t in _)
+            del _
 
             # after
             if hasattr(self, 'logging'):
