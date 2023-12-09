@@ -21,7 +21,7 @@ def flatten(triples,):
                 yield _
 
 
-def isanon(n):
+def isanon(n) -> bool:
     if isinstance(n, g.NamedNode):
         if n.value.startswith(anon_uri):
             return True
@@ -36,13 +36,21 @@ def isanon(n):
 anon_uri = 'urn:uuid:anon:'
 
 def deanon(triples) -> Iterable[g.Triple]:
-    # wont recurse in rdfstar though
-    for s,p,o in triples:
-        yield g.Triple(
-            s if not isanon(s) else g.NamedNode(f"{anon_uri}{uuid()}"),
-            p,
-            o if not isanon(o) else g.NamedNode(f"{anon_uri}{uuid()}")
-        )
+    for t in triples:
+        s,p,o = t
+        # ignore. not going to recurse.
+        if isinstance(s, g.Triple) or isinstance(p, g.Triple):
+            yield t
+            continue
+        assert(not isinstance(s, g.Triple) )
+        assert(not isinstance(o, g.Triple) )
+        isa_s = isanon(s)
+        isa_o = isanon(o)
+        if (not isa_s) and (not isa_o):
+            yield t
+        s = s if not isa_s else g.NamedNode(f"{anon_uri}{uuid()}")
+        o = o if not isa_o else g.NamedNode(f"{anon_uri}{uuid()}")
+        yield g.Triple(s, p, o)
 
 
 class Triples(b.Data):
@@ -73,7 +81,6 @@ class Triples(b.Data):
             else hash(frozenset(self._data))
    
     def notanon_hash(self) -> str:
-        # a hash based on the content. assumed to persist.
         if not self._data: return ''
         _ = flatten(self)
         _ = (n for n in _ if not isanon(n))
@@ -340,13 +347,14 @@ logger = logging.getLogger('engine')
 class Engine(b.Engine): # rule app on Store
 
     def __init__(self, rules: Rules, db: OxiGraph, MAX_ITER=999,
-                 block_seen=True, #deanon=True,
+                 block_seen=True, deanon=True,
                  log=True, print_log=True,
                  ) -> None:
         self._rules = rules
         self._db = db
         self.MAX_ITER = MAX_ITER
         self.block_seen = block_seen
+        self.deanon = deanon
         self.i = 0
         
         # logging
@@ -388,6 +396,8 @@ class Engine(b.Engine): # rule app on Store
             _ = r(self.db)
             if self.block_seen:
                 _ = Triples(_).unseen()
+            if self.deanon:
+                _ = deanon(_)
             self.db._store.bulk_extend(g.Quad(*t) for t in _)
             del _
 
