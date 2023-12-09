@@ -24,9 +24,6 @@ class Data(ABC, Generic[DataBaseType], ):#Datum(ABC):
     def __add__(self, data: SelfT) -> SelfT: # or Self -> Self?
         ...
 
-    @abstractmethod
-    def insert(self, db: DataBaseType) -> None:
-        ...
 
 # dont even need to talk about an iterable here
 #class Iterable
