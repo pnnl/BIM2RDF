@@ -48,9 +48,10 @@ def deanon(triples) -> Iterable[g.Triple]:
         isa_o = isanon(o)
         if (not isa_s) and (not isa_o):
             yield t
-        s = s if not isa_s else g.NamedNode(f"{anon_uri}{uuid()}")
-        o = o if not isa_o else g.NamedNode(f"{anon_uri}{uuid()}")
-        yield g.Triple(s, p, o)
+        else:
+            s = s if not isa_s else g.NamedNode(f"{anon_uri}{uuid()}")
+            o = o if not isa_o else g.NamedNode(f"{anon_uri}{uuid()}")
+            yield g.Triple(s, p, o)
 
 
 class Triples(b.Data):
@@ -354,7 +355,7 @@ class Engine(b.Engine): # rule app on Store
         self._db = db
         self.MAX_ITER = MAX_ITER
         self.block_seen = block_seen
-        self.deanon = deanon
+        self.deanon = False
         self.i = 0
         
         # logging
