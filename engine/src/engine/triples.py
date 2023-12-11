@@ -41,7 +41,7 @@ def deanon(triples) -> Iterable[g.Triple]:
         if (n not in anons):
             if isinstance(n, g.BlankNode):
                 anons[n] = g.NamedNode(f"{anon_uri}{uuid()}")
-    del n
+        del n
     replace = lambda n: anons[n] if n in anons else n
     for s, p, o in triples:
         # not recursing though
