@@ -358,7 +358,7 @@ class Engine(b.Engine): # rule app on Store
         self._db = db
         self.MAX_ITER = MAX_ITER
         self.block_seen = block_seen
-        self.deanon = deanon
+        self.deanon = False
         self.i = 0
         
         # logging
