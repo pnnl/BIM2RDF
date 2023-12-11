@@ -400,7 +400,7 @@ class Engine(b.Engine): # rule app on Store
             _ = r(self.db)
             if self.block_seen:
                 _ = Triples(_).unseen()
-            if True:# self.deanon:
+            if False:# self.deanon:
                 _ = deanon(_)
             self.db._store.bulk_extend(g.Quad(*t) for t in _)
             del _
