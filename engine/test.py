@@ -41,8 +41,9 @@ def test_deanon():
         ]
     o = deanon(i)
     o = list(o)
-    assert(o[0].subject.subject == o[1].subject  )
-    assert(o[0].subject.object  == o[1].object  )
-    assert(o[0].object.subject == o[1].subject  )
-    assert(o[0].object.object  == o[1].object  )
-
+    assert(o[0].subject.subject     == o[1].subject  )
+    assert(o[0].subject.object      == o[1].object  )
+    assert(o[0].object.subject      == o[1].subject  )
+    assert(o[0].object.object       == o[1].object  )
+    assert(o[0].subject.predicate   == o[1].predicate  )
+    assert(o[0].object.predicate    == o[1].predicate  )
