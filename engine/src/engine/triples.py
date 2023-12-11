@@ -61,10 +61,10 @@ def deanon(triples) -> Iterable[g.Triple]:
 class Triples(b.Data):
 
     def __init__(self, data: Iterable[g.Triple]=[]) -> None:
-        if isinstance(data, Iterator):
-            self._data = frozenset(data)
-        elif isinstance(data, self.__class__):
+        if isinstance(data, self.__class__):
             self._data = data._data
+        elif isinstance(data, Iterator):
+            self._data = frozenset(data)
         else:
             assert(isinstance(data, Iterable  ))
             self._data = data
