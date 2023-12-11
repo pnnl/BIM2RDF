@@ -33,7 +33,7 @@ def isanon(n) -> bool:
         assert(isinstance(n, g.BlankNode))
         return True
     
-anon_uri = 'urn:uuid:anon:'
+anon_uri = 'urn:anon:uuid:'
 
 def deanon(triples) -> Iterable[g.Triple]:
     triples = frozenset(triples)
