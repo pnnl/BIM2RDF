@@ -222,7 +222,12 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )
         
 
-def fengine(og=OxiGraph(), validation=True, rules=rules, max_cycles=20) -> 'Engine':
+def fengine(og=OxiGraph(),
+            rules=rules,
+            validation=True,
+            block_seen=True,
+            deanon=True,
+            max_cycles=20) -> 'Engine':
     if validation:
         from validation.engine import Engine
     else:
@@ -230,8 +235,8 @@ def fengine(og=OxiGraph(), validation=True, rules=rules, max_cycles=20) -> 'Engi
     _ = Engine(
             rules,
             og,
-            block_seen=True,
-            deanon=True,
+            block_seen=block_seen,
+            deanon=deanon,
             MAX_ITER=max_cycles
             )
     return _
