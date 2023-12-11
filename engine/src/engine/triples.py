@@ -396,6 +396,8 @@ class Engine(b.Engine): # rule app on Store
                 before = len(self.db)
                 if self.logging.print:
                     logger.info(f"{repr(r)}")
+                from time import monotonic
+                start_time = monotonic()
 
             # do
             _ = r(self.db)
@@ -411,7 +413,8 @@ class Engine(b.Engine): # rule app on Store
                 delta = self.logging.delta(before, len(self.db))
                 self.logging.log[r.spec].append(delta)
                 if self.logging.print:
-                    logger.info(f"# triples before {delta.before }, after {delta.after } => {delta.after-delta.before}")
+                    logger.info(f"# triples before {delta.before }, after {delta.after } => {delta.after-delta.before}.")
+                    logger.info(f"took {'{0:.2f}'.format(monotonic()-start_time)} seconds")
         
         self.i += 1
         self.db._store.optimize()
