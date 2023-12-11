@@ -36,6 +36,7 @@ def isanon(n) -> bool:
 anon_uri = 'urn:uuid:anon:'
 
 def deanon(triples) -> Iterable[g.Triple]:
+    triples = frozenset(triples)
     anons = {}
     for n in flatten(triples):
         if (n not in anons):
@@ -351,14 +352,14 @@ logger = logging.getLogger('engine')
 class Engine(b.Engine): # rule app on Store
 
     def __init__(self, rules: Rules, db: OxiGraph, MAX_ITER=999,
-                 block_seen=True, deanon=True,
+                 block_seen=False, deanon=False,
                  log=True, print_log=True,
                  ) -> None:
         self._rules = rules
         self._db = db
         self.MAX_ITER = MAX_ITER
         self.block_seen = block_seen
-        self.deanon = False
+        self.deanon = deanon
         self.i = 0
         
         # logging
@@ -391,8 +392,8 @@ class Engine(b.Engine): # rule app on Store
 
         for r in self.rules: # TODO: could be parallelized
             # before
-            before = len(self.db)
             if hasattr(self, 'logging'):
+                before = len(self.db)
                 if self.logging.print:
                     logger.info(f"{repr(r)}")
 
@@ -400,7 +401,7 @@ class Engine(b.Engine): # rule app on Store
             _ = r(self.db)
             if self.block_seen:
                 _ = Triples(_).unseen()
-            if False:# self.deanon:
+            if self.deanon:
                 _ = deanon(_)
             self.db._store.bulk_extend(g.Quad(*t) for t in _)
             del _
