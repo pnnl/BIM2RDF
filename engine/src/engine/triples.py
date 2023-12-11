@@ -36,22 +36,25 @@ def isanon(n) -> bool:
 anon_uri = 'urn:uuid:anon:'
 
 def deanon(triples) -> Iterable[g.Triple]:
-    for t in triples:
-        s,p,o = t
-        # ignore. not going to recurse.
-        if isinstance(s, g.Triple) or isinstance(p, g.Triple):
-            yield t
+    anons = {}
+    for n in flatten(triples):
+        if (n not in anons):
+            if isinstance(n, g.BlankNode):
+                anons[n] = g.NamedNode(f"{anon_uri}{uuid()}")
+    del n
+    replace = lambda n: anons[n] if n in anons else n
+    for s, p, o in triples:
+        # not recursing though
+        if isinstance(s, g.Triple) or isinstance(o, g.Triple):
+            if isinstance(s, g.Triple):
+                s = g.Triple(*map(replace, s))
+            if isinstance(o, g.Triple):
+                o = g.Triple(*map(replace, o))
+            yield g.Triple(s, p, o)
             continue
         assert(not isinstance(s, g.Triple) )
         assert(not isinstance(o, g.Triple) )
-        isa_s = isanon(s)
-        isa_o = isanon(o)
-        if (not isa_s) and (not isa_o):
-            yield t
-        else:
-            s = s if not isa_s else g.NamedNode(f"{anon_uri}{uuid()}")
-            o = o if not isa_o else g.NamedNode(f"{anon_uri}{uuid()}")
-            yield g.Triple(s, p, o)
+        yield g.Triple(*map(replace, (s, p, o)))
 
 
 class Triples(b.Data):
@@ -355,7 +358,7 @@ class Engine(b.Engine): # rule app on Store
         self._db = db
         self.MAX_ITER = MAX_ITER
         self.block_seen = block_seen
-        self.deanon = False
+        self.deanon = deanon
         self.i = 0
         
         # logging

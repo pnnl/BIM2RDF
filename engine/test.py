@@ -1,7 +1,7 @@
 
 def test():
     from engine.triples import (ConstructQuery,
-                                 Rules, PyRule, NoEffect, 
+                                 Rules, PyRule, noeffect_pyfunc, 
                                  Engine,
                                  Triples,
                                  OxiGraph)
@@ -19,7 +19,7 @@ def test():
     where {  }
     """
     Construct = ConstructQuery(_)
-    rules = Rules([NoEffect, Data, Construct])
+    rules = Rules([noeffect_pyfunc, Data, Construct])
     engine = Engine(rules, OxiGraph(g.Store()) )
     res = engine()
     _ = res.db
@@ -27,6 +27,22 @@ def test():
     return _
 
 
+def test_deanon():
+    from engine.triples import deanon
+    from pyoxigraph import Triple, NamedNode, BlankNode
+    x = BlankNode('x')
+    y = BlankNode('y')
+    p = NamedNode('p:')
+    t = Triple(x, p, y)
+    m = NamedNode('m:')
+    i = [
+        Triple(t, m , t),
+        t 
+        ]
+    o = deanon(i)
+    o = list(o)
+    assert(o[0].subject.subject == o[1].subject  )
+    assert(o[0].subject.object  == o[1].object  )
+    assert(o[0].object.subject == o[1].subject  )
+    assert(o[0].object.object  == o[1].object  )
 
-if __name__ == '__main__':
-    test()
