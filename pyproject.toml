@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">= 3.11"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling<=1.18.0"]
 build-backend = "hatchling.build"
 
 [tool.rye]
@@ -18,7 +18,7 @@ managed = true
 dev-dependencies = [
     "ipython", 
     "pip", # careful! only for one-offs!
-    # dbging
+    # debugging
     "ipdb", 
     "icecream",
      "mypy", 
@@ -29,8 +29,6 @@ allow-direct-references = true
 
 [tool.rye.workspace]
 members = [
-    "dev", 
-    "topquadrant",
     "project",
     "project_azure", 
     "project_dvc",
@@ -39,8 +37,9 @@ members = [
     "graphdb",
     "speckle",
     "engine",
-    "mapping"
-    ]
+    "mapping",
+    "topquadrant",
+   ]
 
 
 [tool.rye.scripts]

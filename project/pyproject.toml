@@ -6,6 +6,7 @@ authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
 ]
 readme = "README.md"
+
 dependencies = [
    "pyprojroot",
   "fire",]
@@ -16,7 +17,6 @@ dev-dependencies = [
     "pylint",
     "gitpython", "pre-commit"]
 
-# dont need this now
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
