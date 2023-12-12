@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">= 3.11"
 
 [build-system]
-requires = ["hatchling<=1.18.0"]
+requires = ["hatchling<=1.18.0"] # https://github.com/mitsuhiko/rye/issues/515 TODO: update
 build-backend = "hatchling.build"
 
 [tool.rye]
