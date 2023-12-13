@@ -287,32 +287,35 @@ def get_ontology(_: OxiGraph,) -> Triples:
 
 
 def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
-    _ = db._store
+    s = db._store
     from .utils.queries import queries
-    _ = select(_, (
+    before = select(s, (
             queries.rules.mapped,
             queries.rules.ontology,
             queries.rules.rdfs_inferred,
             queries.rules.shacl_inferred) )
     from .utils.conversions import triples2ttl
-    _ = triples2ttl(_)
+    _ = triples2ttl(before)
     from rdflib import Graph
     _ = Graph().parse(data=_, format='text/turtle')
     assert(isinstance(_, Graph))
     _ = get_closure(_, semantics='rdfs')
     from .utils.conversions import rg2triples
     _ = rg2triples(_)
+    after = frozenset(_)
     # only pick out triples from data
+    before = frozenset(before)
+    assert(len(after) >= len(before))
+    _ = after - before; del before, after
+    # furhtermore only get data-inferred
     data = select(db._store, (
         queries.rules.mapped,
         queries.rules.rdfs_inferred,
         queries.rules.shacl_inferred
         ) )
     # pick out subjects...
-    data = frozenset(t[0] for t in data)
-    from rdflib import Graph
-    # to only get data-inferred
-    _ = (t for t in _ if t[0] in data)
+    datasubjects = frozenset(t[0] for t in data)
+    _ = (t for t in _ if t[0] in datasubjects)
     return _
 
 
@@ -331,6 +334,7 @@ def topquadrant_rules(db: OxiGraph) -> Triples:
     _ = tqshacl('infer', _, shapes)
     # could get some bnode issues b/c of
     # ttl reading back bnodse as different!!!
+    # tq only returns new
     return _
 
 
