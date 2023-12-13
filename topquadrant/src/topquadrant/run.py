@@ -43,7 +43,7 @@ def raisee(s: str):
     # further guard to fail
     # in case topquadrant does not exit with an error
     # that's why check is false below
-    if 'exception' in s.stderr.lower():
+    if 'exception in thread' in s.stderr.lower():
         from sys import stderr
         print(s.stderr, file=stderr)
         raise Exception('topquadrant error')
