@@ -11,16 +11,25 @@ stages:
   ontology: # need to process ontology a bit more than just collecting files
   # this step is here instead of in 'ontologies' b/c of recursion issues.
   #                                                   param coll name?
-    cmd: python -m ontologies.collect --collection_name applicable --import_deps True --remove_owl_imports True -p ontology.ttl  # ${item}.ttl
+    cmd: python -m mapping.engine ontology -i 'rdfs' -c 'applicable' -o ontology.ttl
     wdir: work
     deps:
       #- ../../ontologies/223standard.hash
       - ../../ontologies/.ontoenv # 
     outs:
-     - ontology.ttl  #/${item}.ttl
+     - ontology.ttl
+  
+  shacl_rules:
+    cmd: python -m mapping.engine ontology -i False -c 'applicable' -o shacl_rules.ttl
+    wdir: work
+    deps:
+      #- ../../ontologies/223standard.hash
+      - ../../ontologies/.ontoenv # 
+    outs:
+     - shacl_rules.ttl
     
   validation: # if there was a separate validation step, i'd use the verb, validATE
-    cmd: python -m ontologies.collect --collection_name defs --import_deps False --remove_owl_imports True -p validation.ttl 
+    cmd: python -m mapping.engine ontology -i 'rdfs' -c 'defs' -o validation.ttl 
     wdir: work
     deps:
       - ../../ontologies/.ontoenv
@@ -34,6 +43,7 @@ stages:
       - ../s223
       - ontology.ttl
       - validation.ttl
+      - shacl_rules.ttl
     outs:
       - out.ttl # need to keep tracking this?
 

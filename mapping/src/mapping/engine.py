@@ -277,25 +277,42 @@ def select(store: Store, construct_queries) -> Triples:
     return _
 
 
-def rdflib_rdfs(db: OxiGraph) -> Triples:
+from functools import lru_cache
+@lru_cache
+def get_ontology(_: OxiGraph,) -> Triples:
+    from .utils.data import get_data
+    from project import root
+    _ = get_data(root / 'mapping' / 'work' / 'ontology.ttl'  ) # collection
+    return _
+
+
+def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
     _ = db._store
     from .utils.queries import queries
     _ = select(_, (
             queries.rules.mapped,
-            queries.rules.ontology, #
-            #queries.rules.rdfs_inferred,
+            queries.rules.ontology,
+            queries.rules.rdfs_inferred,
             queries.rules.shacl_inferred) )
     from .utils.conversions import triples2ttl
     _ = triples2ttl(_)
     from rdflib import Graph
-    before = Graph()
-    before.parse(data=_, format='text/turtle')
-    from .utils.rdflibgraph import copy
-    _ = copy(before)
+    _ = Graph().parse(data=_, format='text/turtle')
+    assert(isinstance(_, Graph))
     _ = get_closure(_, semantics='rdfs')
     from .utils.conversions import rg2triples
-    _ = generated(before, _)
     _ = rg2triples(_)
+    # only pick out triples from data
+    data = select(db._store, (
+        queries.rules.mapped,
+        queries.rules.rdfs_inferred,
+        queries.rules.shacl_inferred
+        ) )
+    # pick out subjects...
+    data = frozenset(t[0] for t in data)
+    from rdflib import Graph
+    # to only get data-inferred
+    _ = (t for t in _ if t[0] in data)
     return _
 
 
@@ -304,9 +321,12 @@ def topquadrant_rules(db: OxiGraph) -> Triples:
     from .utils.queries import queries
     _ = select(s, (
             queries.rules.mapped,
-            queries.rules.rdfs_inferred,) ) #
-    shapes = select(s, 
-            (queries.rules.ontology,  ) )
+            queries.rules.rdfs_inferred,
+            queries.rules.shacl_inferred,
+              ) ) #
+    from pyoxigraph import parse
+    from project import root
+    shapes = parse(root / 'mapping' / 'work' / 'shacl_rules.ttl', 'text/turtle' )
     from validation.shacl import tqshacl
     _ = tqshacl('infer', _, shapes)
     # could get some bnode issues b/c of
@@ -376,18 +396,36 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     return _
 
 
-if __name__ == '__main__': ...
-    # from pathlib import Path
-    # def rdfs(ipth: Path, opath=None):
-    #     ipth = Path(ipth)
-    #     if not opath:
-    #         opath = Path(ipth.parts[:-1]) / ipth.stem+'-rdfs.ttl'
-    #     db = OxiGraph()
-    #     db._store.bulk_load(ipth, 'text/turtle')
-    #     _ = rdflib_rdfs(db)
-    #     from pyoxigraph import serialize
-    #     from .conversions import triples2ttl
-    #     _ = triples2ttl()
-    #     return opath
+if __name__ == '__main__':
+    from pathlib import Path
+    def semantics_infer(
+            ipth: Path,
+            semantics: str='rdfs',
+            opath: Path=Path('inferred.ttl')):
+        ipth = Path(ipth)
+        g = Graph().parse(ipth, 'text/turtle')
+        g = get_closure(g, semantics=semantics)
+        g.serialize(opath, 'text/turtle')
+        return opath
+    
+    def ontology(
+            collection: str='applicable',
+            infer: str|None ='rdfs',
+            opath: Path=Path('ontology.ttl') ):
+        from ontologies.collect import process
+        _ = process(collection_name=collection, remove_owl_imports=True)
+        if infer:
+            _ = get_closure(_, semantics=infer)
+        _.serialize(opath, 'text/turtle')
+        return opath
+    
+    from fire import Fire
+    import logging
+    logging.basicConfig(force=True) # force removes other loggers that got picked up.
+    logger.setLevel(logging.INFO)
+    Fire(
+        {
+            'semantics_infer': semantics_infer,
+            'ontology': ontology,
+         })
 
-    #...

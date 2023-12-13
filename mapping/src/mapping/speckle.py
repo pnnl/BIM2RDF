@@ -31,6 +31,7 @@ def rules(*,
 
     # inference
     if inference:
+        from .engine import get_ontology
         _ = _ + [PyRule(get_ontology)]
         #                     223p rules
         from .engine import rdflib_rdfs, topquadrant_rules
@@ -42,14 +43,6 @@ def rules(*,
     _ = Rules(_)
     return _
 
-
-from functools import lru_cache
-@lru_cache
-def get_ontology(_: OxiGraph, collection='all') -> Triples:
-    from .utils.data import get_data
-    from project import root
-    _ = get_data(root / 'mapping' / 'work' / 'ontology.ttl'  ) # collection
-    return _
 
 
 def query(q):
