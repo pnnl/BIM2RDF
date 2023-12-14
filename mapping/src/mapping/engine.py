@@ -313,9 +313,16 @@ def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
         queries.rules.rdfs_inferred,
         queries.rules.shacl_inferred
         ) )
-    # pick out subjects...
-    datasubjects = frozenset(t[0] for t in data)
-    _ = (t for t in _ if t[0] in datasubjects)
+    data = frozenset(data)
+    from itertools import chain
+    dataset = chain(
+        frozenset(t[0] for t in data),
+        frozenset(t[1] for t in data),
+        frozenset(t[2] for t in data),
+        )
+    dataset = frozenset(dataset)
+    del data
+    _ = (t for t in _ if any(n in dataset for n in t) )
     return _
 
 
