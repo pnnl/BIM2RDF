@@ -317,7 +317,7 @@ def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
     from itertools import chain
     dataset = chain(
         frozenset(t[0] for t in data),
-        frozenset(t[1] for t in data),
+        #frozenset(t[1] for t in data),
         frozenset(t[2] for t in data),
         )
     dataset = frozenset(dataset)
@@ -420,11 +420,11 @@ if __name__ == '__main__':
         return opath
     
     def ontology(
-            collection: str='applicable',
+            def_: str='ontology',
             infer: str|None ='rdfs',
             opath: Path=Path('ontology.ttl') ):
         from ontologies.collect import process
-        _ = process(collection_name=collection, remove_owl_imports=True)
+        _ = process(def_=def_, import_deps=True, remove_owl_imports=True)
         if infer:
             _ = get_closure(_, semantics=infer)
         _.serialize(opath, 'text/turtle')
