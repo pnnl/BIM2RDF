@@ -7,6 +7,8 @@ PREFIX meta: <http://meta>
 
 CONSTRUCT { 
 ?o1     s223:cnx  _:c.
+?o1 s223:connectsAt _:c.
+_:c s223:connectsThrough ?o1.
 _:c a s223:InletConnectionPoint.
 _:c s223:hasMedium s223:Light-Visible.
 _:c rdfs:label "InletConnectionPoint"^^xsd:string.

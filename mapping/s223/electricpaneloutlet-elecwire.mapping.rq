@@ -7,6 +7,7 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 CONSTRUCT { 
 ?o s223:cnx ?e.
+?o s223:connectsThrough ?e.
 } 
 WHERE { 
 ?eb s223:cnx ?o.

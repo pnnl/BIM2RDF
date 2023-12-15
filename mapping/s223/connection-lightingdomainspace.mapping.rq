@@ -5,7 +5,7 @@ PREFIX spkl: <http://speckle.systems/>
 
 CONSTRUCT {
     ?cp s223:cnx ?this.
-  
+  ?cp s223:isConnectionPointOf ?this.
 }
 WHERE {
 ?l s223:cnx ?o.
