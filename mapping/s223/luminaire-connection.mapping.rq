@@ -6,7 +6,6 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX meta: <http://meta>
 CONSTRUCT { 
 ?o1     s223:cnx   _:conn.
-?o1 s223:connectsThrough _:conn.
 #  no em-light connection equivalent like pipe and wire
 _:conn  a                       s223:Connection.
 _:conn rdfs:label  "Connection"^^xsd:string.

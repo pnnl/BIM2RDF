@@ -7,7 +7,6 @@ PREFIX meta: <http://meta>
 
 CONSTRUCT { 
   ?conn s223:cnx ?this.
-  ?conn s223:isConnectionPointOf ?this.
   ?conn  a s223:InletConnectionPoint.
   ?conn rdfs:label "InletConnectionPoint"^^xsd:string.
   #_:myelectricity a s223:Medium-Electricity. works
