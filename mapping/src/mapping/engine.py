@@ -307,6 +307,7 @@ def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
     before = frozenset(before)
     assert(len(after) >= len(before))
     _ = after - before; del before, after
+    #return _
     # furhtermore only get data-inferred
     data = select(db._store, (
         queries.rules.mapped,
@@ -318,7 +319,7 @@ def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
     dataset = chain(
         frozenset(t[0] for t in data),
         #frozenset(t[1] for t in data),
-        frozenset(t[2] for t in data),
+        #frozenset(t[2] for t in data),
         )
     dataset = frozenset(dataset)
     del data
@@ -333,12 +334,13 @@ def topquadrant_rules(db: OxiGraph) -> Triples:
             queries.rules.mapped,
             queries.rules.rdfs_inferred,
             queries.rules.shacl_inferred,
+            queries.rules.ontology,
               ) ) #
-    from pyoxigraph import parse
-    from project import root
-    shapes = parse(root / 'mapping' / 'work' / 'shacl_rules.ttl', 'text/turtle' )
+    # from pyoxigraph import parse
+    # from project import root
+    # shapes = parse(root / 'mapping' / 'work' / 'shacl.ttl', 'text/turtle' )
     from validation.shacl import tqshacl
-    _ = tqshacl('infer', _, shapes)
+    _ = tqshacl('infer', _, )
     # could get some bnode issues b/c of
     # ttl reading back bnodse as different!!!
     # tq only returns new
