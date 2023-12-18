@@ -34,10 +34,11 @@ def rules(*,
         from .engine import get_ontology
         _ = _ + [PyRule(get_ontology)]
         #                     223p rules
-        from .engine import rdflib_rdfs, topquadrant_rules
+        from .engine import topquadrant_rules
+        #from .engine import rdflib_rdfs
         _ = _ + [
-            PyRule(rdflib_rdfs),
-            PyRule(topquadrant_rules)
+            #PyRule(rdflib_rdfs),
+            PyRule(topquadrant_rules),
                 ]
 
     _ = Rules(_)
