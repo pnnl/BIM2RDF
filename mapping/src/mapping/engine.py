@@ -334,11 +334,12 @@ def topquadrant_rules(db: OxiGraph) -> Triples:
             queries.rules.mapped,
             queries.rules.rdfs_inferred,
             queries.rules.shacl_inferred,
-            queries.rules.ontology,
               ) ) #
-    # from pyoxigraph import parse
-    # from project import root
-    # shapes = parse(root / 'mapping' / 'work' / 'shacl.ttl', 'text/turtle' )
+    from pyoxigraph import parse
+    from project import root
+    shapes = parse(root / 'mapping' / 'work' / 'ontology.ttl', 'text/turtle' )
+    from itertools import chain
+    _ = chain(_, shapes)
     from validation.shacl import tqshacl
     _ = tqshacl('infer', _, )
     # could get some bnode issues b/c of

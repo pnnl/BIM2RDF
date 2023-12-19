@@ -173,11 +173,6 @@ class rulequeries:
         _ = self.q.query_template(pattern, filter)
         return _
     
-    @property
-    def ontology(self,):
-        from ..engine import get_ontology
-        _ = self.q.querymaker(get_ontology)
-        return _.maker(_.pattern, _.filter)
     
     @property
     def speckle(self):
