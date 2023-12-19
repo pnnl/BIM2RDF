@@ -9,7 +9,7 @@ Else, you can `rye run mapping` from the `mapping` directory.
 
 Basic use:
 <br>
-From [this](./) directory,
+From [this](./work) directory,
 <br>
 fill in [`params.yaml`](../params.yaml),
 <br>
