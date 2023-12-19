@@ -28,7 +28,7 @@ then manage data, `dvc push`.
 
 ## Development
 
-Use GraphDB or [this utility](./tests/query.qmd).
+Use GraphDB or [oxigraph server](https://github.com/pchampin/oxigraph/tree/main/server#installation).
 
 ## Checking
 
