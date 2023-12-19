@@ -12,7 +12,7 @@ stages:
   # this step is here instead of in 'ontologies' b/c of recursion issues.
   #                                                   param coll name?
     cmd: python -m mapping.engine ontology -i False -d 'ontology' -o ontology.ttl
-    wdir: work
+    wdir: .
     deps:
       #- ../../ontologies/223standard.hash
       - ../../ontologies/.ontoenv # 
@@ -22,7 +22,7 @@ stages:
 
   map:
     cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=${building}
-    wdir: work
+    wdir: .
     deps:
       - ../s223
       - ontology.ttl
@@ -31,7 +31,7 @@ stages:
 
   report:
     cmd: quarto render report.qmd
-    wdir: work/report
+    wdir: report
     deps:
       - ../out.ttl
       - report.qmd
