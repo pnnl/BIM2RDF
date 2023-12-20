@@ -5,14 +5,12 @@ PREFIX meta: <http://meta>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
 CONSTRUCT { 
-?o1 a s223:OccupancySensor. # TODO: there are specific types
-?o1 rdfs:label ?f.
 ?o1 a s223:OccupantMotionSensor.
+?o1 rdfs:label ?f.
 ?o1 s223:observes _:q.
 _:q a s223:EnumeratedObservableProperty. 
-_:q s223:hasEnumerationKind s223:Occupancy-Presence.
-_:q s223:hasValue s223:Prsence-True.
-_:q rdfs:label "ObservableProperty"^^xsd:string.
+_:q s223:hasEnumerationKind s223:Occupancy-Motion.
+_:q rdfs:label "Enumerated observable property"^^xsd:string.
 } 
 WHERE { 
 <<?o1 spkl:category "Lighting Devices">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
