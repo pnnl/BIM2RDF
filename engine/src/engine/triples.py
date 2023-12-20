@@ -7,7 +7,6 @@ from .abstract import abstract as b
 import pyoxigraph as g
 from typing import Iterable, Iterator
 
-from uuid import uuid4 as uuid
 
 seenbatches = set()
 
@@ -32,16 +31,27 @@ def isanon(n) -> bool:
     else:
         assert(isinstance(n, g.BlankNode))
         return True
-    
-anon_uri = 'urn:anon:uuid:'
 
-def deanon(triples) -> Iterable[g.Triple]:
+
+anon_uri = 'urn:anon:hash:'
+
+def mkctr(i=0):
+    i = i
+    while True:
+        yield i
+        i += 1
+
+def deanon(triples, notanon_hash=None) -> Iterable[g.Triple]:
     triples = tuple(triples)
+    if not notanon_hash:
+        notanon_hash = Triples(triples).notanon_hash() # same b/w python sessions
+        notanon_hash = abs(notanon_hash)
     anons = {}
+    ctr = mkctr()
     for n in flatten(triples):
         if (n not in anons):
             if isinstance(n, g.BlankNode):
-                anons[n] = g.NamedNode(f"{anon_uri}{uuid()}")
+                anons[n] = g.NamedNode(f"{anon_uri}{notanon_hash}:{next(ctr)}")
         del n
     replace = lambda n: anons[n] if n in anons else n
     for s, p, o in triples:
@@ -85,8 +95,8 @@ class Triples(b.Data):
         return hash((self._data)) if isinstance(self._data, (frozenset, set) ) \
             else hash(frozenset(self._data))
    
-    def notanon_hash(self) -> str:
-        if not self._data: return ''
+    def notanon_hash(self) -> int:
+        if not self._data: return 0
         _ = flatten(self)
         _ = (n for n in _ if not isanon(n))
         _ = frozenset(_)
