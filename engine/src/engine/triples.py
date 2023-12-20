@@ -36,7 +36,7 @@ def isanon(n) -> bool:
 anon_uri = 'urn:anon:uuid:'
 
 def deanon(triples) -> Iterable[g.Triple]:
-    triples = frozenset(triples)
+    triples = tuple(triples)
     anons = {}
     for n in flatten(triples):
         if (n not in anons):
@@ -52,10 +52,10 @@ def deanon(triples) -> Iterable[g.Triple]:
             if isinstance(o, g.Triple):
                 o = g.Triple(*map(replace, o))
             yield g.Triple(s, p, o)
-            continue
-        assert(not isinstance(s, g.Triple) )
-        assert(not isinstance(o, g.Triple) )
-        yield g.Triple(*map(replace, (s, p, o)))
+        else:
+            assert(not isinstance(s, g.Triple) )
+            assert(not isinstance(o, g.Triple) )
+            yield g.Triple(*map(replace, (s, p, o)))
 
 
 class Triples(b.Data):
