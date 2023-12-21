@@ -1,8 +1,8 @@
-base_uri = lambda: f"http://speckle.systems/"
-meta_uri = lambda: 'http://meta'
+base_uri = lambda: f"http://speckle.systems/" # urn:speckle:concept
+meta_uri = lambda: 'http://meta'              # urn:speckle:meta
 
 
-def object_uri(stream_id, object_id):
+def object_uri(stream_id, object_id=''):
     return f"http://speckle.xyz/streams/{stream_id}/objects/{object_id}"
 
 

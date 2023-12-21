@@ -106,7 +106,7 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     _ = _.objects(stream_id, object_id)
     _ = query(_,)
     from speckle.objects import rdf as ordf
-    _ = ordf(_) #
+    _ = ordf(_, stream_id=stream_id) #
     _ = _.read()
     d = _.decode()
     from .utils.data import get_data
