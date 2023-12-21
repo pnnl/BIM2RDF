@@ -280,17 +280,36 @@ def engine(stream_id, *, branch_ids=None,
     #     )
     # _()
     # some manual rules handling to optimize processing time
-    # 1. load data                                                                           ........no need to keep spinning
-    _ = fengine(            rules=data_rules,                                               validation=False, max_cycles=1)()
+    # 1. load data / "one-time rules"
+    from .engine import get_ontology
+    _ = fengine(
+            rules=data_rules+(Rules([PyRule(get_ontology)]) if rules_dir else Rules([]) ),
+            validation=False,
+            max_cycles=1)() # no need to keep spinning
     if rules_dir:
     # 2. "mappings"
-        _ = fengine(og=_.db,    rules=rules(rules_dir=rules_dir,    inference=False),       validation=False,         max_cycles=max_cycles)()
+        _ = fengine(og=_.db,
+            rules=rules(
+                rules_dir=rules_dir,
+                inference=False),
+            validation=False,
+            max_cycles=max_cycles)()
     # 3. inferencing 
     if inference:                                                                                                     # or is just once cycle enough?
-        _ = fengine(og=_.db,    rules=rules(rules_dir=None,         inference=inference),    validation=False,        max_cycles=max_cycles)() 
+        _ = fengine(og=_.db,
+            rules=rules(
+                rules_dir=None,
+                inference=inference),
+            validation=False,
+            max_cycles=max_cycles)()
     # 4. validation
     if validation:                                                                                                    # doesn't matter.
-        _ = fengine(og=_.db,    rules=rules(rules_dir=None,         inference=False),       validation=validation,    max_cycles=max_cycles)()
+        _ = fengine(og=_.db,
+            rules=rules(
+                rules_dir=None,
+                inference=False),
+            validation=validation,
+            max_cycles=max_cycles)()
     
     _ = _.db._store
 

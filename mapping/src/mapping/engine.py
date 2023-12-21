@@ -277,8 +277,7 @@ def select(store: Store, construct_queries) -> Triples:
     return _
 
 
-from functools import lru_cache
-@lru_cache
+
 def get_ontology(_: OxiGraph,) -> Triples:
     from .utils.data import get_data
     from project import root
