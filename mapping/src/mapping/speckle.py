@@ -81,6 +81,14 @@ class SpeckleGetter(PyRule):
         _ = sorted(_, key=lambda i: i['createdAt'] )
         _ = tuple(d['name'] for d in _)
         return _
+    
+    @staticmethod
+    def get_streams() -> 'streams':
+        _ = query_speckle_meta()
+        from types import SimpleNamespace as NS
+        return tuple(
+            NS(id=i['id'], name=i['name'])
+            for i in  _['streams']['items'])
 
     @classmethod
     def multiple(cls, stream_id, branch_ids=[]):  # object_ids = []
@@ -89,7 +97,6 @@ class SpeckleGetter(PyRule):
             branch_ids = cls.get_branches(stream_id)
         for b in branch_ids:
             yield cls(stream_id, branch_id=b, )
-
 
     def meta(self, ) -> Triples:
         _ = self._getters.meta() 
@@ -252,6 +259,12 @@ def engine(stream_id, *, branch_ids=None,
     if not (str(out).lower().endswith('ttl')):
         raise ValueError('just use ttl fmt')
     
+    assert(
+        (stream_id in (s.id for s in SpeckleGetter.get_streams()) )
+        or
+        (stream_id in (s.name for s in SpeckleGetter.get_streams()) )
+          )
+
     # parsing of branch_id is relegated to
     if branch_ids is None:
         # figuring this is the default mode of working from now.
