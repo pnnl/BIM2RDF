@@ -19,25 +19,31 @@ _:junctionoutlet a s223:OutletConnectionPoint.
 _:junctionoutlet rdfs:label "OutletConnectionPoint"^^xsd:string.
 _:junctionoutlet s223:hasMedium s223:AC-120VLN-1Ph-60Hz. 
 ?lum ?circuit _:junctionoutlet.
- _:junctionoutlet s223:cnx ?j.
+_:junctionoutlet s223:cnx ?j.
 }
-WHERE 
-   {
-?lum a s223:Luminaire. 
-<<?lum spkl:category  "Lighting Fixtures">> meta: <<?rl spkl:name "architecture/rooms and lighting fixtures">>.
+WHERE {
+?lum a s223:Luminaire.
 ?lum spkl:elementId ?eid.
-?lumcircuit spkl:Connectors/rdf:rest*/rdf:first ?conn.
-<<?lumcircuit spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>.
+  {
+  ?lumcircuit spkl:Connectors/rdf:rest*/rdf:first ?conn.
+  <<?lumcircuit spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>.
+  }
 ?lumcircuit spkl:elementId ?eid.
-?lumcircuit spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM ?circuit.
-?lumcircuit spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM/spkl:value ?circuitname.
-?j a s223:Junction.
-?e a s223:ElectricWire.
-?e rdfs:label ?circuitname.
-<<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. 
-?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?circuitname. 
-?e s223:cnx ?i.
-?i a s223:InletConnectionPoint.
-?i s223:cnx ?j.
-   
-}    
+{
+    ?lumcircuit spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM ?circuit.
+	?circuit spkl:value ?circuitname.
+ }
+
+  {
+  ?elecbreaker a s223:ElectricBreaker.
+  ?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?circuitname. 
+  }
+{
+    ?e rdfs:label ?circuitname.
+	?e s223:cnx ?i.
+	?j a s223:Junction.
+	?e a s223:ElectricWire.
+	?i a s223:InletConnectionPoint.
+	?i s223:cnx ?j.
+}
+}
