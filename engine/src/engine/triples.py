@@ -51,7 +51,7 @@ def deanon(triples, notanon_hash=None) -> Iterable[g.Triple]:
     for n in flatten(triples):
         if (n not in anons):
             if isinstance(n, g.BlankNode):
-                anons[n] = g.NamedNode(f"{anon_uri}{notanon_hash}:{next(ctr)}")
+                anons[n] = g.NamedNode(f"{anon_uri}{notanon_hash}.{next(ctr)}")
         del n
     replace = lambda n: anons[n] if n in anons else n
     for s, p, o in triples:
