@@ -21,12 +21,6 @@ def find_list_fields(d: dict):
             yield k
 
 
-def sample_json():
-    _ = open('.json').read()
-    import json
-    _ = json.loads(_)
-    return _
-
 def remove_at(d: dict) -> dict:
     # can't have @. collides with jsonld.
     # need copy? functional programming rules
@@ -143,17 +137,14 @@ def data_decode(d: str) -> 'array':
     return _
 
 
-
-
 # can take json or speckleid
 def rdf(d, data_lists=False):  #TODO: propagate "engine" option to encode data list
-    #_ = sample_json()
     _ = d
     _ = remove_at(_)
     _ = url_quote(_)
     if data_lists:
         _ = encode_data_lists(_, encoder=data_encode)
-    else:
+    else: # "erase" the data
         _ = encode_data_lists(_, encoder=lambda l: "")
     # the num lists wont show
     _ = contextualize(_)
