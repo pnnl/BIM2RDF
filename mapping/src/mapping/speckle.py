@@ -43,7 +43,6 @@ def rules(*,
     return _
 
 
-
 def query(q):
     from speckle.graphql import query, client
     _ = query(q, lambda: client()) # need this to be 'live'
@@ -103,6 +102,14 @@ class SpeckleGetter(PyRule):
         #_ = Triples()
         return _
 
+def namespaces():
+    _ = SpeckleGetter.get_streams()
+    from speckle import object_uri
+    from ontologies import namespace
+    from rdflib import URIRef
+    _ = map(lambda i: namespace(f"pnnl-{i.name}", object_uri(i.id,)), _)
+    _ = tuple(_)
+    return _
 
 from .cache import get_cache
 @get_cache('speckle', maxsize=100)
