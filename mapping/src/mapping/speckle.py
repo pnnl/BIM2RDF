@@ -107,7 +107,7 @@ def namespaces():
     from speckle import object_uri
     from ontologies import namespace
     from rdflib import URIRef
-    _ = map(lambda i: namespace(f"pnnl-{i.name}", object_uri(i.id,)), _)
+    _ = map(lambda i: namespace(f"pnnl-{i.name}", URIRef(object_uri(i.id,)) ), _)
     _ = tuple(_)
     return _
 
