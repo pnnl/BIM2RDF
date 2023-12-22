@@ -1,4 +1,5 @@
-from engine.triples import PyRuleCallable, Triples
+from ast import Store
+from engine.triples import Engine, PyRuleCallable, Triples
 from .engine import Rules, OxiGraph, Triples, PyRule
 from typing import Callable, Iterable
 from pathlib import Path
@@ -229,11 +230,11 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         
 
 def fengine(og=OxiGraph(),
-            rules=rules,
-            validation=True,
-            block_seen=True,
-            deanon=True,
-            max_cycles=20) -> 'Engine':
+        rules=rules,
+        validation=True,
+        block_seen=True,
+        deanon=True,
+        max_cycles=20) -> 'Engine':
     if validation:
         from validation.engine import Engine
     else:
@@ -254,17 +255,16 @@ allowed_branches = {
 
 from pathlib import Path
 from typing import Iterable
-def engine(stream_id, *, branch_ids=None,
-           rules_dir: Path | Iterable[Path] | None = maps_dir,
-           max_cycles=10,
-           inference=False,
-           validation=False,
-           out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
-           out:Path|None=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
+from pyoxigraph import Store
+def map_(stream_id, *, branch_ids=None,
+        rules_dir: Path | Iterable[Path] | None = maps_dir,
+        max_cycles=10,
+        inference=False,
+        validation=False,
+        init=OxiGraph()
+        ) -> Store:
     object_id=None
     # data/config for args
-    if not (str(out).lower().endswith('ttl')):
-        raise ValueError('just use ttl fmt')
     
     assert(
         (stream_id in (s.id for s in SpeckleGetter.get_streams()) )
@@ -303,6 +303,7 @@ def engine(stream_id, *, branch_ids=None,
     # 1. load data / "one-time rules"
     from .engine import get_ontology
     _ = fengine(
+            og=init,
             rules=data_rules+(Rules([PyRule(get_ontology)]) if rules_dir else Rules([]) ),
             validation=False,
             max_cycles=1)() # no need to keep spinning
@@ -315,7 +316,7 @@ def engine(stream_id, *, branch_ids=None,
             validation=False,
             max_cycles=max_cycles)()
     # 3. inferencing 
-    if inference:                                                                                                     # or is just once cycle enough?
+    if inference:
         _ = fengine(og=_.db,
             rules=rules(
                 rules_dir=None,
@@ -323,7 +324,7 @@ def engine(stream_id, *, branch_ids=None,
             validation=False,
             max_cycles=max_cycles)()
     # 4. validation
-    if validation:                                                                                                    # doesn't matter.
+    if validation:
         _ = fengine(og=_.db,
             rules=rules(
                 rules_dir=None,
@@ -331,40 +332,7 @@ def engine(stream_id, *, branch_ids=None,
             validation=validation,
             max_cycles=max_cycles)()
     
-    _ = _.db._store
-
-    if out_selections:
-        from pyoxigraph import Store, Quad
-        s = Store()
-        if isinstance(out_selections, str):
-            out_selections = (out_selections,)
-        else:
-            assert(isinstance(out_selections, (tuple, list, set, frozenset)) )
-
-        from .utils.queries import queries
-        for q in out_selections:
-            q = getattr(queries.rules, q)
-            q = _.query(q)
-            q = tuple(q) # why do i have to do this?!
-            if q: s.bulk_extend(Quad(*t) for t in q)
-            del q
-        _ = s; del s        
-
-    if not out:
-        return _
-    out = Path(out)
-    if split_out:
-        out = Path('/'.join((out).parts[:-1] + (out.stem,)))
-        if out.exists():
-            from shutil import rmtree
-            rmtree(out)
-        from .utils.data import split_triples, sort_triples, Triples
-        split_triples(
-            sort_triples(Triples(t.triple for t in _)),
-            chunk_size=nsplit_out)
-    else:
-        _.dump(str(out), 'text/turtle')
-    return out
+    return _.db._store
 
 
 if __name__ == '__main__':
@@ -377,4 +345,25 @@ if __name__ == '__main__':
     logger.setLevel(logging.INFO)
     from validation.engine import logger
     logger.setLevel(logging.INFO)
-    fire.Fire(engine) # HAHH!!
+    
+    def write_map(stream_id, *, branch_ids=None,
+            rules_dir: Path | Iterable[Path] | None = maps_dir,
+            max_cycles=10,
+            inference=False,
+            validation=False,
+            out=Path('db')
+            ) -> Path:
+        out = Path(out)
+        if out.exists():
+            assert(out.is_dir())
+            assert(not tuple(out.iterdir()) )
+        init = OxiGraph(Store(out))
+        _ = map_(stream_id, branch_ids=branch_ids,
+                rules_dir = rules_dir,
+                max_cycles=max_cycles,
+                inference=inference,
+                validation=validation,
+                init=init)
+        return out
+            
+    fire.Fire(write_map)
