@@ -267,15 +267,8 @@ def fix(g: Graph) -> Graph:
 #         super().__init__(spec)
 
 
-from pyoxigraph import Store
-# put in utils/queries.py TODO:
-def select(store: Store, construct_queries) -> Triples:
-    _ = map(lambda q: store.query(q) , construct_queries )
-    from itertools import chain
-    _ = chain.from_iterable(_)
-    _ = Triples(_)
-    return _
 
+from .utils.queries import select
 
 
 def get_ontology(_: OxiGraph,) -> Triples:

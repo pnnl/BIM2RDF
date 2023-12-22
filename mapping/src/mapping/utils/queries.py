@@ -2,7 +2,13 @@
 programmatic generation of queries
 """
 from ..engine import Triples, PyRule, ConstructRule as _ConstructRule, OxiGraph
-
+from pyoxigraph import Store
+def select(store: Store, construct_queries) -> Triples:
+    _ = map(lambda q: store.query(q) , construct_queries )
+    from itertools import chain
+    _ = chain.from_iterable(_)
+    _ = Triples(_)
+    return _
 
 from functools import lru_cache
 @lru_cache
