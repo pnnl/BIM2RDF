@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 from . import mapping_dir
-maps_dir = mapping_dir / 's223'
+maps_dir = mapping_dir / 'mappings'
 def rules_from_dir(maps_dir=maps_dir):
     from .engine import ConstructRule
     # mappings

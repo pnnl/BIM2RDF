@@ -31,6 +31,7 @@ def namespaces(unique=True):
     return _
 
 
+
 def sample_data():
     # to trigger metadata creation
     import pyoxigraph as g
