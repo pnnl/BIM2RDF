@@ -264,8 +264,6 @@ def map_(stream_id, *, branch_ids=None,
         init=OxiGraph()
         ) -> Store:
     object_id=None
-    # data/config for args
-    
     assert(
         (stream_id in (s.id for s in SpeckleGetter.get_streams()) )
         or
