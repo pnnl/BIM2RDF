@@ -268,7 +268,6 @@ def fix(g: Graph) -> Graph:
 
 
 
-from .utils.queries import select
 
 
 def get_ontology(_: OxiGraph,) -> Triples:
@@ -280,7 +279,7 @@ def get_ontology(_: OxiGraph,) -> Triples:
 
 def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
     s = db._store
-    from .utils.queries import queries
+    from .utils.queries import queries, select
     before = select(s, (
             queries.rules.mapped,
             queries.rules.ontology,
@@ -321,7 +320,7 @@ def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
 
 def topquadrant_rules(db: OxiGraph) -> Triples:
     s = db._store
-    from .utils.queries import queries
+    from .utils.queries import queries, select
     _ = select(s, (
             queries.rules.mapped,
             queries.rules.rdfs_inferred,
@@ -380,7 +379,7 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     functions = shacl_defs().functions
     rules =  shacl_defs().rules
     _ = db._store
-    from .utils.queries import queries
+    from .utils.queries import queries, select
     _ = select(_, (
         queries.rules.mapped,
         #queries.rules.shacl_inferred)
