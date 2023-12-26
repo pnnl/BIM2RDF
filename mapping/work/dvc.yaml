@@ -21,25 +21,25 @@ stages:
   
 
   map:
-    cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=${building}
+    cmd: python -m mapping.speckle --stream_id=${building} --inference=True --validation=True 
     wdir: .
     deps:
-      - ../s223
+      - ../mappings
       - ontology.ttl
     outs:
-      - out.ttl # need to keep tracking this?
+      - db
 
   report:
     cmd: quarto render report.qmd
     wdir: report
     deps:
-      - ../out.ttl
+      - ../db
       - report.qmd
     outs:
       - report.html
       - report_files
 
-  # upload:
+  # distribution:
   #   cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
   #   wdir: work
   #   deps:
