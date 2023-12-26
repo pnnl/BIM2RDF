@@ -28,7 +28,9 @@ then manage data, `dvc push`.
 
 ## Development
 
-Use GraphDB or [oxigraph server](https://github.com/pchampin/oxigraph/tree/main/server#installation).
+Use GraphDB or [oxigraph server](https://github.com/pchampin/oxigraph/tree/main/server) to develop queries.
+
+Use the `--no-commit` in [DVC repro](https://dvc.org/doc/command-reference/repro) to not fill up your DVC cache when just developing.
 
 ## Checking
 
