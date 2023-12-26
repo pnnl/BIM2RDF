@@ -44,8 +44,9 @@ if __name__ == '__main__':
         for q in queries:
             q = Path(q)
             if not q.exists(): # it's some name
-                qo = Path(f"{q}.ttl")
+                q = str(q)
                 assert(isinstance(q, str))
+                qo = Path(f"{q}.ttl")
                 from .queries import queries as querieso
                 q = getattr(querieso.rules, q)
             else:
