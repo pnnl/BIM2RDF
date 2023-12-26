@@ -35,13 +35,19 @@ stages:
     deps:
       - ../db
       - report.qmd
+      # - some other content
     outs:
       - report.html
       - report_files
 
-  # distribution:
-  #   cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
-  #   wdir: work
-  #   deps:
-  #     - out.ttl
+  distribution:
+    cmd: python -m mapping.utils.db extract_triples db mapped
+    wdir: .
+    deps:
+      - db
+    outs:
+      - mapped.ttl
 # test here? to actually error out if check?
+
+# upload
+#cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
