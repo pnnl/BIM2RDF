@@ -22,13 +22,16 @@ def namespaces(unique=True):
     def s():
         from speckle import namespaces
         return namespaces()
+    def ms():
+        from mapping.speckle import namespaces
+        return namespaces()
     def e():
         from ..engine import namespaces
         return namespaces()
     def em():
         from engine.triples import PyRule
         return (namespace('meta', PyRule.meta_uri,) ,)
-    _ = tuple(o())+tuple(s())+tuple(e())+tuple(em())
+    _ = tuple(o())+tuple(s())+tuple(e())+tuple(em())+tuple(ms())
     _ = sorted(_, key=lambda ns: ns.prefix )
     _ = tuple(frozenset(_))
     if unique:
