@@ -41,12 +41,12 @@ stages:
       - report_files
 
   distribution:
-    cmd: python -m mapping.utils.db extract_triples db mapped
+    cmd: python distribution.py extract_triples db mapped shacl_inferred -o mapped_plus_inferred.ttl
     wdir: .
     deps:
       - db
     outs:
-      - mapped.ttl
+      - mapped_plus_inferred.ttl
 # test here? to actually error out if check?
 
 # upload

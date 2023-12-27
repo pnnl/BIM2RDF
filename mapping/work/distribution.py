@@ -2,50 +2,61 @@
 distribution tasks
 """
 from pathlib import Path
+from typing import Iterable, Self
 
-bdg2no = {
-    'Pritoni': 0,
-    'proto med-office': 1,
-}
+class Building:
+    def __init__(self, name: str, ) -> None:
+        self.name = name
+    
+    @classmethod
+    def s(cls) -> Iterable[Self]:
+        from mapping.speckle import SpeckleGetter
+        for _ in SpeckleGetter.get_streams():
+            yield cls(_.name)
+    
+    def __str__(self) -> str:
+        return self.name
+    
+    @property
+    def number(self)->int:
+        _ = {
+        'Pritoni':          1,
+        'proto-medoffice':  2,
+        'lbnl-bldg59':      3,
+        'nrel-rail':        4,
+        'neea-medoffice':   5,
+        # special
+        'Error':            999,
+        }
+        assert(
+            len(_.keys())
+               == 
+            len(frozenset(_.values())) )
+        return _[self.name]
+    
+    from functools import cached_property
+    @cached_property
+    def uri(self):
+        from mapping.speckle import namespaces as sns
+        for p, u in sns():
+            if p == self.name:
+                return u
+    @property
+    def prefix(self):
+        return f"bdg{self.number}"
 
-from graphdb.tasks import upload_graph
 
 
-#out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
-# if out_selections:
-#         from pyoxigraph import Store, Quad
-#         s = Store()
-#         if isinstance(out_selections, str):
-#             out_selections = (out_selections,)
-#         else:
-#             assert(isinstance(out_selections, (tuple, list, set, frozenset)) )
-
-#         from .utils.queries import queries
-#         for q in out_selections:
-#             q = getattr(queries.rules, q)
-#             q = _.query(q)
-#             q = tuple(q) # why do i have to do this?!
-#             if q: s.bulk_extend(Quad(*t) for t in q)
-#             del q
-#         _ = s; del s
-# if not out:
-#         return _
-#     out = Path(out)
-#     if split_out:
-#         out = Path('/'.join((out).parts[:-1] + (out.stem,)))
-#         if out.exists():
-#             from shutil import rmtree
-#             rmtree(out)
-#         from .utils.data import split_triples, sort_triples, Triples
-#         split_triples(
-#             sort_triples(Triples(t.triple for t in _)),
-#             chunk_size=nsplit_out)
-#     else:
-#         _.dump(str(out), 'text/turtle')
-#     return out
-
-#namdspaces include "ours"
-#def replace_namespace
+def namespaces():
+    from mapping.utils.queries import namespaces as qns
+    from ontologies import namespace
+    bdgs = {b.name:b for b in Building.s()}
+    for p, u in qns():
+        if p in bdgs:
+            yield namespace(bdgs[p].prefix, u)
+        else:
+            yield namespace(p, u)
+        
 
 class triplesqueryname(str):
     def __init__(self, name) -> None:
@@ -59,10 +70,14 @@ class triplesqueryname(str):
         return getattr(queries.rules, self.name)
 
 
+
+
+
 def extract_triples(
         ttl_or_dbdir: Path,
         *queries: Path|triplesqueryname,
-        out: Path|None=Path('out.ttl')):
+        replace_bdgprefix=True,
+        out: Path=Path('queried.ttl')):
     ttl_or_dir = Path(ttl_or_dbdir)
     from pyoxigraph import Store
     if ttl_or_dir.suffix == '.ttl':
@@ -86,20 +101,36 @@ def extract_triples(
             assert(q.suffix == '.rq')
             q = q.read_text()
             queries.append(q)
-
+    
+    from io import BytesIO
+    _ = BytesIO()
     from mapping.utils.queries import select
-    if not out:
-        from io import BytesIO
-        out = BytesIO()
     serialize(
         select(s, queries),
-        out,
+        _,
         'text/turtle')
-    
-    
+    _.seek(0)
+
+    from rdflib import Graph
+    _ = Graph().parse(_, format='text/turtle')
+
+
+    if replace_bdgprefix:
+        nss = namespaces
+    else:
+        from mapping.utils.queries import namespaces as nss
+    for p,u in nss(): _.bind(p, u)
+
+    _.serialize(out, format='text/turtle')
     return out
 
 
+
+from graphdb.tasks import upload_graph as upload_to_graphdb
+
 if __name__ == '__main__':
     from fire import Fire
-    Fire({'extract_triples': extract_triples})
+    Fire({
+        'extract_triples': extract_triples,
+        'upload_to_graphdb': upload_to_graphdb,
+        })
