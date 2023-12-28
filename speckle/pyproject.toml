@@ -23,7 +23,7 @@ build-backend = "hatchling.build"
 managed = true
 dev-dependencies = [
     "ipdb",
-    "pytest","pytest-watcher", "syrupy",
+    "pytest","pytest-watcher", # "pytest-accept", ?
     "fire"] # the cmd only applies in the dev situation
 
 
