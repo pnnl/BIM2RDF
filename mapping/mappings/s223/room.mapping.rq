@@ -92,14 +92,14 @@ OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "lobby")).  
-      BIND(rec:Lobby as ?rec_or_recx) 
+      BIND(recx:Lobby as ?rec_or_recx) #change to rec once added in ontlogy
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "lounge")).  
-      BIND(rec:Lounge as ?rec_or_recx) 
+      BIND(recx:Lounge as ?rec_or_recx) #change to rec once added in ontlogy
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
@@ -156,7 +156,7 @@ OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "class")).  
-      BIND(rec:TeamRoom as ?rec_or_recx) 
+      BIND(rec:Library as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 }

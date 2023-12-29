@@ -7,10 +7,12 @@ PREFIX qudtqk: <http://qudt.org/vocab/quantitykind/>
 PREFIX unit: <http://qudt.org/vocab/unit/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
+
 CONSTRUCT { 
 ?this a s223:DomainSpace.
 ?this s223:hasDomain s223:Domain-Lighting.
-?this rdfs:label ?name.
+ ?this rdfs:label "Domain-Lighting"^^xsd:string.
+#?this rdfs:label ?name.
 ?this s223:hasProperty ?p.
 ?p a s223:QuantifiableProperty.
 ?p qudt:hasQuantityKind qudtqk:Area.
@@ -20,7 +22,7 @@ CONSTRUCT {
 } 
 WHERE { 
 <<?this spkl:category  "Spaces">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
-    ?this spkl:name ?name. 
+    #?this spkl:name ?name. 
     ?this spkl:parameters/spkl:ROOM_AREA ?p.
   ?p spkl:value ?v.
   BIND(xsd:decimal(?v) AS ?vd).
