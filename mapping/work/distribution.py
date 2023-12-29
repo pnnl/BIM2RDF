@@ -76,7 +76,7 @@ class triplesqueryname(str):
 def extract_triples(
         ttl_or_dbdir: Path,
         *queries: Path|triplesqueryname,
-        replace_bdgprefix=True,
+        replace_bdgprefix=False,
         out: Path=Path('queried.ttl')):
     ttl_or_dir = Path(ttl_or_dbdir)
     from pyoxigraph import Store

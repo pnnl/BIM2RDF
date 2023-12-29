@@ -41,7 +41,7 @@ stages:
       - report_files
 
   distribution:
-    cmd: python distribution.py extract_triples db mapped shacl_inferred -o mapped_plus_inferred.ttl
+    cmd: python distribution.py extract_triples db mapped shacl_inferred --replace_bdgprefix True -o mapped_plus_inferred.ttl
     wdir: .
     deps:
       - db
