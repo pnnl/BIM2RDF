@@ -39,7 +39,7 @@ WHERE {
   ?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?circuitname. 
   }
 {
-    ?e rdfs:label ?circuitname.
+  ?e rdfs:label ?circuitname.
 	?e s223:cnx ?i.
 	?j a s223:Junction.
 	?e a s223:ElectricWire.

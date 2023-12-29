@@ -2,11 +2,13 @@ PREFIX meta: <http://meta>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX spkl: <http://speckle.systems/> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 
 CONSTRUCT { 
 ?this a s223:ElectricBreaker.
-  ?this rdfs:label ?name . 
+?this rdfs:label ?name . 
+#?this rdfs:label "ElectricBreaker"^^xsd:string.
 } 
 WHERE { 
 <<?this spkl:category  "Electrical Equipment">> meta: <<?mi spkl:name "electrical/panels">>. # TODO branchName could be used here
