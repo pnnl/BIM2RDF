@@ -24,7 +24,7 @@ stages:
     cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=${building}
     wdir: .
     deps:
-      - ../s223
+      - ../mappings
       - ontology.ttl
     outs:
       - out.ttl # need to keep tracking this?
