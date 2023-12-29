@@ -21,27 +21,33 @@ stages:
   
 
   map:
-    cmd: python -m mapping.speckle --inference=True --validation=True --stream_id=${building}
+    cmd: python -m mapping.speckle --stream_id=${building} --inference=True --validation=True 
     wdir: .
     deps:
       - ../mappings
       - ontology.ttl
     outs:
-      - out.ttl # need to keep tracking this?
+      - db
 
   report:
     cmd: quarto render report.qmd
     wdir: report
     deps:
-      - ../out.ttl
+      - ../db
       - report.qmd
+      # - some other content
     outs:
       - report.html
       - report_files
 
-  # upload:
-  #   cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
-  #   wdir: work
-  #   deps:
-  #     - out.ttl
+  distribution:
+    cmd: python distribution.py extract_triples db mapped shacl_inferred -o mapped_plus_inferred.ttl
+    wdir: .
+    deps:
+      - db
+    outs:
+      - mapped_plus_inferred.ttl
 # test here? to actually error out if check?
+
+# upload
+#cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}

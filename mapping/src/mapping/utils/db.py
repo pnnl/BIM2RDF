@@ -20,3 +20,10 @@ def get_store(ttl: Path=None, dir: Path=None,  overwrite=True):
             s.bulk_load(str(ttl), 'text/turtle')
     
     return s
+
+
+
+
+
+
+

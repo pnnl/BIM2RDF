@@ -12,8 +12,7 @@ pd.set_option('display.max_colwidth', 30)
 import mapping.report as mr
 from project import root
 import pyoxigraph as og
-store = og.Store()
-store.bulk_load(str(root / 'mapping' / 'work' / 'out.ttl'), 'text/turtle')
+store = og.Store('../db')
 r = mr.Report(store) 
 r.validation().to_dict(orient='records')
 ```

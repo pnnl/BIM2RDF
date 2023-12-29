@@ -267,14 +267,6 @@ def fix(g: Graph) -> Graph:
 #         super().__init__(spec)
 
 
-from pyoxigraph import Store
-# put in utils/queries.py TODO:
-def select(store: Store, construct_queries) -> Triples:
-    _ = map(lambda q: store.query(q) , construct_queries )
-    from itertools import chain
-    _ = chain.from_iterable(_)
-    _ = Triples(_)
-    return _
 
 
 
@@ -287,7 +279,7 @@ def get_ontology(_: OxiGraph,) -> Triples:
 
 def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
     s = db._store
-    from .utils.queries import queries
+    from .utils.queries import queries, select
     before = select(s, (
             queries.rules.mapped,
             queries.rules.ontology,
@@ -328,7 +320,7 @@ def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
 
 def topquadrant_rules(db: OxiGraph) -> Triples:
     s = db._store
-    from .utils.queries import queries
+    from .utils.queries import queries, select
     _ = select(s, (
             queries.rules.mapped,
             queries.rules.rdfs_inferred,
@@ -387,7 +379,7 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     functions = shacl_defs().functions
     rules =  shacl_defs().rules
     _ = db._store
-    from .utils.queries import queries
+    from .utils.queries import queries, select
     _ = select(_, (
         queries.rules.mapped,
         #queries.rules.shacl_inferred)

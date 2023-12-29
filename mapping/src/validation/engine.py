@@ -48,7 +48,7 @@ def shacl_validation(db: OxiGraph,) -> Triples:
 def shacl_validation(db: OxiGraph) -> Triples:
     s = db._store
     from mapping.utils.queries import queries
-    from mapping.engine import select
+    from mapping.utils.queries import select
     _ = select(s, (
             queries.rules.mapped,
             queries.rules.rdfs_inferred,

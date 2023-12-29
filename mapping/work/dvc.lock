@@ -1,0 +1,68 @@
+schema: '2.0'
+stages:
+  ontology:
+    cmd: python -m mapping.engine ontology -i False -d 'ontology' -o ontology.ttl
+    deps:
+    - path: ../../ontologies/.ontoenv
+      hash: md5
+      md5: 446689bfced3da9e3b1bbb2a2d1e0ee7.dir
+      size: 355685
+      nfiles: 9
+    outs:
+    - path: ontology.ttl
+      hash: md5
+      md5: 78af1b766a3e21148bb2ebffed0f423a
+      size: 5597671
+  map:
+    cmd: python -m mapping.speckle --stream_id=Pritoni --inference=True --validation=True
+    deps:
+    - path: ../mappings
+      hash: md5
+      md5: 72f44240e1204a58c1f1a2b991ade160.dir
+      size: 19685
+      nfiles: 24
+    - path: ontology.ttl
+      hash: md5
+      md5: 78af1b766a3e21148bb2ebffed0f423a
+      size: 5597671
+    outs:
+    - path: db
+      hash: md5
+      md5: ddd06b83f1fe624be5e9093976e85201.dir
+      size: 152782521
+      nfiles: 149
+  report:
+    cmd: quarto render report.qmd
+    deps:
+    - path: ../db
+      hash: md5
+      md5: b427093cc7d3be126d53c3a714b73725.dir
+      size: 152844388
+      nfiles: 151
+    - path: report.qmd
+      hash: md5
+      md5: 39eebc2711b682416d7a4c662244bcc4
+      size: 361
+    outs:
+    - path: report.html
+      hash: md5
+      md5: 33d252e7983d3484673ba52537727dfc
+      size: 15932
+    - path: report_files
+      hash: md5
+      md5: 9d0a3daf8485c012a9a5916bd9144ea6.dir
+      size: 849811
+      nfiles: 11
+  distribution:
+    cmd: python -m mapping.utils.db extract_triples db mapped
+    deps:
+    - path: db
+      hash: md5
+      md5: 7c5a9b8ea32864c6c32e936558053ba4.dir
+      size: 152845509
+      nfiles: 151
+    outs:
+    - path: mapped.ttl
+      hash: md5
+      md5: 0dcfa4cabbd2e845eda258bfcfb25e9d
+      size: 110910
