@@ -9,10 +9,30 @@ import pandas as pd
 pd.set_option('display.max_rows', 100)
 pd.set_option('display.max_colwidth', 30)
 
-import mapping.report as mr
+def validation(store, filter=True):
+    from mapping.utils.queries import queries
+    from mapping.utils.tables import query_table
+    _ = store.query(queries.shacl_report)
+    _ = query_table(_)
+    if filter:
+        mdq = set()
+        for q in {
+            queries.rules.mapped,
+            #queries.rules.rdfs_inferred,
+            #queries.rules.shacl_inferred
+            }:
+            md = store.query(q)
+            md = tuple(md)
+            from itertools import chain
+            md = chain((t[0] for t in md), (t[2] for t in md))
+            md = (_.value for _ in md)
+            mdq.update(md)
+        _ = _[_['focusNode'].isin(mdq)]
+    return _
+
+
 from project import root
 import pyoxigraph as og
 store = og.Store('../db')
-r = mr.Report(store) 
-r.validation().to_dict(orient='records')
+validation(store).to_dict(orient='records')
 ```
