@@ -21,7 +21,7 @@ stages:
   
 
   map:
-    cmd: python -m mapping.speckle --stream_id=${building} --inference=True --validation=True 
+    cmd: python -m mapping.speckle --stream_id=${building} --inference=True --validation=True -o db
     wdir: .
     deps:
       - ../mappings
