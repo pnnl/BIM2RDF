@@ -355,7 +355,7 @@ if __name__ == '__main__':
         if out.exists():
             if not out.is_dir():
                 raise IOError(f'{out} is not dir')
-            if not tuple(out.iterdir()):
+            if tuple(out.iterdir()):
                 raise IOError(f'{out} not empty')
         init = OxiGraph(Store(out))
         _ = map_(stream_id, branch_ids=branch_ids,
