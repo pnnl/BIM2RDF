@@ -9,6 +9,12 @@ import pandas as pd
 pd.set_option('display.max_rows', 100)
 pd.set_option('display.max_colwidth', 30)
 
+def query_table(store, query):
+    _ = store.query(query)
+    from mapping.utils.tables import query_table as qt
+    _ = qt(_)
+    return _
+
 def validation(store, filter=True):
     from mapping.utils.queries import queries
     from mapping.utils.tables import query_table
@@ -30,9 +36,26 @@ def validation(store, filter=True):
         _ = _[_['focusNode'].isin(mdq)]
     return _
 
-
 from project import root
 import pyoxigraph as og
 store = og.Store('../db')
 validation(store).to_dict(orient='records')
+```
+
+
+```{python}
+q = """
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ 
+SELECT ?physicalspace 
+WHERE {
+    ?physicalspace a s223:PhysicalSpace.
+    ?physicalspace s223:contains ?room.
+    #?physicalspace s223:hasProperty ?property.
+    #?property s223:hasValue ?area.    
+    }
+#GROUP BY ?physicalspace ?area
+"""
+query_table(store, q)
 ```
