@@ -43,19 +43,156 @@ validation(store).to_dict(orient='records')
 ```
 
 
+
+
+
+Physical Space Count 
+
 ```{python}
 q = """
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
  
-SELECT ?physicalspace 
-WHERE {
-    ?physicalspace a s223:PhysicalSpace.
-    ?physicalspace s223:contains ?room.
-    #?physicalspace s223:hasProperty ?property.
-    #?property s223:hasValue ?area.    
-    }
-#GROUP BY ?physicalspace ?area
+SELECT (COUNT (?ps) AS ?roomcount) 
+
+WHERE 
+   {?ps a s223:PhysicalSpace.
+}
+
+"""
+query_table(store, q)
+```
+
+Lighting Domain Space Count
+
+```{python}
+q = """
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ 
+SELECT  (COUNT (?ds) AS ?lightingdomainspacecount)
+
+WHERE 
+   {?ds a s223:DomainSpace.
+    ?ds s223:hasDomain s223:Domain-Lighting.
+   }
+
+"""
+query_table(store, q)
+```
+
+HVAC Domain Space Count
+
+```{python}
+q = """
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ 
+SELECT  (COUNT (?ds) AS ?HVACdomainspacecount)
+
+WHERE 
+   {?ds a s223:DomainSpace.
+   ?ds s223:hasDomain s223:Domain-HVAC.
+   }
+
+"""
+query_table(store, q)
+```
+
+Lighting Zone Count
+
+```{python}
+q = """
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ 
+SELECT   (COUNT (?z) AS ?lightingzonecount)
+
+WHERE 
+   {?z a s223:Zone.
+   ?z s223:hasDomain s223:Domain-Lighting.
+ } 
+
+
+"""
+query_table(store, q)
+```
+
+HVAC Zone Count
+
+```{python}
+q = """
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ 
+SELECT  (COUNT (?z) AS ?HVACzonecount)
+
+WHERE 
+   {?z a s223:Zone.
+    ?z s223:hasDomain s223:Domain-HVAC.
+ } 
+
+
+"""
+query_table(store, q)
+```
+
+Luminaire Count
+
+```{python}
+q = """
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ 
+SELECT  (COUNT (?l) AS ?luminairecount)
+
+WHERE 
+   {?l a s223:Luminaire.
+   
+  
+ } 
+
+
+"""
+query_table(store, q)
+```
+
+Electric Breaker Count
+
+```{python}
+q = """
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ 
+SELECT  (COUNT (?e) AS ?electricbreakercount)
+
+WHERE 
+   {?e a s223:ElectricBreaker.
+  
+  
+ } 
+
+
+"""
+query_table(store, q)
+```
+
+Occupancy Sensor Count
+
+```{python}
+q = """
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ 
+SELECT (COUNT (?e) AS ?occupantsensorcount)
+
+WHERE 
+   {?o a s223:OccupantMotionSensor.
+   
+  
+ } 
+
+
 """
 query_table(store, q)
 ```
