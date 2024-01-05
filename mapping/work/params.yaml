@@ -1,4 +1,4 @@
-building: lbnl-bldg59
+building: proto-medoffice
 
 # bdg dep mapping file
 # might want to create a params.py

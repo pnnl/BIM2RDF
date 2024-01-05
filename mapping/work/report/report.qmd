@@ -9,10 +9,53 @@ import pandas as pd
 pd.set_option('display.max_rows', 100)
 pd.set_option('display.max_colwidth', 30)
 
-import mapping.report as mr
+def query_table(store, query):
+    _ = store.query(query)
+    from mapping.utils.tables import query_table as qt
+    _ = qt(_)
+    return _
+
+def validation(store, filter=True):
+    from mapping.utils.queries import queries
+    from mapping.utils.tables import query_table
+    _ = store.query(queries.shacl_report)
+    _ = query_table(_)
+    if filter:
+        mdq = set()
+        for q in {
+            queries.rules.mapped,
+            #queries.rules.rdfs_inferred,
+            #queries.rules.shacl_inferred
+            }:
+            md = store.query(q)
+            md = tuple(md)
+            from itertools import chain
+            md = chain((t[0] for t in md), (t[2] for t in md))
+            md = (_.value for _ in md)
+            mdq.update(md)
+        _ = _[_['focusNode'].isin(mdq)]
+    return _
+
 from project import root
 import pyoxigraph as og
 store = og.Store('../db')
-r = mr.Report(store) 
-r.validation().to_dict(orient='records')
+validation(store).to_dict(orient='records')
+```
+
+
+```{python}
+q = """
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+ 
+SELECT ?physicalspace 
+WHERE {
+    ?physicalspace a s223:PhysicalSpace.
+    ?physicalspace s223:contains ?room.
+    #?physicalspace s223:hasProperty ?property.
+    #?property s223:hasValue ?area.    
+    }
+#GROUP BY ?physicalspace ?area
+"""
+query_table(store, q)
 ```

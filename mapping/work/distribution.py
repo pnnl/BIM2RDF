@@ -4,6 +4,7 @@ distribution tasks
 from pathlib import Path
 from typing import Iterable, Self
 
+
 class Building:
     def __init__(self, name: str, ) -> None:
         self.name = name
@@ -125,6 +126,35 @@ def extract_triples(
     return out
 
 
+def syncdir():
+    from pathlib import Path
+    sharefolder = Path('Data-Driven Electrical Systems - PROJ-semanticinterop') / Path('generated')
+    from platform import system
+    if system().lower() == 'windows':
+        return Path.home() / 'PNNL' / sharefolder
+    else:
+        return Path.home() / sharefolder
+
+
+def copy_to_sharefolder(*srcs:Path,
+        _sharefolder=syncdir(), dst_sharefolder=Path(),
+        delete_dst=False,):
+    dst = _sharefolder / Path(dst_sharefolder)
+    if delete_dst:
+        from shutil import rmtree
+        rmtree(dst)
+
+    for src in srcs:
+        src = Path(src)
+        if src.is_file():
+            from shutil import copy
+            copy(src, dst)
+        else:
+            assert(src.is_dir())
+            from shutil import copytree as copy
+            copy(src, dst, dirs_exist_ok=True)
+
+
 
 from graphdb.tasks import upload_graph as upload_to_graphdb
 
@@ -133,4 +163,5 @@ if __name__ == '__main__':
     Fire({
         'extract_triples': extract_triples,
         'upload_to_graphdb': upload_to_graphdb,
+        'copy_to_sharefolder': copy_to_sharefolder,
         })

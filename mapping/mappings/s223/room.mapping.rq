@@ -69,7 +69,7 @@ OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "storage")  
-            || contains(lcase(?lname), "equipment" )).  
+            || contains(lcase(?lname), "equipment" ) || contains(lcase(?lname), "janitor" )).  
       BIND(rec:Storage as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
@@ -157,6 +157,63 @@ OPTIONAL
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "class")).  
       BIND(rec:Library as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "elevator")).  
+      BIND(rec:ElevatorRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "office")).  
+      BIND(rec:OfficeRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "custodial")).  
+      BIND(rec:Cabinet as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "vestibule")).  
+      BIND(rec:Entrance as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "seminar")).  
+      BIND(rec:Workshop as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "data")).  
+      BIND(rec:DataServerRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "lactation")).  
+      BIND(rec:MothersRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "huddle")  
+            || contains(lcase(?lname), "hotel" )).  
+      BIND(rec:MultiPurposeRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 }

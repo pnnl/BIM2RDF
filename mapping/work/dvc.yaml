@@ -21,7 +21,7 @@ stages:
   
 
   map:
-    cmd: python -m mapping.speckle --stream_id=${building} --inference=True --validation=True 
+    cmd: python -m mapping.speckle --stream_id=${building} --inference=True --validation=True -o db
     wdir: .
     deps:
       - ../mappings
@@ -39,14 +39,38 @@ stages:
     outs:
       - report.html
       - report_files
+  
+  upload_report_sharefolder:
+    cmd: python distribution.py copy_to_sharefolder report --dst_sharefolder ${building}/report --delete_dst=True
+    wdir: .
+    deps:
+      - report
+    # outs: is not controlled
+  
+  mapped_ttl:
+    cmd: python distribution.py extract_triples db mapped --replace_bdgprefix True -o mapped.ttl
+    wdir: .
+    deps:
+      - db
+    outs:
+      - mapped.ttl
 
-  distribution:
+  mapped_plus_inferred_ttl:
     cmd: python distribution.py extract_triples db mapped shacl_inferred --replace_bdgprefix True -o mapped_plus_inferred.ttl
     wdir: .
     deps:
       - db
     outs:
       - mapped_plus_inferred.ttl
+  
+  upload_ttls_sharefolder:
+    cmd: python distribution.py copy_to_sharefolder mapped_plus_inferred.ttl mapped.ttl --dst_sharefolder ${building} --delete_dst=False
+    deps:
+      - mapped_plus_inferred.ttl
+      - mapped.ttl
+    # outs: are not controlled
+
+
 # test here? to actually error out if check?
 
 # upload
