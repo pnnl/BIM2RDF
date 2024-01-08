@@ -370,5 +370,30 @@ if __name__ == '__main__':
                 init=init)
         return out
     
+    def from_file(f: Path):
+        f = Path(f)
+        if not (f.suffix in {'.yml', '.yaml'}):
+            raise IOError('file needs to be yaml')
+        _ = open(f)
+        from yaml import safe_load
+        p = safe_load(_) # params
+        vn = p['run']['variation']
+        for v in p['variations']:
+            if v['name'] == vn: break
+        if not v['name'] == vn:
+            raise ValueError('variation not found')
+        return write_map(
+            p['run']['building'],
+            branch_ids=v['branches'],
+            rules=[Path(_) for _ in v['sparql_rules'] ],
+            max_cycles=p['run']['max_cycles'],
+            inference=v['inference'],
+            validation=v['validation'],
+            out=Path(p['run']['db']),
+         )
+
+    fire.Fire({
+        'from_args': write_map,
+        'from_file': from_file,
+        })
     
-    fire.Fire(write_map)
