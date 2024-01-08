@@ -1,6 +1,6 @@
 from ast import Store
 from engine.triples import Engine, PyRuleCallable, Triples
-from .engine import Rules, OxiGraph, Triples, PyRule
+from .engine import ConstructRule, Rules, OxiGraph, Triples, PyRule
 from typing import Callable, Iterable
 from pathlib import Path
 
@@ -16,19 +16,22 @@ def rules_from_dir(maps_dir=maps_dir):
     return _
 
 
-def rules(*,
-          rules_dir: Path | Iterable[Path] | None = maps_dir,
+def mk_rules(*,
+          paths: Path | Iterable[Path] | None = maps_dir,
           inference = True, 
             ) -> Rules:
     _ = []
     from .engine import Rules
-    if rules_dir:
-        if isinstance(rules_dir, Path):
-            rules_dir = [rules_dir]
+    if paths:
+        if isinstance(paths, Path):
+            return mk_rules(paths=[paths], inference=inference)
         else:
-            rules_dir = tuple(rules_dir)
-        for rd in rules_dir:
-            _ = _ + rules_from_dir(rd)
+            for p in paths:
+                if p.is_dir():
+                    _ = _ + rules_from_dir(p)
+                else:
+                    assert(p.suffix == '.rq')
+                    _ = _ + [ ConstructRule(p) ]
 
     # inference
     if inference:
@@ -230,7 +233,7 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         
 
 def fengine(og=OxiGraph(),
-        rules=rules,
+        rules=mk_rules(),
         validation=True,
         block_seen=True,
         deanon=True,
@@ -257,7 +260,7 @@ from pathlib import Path
 from typing import Iterable
 from pyoxigraph import Store
 def map_(stream_id, *, branch_ids=None,
-        rules_dir: Path | Iterable[Path] | None = maps_dir,
+        rules: Path | Iterable[Path] | None = maps_dir,
         max_cycles=10,
         inference=False,
         validation=False,
@@ -281,11 +284,11 @@ def map_(stream_id, *, branch_ids=None,
     else:
         raise TypeError('branch id not processed')
     
-    if rules_dir:
-        if isinstance(rules_dir, (list, tuple, set)):
-            rules_dir = tuple(Path(_) for _ in rules_dir)
+    if rules:
+        if isinstance(rules, (list, tuple, set)):
+            rules = tuple(Path(_) for _ in rules)
         else:
-            rules_dir = Path(rules_dir)
+            rules = (Path(rules),)
     
     # throw and forget mode. not optimized but don't have to manage.
     # _ = fengine(
@@ -302,30 +305,30 @@ def map_(stream_id, *, branch_ids=None,
     from .engine import get_ontology
     _ = fengine(
             og=init,
-            rules=data_rules+(Rules([PyRule(get_ontology)]) if rules_dir else Rules([]) ),
+            rules=data_rules+(Rules([PyRule(get_ontology)]) if rules else Rules([]) ),
             validation=False,
             max_cycles=1)() # no need to keep spinning
-    if rules_dir:
+    if rules:
     # 2. "mappings"
         _ = fengine(og=_.db,
-            rules=rules(
-                rules_dir=rules_dir,
+            rules=mk_rules(
+                paths=rules,
                 inference=False),
             validation=False,
             max_cycles=max_cycles)()
     # 3. inferencing 
     if inference:
         _ = fengine(og=_.db,
-            rules=rules(
-                rules_dir=None,
+            rules=mk_rules(
+                paths=None,
                 inference=inference),
             validation=False,
             max_cycles=max_cycles)()
     # 4. validation
     if validation:
         _ = fengine(og=_.db,
-            rules=rules(
-                rules_dir=None,
+            rules=mk_rules(
+                paths=None,
                 inference=False),
             validation=validation,
             max_cycles=max_cycles)()
@@ -345,7 +348,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.INFO)
     
     def write_map(stream_id, *, branch_ids=None,
-            rules_dir: Path | Iterable[Path] | None = maps_dir,
+            rules: Path | Iterable[Path] | None = maps_dir,
             max_cycles=10,
             inference=False,
             validation=False,
@@ -359,7 +362,7 @@ if __name__ == '__main__':
                 raise IOError(f'{out} not empty')
         init = OxiGraph(Store(out))
         _ = map_(stream_id, branch_ids=branch_ids,
-                rules_dir = rules_dir,
+                rules = rules,
                 max_cycles=max_cycles,
                 inference=inference,
                 validation=validation,
