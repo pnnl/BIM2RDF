@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 from . import mapping_dir
-maps_dir = mapping_dir / 'mappings'
+maps_dir = mapping_dir / 'rules'
 def rules_from_dir(maps_dir=maps_dir):
     from .engine import ConstructRule
     # mappings
@@ -336,6 +336,7 @@ def map_(stream_id, *, branch_ids=None,
     return _.db._store
 
 
+
 if __name__ == '__main__':
     import fire
     import logging
@@ -368,5 +369,6 @@ if __name__ == '__main__':
                 validation=validation,
                 init=init)
         return out
-            
+    
+    
     fire.Fire(write_map)
