@@ -47,7 +47,7 @@ stages:
     # outs: is not controlled
   
   mapped_ttl:
-    cmd: python distribution.py extract_triples db mapped --replace_bdgprefix True -o mapped.ttl
+    cmd: python distribution.py extract_triples ${run.db} mapped --replace_bdgprefix True -o mapped.ttl
     wdir: .
     params:
       - run.building
@@ -58,7 +58,7 @@ stages:
       - mapped.ttl
 
   mapped_plus_inferred_ttl:
-    cmd: python distribution.py extract_triples db mapped shacl_inferred --replace_bdgprefix True -o mapped_plus_inferred.ttl
+    cmd: python distribution.py extract_triples ${run.db} mapped shacl_inferred --replace_bdgprefix True -o mapped_plus_inferred.ttl
     wdir: .
     params:
       - run.building
