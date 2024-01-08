@@ -380,7 +380,7 @@ if __name__ == '__main__':
         vn = p['run']['variation']
         for v in p['variations']:
             if v['name'] == vn: break
-        if not v['name'] == vn:
+        if not (v['name'] == vn):
             raise ValueError('variation not found')
         return write_map(
             p['run']['building'],
