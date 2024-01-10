@@ -1,7 +1,42 @@
-building: proto-medoffice
+# "current"
+run: 
+  building: Pritoni
+  variation: default
+  db: db # not part of 'variation'. fixed by default but putting here to be explicit
+  max_cycles: 10  # ditto
 
-# bdg dep mapping file
-# might want to create a params.py
-# to dynamically create mapping file ref.
-# to say: if no mapping => use 'default'/'ref' mapping
-#         else: use bdg-specific mapping
+# centralizing variations (ideal)
+variations:
+# explict arguments
+  - name: default
+    branches:
+      - architecture/rooms and lighting fixtures
+      - architecture/hvac zone
+      - electrical/panels
+      - electrical/electrical connection
+      #- mechanical/
+      #- plumbing/
+    sparql_rules:
+      - ../rules # contains "mappings" mainly
+    inference: True
+    validation: True
+  #- name: buildingname for something really specific to a bdg (not ideal but can do)
+  # sparql_rules:
+  #   - ../rules/bdg/buildingname
+
+distribution:
+  - name: Pritoni
+    number: 1
+  - name: proto-medoffice
+    number: 2
+  - name: lbnl-bldg59
+    number: 3
+  - name: nrel-rail
+    number: 4
+  - name: neea-medoffice
+    number: 5
+#  special
+  - name: Error
+    number: 999
+
+

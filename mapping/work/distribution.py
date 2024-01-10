@@ -18,24 +18,28 @@ class Building:
     def __str__(self) -> str:
         return self.name
     
-    @property
+    from functools import cached_property
+
+    @classmethod
+    def get_numbers(cls):
+        _ = Path(__file__ ).parent / 'params.yaml'
+        from yaml import safe_load
+        _ = open(_)
+        _ = safe_load(_)
+        _ = _['distribution']
+        _ = {_['name']:_['number'] for _ in _}
+        return _
+    
+    @cached_property
     def number(self)->int:
-        _ = {
-        'Pritoni':          1,
-        'proto-medoffice':  2,
-        'lbnl-bldg59':      3,
-        'nrel-rail':        4,
-        'neea-medoffice':   5,
-        # special
-        'Error':            999,
-        }
+        _ = self.get_numbers()
         assert(
             len(_.keys())
                == 
             len(frozenset(_.values())) )
         return _[self.name]
     
-    from functools import cached_property
+    
     @cached_property
     def uri(self):
         from mapping.speckle import namespaces as sns
@@ -140,7 +144,7 @@ def copy_to_sharefolder(*srcs:Path,
         _sharefolder=syncdir(), dst_sharefolder=Path(),
         delete_dst=False,):
     dst = _sharefolder / Path(dst_sharefolder)
-    if delete_dst:
+    if delete_dst and dst.exists():
         from shutil import rmtree
         rmtree(dst)
 
