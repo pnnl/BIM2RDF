@@ -11,9 +11,9 @@ Basic use:
 <br>
 From [this](./work) directory,
 <br>
-fill in [`params.yaml`](../params.yaml),
+fill in [`params.yaml`](./work/params.yaml),
 <br>
-modify [mappings](../s223/) if needed.
+modify [mappings](./rules) if needed.
 <br>
 then just `dvc repro`,
 <br>
