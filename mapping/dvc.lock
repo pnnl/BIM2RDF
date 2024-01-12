@@ -2,7 +2,7 @@ schema: '2.0'
 stages:
   ontology:
     cmd: python -m ontologies.collect --collection_name applicable --import_deps True
-      --remove_owl_imports True -p ontology.ttl
+      -p ontology.ttl
     deps:
     - path: ../../ontologies/.ontoenv
       hash: md5
@@ -15,8 +15,8 @@ stages:
       md5: e828953611e7410fb6ef78f0cc80907b
       size: 6718635
   validation:
-    cmd: python -m ontologies.collect --collection_name defs --import_deps False --remove_owl_imports
-      True -p validation.ttl
+    cmd: python -m ontologies.collect --collection_name defs --import_deps False
+      -p validation.ttl
     deps:
     - path: ../../ontologies/.ontoenv
       hash: md5
