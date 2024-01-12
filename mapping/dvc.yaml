@@ -11,7 +11,7 @@ stages:
   ontology: # need to process ontology a bit more than just collecting files
   # this step is here instead of in 'ontologies' b/c of recursion issues.
   #                                                   param coll name?
-    cmd: python -m ontologies.collect --collection_name applicable --import_deps True --remove_owl_imports True -p ontology.ttl  # ${item}.ttl
+    cmd: python -m ontologies.collect --collection_name applicable --import_deps True -p ontology.ttl  # ${item}.ttl
     wdir: work
     deps:
       #- ../../ontologies/223standard.hash
@@ -20,7 +20,7 @@ stages:
      - ontology.ttl  #/${item}.ttl
     
   validation: # if there was a separate validation step, i'd use the verb, validATE
-    cmd: python -m ontologies.collect --collection_name defs --import_deps False --remove_owl_imports True -p validation.ttl 
+    cmd: python -m ontologies.collect --collection_name defs --import_deps False -p validation.ttl 
     wdir: work
     deps:
       - ../../ontologies/.ontoenv
