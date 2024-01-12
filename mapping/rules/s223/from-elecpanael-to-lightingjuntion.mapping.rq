@@ -21,14 +21,15 @@ _:i s223:cnx _:j.
 _:j a s223:Junction. #circuitname can be applied here aswell
 _:j rdfs:label "Junction"^^xsd:string.
 _:j s223:hasMedium  s223:Medium-Electricity.
-
+?elecbreaker ?circuit _:j.
 }  
 
 WHERE 
    {
 ?elecbreaker a s223:ElectricBreaker.    
 <<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. 
-#?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?circuitname. 
+?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME ?circuit.
+?circuit spkl:value ?circuitname. 
 ?elecbreaker spkl:Connectors/rdf:rest*/rdf:first ?conn.
 
 

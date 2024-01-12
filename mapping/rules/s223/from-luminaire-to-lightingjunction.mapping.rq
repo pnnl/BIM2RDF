@@ -30,20 +30,26 @@ WHERE {
   }
 ?lumcircuit spkl:elementId ?eid.
 {
-    ?lumcircuit spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM ?circuit.
+  ?lumcircuit spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM  ?circuit.
 	?circuit spkl:value ?circuitname.
  }
 
   {
   ?elecbreaker a s223:ElectricBreaker.
-  ?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?circuitname. 
+  ?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME ?circuit1.
+  ?circuit1 spkl:value ?circuitname. 
+  ?elecbreaker ?circuit1 ?j.
   }
 {
-  ?e rdfs:label ?circuitname.
+  
+  ?elecbreaker s223:cnx ?o.
+  ?o a s223:OutletConnectionPoint.
+  ?o s223:cnx ?e.
+  ?e a s223:ElectricWire.
 	?e s223:cnx ?i.
+  ?i a s223:InletConnectionPoint.
+  ?i s223:cnx ?j.
 	?j a s223:Junction.
-	?e a s223:ElectricWire.
-	?i a s223:InletConnectionPoint.
-	?i s223:cnx ?j.
+	
 }
 }
