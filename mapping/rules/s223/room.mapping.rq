@@ -11,7 +11,8 @@ PREFIX qudt: <http://qudt.org/schema/qudt/>
 PREFIX qudtqk: <http://qudt.org/vocab/quantitykind/>
 PREFIX unit: <http://qudt.org/vocab/unit/>
 CONSTRUCT { 
-?this a s223:PhysicalSpace.
+#?this a s223:PhysicalSpace.
+#?this a rec:Room.
 ?this a ?rec_or_recx.
 ?this rdfs:label ?recname.
 ?this s223:hasProperty ?p.
@@ -143,13 +144,6 @@ OPTIONAL
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "copy")).  
       BIND(rec:CopyingRoom as ?rec_or_recx) 
-      ?rec_or_recx rdfs:label ?recname.
-    }
-OPTIONAL
-    {
-      ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "work")).  
-      BIND(recx:Workstation as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
