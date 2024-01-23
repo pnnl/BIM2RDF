@@ -4,7 +4,7 @@ PREFIX spkl: <http://speckle.systems/>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 CONSTRUCT { 
-?this s223:cnx ?conn.
+?this s223:hasConnectionPoint ?conn.
   ?conn  a s223:OutletConnectionPoint.
   ?conn rdfs:label "OutletConnectionPoint"^^xsd:string.
   ?conn s223:hasMedium s223:AC-120VLN-1Ph-60Hz. # can this be inferred? 

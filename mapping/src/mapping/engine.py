@@ -267,50 +267,75 @@ def fix(g: Graph) -> Graph:
 #         super().__init__(spec)
 
 
-from pyoxigraph import Store
-# put in utils/queries.py TODO:
-def select(store: Store, construct_queries) -> Triples:
-    _ = map(lambda q: store.query(q) , construct_queries )
-    from itertools import chain
-    _ = chain.from_iterable(_)
-    _ = Triples(_)
+
+
+
+def get_ontology(_: OxiGraph,) -> Triples:
+    from .utils.data import get_data
+    from project import root
+    _ = get_data(root / 'mapping' / 'work' / 'ontology.ttl'  ) # collection
     return _
 
 
-def rdflib_rdfs(db: OxiGraph) -> Triples:
-    _ = db._store
-    from .utils.queries import queries
-    _ = select(_, (
+def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
+    s = db._store
+    from .utils.queries import queries, select
+    before = select(s, (
             queries.rules.mapped,
-            queries.rules.ontology, #
-            #queries.rules.rdfs_inferred,
+            queries.rules.ontology,
+            queries.rules.rdfs_inferred,
             queries.rules.shacl_inferred) )
     from .utils.conversions import triples2ttl
-    _ = triples2ttl(_)
+    _ = triples2ttl(before)
     from rdflib import Graph
-    before = Graph()
-    before.parse(data=_, format='text/turtle')
-    from .utils.rdflibgraph import copy
-    _ = copy(before)
+    _ = Graph().parse(data=_, format='text/turtle')
+    assert(isinstance(_, Graph))
     _ = get_closure(_, semantics='rdfs')
     from .utils.conversions import rg2triples
-    _ = generated(before, _)
     _ = rg2triples(_)
+    after = frozenset(_)
+    # only pick out triples from data
+    before = frozenset(before)
+    assert(len(after) >= len(before))
+    _ = after - before; del before, after
+    #return _
+    # furhtermore only get data-inferred
+    data = select(db._store, (
+        queries.rules.mapped,
+        queries.rules.rdfs_inferred,
+        queries.rules.shacl_inferred
+        ) )
+    data = frozenset(data)
+    from itertools import chain
+    dataset = chain(
+        frozenset(t[0] for t in data),
+        #frozenset(t[1] for t in data),
+        #frozenset(t[2] for t in data),
+        )
+    dataset = frozenset(dataset)
+    del data
+    _ = (t for t in _ if any(n in dataset for n in t) )
     return _
 
 
 def topquadrant_rules(db: OxiGraph) -> Triples:
     s = db._store
-    from .utils.queries import queries
+    from .utils.queries import queries, select
     _ = select(s, (
             queries.rules.mapped,
-            queries.rules.rdfs_inferred,) ) #
-    shapes = select(s, 
-            (queries.rules.ontology,  ) )
+            queries.rules.rdfs_inferred,
+            queries.rules.shacl_inferred,
+              ) ) #
+    from pyoxigraph import parse
+    from project import root
+    shapes = parse(root / 'mapping' / 'work' / 'ontology.ttl', 'text/turtle' )
+    from itertools import chain
+    _ = chain(_, shapes)
     from validation.shacl import tqshacl
-    _ = tqshacl('infer', _, shapes)
+    _ = tqshacl('infer', _, )
     # could get some bnode issues b/c of
     # ttl reading back bnodse as different!!!
+    # tq only returns new
     return _
 
 
@@ -354,7 +379,7 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     functions = shacl_defs().functions
     rules =  shacl_defs().rules
     _ = db._store
-    from .utils.queries import queries
+    from .utils.queries import queries, select
     _ = select(_, (
         queries.rules.mapped,
         #queries.rules.shacl_inferred)
@@ -376,18 +401,36 @@ def pyshacl_rules(db: OxiGraph) -> Triples:
     return _
 
 
-if __name__ == '__main__': ...
-    # from pathlib import Path
-    # def rdfs(ipth: Path, opath=None):
-    #     ipth = Path(ipth)
-    #     if not opath:
-    #         opath = Path(ipth.parts[:-1]) / ipth.stem+'-rdfs.ttl'
-    #     db = OxiGraph()
-    #     db._store.bulk_load(ipth, 'text/turtle')
-    #     _ = rdflib_rdfs(db)
-    #     from pyoxigraph import serialize
-    #     from .conversions import triples2ttl
-    #     _ = triples2ttl()
-    #     return opath
+if __name__ == '__main__':
+    from pathlib import Path
+    def semantics_infer(
+            ipth: Path,
+            semantics: str='rdfs',
+            opath: Path=Path('inferred.ttl')):
+        ipth = Path(ipth)
+        g = Graph().parse(ipth, 'text/turtle')
+        g = get_closure(g, semantics=semantics)
+        g.serialize(opath, 'text/turtle')
+        return opath
+    
+    def ontology(
+            def_: str='ontology',
+            infer: str|None ='rdfs',
+            opath: Path=Path('ontology.ttl') ):
+        from ontologies.collect import process
+        _ = process(def_=def_, import_deps=True, remove_owl_imports=True)
+        if infer:
+            _ = get_closure(_, semantics=infer)
+        _.serialize(opath, 'text/turtle')
+        return opath
+    
+    from fire import Fire
+    import logging
+    logging.basicConfig(force=True) # force removes other loggers that got picked up.
+    logger.setLevel(logging.INFO)
+    Fire(
+        {
+            'semantics_infer': semantics_infer,
+            'ontology': ontology,
+         })
 
-    #...

@@ -1,0 +1,215 @@
+PREFIX rec: <https://w3id.org/rec#> 
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix recx: <urn:rec:extentions:>
+
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX qudtqk: <http://qudt.org/vocab/quantitykind/>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+CONSTRUCT { 
+#?this a s223:PhysicalSpace.
+#?this a rec:Room.
+?this a ?rec_or_recx.
+?this rdfs:label ?recname.
+?this s223:hasProperty ?p.
+?p a s223:QuantifiableProperty.
+?p qudt:hasQuantityKind qudtqk:Area.
+?p s223:hasValue ?vd.
+?p qudt:hasUnit unit:M2.
+?p rdfs:label "QuantifiableProperty"^^xsd:string.
+
+} 
+WHERE { 
+<<?this spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
+  ?this spkl:parameters/spkl:ROOM_AREA ?p.
+  ?p spkl:value ?v.
+  BIND(xsd:decimal(?v) AS ?vd).
+  
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "open")).  
+      BIND(recx:OpenOffice as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "private")  
+            || contains(lcase(?lname), "enclosed" )).  
+      BIND(recx:PrivateOffice as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "kitchen")).  
+      BIND(rec:CookingRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "corridor")  
+            || contains(lcase(?lname), "hallway" )).  
+      BIND(rec:Hallway as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "conference")).  
+      BIND(rec:ConferenceRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "storage")  
+            || contains(lcase(?lname), "equipment" ) || contains(lcase(?lname), "janitor" )).  
+      BIND(rec:Storage as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "bath")  
+            || contains(lcase(?lname), "restroom") || contains(lcase(?lname), "toilet")).  
+      BIND(rec:Bathroom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "dining")).  
+      BIND(rec:DiningRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "lobby")).  
+      BIND(recx:Lobby as ?rec_or_recx) #change to rec once added in ontlogy
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "lounge")).  
+      BIND(recx:Lounge as ?rec_or_recx) #change to rec once added in ontlogy
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "mechanical")).  
+      BIND(recx:MechanicalRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "stair")).  
+      BIND(rec:Stairwell as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "electrical")).  
+      BIND(rec:ElectricityRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "break")).  
+      BIND(rec:RestingRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "computer")).  
+      BIND(recx:ComputerRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "copy")).  
+      BIND(rec:CopyingRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "class")).  
+      BIND(rec:Library as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "elevator")).  
+      BIND(rec:ElevatorRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "office")).  
+      BIND(rec:OfficeRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "custodial")).  
+      BIND(rec:Cabinet as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "vestibule")).  
+      BIND(rec:Entrance as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "seminar")).  
+      BIND(rec:Workshop as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "data")).  
+      BIND(rec:DataServerRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "lactation")).  
+      BIND(rec:MothersRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "huddle")  
+            || contains(lcase(?lname), "hotel" )).  
+      BIND(rec:MultiPurposeRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+}
+
+        

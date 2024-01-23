@@ -70,9 +70,9 @@ def tqshacl(
         shapesp.unlink(missing_ok=True)
         serialize(shapes, shapesp, 'text/turtle')
         o = f(datap, shapesp,)
+        shapesp.unlink(missing_ok=True)
     else:
         o = f(datap, )
-    shapesp.unlink(missing_ok=True)
     datap.unlink(missing_ok=True)
     from mapping.utils.data import get_data
     o = get_data(o.stdout, )

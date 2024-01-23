@@ -1,7 +1,0 @@
-building: Pritoni
-
-# bdg dep mapping file
-# might want to create a params.py
-# to dynamically create mapping file ref.
-# to say: if no mapping => use 'default'/'ref' mapping
-#         else: use bdg-specific mapping

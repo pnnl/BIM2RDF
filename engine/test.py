@@ -32,8 +32,8 @@ def test_deanon():
     from pyoxigraph import Triple, NamedNode, BlankNode
     # test bn deanoned stay stay the same.
     x = BlankNode('x')
-    y = BlankNode('y')
     p = NamedNode('p:')
+    y = BlankNode('y')
     t = Triple(x, p, y)
     m = NamedNode('m:')
     i = [
@@ -43,7 +43,9 @@ def test_deanon():
     o = deanon(i)
     o = list(o)
     for n in flatten(o):
-        assert(not isinstance(n, BlankNode))
+        assert(not isinstance(n, BlankNode) )
+    assert(isinstance(o[0].subject, Triple) )
+    assert(isinstance(o[0].object, Triple)  )
     assert(o[0].subject.subject     == o[1].subject  )
     assert(o[0].subject.object      == o[1].object  )
     assert(o[0].object.subject      == o[1].subject  )

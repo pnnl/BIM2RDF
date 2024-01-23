@@ -21,12 +21,6 @@ def find_list_fields(d: dict):
             yield k
 
 
-def sample_json():
-    _ = open('.json').read()
-    import json
-    _ = json.loads(_)
-    return _
-
 def remove_at(d: dict) -> dict:
     # can't have @. collides with jsonld.
     # need copy? functional programming rules
@@ -54,15 +48,21 @@ def url_quote(d: dict) -> dict:
     return d
 
 
+def rem___closure(d: dict) -> dict:
+    raise NotImplementedError
+
 from . import base_uri
 
-def contextualize(d: dict) -> dict:
+def contextualize(d: dict,
+        vocab = lambda: base_uri(),
+        base = lambda: base_uri(),
+        ) -> dict:
     #"@context": {"@vocab": "http://speckle.systems/", "@base":"http://speckle.systems/", "id": "@id", "referencedId": "@id" },
     # this works in jsonld playground
     #d = d.copy()
     context = {
-        '@vocab':       base_uri(),
-        '@base':        base_uri(),
+        '@vocab':       vocab(),
+        '@base':        base(),
         'referencedId': '@id',
         'id':           '@id',
         #"data":         {"@container": "@list"} most (almost all?) of these are the data lists
@@ -143,20 +143,23 @@ def data_decode(d: str) -> 'array':
     return _
 
 
-
-
 # can take json or speckleid
-def rdf(d, data_lists=False):  #TODO: propagate "engine" option to encode data list
-    #_ = sample_json()
+def rdf(d,
+        stream_id=None,
+        data_lists=False):  #TODO: propagate "engine" option to encode data list
     _ = d
     _ = remove_at(_)
     _ = url_quote(_)
     if data_lists:
         _ = encode_data_lists(_, encoder=data_encode)
-    else:
+    else: # "erase" the data
         _ = encode_data_lists(_, encoder=lambda l: "")
     # the num lists wont show
-    _ = contextualize(_)
+    if stream_id:
+        from . import object_uri
+        _ = contextualize(_, base=lambda: object_uri(stream_id) )
+    else:
+        _ = contextualize(_)
     #from pyld import jsonld as lj
     #_ = lj.flatten(_)
     #lj.to_rdf()
@@ -181,8 +184,10 @@ def rdf(d, data_lists=False):  #TODO: propagate "engine" option to encode data l
 
 
 if __name__ == '__main__':
+    from pathlib import Path
 
-    def write_json(stream_id, object_id, path='data.json', safe=True):
+    def write_json(stream_id, object_id, path=Path('data.json'), safe=True):
+        path = Path(path)
         # for debugging
         from speckle.graphql import queries, query
         _ = queries()
@@ -193,9 +198,25 @@ if __name__ == '__main__':
             _ = url_quote(_)
             _ = encode_data_lists(_)
         from json import dump
-        from pathlib import Path
-        dump(_, open(Path(path), 'w'),)
+        dump(_, open(path, 'w'),)
+        return path
+    
+    def write_ttl(stream_id, object_id, path=Path('data.ttl'),):
+        path = Path(path)
+        # for debugging
+        from speckle.graphql import queries, query
+        _ = queries()
+        _ = _.objects(stream_id, object_id)
+        _ = query(_) # dict
+        _ = rdf(_, stream_id=stream_id)
+        _.seek(0)
+        open(path, 'wb').write(_.read())
+        return path
+
     
     import fire
-    fire.Fire(write_json)
+    fire.Fire({
+        'write_json': write_json,
+        'write_ttl': write_ttl,})
+
 

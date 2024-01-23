@@ -2,7 +2,13 @@
 programmatic generation of queries
 """
 from ..engine import Triples, PyRule, ConstructRule as _ConstructRule, OxiGraph
-
+from pyoxigraph import Store
+def select(store: Store, construct_queries) -> Triples:
+    _ = map(lambda q: store.query(q) , construct_queries )
+    from itertools import chain
+    _ = chain.from_iterable(_)
+    _ = Triples(_)
+    return _
 
 from functools import lru_cache
 @lru_cache
@@ -10,11 +16,14 @@ def namespaces(unique=True):
     from ontologies import namespace
     def o():
         from ontologies import namespaces
-        for nss in namespaces(collection='applicable'):
+        for nss in namespaces():
             for pfx, ns in nss.namespaces():
                 yield namespace(pfx, ns)
     def s():
         from speckle import namespaces
+        return namespaces()
+    def ms():
+        from mapping.speckle import namespaces
         return namespaces()
     def e():
         from ..engine import namespaces
@@ -22,13 +31,14 @@ def namespaces(unique=True):
     def em():
         from engine.triples import PyRule
         return (namespace('meta', PyRule.meta_uri,) ,)
-    _ = tuple(o())+tuple(s())+tuple(e())+tuple(em())
+    _ = tuple(o())+tuple(s())+tuple(e())+tuple(em())+tuple(ms())
     _ = sorted(_, key=lambda ns: ns.prefix )
     _ = tuple(frozenset(_))
     if unique:
         _ = {p:n for p,n in _}
         _ = tuple(_.items())
     return _
+
 
 
 def sample_data():
@@ -173,11 +183,6 @@ class rulequeries:
         _ = self.q.query_template(pattern, filter)
         return _
     
-    @property
-    def ontology(self,):
-        from ..speckle import get_ontology
-        _ = self.q.querymaker(get_ontology)
-        return _.maker(_.pattern, _.filter)
     
     @property
     def speckle(self):

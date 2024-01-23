@@ -9,11 +9,11 @@ Else, you can `rye run mapping` from the `mapping` directory.
 
 Basic use:
 <br>
-From [this](./) directory,
+From [this](./work) directory,
 <br>
-fill in [`params.yaml`](../params.yaml),
+fill in [`params.yaml`](./work/params.yaml),
 <br>
-modify [mappings](../s223/) if needed.
+modify [mappings](./rules) if needed.
 <br>
 then just `dvc repro`,
 <br>
@@ -28,7 +28,9 @@ then manage data, `dvc push`.
 
 ## Development
 
-Use GraphDB or [this utility](./tests/query.qmd).
+Use GraphDB or [oxigraph server](https://github.com/pchampin/oxigraph/tree/main/server) to develop queries.
+
+Use the `--no-commit` in [DVC repro](https://dvc.org/doc/command-reference/repro) to not fill up your DVC cache when just developing.
 
 ## Checking
 

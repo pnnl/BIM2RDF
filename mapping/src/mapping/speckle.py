@@ -1,11 +1,12 @@
-from engine.triples import PyRuleCallable, Triples
-from .engine import Rules, OxiGraph, Triples, PyRule
+from ast import Store
+from engine.triples import Engine, PyRuleCallable, Triples
+from .engine import ConstructRule, Rules, OxiGraph, Triples, PyRule
 from typing import Callable, Iterable
 from pathlib import Path
 
 
 from . import mapping_dir
-maps_dir = mapping_dir / 's223'
+maps_dir = mapping_dir / 'rules'
 def rules_from_dir(maps_dir=maps_dir):
     from .engine import ConstructRule
     # mappings
@@ -15,40 +16,34 @@ def rules_from_dir(maps_dir=maps_dir):
     return _
 
 
-def rules(*,
-          rules_dir: Path | Iterable[Path] | None = maps_dir,
+def mk_rules(*,
+          paths: Path | Iterable[Path] | None = maps_dir,
           inference = True, 
             ) -> Rules:
     _ = []
     from .engine import Rules
-    if rules_dir:
-        if isinstance(rules_dir, Path):
-            rules_dir = [rules_dir]
+    if paths:
+        if isinstance(paths, Path):
+            return mk_rules(paths=[paths], inference=inference)
         else:
-            rules_dir = tuple(rules_dir)
-        for rd in rules_dir:
-            _ = _ + rules_from_dir(rd)
+            for p in paths:
+                if p.is_dir():
+                    _ = _ + rules_from_dir(p)
+                else:
+                    assert(p.suffix == '.rq')
+                    _ = _ + [ ConstructRule(p) ]
 
     # inference
     if inference:
-        _ = _ + [PyRule(get_ontology)]
         #                     223p rules
-        from .engine import rdflib_rdfs, topquadrant_rules
+        from .engine import topquadrant_rules
+        #from .engine import rdflib_rdfs
         _ = _ + [
-            PyRule(rdflib_rdfs),
-            PyRule(topquadrant_rules)
+            #PyRule(rdflib_rdfs),
+            PyRule(topquadrant_rules),
                 ]
 
     _ = Rules(_)
-    return _
-
-
-from functools import lru_cache
-@lru_cache
-def get_ontology(_: OxiGraph, collection='all') -> Triples:
-    from .utils.data import get_data
-    from project import root
-    _ = get_data(root / 'mapping' / 'work' / 'ontology.ttl'  ) # collection
     return _
 
 
@@ -89,6 +84,14 @@ class SpeckleGetter(PyRule):
         _ = sorted(_, key=lambda i: i['createdAt'] )
         _ = tuple(d['name'] for d in _)
         return _
+    
+    @staticmethod
+    def get_streams() -> 'streams':
+        _ = query_speckle_meta()
+        from types import SimpleNamespace as NS
+        return tuple(
+            NS(id=i['id'], name=i['name'])
+            for i in  _['streams']['items'])
 
     @classmethod
     def multiple(cls, stream_id, branch_ids=[]):  # object_ids = []
@@ -98,12 +101,19 @@ class SpeckleGetter(PyRule):
         for b in branch_ids:
             yield cls(stream_id, branch_id=b, )
 
-
     def meta(self, ) -> Triples:
         _ = self._getters.meta() 
         #_ = Triples()
         return _
 
+def namespaces():
+    _ = SpeckleGetter.get_streams()
+    from speckle import object_uri
+    from ontologies import namespace
+    from rdflib import URIRef
+    _ = map(lambda i: namespace(f"{i.name}", URIRef(object_uri(i.id,)) ), _)
+    _ = tuple(_)
+    return _
 
 from .cache import get_cache
 @get_cache('speckle', maxsize=100)
@@ -114,7 +124,7 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     _ = _.objects(stream_id, object_id)
     _ = query(_,)
     from speckle.objects import rdf as ordf
-    _ = ordf(_) #
+    _ = ordf(_, stream_id=stream_id) #
     _ = _.read()
     d = _.decode()
     from .utils.data import get_data
@@ -223,11 +233,11 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         
 
 def fengine(og=OxiGraph(),
-            rules=rules,
-            validation=True,
-            block_seen=True,
-            deanon=True,
-            max_cycles=20) -> 'Engine':
+        rules=mk_rules(),
+        validation=True,
+        block_seen=True,
+        deanon=True,
+        max_cycles=20) -> 'Engine':
     if validation:
         from validation.engine import Engine
     else:
@@ -248,18 +258,21 @@ allowed_branches = {
 
 from pathlib import Path
 from typing import Iterable
-def engine(stream_id, *, branch_ids=None,
-           rules_dir: Path | Iterable[Path] | None = maps_dir,
-           max_cycles=10,
-           inference=False,
-           validation=False,
-           out_selections: None | list =None, #'all'+{a for a in dir(queries.rules) if not ((a == 'q' ) or (a.startswith('_')) ) },
-           out:Path|None=Path('out.ttl'), split_out=False, nsplit_out=1000 ) -> Path:
+from pyoxigraph import Store
+def map_(stream_id, *, branch_ids=None,
+        rules: Path | Iterable[Path] | None = maps_dir,
+        max_cycles=10,
+        inference=False,
+        validation=False,
+        init=OxiGraph()
+        ) -> Store:
     object_id=None
-    # data/config for args
-    if not (str(out).lower().endswith('ttl')):
-        raise ValueError('just use ttl fmt')
-    
+    assert(
+        (stream_id in (s.id for s in SpeckleGetter.get_streams()) )
+        or
+        (stream_id in (s.name for s in SpeckleGetter.get_streams()) )
+          )
+
     # parsing of branch_id is relegated to
     if branch_ids is None:
         # figuring this is the default mode of working from now.
@@ -271,11 +284,11 @@ def engine(stream_id, *, branch_ids=None,
     else:
         raise TypeError('branch id not processed')
     
-    if rules_dir:
-        if isinstance(rules_dir, (list, tuple, set)):
-            rules_dir = tuple(Path(_) for _ in rules_dir)
+    if rules:
+        if isinstance(rules, (list, tuple, set)):
+            rules = tuple(Path(_) for _ in rules)
         else:
-            rules_dir = Path(rules_dir)
+            rules = (Path(rules),)
     
     # throw and forget mode. not optimized but don't have to manage.
     # _ = fengine(
@@ -288,52 +301,40 @@ def engine(stream_id, *, branch_ids=None,
     #     )
     # _()
     # some manual rules handling to optimize processing time
-    # 1. load data                                                                           ........no need to keep spinning
-    _ = fengine(            rules=data_rules,                                               validation=False, max_cycles=1)()
-    if rules_dir:
+    # 1. load data / "one-time rules"
+    from .engine import get_ontology
+    _ = fengine(
+            og=init,
+            rules=data_rules+(Rules([PyRule(get_ontology)]) if rules else Rules([]) ),
+            validation=False,
+            max_cycles=1)() # no need to keep spinning
+    if rules:
     # 2. "mappings"
-        _ = fengine(og=_.db,    rules=rules(rules_dir=rules_dir,    inference=False),       validation=False,         max_cycles=max_cycles)()
+        _ = fengine(og=_.db,
+            rules=mk_rules(
+                paths=rules,
+                inference=False),
+            validation=False,
+            max_cycles=max_cycles)()
     # 3. inferencing 
-    if inference:                                                                                                     # or is just once cycle enough?
-        _ = fengine(og=_.db,    rules=rules(rules_dir=None,         inference=inference),    validation=False,        max_cycles=max_cycles)() 
+    if inference:
+        _ = fengine(og=_.db,
+            rules=mk_rules(
+                paths=None,
+                inference=inference),
+            validation=False,
+            max_cycles=max_cycles)()
     # 4. validation
-    if validation:                                                                                                    # doesn't matter.
-        _ = fengine(og=_.db,    rules=rules(rules_dir=None,         inference=False),       validation=validation,    max_cycles=max_cycles)()
+    if validation:
+        _ = fengine(og=_.db,
+            rules=mk_rules(
+                paths=None,
+                inference=False),
+            validation=validation,
+            max_cycles=max_cycles)()
     
-    _ = _.db._store
+    return _.db._store
 
-    if out_selections:
-        from pyoxigraph import Store, Quad
-        s = Store()
-        if isinstance(out_selections, str):
-            out_selections = (out_selections,)
-        else:
-            assert(isinstance(out_selections, (tuple, list, set, frozenset)) )
-
-        from .utils.queries import queries
-        for q in out_selections:
-            q = getattr(queries.rules, q)
-            q = _.query(q)
-            q = tuple(q) # why do i have to do this?!
-            if q: s.bulk_extend(Quad(*t) for t in q)
-            del q
-        _ = s; del s        
-
-    if not out:
-        return _
-    out = Path(out)
-    if split_out:
-        out = Path('/'.join((out).parts[:-1] + (out.stem,)))
-        if out.exists():
-            from shutil import rmtree
-            rmtree(out)
-        from .utils.data import split_triples, sort_triples, Triples
-        split_triples(
-            sort_triples(Triples(t.triple for t in _)),
-            chunk_size=nsplit_out)
-    else:
-        _.dump(str(out), 'text/turtle')
-    return out
 
 
 if __name__ == '__main__':
@@ -346,4 +347,53 @@ if __name__ == '__main__':
     logger.setLevel(logging.INFO)
     from validation.engine import logger
     logger.setLevel(logging.INFO)
-    fire.Fire(engine) # HAHH!!
+    
+    def write_map(stream_id, *, branch_ids=None,
+            rules: Path | Iterable[Path] | None = maps_dir,
+            max_cycles=10,
+            inference=False,
+            validation=False,
+            out=Path('db')
+            ) -> Path:
+        out = Path(out)
+        if out.exists():
+            if not out.is_dir():
+                raise IOError(f'{out} is not dir')
+            if tuple(out.iterdir()):
+                raise IOError(f'{out} not empty')
+        init = OxiGraph(Store(out))
+        _ = map_(stream_id, branch_ids=branch_ids,
+                rules = rules,
+                max_cycles=max_cycles,
+                inference=inference,
+                validation=validation,
+                init=init)
+        return out
+    
+    def from_file(f: Path):
+        f = Path(f)
+        if not (f.suffix in {'.yml', '.yaml'}):
+            raise IOError('file needs to be yaml')
+        _ = open(f)
+        from yaml import safe_load
+        p = safe_load(_) # params
+        vn = p['run']['variation']
+        for v in p['variations']:
+            if v['name'] == vn: break
+        if not (v['name'] == vn):
+            raise ValueError('variation not found')
+        return write_map(
+            p['run']['building'],
+            branch_ids=v['branches'],
+            rules=[Path(_) for _ in v['sparql_rules'] ],
+            max_cycles=p['run']['max_cycles'],
+            inference=v['inference'],
+            validation=v['validation'],
+            out=Path(p['run']['db']),
+         )
+
+    fire.Fire({
+        'from_args': write_map,
+        'from_file': from_file,
+        })
+    

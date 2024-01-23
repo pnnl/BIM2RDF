@@ -1,0 +1,70 @@
+schema: '2.0'
+stages:
+  ontology:
+    cmd: python -m mapping.engine ontology -i False -d 'ontology' -o ontology.ttl
+    deps:
+    - path: ../../ontologies/.ontoenv
+      hash: md5
+      md5: 21ea5535042d6b0431f658ddd246b731.dir
+      size: 405804
+      nfiles: 9
+    outs:
+    - path: ontology.ttl
+      hash: md5
+      md5: 2c153ea0b2a136a594f66990775bd93d
+      size: 8425935
+  map:
+    cmd: python -m mapping.speckle --stream_id=proto-medoffice --inference=True --validation=True
+      -o db
+    deps:
+    - path: ../mappings
+      hash: md5
+      md5: 24780d6c1a36fe2f2c5d571b3267fa88.dir
+      size: 22570
+      nfiles: 24
+    - path: ontology.ttl
+      hash: md5
+      md5: 2c153ea0b2a136a594f66990775bd93d
+      size: 8425935
+    outs:
+    - path: db
+      hash: md5
+      md5: e65ecff84779170abb2ed9a1c47bfe9f.dir
+      size: 2625602479
+      nfiles: 202
+  report:
+    cmd: quarto render report.qmd
+    deps:
+    - path: ../db
+      hash: md5
+      md5: 92a7f262a1a2b2746487b608128179e0.dir
+      size: 2625573759
+      nfiles: 204
+    - path: report.qmd
+      hash: md5
+      md5: 8a922b96956b884b1966b4f7b54e013b
+      size: 3422
+    outs:
+    - path: report.html
+      hash: md5
+      md5: 9c01e554d24e0e7d3ad23841cc33609d
+      size: 25569
+    - path: report_files
+      hash: md5
+      md5: b7a69793a4d3e2ce99b4abf23dd182e0.dir
+      size: 686476
+      nfiles: 11
+  distribution:
+    cmd: python distribution.py extract_triples db mapped shacl_inferred --replace_bdgprefix
+      True -o mapped_plus_inferred.ttl
+    deps:
+    - path: db
+      hash: md5
+      md5: 919bc96585173e3502f8c95373dd867f.dir
+      size: 2153012641
+      nfiles: 164
+    outs:
+    - path: mapped_plus_inferred.ttl
+      hash: md5
+      md5: 6bdd705950ecc9721e1cbd5e8ea9afd9
+      size: 2297926

@@ -24,7 +24,10 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = ["pandas", "shelved-cache"]
+dev-dependencies = [
+    "pandas",
+    "shelved-cache",
+     ]
 
 [tool.hatch.metadata]
 allow-direct-references = true

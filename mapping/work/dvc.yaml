@@ -1,0 +1,80 @@
+stages:
+  ontology: # need to process ontology a bit more than just collecting files
+  # this step is here instead of in 'ontologies' b/c of recursion issues.
+  #                                                   param coll name?
+    cmd: python -m mapping.engine ontology -i False -d 'ontology' -o ontology.ttl
+    wdir: .
+    deps:
+      #- ../../ontologies/223standard.hash
+      - ../../ontologies/.ontoenv # 
+    outs:
+     - ontology.ttl  
+
+  # filling out params key puts them as keys in dvc lock
+  map:
+    cmd: python -m mapping.speckle from_file params.yaml
+    wdir: .
+    params:
+      - run.building
+      - run.variation
+    deps:
+      #- rules dir from params good enough?
+      - ../rules
+      - ontology.ttl
+    outs:
+      - ${run.db}
+
+  report:
+    cmd: quarto render report.qmd
+    wdir: report
+    params:
+      - ../params.yaml:
+        - run.building
+        - run.variation
+    deps:
+      - ../${run.db}
+      - report.qmd
+      # - some other content
+    outs:
+      - report.html
+      - report_files
+  
+  upload_report_sharefolder:
+    cmd: python distribution.py copy_to_sharefolder report --dst_sharefolder ${run.building}/${run.variation}/report --delete_dst=True
+    wdir: .
+    deps:
+      - report
+    # outs: is not controlled
+  
+  mapped_ttl:
+    cmd: python distribution.py extract_triples ${run.db} mapped --replace_bdgprefix True -o mapped.ttl
+    wdir: .
+    params:
+      - run.building
+      - run.variation
+    deps:
+      - ${run.db}
+    outs:
+      - mapped.ttl
+
+  mapped_plus_inferred_ttl:
+    cmd: python distribution.py extract_triples ${run.db} mapped shacl_inferred --replace_bdgprefix True -o mapped_plus_inferred.ttl
+    wdir: .
+    params:
+      - run.building
+      - run.variation
+    deps:
+      - ${run.db}
+    outs:
+      - mapped_plus_inferred.ttl
+  
+  upload_ttls_sharefolder:
+    cmd: python distribution.py copy_to_sharefolder mapped_plus_inferred.ttl mapped.ttl --dst_sharefolder ${run.building}/${run.variation} --delete_dst=False
+    deps:
+      - mapped_plus_inferred.ttl
+      - mapped.ttl
+    # outs: are not controlled
+
+
+# upload TODO: use 'variations' to name?
+#cmd: python -m graphdb.tasks upload_graph out.ttl --delete=True  --name ${building}
