@@ -4,8 +4,6 @@ tasks
 from pathlib import Path
 from typing import Iterable, Self
 
-from isort import stream
-
 
 class Stream:
     def __init__(self, meta) -> None:
