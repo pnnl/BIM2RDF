@@ -12,7 +12,7 @@ stages:
 
   # filling out params key puts them as keys in dvc lock
   map:
-    cmd: python -m mapping.speckle from_file params.yaml
+    cmd: python tasks.py map params.yaml
     wdir: .
     params:
       - run.building
@@ -39,15 +39,17 @@ stages:
       - report.html
       - report_files
   
+  # distribution 
+
   upload_report_sharefolder:
-    cmd: python distribution.py copy_to_sharefolder report --dst_sharefolder ${run.building}/${run.variation}/report --delete_dst=True
+    cmd: python tasks.py copy_to_sharefolder report --dst_sharefolder ${run.building}/${run.variation}/report --delete_dst=True
     wdir: .
     deps:
       - report
     # outs: is not controlled
   
   mapped_ttl:
-    cmd: python distribution.py extract_triples ${run.db} mapped --replace_bdgprefix True -o mapped.ttl
+    cmd: python tasks.py extract_triples ${run.db} mapped --replace_bdgprefix True -o mapped.ttl
     wdir: .
     params:
       - run.building
@@ -58,7 +60,7 @@ stages:
       - mapped.ttl
 
   mapped_plus_inferred_ttl:
-    cmd: python distribution.py extract_triples ${run.db} mapped shacl_inferred --replace_bdgprefix True -o mapped_plus_inferred.ttl
+    cmd: python tasks.py extract_triples ${run.db} mapped shacl_inferred --replace_bdgprefix True -o mapped_plus_inferred.ttl
     wdir: .
     params:
       - run.building
@@ -69,7 +71,7 @@ stages:
       - mapped_plus_inferred.ttl
   
   upload_ttls_sharefolder:
-    cmd: python distribution.py copy_to_sharefolder mapped_plus_inferred.ttl mapped.ttl --dst_sharefolder ${run.building}/${run.variation} --delete_dst=False
+    cmd: python tasks.py copy_to_sharefolder mapped_plus_inferred.ttl mapped.ttl --dst_sharefolder ${run.building}/${run.variation} --delete_dst=False
     deps:
       - mapped_plus_inferred.ttl
       - mapped.ttl
