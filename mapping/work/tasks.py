@@ -1,45 +1,93 @@
 """
-distribution tasks
+tasks
 """
 from pathlib import Path
 from typing import Iterable, Self
 
 
+class Stream:
+    def __init__(self, meta) -> None:
+        self.meta = meta
+
+    @property
+    def isnamed(self):
+        if self.meta.name.startswith(Building.abbrev):
+            return False
+        else:
+            return True
+    @property
+    def number(self):
+        if not self.isnamed:
+            for i,c in enumerate(self.meta.name):
+                if c.isnumeric():
+                    break
+            _ = self.meta.name[i:]
+            _ = int(_)
+            return _
+
+
 class Building:
-    def __init__(self, name: str, ) -> None:
-        self.name = name
-    
-    @classmethod
-    def s(cls) -> Iterable[Self]:
-        from mapping.speckle import SpeckleGetter
-        for _ in SpeckleGetter.get_streams():
-            yield cls(_.name)
-    
-    def __str__(self) -> str:
-        return self.name
-    
-    from functools import cached_property
+    abbrev = 'bldg'
+
+    def __init__(self, stream) -> None:
+        self.stream = Stream(stream)
 
     @classmethod
-    def get_numbers(cls):
+    def streams(cls):
+        from mapping.speckle import SpeckleGetter
+        for _ in SpeckleGetter.get_streams():
+            yield _
+    @classmethod
+    def s(cls) -> Iterable[Self]:
+        yield from map(lambda s:cls(s), cls.streams())
+    
+    @classmethod
+    def distribution(cls):
         _ = Path(__file__ ).parent / 'params.yaml'
         from yaml import safe_load
         _ = open(_)
         _ = safe_load(_)
         _ = _['distribution']
-        _ = {_['name']:_['number'] for _ in _}
-        return _
+        from functools import cache
+        @cache
+        def distributionlist():
+            assert(
+                len({d['name'] for d in _})
+                == 
+                len({d['number'] for d in _}))
+            return _
+        return distributionlist()
     
+    from functools import cached_property
+    @cached_property
+    def name(self):
+        name = None
+        if self.stream.isnamed:
+            name = self.stream.meta.name
+            assert(name in {d['name'] for d in self.distribution() } )
+        else:
+            for d in self.distribution():
+                if d['number'] == self.stream.number:
+                    name = d['name']
+        assert(name)
+        return name
+    
+    def __str__(self) -> str:
+        return self.name
+
     @cached_property
     def number(self)->int:
-        _ = self.get_numbers()
-        assert(
-            len(_.keys())
-               == 
-            len(frozenset(_.values())) )
-        return _[self.name]
-    
-    
+        number = None
+        if not self.stream.isnamed:
+            number = self.stream.number
+            assert(number in {d['number'] for d in self.distribution()}  )
+        else:
+            for d in self.distribution():
+                if d['name'] == self.stream.meta.name:
+                    number = d['number']
+        assert(number)
+        return number
+        
     @cached_property
     def uri(self):
         from mapping.speckle import namespaces as sns
@@ -48,8 +96,7 @@ class Building:
                 return u
     @property
     def prefix(self):
-        return f"bdg{self.number}"
-
+        return f"{self.abbrev}{self.number}"
 
 
 def namespaces():
@@ -73,8 +120,6 @@ class triplesqueryname(str):
     def query(self):
         from mapping.utils.queries import queries
         return getattr(queries.rules, self.name)
-
-
 
 
 
@@ -159,12 +204,52 @@ def copy_to_sharefolder(*srcs:Path,
             copy(src, dst, dirs_exist_ok=True)
 
 
+def map_(f: Path):
+    f = Path(f)
+    if not (f.suffix in {'.yml', '.yaml'}):
+        raise IOError('file needs to be yaml')
+    _ = open(f)
+    from yaml import safe_load
+    p = safe_load(_) # params
+    vn = p['run']['variation']
+    for v in p['variations']:
+        if v['name'] == vn: break
+    if not (v['name'] == vn):
+        raise ValueError('variation not found')
+
+    stream = None
+    for b in Building.s():
+        if b.name == p['run']['building']:
+            stream = b.stream.meta.name
+    if not stream:
+        raise ValueError('stream not found')
+    from mapping.speckle import write_map
+    return write_map(
+        stream,
+        branch_ids=v['branches'],
+        rules=[Path(_) for _ in v['sparql_rules'] ],
+        max_cycles=p['run']['max_cycles'],
+        inference=v['inference'],
+        validation=v['validation'],
+        out=Path(p['run']['db']),
+        )
+
 
 from graphdb.tasks import upload_graph as upload_to_graphdb
 
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig(force=True) # force removes other loggers that got picked up.
+    from engine.triples import logger
+    logger.setLevel(logging.INFO)
+    from mapping.engine import logger
+    logger.setLevel(logging.INFO)
+    from validation.engine import logger
+    logger.setLevel(logging.INFO)
+
     from fire import Fire
     Fire({
+        'map': map_,
         'extract_triples': extract_triples,
         'upload_to_graphdb': upload_to_graphdb,
         'copy_to_sharefolder': copy_to_sharefolder,
