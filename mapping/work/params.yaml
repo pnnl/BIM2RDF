@@ -1,6 +1,6 @@
 # "current"
 run: 
-  building: Pritoni
+  building: bldg2
   variation: default
   db: db # not part of 'variation'. fixed by default but putting here to be explicit
   max_cycles: 10  # ditto
@@ -25,15 +25,15 @@ variations:
   #   - ../rules/bdg/buildingname
 
 distribution:
-  - name: Pritoni
+  - name: bldg1
     number: 1
-  - name: proto-medoffice
+  - name: bldg2
     number: 2
-  - name: lbnl-bldg59
+  - name: bldg3
     number: 3
-  - name: nrel-rail
+  - name: bldg4
     number: 4
-  - name: neea-medoffice
+  - name: bldg5
     number: 5
 #  special
   - name: Error
