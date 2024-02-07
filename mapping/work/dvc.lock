@@ -5,50 +5,57 @@ stages:
     deps:
     - path: ../../ontologies/.ontoenv
       hash: md5
-      md5: 21ea5535042d6b0431f658ddd246b731.dir
-      size: 405804
+      md5: 1328034dafa54e66f3e0d9d7f2fbea3e.dir
+      size: 353992
       nfiles: 9
     outs:
     - path: ontology.ttl
       hash: md5
-      md5: 2c153ea0b2a136a594f66990775bd93d
-      size: 8425935
+      md5: 9e5a5a58c1f49543576692cde9283074
+      size: 5598335
   map:
-    cmd: python -m mapping.speckle --stream_id=proto-medoffice --inference=True --validation=True
-      -o db
+    cmd: python tasks.py map params.yaml
     deps:
-    - path: ../mappings
+    - path: ../rules
       hash: md5
-      md5: 24780d6c1a36fe2f2c5d571b3267fa88.dir
-      size: 22570
-      nfiles: 24
+      md5: 675c4af3c279e3425ebac0384b06c212.dir
+      size: 23645
+      nfiles: 25
     - path: ontology.ttl
       hash: md5
-      md5: 2c153ea0b2a136a594f66990775bd93d
-      size: 8425935
+      md5: 9e5a5a58c1f49543576692cde9283074
+      size: 5598335
+    params:
+      params.yaml:
+        run.building: Pritoni
+        run.variation: default
     outs:
     - path: db
       hash: md5
-      md5: e65ecff84779170abb2ed9a1c47bfe9f.dir
-      size: 2625602479
-      nfiles: 202
+      md5: d66e7572e2ba7666909aa22518ff0ca0.dir
+      size: 152933400
+      nfiles: 149
   report:
     cmd: quarto render report.qmd
     deps:
     - path: ../db
       hash: md5
-      md5: 92a7f262a1a2b2746487b608128179e0.dir
-      size: 2625573759
-      nfiles: 204
+      md5: b8c78e3d8d4936adc3457ad66d69af47.dir
+      size: 152996973
+      nfiles: 151
     - path: report.qmd
       hash: md5
       md5: 8a922b96956b884b1966b4f7b54e013b
       size: 3422
+    params:
+      ../params.yaml:
+        run.building: Pritoni
+        run.variation: default
     outs:
     - path: report.html
       hash: md5
-      md5: 9c01e554d24e0e7d3ad23841cc33609d
-      size: 25569
+      md5: 0c35eba8b8af79057f12c45db739f921
+      size: 15641
     - path: report_files
       hash: md5
       md5: b7a69793a4d3e2ce99b4abf23dd182e0.dir
@@ -68,3 +75,59 @@ stages:
       hash: md5
       md5: 6bdd705950ecc9721e1cbd5e8ea9afd9
       size: 2297926
+  upload_report_sharefolder:
+    cmd: python tasks.py copy_to_sharefolder report --dst_sharefolder Pritoni/default/report
+      --delete_dst=True
+    deps:
+    - path: report
+      hash: md5
+      md5: 4e48cde43764ebcc310f125e678c35ac.dir
+      size: 705539
+      nfiles: 13
+  mapped_ttl:
+    cmd: python tasks.py extract_triples db mapped --replace_bdgprefix True -o mapped.ttl
+    deps:
+    - path: db
+      hash: md5
+      md5: 7c9589b5b6476a1d889d5f21ba90ed57.dir
+      size: 153103617
+      nfiles: 153
+    params:
+      params.yaml:
+        run.building: Pritoni
+        run.variation: default
+    outs:
+    - path: mapped.ttl
+      hash: md5
+      md5: e6995e69cd8e54f26f7b89bcbf582ff4
+      size: 37245
+  mapped_plus_inferred_ttl:
+    cmd: python tasks.py extract_triples db mapped shacl_inferred --replace_bdgprefix
+      True -o mapped_plus_inferred.ttl
+    deps:
+    - path: db
+      hash: md5
+      md5: 8b1f45126f6d6e4651497ab9974decb0.dir
+      size: 153211409
+      nfiles: 155
+    params:
+      params.yaml:
+        run.building: Pritoni
+        run.variation: default
+    outs:
+    - path: mapped_plus_inferred.ttl
+      hash: md5
+      md5: 351978111dcbde81d42d991ce9582080
+      size: 67009
+  upload_ttls_sharefolder:
+    cmd: python tasks.py copy_to_sharefolder mapped_plus_inferred.ttl mapped.ttl --dst_sharefolder
+      Pritoni/default --delete_dst=False
+    deps:
+    - path: mapped.ttl
+      hash: md5
+      md5: e6995e69cd8e54f26f7b89bcbf582ff4
+      size: 37245
+    - path: mapped_plus_inferred.ttl
+      hash: md5
+      md5: 351978111dcbde81d42d991ce9582080
+      size: 67009

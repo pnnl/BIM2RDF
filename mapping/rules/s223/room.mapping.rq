@@ -21,6 +21,13 @@ CONSTRUCT {
 ?p s223:hasValue ?vd.
 ?p qudt:hasUnit unit:M2.
 ?p rdfs:label "QuantifiableProperty"^^xsd:string.
+?this s223:hasProperty ?number.
+?number a s223:Property.
+?number s223:hasValue ?roomnumber.
+    #?number s223:hasEnumerationKind qudt:AbstractQuantityKind. 
+    #?number qudt:id ?roomnumber.
+    ?number rdfs:label "Property"^^xsd:string.
+#?this rec:Identifiers ?number.
 
 } 
 WHERE { 
@@ -28,6 +35,8 @@ WHERE {
   ?this spkl:parameters/spkl:ROOM_AREA ?p.
   ?p spkl:value ?v.
   BIND(xsd:decimal(?v) AS ?vd).
+  ?this spkl:parameters/spkl:ROOM_NUMBER ?number.
+  ?number spkl:value ?roomnumber.
   
 OPTIONAL
     {
