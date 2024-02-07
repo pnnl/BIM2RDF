@@ -21,7 +21,7 @@ stages:
       #- rules dir from params good enough?
       - ../rules
       - ontology.ttl
-      #- revit/${run.building} idea to capture revit file version
+      #- revit/${run.building} TODO idea to capture revit file version
     outs:
       - ${run.db}
 
