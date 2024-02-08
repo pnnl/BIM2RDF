@@ -18,8 +18,8 @@ stages:
     deps:
     - path: ../rules
       hash: md5
-      md5: 50f7615165f5960b3c8b2c71f4c83d7f.dir
-      size: 23627
+      md5: 675c4af3c279e3425ebac0384b06c212.dir
+      size: 23645
       nfiles: 25
     - path: ontology.ttl
       hash: md5
@@ -27,39 +27,39 @@ stages:
       size: 5633025
     params:
       params.yaml:
-        run.building: Pritoni
+        run.building: lbnl-bldg59
         run.variation: default
     outs:
     - path: db
       hash: md5
-      md5: d6807e06f3de4db7b56effbca7532dcc.dir
-      size: 152937009
-      nfiles: 149
+      md5: ecf1b080f1c879560acf08bbb634d380.dir
+      size: 2090281901
+      nfiles: 184
   report:
     cmd: quarto render report.qmd
     deps:
     - path: ../db
       hash: md5
-      md5: 6cd8b88f5216c3e4c7942ba63e65bee3.dir
-      size: 153001158
-      nfiles: 151
+      md5: 05371edc36f9dd258c9ac8c37a6cf460.dir
+      size: 2090260767
+      nfiles: 186
     - path: report.qmd
       hash: md5
       md5: 8a922b96956b884b1966b4f7b54e013b
       size: 3422
     params:
       ../params.yaml:
-        run.building: Pritoni
+        run.building: lbnl-bldg59
         run.variation: default
     outs:
     - path: report.html
       hash: md5
-      md5: ef2b61e2b8de7850cb653903f236b03b
-      size: 20777
+      md5: d0455d4e97d9c823605ebd8aa57b9ec8
+      size: 15649
     - path: report_files
       hash: md5
-      md5: 80af602566cbafc1af81a45b24e4ec82.dir
-      size: 843856
+      md5: b7a69793a4d3e2ce99b4abf23dd182e0.dir
+      size: 686476
       nfiles: 11
   distribution:
     cmd: python distribution.py extract_triples db mapped shacl_inferred --replace_bdgprefix
@@ -76,58 +76,58 @@ stages:
       md5: 6bdd705950ecc9721e1cbd5e8ea9afd9
       size: 2297926
   upload_report_sharefolder:
-    cmd: python tasks.py copy_to_sharefolder report --dst_sharefolder Pritoni/default/report
+    cmd: python tasks.py copy_to_sharefolder report --dst_sharefolder lbnl-bldg59/default/report
       --delete_dst=True
     deps:
     - path: report
       hash: md5
-      md5: d230c17b2a8736892f229217b9d7e91e.dir
-      size: 868055
+      md5: e24f2221a608f634e884858a444748ff.dir
+      size: 705547
       nfiles: 13
   mapped_ttl:
     cmd: python tasks.py extract_triples db mapped --replace_bdgprefix True -o mapped.ttl
     deps:
     - path: db
       hash: md5
-      md5: a2eae8be957bd83beb61d52e0189b71a.dir
-      size: 153108930
-      nfiles: 153
+      md5: de632fe1960d92cd05b3ac2b0b820948.dir
+      size: 2090368540
+      nfiles: 188
     params:
       params.yaml:
-        run.building: Pritoni
+        run.building: lbnl-bldg59
         run.variation: default
     outs:
     - path: mapped.ttl
       hash: md5
-      md5: 3673c01712617dd554ebf8c154b6b906
-      size: 37245
+      md5: 693ae4dff651afecb3d1198cc8c5c9cb
+      size: 1620936
   mapped_plus_inferred_ttl:
     cmd: python tasks.py extract_triples db mapped shacl_inferred --replace_bdgprefix
       True -o mapped_plus_inferred.ttl
     deps:
     - path: db
       hash: md5
-      md5: 87a537038b63b49e9dfc7981adf0eca6.dir
-      size: 153216723
-      nfiles: 155
+      md5: 1bc1ab8a6faaf32af58444c53633de90.dir
+      size: 2090476334
+      nfiles: 190
     params:
       params.yaml:
-        run.building: Pritoni
+        run.building: lbnl-bldg59
         run.variation: default
     outs:
     - path: mapped_plus_inferred.ttl
       hash: md5
-      md5: c3d6910667771850be6a02e72f607c78
-      size: 66901
+      md5: 71799dd584ebd59ad6faf51e39fc870c
+      size: 3294135
   upload_ttls_sharefolder:
     cmd: python tasks.py copy_to_sharefolder mapped_plus_inferred.ttl mapped.ttl --dst_sharefolder
-      Pritoni/default --delete_dst=False
+      lbnl-bldg59/default --delete_dst=False
     deps:
     - path: mapped.ttl
       hash: md5
-      md5: 3673c01712617dd554ebf8c154b6b906
-      size: 37245
+      md5: 693ae4dff651afecb3d1198cc8c5c9cb
+      size: 1620936
     - path: mapped_plus_inferred.ttl
       hash: md5
-      md5: c3d6910667771850be6a02e72f607c78
-      size: 66901
+      md5: 71799dd584ebd59ad6faf51e39fc870c
+      size: 3294135

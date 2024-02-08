@@ -1,12 +1,11 @@
 # "current"
 run:
-  #building: Pritoni. # use dvc exp run --set-param +run.building
+  building: lbnl-bldg59 # use dvc exp run --set-param +run.building
   variation: default
   db: db # not part of 'variation'. fixed by default but putting here to be explicit
   max_cycles: 10  # ditto
 
-# centralizing variations (ideal)
-  building: Pritoni
+
 variations:
 # explict arguments
 - name: default
