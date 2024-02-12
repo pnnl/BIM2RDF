@@ -1,7 +1,7 @@
 
 def get_dir():
     from project import root
-    dir = root / 'mapping' / 'work' / 'cache'
+    dir = root  / 'work' / 'cache'
     if not dir.exists():
         dir.mkdir()
     return dir
