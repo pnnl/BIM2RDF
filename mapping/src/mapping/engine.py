@@ -273,7 +273,7 @@ def fix(g: Graph) -> Graph:
 def get_ontology(_: OxiGraph,) -> Triples:
     from .utils.data import get_data
     from project import root
-    _ = get_data(root / 'mapping' / 'work' / 'ontology.ttl'  ) # collection
+    _ = get_data(root / 'models' / 'ontology.ttl'  ) # collection
     return _
 
 
@@ -328,7 +328,7 @@ def topquadrant_rules(db: OxiGraph) -> Triples:
               ) ) #
     from pyoxigraph import parse
     from project import root
-    shapes = parse(root / 'mapping' / 'work' / 'ontology.ttl', 'text/turtle' )
+    shapes = parse(root / 'models'  / 'ontology.ttl', 'text/turtle' )
     from itertools import chain
     _ = chain(_, shapes)
     from validation.shacl import tqshacl
