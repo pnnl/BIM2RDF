@@ -9,6 +9,8 @@ delete cache when needed.
 - create a separate "data" branch? what is dvc exp "promote"?
 - can keep one revit model and just "switch" between them?
 - disable s223 "always-changed" b/c it's annoying
+- create more managable table view
+- metric: pass/fail
 
 
 Main program is `python -m mapping.speckle`
