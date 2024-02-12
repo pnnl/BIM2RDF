@@ -111,6 +111,7 @@ def namespaces():
     from speckle import object_uri
     from ontologies import namespace
     from rdflib import URIRef
+    _ = (s for s in _  if s.name.startswith('bldg'))
     _ = map(lambda i: namespace(f"{i.name}", URIRef(object_uri(i.id,)) ), _)
     _ = tuple(_)
     return _
