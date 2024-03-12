@@ -12,6 +12,7 @@ _:c s223:hasMedium s223:Light-Visible.
 _:c rdfs:label "InletConnectionPoint"^^xsd:string.
 #  no em-light connection equivalent like pipe and wire
 
+
 } 
 WHERE { 
 ?o1 a s223:Connection.

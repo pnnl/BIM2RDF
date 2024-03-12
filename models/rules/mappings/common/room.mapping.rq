@@ -6,10 +6,10 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 prefix recx: <urn:rec:extentions:>
-
 PREFIX qudt: <http://qudt.org/schema/qudt/>
 PREFIX qudtqk: <http://qudt.org/vocab/quantitykind/>
 PREFIX unit: <http://qudt.org/vocab/unit/>
+
 CONSTRUCT { 
 #?this a s223:PhysicalSpace.
 #?this a rec:Room.
@@ -26,8 +26,13 @@ CONSTRUCT {
 ?number s223:hasValue ?roomnumber.
     #?number s223:hasEnumerationKind qudt:AbstractQuantityKind. 
     #?number qudt:id ?roomnumber.
-    ?number rdfs:label "Property"^^xsd:string.
-#?this rec:Identifiers ?number.
+?number rdfs:label "Property"^^xsd:string.
+#?this s223:hasProperty ?occupancy. #to get occupancy count from Rooms in Revit Model
+#?occupancy a s223:QuantifiableObservableProperty.
+#?occupancy s223:hasQuantityKind qudtqk:Population.
+#?occupancy qudt:hasUnit unit:NUM.
+#?occupancy s223:hasValue ?oc.
+#?occupancy rdfs:label "QuantifiableObservableProperty"^^xsd:string.
 
 } 
 WHERE { 
@@ -37,6 +42,9 @@ WHERE {
   BIND(xsd:decimal(?v) AS ?vd).
   ?this spkl:parameters/spkl:ROOM_NUMBER ?number.
   ?number spkl:value ?roomnumber.
+  #?this spkl:parameters/spkl:ROOM_OCCUPANCY ?occupancy. 
+  #?occupancy spkl:value ?occupancycount. 
+  #BIND(xsd:decimal(?occupancycount) AS ?oc).
   
 OPTIONAL
     {
@@ -71,7 +79,7 @@ OPTIONAL
 OPTIONAL
     {
       ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "conference")).  
+      filter(contains(lcase(?lname), "conference") || contains(lcase(?lname), "meeting" )).  
       BIND(rec:ConferenceRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
@@ -158,7 +166,7 @@ OPTIONAL
 OPTIONAL
     {
       ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "class")).  
+      filter(contains(lcase(?lname), "class") || contains(lcase(?lname), "quite" )).  
       BIND(rec:Library as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
@@ -172,7 +180,7 @@ OPTIONAL
 OPTIONAL
     {
       ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "office")).  
+      filter(contains(lcase(?lname), "office") || contains(lcase(?lname), "work" )).  
       BIND(rec:OfficeRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
@@ -200,14 +208,14 @@ OPTIONAL
 OPTIONAL
     {
       ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "data")).  
+      filter(contains(lcase(?lname), "data") || contains(lcase(?lname), "server" )).  
       BIND(rec:DataServerRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
     {
       ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "lactation")).  
+      filter(contains(lcase(?lname), "lactation") || contains(lcase(?lname), "mother" )).  
       BIND(rec:MothersRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
@@ -217,6 +225,27 @@ OPTIONAL
       filter(contains(lcase(?lname), "huddle")  
             || contains(lcase(?lname), "hotel" )).  
       BIND(rec:MultiPurposeRoom as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "coffee")).  
+      BIND(rec:Pantry as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "welcome")).  
+      BIND(rec:Reception as ?rec_or_recx) 
+      ?rec_or_recx rdfs:label ?recname.
+    }
+OPTIONAL
+    {
+      ?this spkl:name ?lname.  
+      filter(contains(lcase(?lname), "phone")).  
+      BIND(rec:PhoneBooth as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 }

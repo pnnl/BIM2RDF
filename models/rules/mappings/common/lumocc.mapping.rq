@@ -14,7 +14,7 @@ _:q s223:hasEnumerationKind s223:Occupancy-Motion.
 _:q rdfs:label "Enumerated observable property"^^xsd:string.
 } 
 WHERE { 
-<<?o1 spkl:category "Lighting Devices">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
+<<?o1 spkl:category "Lighting Devices">> meta: <<?mi spkl:name "architecture/lighting device">>.
 ?o1 spkl:phaseCreated ?_.
 #?o1 spkl:definition/spkl:family ?f.
 #filter(contains(lcase(?f), "occupancy"))

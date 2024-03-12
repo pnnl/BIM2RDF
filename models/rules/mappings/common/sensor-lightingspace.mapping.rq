@@ -9,7 +9,7 @@ CONSTRUCT {
 
 } 
 WHERE { 
-<<?o1 spkl:category "Lighting Devices">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+<<?o1 spkl:category "Lighting Devices">> meta: <<?_ spkl:name "architecture/lighting device">>.
 ?o1 spkl:definition/spkl:family ?f.
 filter(contains(lcase(?f), "occupancy")) #why lcase?
 ?o1 spkl:parameters/spkl:c05b27f4-316d-447d-b99f-c0372ce73c7e/spkl:value ?id.

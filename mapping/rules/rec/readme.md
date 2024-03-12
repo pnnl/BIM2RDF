@@ -1,1 +1,0 @@
-mappings for Real Estate Core
