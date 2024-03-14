@@ -10,16 +10,6 @@ CONSTRUCT {
 ?conn  a s223:InletConnectionPoint.
 ?conn rdfs:label "InletConnectionPoint"^^xsd:string.
 ?conn s223:hasMedium s223:AC-120VLN-1Ph-60Hz. 
-?conn s223:cnx _:luminairewire.
-_:luminairewire a s223:ElectricWire.
-_:luminairewire s223:hasMedium  s223:Medium-Electricity.
-_:luminairewire rdfs:label "ElectricWire"^^xsd:string.
-_:luminairewire s223:cnx _:junctionoutlet.
-_:junctionoutlet a s223:OutletConnectionPoint.
-_:junctionoutlet rdfs:label "OutletConnectionPoint"^^xsd:string.
-_:junctionoutlet s223:hasMedium s223:AC-120VLN-1Ph-60Hz. 
-?lum ?circuit _:junctionoutlet.
-_:junctionoutlet s223:cnx ?j.
 }
 WHERE {
 ?lum a s223:Luminaire.
@@ -29,27 +19,5 @@ WHERE {
   <<?lumcircuit spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>.
   }
 ?lumcircuit spkl:elementId ?eid.
-{
-  ?lumcircuit spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM  ?circuit.
-	?circuit spkl:value ?circuitname.
- }
 
-  {
-  ?elecbreaker a s223:ElectricBreaker.
-  ?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME ?circuit1.
-  ?circuit1 spkl:value ?circuitname. 
-  ?elecbreaker ?circuit1 ?j.
-  }
-{
-  
-  ?elecbreaker s223:cnx ?o.
-  ?o a s223:OutletConnectionPoint.
-  ?o s223:cnx ?e.
-  ?e a s223:ElectricWire.
-	?e s223:cnx ?i.
-  ?i a s223:InletConnectionPoint.
-  ?i s223:cnx ?j.
-	?j a s223:Junction.
-	
-}
 }
