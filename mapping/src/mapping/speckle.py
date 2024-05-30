@@ -52,6 +52,7 @@ def query(q):
     _ = query(q, lambda: client()) # need this to be 'live'
     return _
 
+
 class SpeckleGetter(PyRule):
 
     def __init__(self, stream_id, branch_id=None, object_id=None) -> None:
