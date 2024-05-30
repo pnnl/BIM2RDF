@@ -318,7 +318,13 @@ def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
     return _
 
 
-def topquadrant_rules(db: OxiGraph) -> Triples:
+def shapes():
+    from pyoxigraph import parse
+    from project import root
+    return parse(root / 'models'  / 'ontology.ttl', 'text/turtle')
+
+
+def topquadrant_rules(db: OxiGraph, shapes=shapes) -> Triples:
     s = db._store
     from .utils.queries import queries, select
     _ = select(s, (
@@ -326,9 +332,7 @@ def topquadrant_rules(db: OxiGraph) -> Triples:
             queries.rules.rdfs_inferred,
             queries.rules.shacl_inferred,
               ) ) #
-    from pyoxigraph import parse
-    from project import root
-    shapes = parse(root / 'models'  / 'ontology.ttl', 'text/turtle' )
+    shapes = shapes()
     from itertools import chain
     _ = chain(_, shapes)
     from validation.shacl import tqshacl
@@ -350,7 +354,6 @@ def generated(before, after):
     # below is incredibly slow
     from .utils.rdflibgraph import graph_diff
     return graph_diff(before, after).in_generated
-
 
 
 from functools import lru_cache

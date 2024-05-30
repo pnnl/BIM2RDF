@@ -4,7 +4,6 @@ from engine.triples import (
         OxiGraph)
 
 
-
 def _shacl_validation(db: OxiGraph):
     _ = db._store
     from mapping.engine import select
@@ -45,7 +44,15 @@ def shacl_validation(db: OxiGraph,) -> Triples:
     return _
 
 
-def shacl_validation(db: OxiGraph) -> Triples:
+def shapes():
+    from project import root
+    shapes = root / 'models' / 'ontology.ttl'
+    from mapping.utils.data import get_data
+    return get_data(shapes)
+
+def shacl_validation(db: OxiGraph,
+                     shapes = shapes,
+                     ) -> Triples:
     s = db._store
     from mapping.utils.queries import queries
     from mapping.utils.queries import select
@@ -54,14 +61,11 @@ def shacl_validation(db: OxiGraph) -> Triples:
             queries.rules.rdfs_inferred,
             queries.rules.shacl_inferred,
             ) ) #
-    from project import root
-    shapes = root / 'models' / 'ontology.ttl'
-    from mapping.utils.data import get_data
-    shapes = get_data(shapes)
+    shapes = shapes()
     from itertools import chain
     _ = chain(_, shapes)
     from validation.shacl import tqshacl
-    _ = tqshacl('validate', _, )
+    _ = tqshacl('validate', _,)
     return _
 
 
@@ -95,7 +99,7 @@ class Engine(_Engine):
         if conforms == 'true':
             conforms = True
         else:
-            assert(conforms == 'false' )
+            assert(conforms == 'false')
             conforms = False
         logger.info(f"conforms: {conforms}")
         assert(isinstance(conforms, bool))
