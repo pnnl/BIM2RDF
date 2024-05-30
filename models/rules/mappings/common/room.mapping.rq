@@ -166,7 +166,7 @@ OPTIONAL
 OPTIONAL
     {
       ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "class") || contains(lcase(?lname), "quite" )).  
+      filter(contains(lcase(?lname), "class") || contains(lcase(?lname), "quite" ) || contains(lcase(?lname), "library" )).  
       BIND(rec:Library as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
