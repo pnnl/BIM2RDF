@@ -16,7 +16,7 @@ CONSTRUCT {
 WHERE 
 {
 <<?es spkl:category "Lighting Devices">> meta: <<?si spkl:name "electrical/junction">>.
-?es spkl:phaseCreated ?_.
+?es spkl:phaseCreated ?_. #add another line to add switches explicitly
 ?es spkl:roomId ?rl.
 <<?r spkl:category  "Rooms">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
 ?r spkl:elementId ?rl.

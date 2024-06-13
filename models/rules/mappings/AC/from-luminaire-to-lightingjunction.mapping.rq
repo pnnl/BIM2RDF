@@ -13,11 +13,11 @@ CONSTRUCT {
 ?conn  a s223:InletConnectionPoint.
 ?conn rdfs:label "InletConnectionPoint"^^xsd:string.
 ?conn s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
-?conn s223:hasProperty ?voltage. 
-?voltage a s223:QuantifiableProperty. 
-?voltage qudt:hasQuantityKind qudt:Voltage.
-?voltage s223:hasValue ?v1. 
-?voltage qudt:hasUnit unit:V.
+?conn s223:hasProperty s223:Voltage-277V. 
+#?voltage a s223:QuantifiableProperty. 
+#?voltage qudt:hasQuantityKind qudt:Voltage.
+#?voltage s223:hasValue ?v1. 
+#?voltage qudt:hasUnit unit:V.
 }
 WHERE {
 ?lum a s223:Luminaire.
