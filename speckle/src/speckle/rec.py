@@ -33,6 +33,7 @@ class MatrixList(list):
 
 terminals = {
     int, float, str,
+    type(None), # weird
     # datetime?
     #list, # don't traverse these if matrix
     MatrixList,
@@ -56,6 +57,10 @@ def json():
 
 def json():
     return {'id':1, 'p':33, 'pl': {'id':2} }
+
+
+def json():
+    return [{'id':1}, {'referencedId': 2}, {}]
 
 
 def pth2triples(p):
@@ -93,18 +98,25 @@ def enter(p, k, v): # for creating 'parents'
         return o, v.items()
     elif isinstance(v, dict):
         return dict(), v.items()
+    elif isinstance(v, list):
+        return [], enumerate(v) # why do i have to enum?
     else:
-        isinstance(v, terminals)
+        assert(isinstance(v, terminals))
         return v, False
+        
 
 def exit(p, k, v,
          new_obj, new_items):
-    new_obj.update(new_items)
+    if isinstance(new_obj, (Object, dict)):
+        new_obj.update(new_items)
+    else:
+        assert(isinstance(new_obj, list))
+        new_obj.extend(v for i,v in new_items)
     return new_obj
 
 
 def test():
-    _ = bigjson()
+    _ = json()
     _ = remap(_,
             visit=visit, 
             enter=enter,
