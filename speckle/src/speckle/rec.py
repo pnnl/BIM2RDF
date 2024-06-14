@@ -1,6 +1,5 @@
 # using conversion using boltons.iterutils
 
-from json import load
 from boltons.iterutils import remap # get_path, research
 
 # use remap to (k, v) -> (k, ttl)
@@ -10,6 +9,7 @@ from boltons.iterutils import remap # get_path, research
 from functools import cache
 @cache
 def bigjson():
+    from json import load
     _ = load(open('./data.json'))
     return _
 
@@ -102,7 +102,7 @@ def enter(p, k, v):
         o = Object(did, {})
         return o, v.items()
     elif isinstance(v, dict):
-        return dict(), v.items()
+        return Object(id(v), {}), v.items()
     elif isinstance(v, list):
         #from uuid import uuid4 as uid.
         # python already creates an id. just use it
@@ -124,8 +124,8 @@ def exit(p, k, v,
 
 
 def test():
-    _ = json()
-    _ = [{'id':5}]
+    #_ = bigjson()
+    _ = {}
     _ = remap(_,
             visit=visit, 
             enter=enter,
