@@ -26,6 +26,7 @@ class Object:
         self.data.update(items)
 
 
+
 class MatrixList(list):
     def __str__(self, ):
         return "encoded matrix list"
@@ -76,11 +77,21 @@ def visit(p, k, v): # path, key, value
     # else:
     #     return k, v
 
+
 def enter(p, k, v): # for creating 'parents'
-    if isinstance(v, dict) and 'id' in v:
-        o = Object(v.pop('id'))
+    def dicthasid(v):
+        if isinstance(v, dict):
+            if 'id' in v:
+                return v.pop('id')
+            if 'referencedId' in v:
+                return v.pop('referencedId')
+        else:
+            return False
+    # dict w/ id -> Object
+    if id:=dicthasid(v):
+        o = Object(id)
         return o, v.items()
-    elif isinstance(v, dict) and 'id' not in v:
+    elif isinstance(v, dict):
         return dict(), v.items()
     else:
         isinstance(v, terminals)
