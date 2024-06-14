@@ -15,7 +15,7 @@ def bigjson():
 
 class Object:
     __slots__ = 'id', 'data'
-    def __init__(self, id, data={}) -> None:
+    def __init__(self, id, data) -> None:
         self.id = id
         self.data = data # self-refs :/
     
@@ -23,8 +23,11 @@ class Object:
         return f"@{self.id} {repr(self.data)}"
 
     def update(self, items):
-        self.data.update(items)
-
+        if isinstance(self.data, list):
+            self.data.extend(v for k,v in items)
+        else:
+            assert(isinstance(self.data, dict))
+            self.data.update(items)
 
 
 class MatrixList(list):
@@ -83,7 +86,9 @@ def visit(p, k, v): # path, key, value
     #     return k, v
 
 
-def enter(p, k, v): # for creating 'parents'
+def enter(p, k, v):
+    # for creating 'parents'
+    # and id'ing things
     def dicthasid(v):
         if isinstance(v, dict):
             if 'id' in v:
@@ -93,13 +98,15 @@ def enter(p, k, v): # for creating 'parents'
         else:
             return False
     # dict w/ id -> Object
-    if id:=dicthasid(v):
-        o = Object(id)
+    if did:=dicthasid(v):
+        o = Object(did, {})
         return o, v.items()
     elif isinstance(v, dict):
         return dict(), v.items()
     elif isinstance(v, list):
-        return [], enumerate(v) # why do i have to enum?
+        #from uuid import uuid4 as uid.
+        # python already creates an id. just use it
+        return Object(id(v), []) , enumerate(v)  # why do i have to enum?
     else:
         assert(isinstance(v, terminals))
         return v, False
@@ -110,13 +117,15 @@ def exit(p, k, v,
     if isinstance(new_obj, (Object, dict)):
         new_obj.update(new_items)
     else:
-        assert(isinstance(new_obj, list))
-        new_obj.extend(v for i,v in new_items)
+        raise Exception('not handled')
+        #assert(isinstance(new_obj, list))
+        #new_obj.extend(v for i,v in new_items)
     return new_obj
 
 
 def test():
     _ = json()
+    _ = [{'id':5}]
     _ = remap(_,
             visit=visit, 
             enter=enter,
