@@ -28,6 +28,15 @@ class Object:
         else:
             assert(isinstance(self.data, dict))
             self.data.update(items)
+    
+    def __iter__(self):
+        if isinstance(self.data, type(self)):
+            yield from self.data
+        elif isinstance(self.data, list):
+            yield from enumerate(self.data)
+        else:
+            assert(isinstance(self.data, dict))
+            yield from self.data.items()
 
 
 class MatrixList(list):
@@ -71,7 +80,7 @@ def pth2triples(p):
     assert(len(p) == 2)
 
 
-def visit(p, k, v): # path, key, value
+def idvisit(p, k, v): # path, key, value
     # keep for transformations?
     return True
     # if isinstance(v, Object):
@@ -86,7 +95,7 @@ def visit(p, k, v): # path, key, value
     #     return k, v
 
 
-def enter(p, k, v):
+def identer(p, k, v):
     # for creating 'parents'
     # and id'ing things
     def dicthasid(v):
@@ -106,14 +115,13 @@ def enter(p, k, v):
     elif isinstance(v, list):
         #from uuid import uuid4 as uid.
         # python already creates an id. just use it
-        return Object(id(v), []) , enumerate(v)  # why do i have to enum?
+        return Object(id(v), []), enumerate(v)  # why do i have to enum?
     else:
         assert(isinstance(v, terminals))
         return v, False
-        
 
 
-def exit(p, k, v,
+def idexit(p, k, v,
          new_obj, new_items):
     if isinstance(new_obj, Object):
         new_obj.update(new_items)
@@ -127,8 +135,59 @@ def exit(p, k, v,
 def test():
     _ = bigjson()
     _ = remap(_,
-            visit=visit, 
-            enter=enter,
-            exit=exit
+            visit=idvisit, 
+            enter=identer,
+            exit=idexit,
             )
     return _
+
+
+
+from dataclasses import dataclass
+@dataclass(frozen=True)
+class Triple:
+    subject: 's'
+    prediate: 'p'
+    object: 'o'
+
+
+def spovisit(p, k, v):
+    return True
+    return k, Triple(v)
+    print(p, k, v)
+    return k, 
+
+
+def spoenter(p, k, v):
+    if isinstance(v, Object):
+        return [], ((ik, Triple(v.id, ik, iv)) for ik,iv in iter(v) )
+    else:
+        assert(isinstance(v, Triple))
+        if isinstance(v.object, Object):
+            return [], ((ik, Triple(v.object.id, ik, iv)) for ik,iv in iter(v.object) )
+        else:
+            return v, False
+
+
+def spoexit(p, k, v,
+            new_obj, new_items):
+    if isinstance(new_obj, list):
+        new_obj.extend(new_items)
+    else:
+        raise Exception('not handled')
+        #assert(isinstance(new_obj, list))
+        #new_obj.extend(v for i,v in new_items)
+    return new_obj
+
+
+def test():
+    _ = Object(1, Object(2, ['a', 'b', 'c', Object(3, [11,22,33]) ])  )
+    _ = remap(_,
+              visit=spovisit,
+              enter=spoenter,
+              exit=spoexit,)
+    return _
+
+# 1. id
+# 2. triple (in structure)
+# 3. flatten (take out structure)
