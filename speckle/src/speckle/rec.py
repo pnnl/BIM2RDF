@@ -112,9 +112,10 @@ def enter(p, k, v):
         return v, False
         
 
+
 def exit(p, k, v,
          new_obj, new_items):
-    if isinstance(new_obj, (Object, dict)):
+    if isinstance(new_obj, Object):
         new_obj.update(new_items)
     else:
         raise Exception('not handled')
@@ -124,8 +125,7 @@ def exit(p, k, v,
 
 
 def test():
-    #_ = bigjson()
-    _ = {}
+    _ = bigjson()
     _ = remap(_,
             visit=visit, 
             enter=enter,
