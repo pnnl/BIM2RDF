@@ -1,13 +1,6 @@
 
 
-from functools import cache
-@cache
-def bigjson():
-    from json import load
-    _ = load(open('./data.json'))
-    return _
-
-class Object:
+class Object: # entity?
     __slots__ = 'id', 'data'
     def __init__(self, id, data) -> None:
         self.id = id
@@ -40,18 +33,10 @@ class MatrixList(list):
 terminals = {
     int, float, str,
     type(None), # weird
-    # datetime?
-    #list, # don't traverse these if matrix
-    MatrixList,
+    # does json have datetime?
+    MatrixList, # don't traverse these if matrix
     }
 terminals = tuple(terminals)
-
-
-
-def json():
-    return { "stream": {"id": 'sid', "object": {'id': 'oid',
-    'p1': 123,
-    'p2': 'abc',}},}
 
 
 
@@ -138,12 +123,15 @@ class Tripling(Remapping):
     
     @classmethod
     def enter(cls, p, k, v):
+        from itertools import chain
         if isinstance(v, Object):
             return [], ((ik, cls.Triple(v.id, ik, iv)) for ik,iv in iter(v) )
         else:
             assert(isinstance(v, cls.Triple))
-            if isinstance(v.object, Object):
-                return [], ((ik, cls.Triple(v.object.id, ik, iv)) for ik,iv in iter(v.object) )
+            if isinstance(v.object, Object): # some "nesting"
+                ptr_to_nested = [ (0, cls.Triple(v.subject, v.prediate, v.object.id)  )  ]
+                nested = ((ik, cls.Triple(v.object.id, ik, iv)) for ik,iv in iter(v.object) )
+                return [], chain(ptr_to_nested, nested)
             else:
                 return v, False
 
@@ -157,10 +145,28 @@ class Tripling(Remapping):
         return new_obj
 
 
+from functools import cache
+@cache
+def bigjson():
+    from json import load
+    _ = load(open('./data.json'))
+    return _
+
+
+def json():
+    return { "stream": {"id": 'sid', "object": {'id': 'oid',
+    'p1': 123,
+    'p2': 'abc',}},}
+
+def json():
+    # connector triple is   (1, lp, 2)
+    return {'id':1, 'p': 3, 'lp': {'id': 2, 'p': 'np'}  }
+
+
 def test():
     _ = json()
     _ = Identification.map(_)
-    return _
+    #return _
     _ = Tripling.map(_)
     return _
 
