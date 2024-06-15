@@ -106,6 +106,9 @@ class Identification(Remapping):
 
 
 class Tripling(Remapping):
+    """
+    (identified) objects -> triples
+    """
 
     from dataclasses import dataclass
     @dataclass(frozen=True)
@@ -143,6 +146,13 @@ class Tripling(Remapping):
         else:
             raise Exception('not handled')
         return new_obj
+    
+    @classmethod
+    def map(cls, d):
+        _ = super().map(d)
+        from boltons.iterutils import flatten#, flatten_iter
+        _ = flatten(_)
+        return _
 
 
 from functools import cache
@@ -161,6 +171,7 @@ def json():
 def json():
     # connector triple is   (1, lp, 2)
     return {'id':1, 'p': 3, 'lp': {'id': 2, 'p': 'np'}  }
+
 
 
 def test():
