@@ -172,7 +172,7 @@ def spoenter(p, k, v):
 def spoexit(p, k, v,
             new_obj, new_items):
     if isinstance(new_obj, list):
-        new_obj.extend(new_items)
+        new_obj.extend(v for k,v in new_items)
     else:
         raise Exception('not handled')
         #assert(isinstance(new_obj, list))
