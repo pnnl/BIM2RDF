@@ -1,9 +1,3 @@
-# using conversion using boltons.iterutils
-
-from boltons.iterutils import remap # get_path, research
-
-# use remap to (k, v) -> (k, ttl)
-# inplace string?
 
 
 from functools import cache
@@ -75,61 +69,65 @@ def json():
     return [{'id':1}, {'referencedId': 2}, {}]
 
 
-def pth2triples(p):
-    assert(len(p) == 2)
-    assert(len(p) == 2)
+class Remapping:
+    @classmethod
+    def map(cls, j):
+        from boltons.iterutils import remap 
+        return remap(j,
+                     visit=cls.visit,
+                     enter=cls.enter,
+                     exit=cls.exit,)
 
 
-def idvisit(p, k, v): # path, key, value
-    # keep for transformations?
-    return True
-    # if isinstance(v, Object):
-    #     return True
-    # else:
-    #     return False
-    # do the transform here
-    #return p+(k,), v
-    # if isinstance(v, terminals):
-    #     return k, str(v)
-    # else:
-    #     return k, v
+class Identification(Remapping):
+    """
+    json -> objects with id
+    """
 
-
-def identer(p, k, v):
-    # for creating 'parents'
-    # and id'ing things
-    def dicthasid(v):
-        if isinstance(v, dict):
-            if 'id' in v:
-                return v.pop('id')
-            if 'referencedId' in v:
-                return v.pop('referencedId')
+    @classmethod
+    def visit(cls, p, k, v): # path, key, value
+        # keep for transformations?
+        return True
+    
+    @classmethod
+    def enter(cls, p, k, v):
+        # for creating 'parents'
+        # and id'ing things
+        def dicthasid(v):
+            if isinstance(v, dict):
+                if 'id' in v:
+                    return v.pop('id')
+                if 'referencedId' in v:
+                    return v.pop('referencedId')
+            else:
+                return False
+        # dict w/ id -> Object
+        if did:=dicthasid(v):
+            o = Object(did, {})
+            return o, v.items()
+        elif isinstance(v, dict):
+            return Object(id(v), {}), v.items()
+        elif isinstance(v, list):
+            #from uuid import uuid4 as uid.
+            # python already creates an id. just use it
+            return Object(id(v), []), enumerate(v)  # why do i have to enum?
         else:
-            return False
-    # dict w/ id -> Object
-    if did:=dicthasid(v):
-        o = Object(did, {})
-        return o, v.items()
-    elif isinstance(v, dict):
-        return Object(id(v), {}), v.items()
-    elif isinstance(v, list):
-        #from uuid import uuid4 as uid.
-        # python already creates an id. just use it
-        return Object(id(v), []), enumerate(v)  # why do i have to enum?
-    else:
-        assert(isinstance(v, terminals))
-        return v, False
+            assert(isinstance(v, terminals))
+            return v, False
 
+    @classmethod
+    def exit(cls, p, k, v,
+            new_obj, new_items):
+        if isinstance(new_obj, Object):
+            new_obj.update(new_items)
+        else:
+            raise Exception('not handled')
+            #assert(isinstance(new_obj, list))
+            #new_obj.extend(v for i,v in new_items)
+        return new_obj
+    
 
-def idexit(p, k, v,
-         new_obj, new_items):
-    if isinstance(new_obj, Object):
-        new_obj.update(new_items)
-    else:
-        raise Exception('not handled')
-        #assert(isinstance(new_obj, list))
-        #new_obj.extend(v for i,v in new_items)
-    return new_obj
+    
 
 
 def test():
@@ -142,6 +140,14 @@ def test():
     return _
 
 
+def identify(j):
+    _ = remap(j,
+            visit=idvisit, 
+            enter=identer,
+            exit=idexit,
+            )
+    return _
+
 
 from dataclasses import dataclass
 @dataclass(frozen=True)
@@ -149,6 +155,9 @@ class Triple:
     subject: 's'
     prediate: 'p'
     object: 'o'
+
+    def __str__(self) -> str:
+        return f"{self.subject} {self.prediate} {self.object}."
 
 
 def spovisit(p, k, v):
@@ -175,13 +184,12 @@ def spoexit(p, k, v,
         new_obj.extend(v for k,v in new_items)
     else:
         raise Exception('not handled')
-        #assert(isinstance(new_obj, list))
-        #new_obj.extend(v for i,v in new_items)
     return new_obj
 
 
 def test():
     _ = Object(1, Object(2, ['a', 'b', 'c', Object(3, [11,22,33]) ])  )
+    _ = json()
     _ = remap(_,
               visit=spovisit,
               enter=spoenter,
@@ -191,3 +199,4 @@ def test():
 # 1. id
 # 2. triple (in structure)
 # 3. flatten (take out structure)
+# 4. to str
