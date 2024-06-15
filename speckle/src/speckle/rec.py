@@ -47,9 +47,6 @@ terminals = {
 terminals = tuple(terminals)
 
 
-# need to identify.
-# need a 'context' thing...
-# ..to reach into a property at same level.
 
 def json():
     return { "stream": {"id": 'sid', "object": {'id': 'oid',
@@ -57,33 +54,28 @@ def json():
     'p2': 'abc',}},}
 
 
-def json():
-    return {'id': 1, 'p1':33, 'p': {'id': '2', 'pp': 3,  }  }
-
-
-def json():
-    return {'id':1, 'p':33, 'pl': {'id':2} }
-
-
-def json():
-    return [{'id':1}, {'referencedId': 2}, {}]
-
 
 class Remapping:
+
+    def __init__(self, d) -> None:
+        self.data = d
+
     @classmethod
     def map(cls, j):
         from boltons.iterutils import remap 
         return remap(j,
-                     visit=cls.visit,
-                     enter=cls.enter,
-                     exit=cls.exit,)
+                visit=cls.visit,
+                enter=cls.enter,
+                exit=cls.exit,)
+    
+    def __call__(self):
+        return self.map(self.data)
 
 
 class Identification(Remapping):
     """
     json -> objects with id
     """
-
     @classmethod
     def visit(cls, p, k, v): # path, key, value
         # keep for transformations?
@@ -127,73 +119,49 @@ class Identification(Remapping):
         return new_obj
     
 
+
+class Tripling(Remapping):
+
+    from dataclasses import dataclass
+    @dataclass(frozen=True)
+    class Triple:
+        subject: 's'
+        prediate: 'p'
+        object: 'o'
+
+        def __str__(self) -> str:
+            return f"{self.subject} {self.prediate} {self.object}."
+
+    @classmethod
+    def visit(cls, p, k, v):
+        return True
     
-
-
-def test():
-    _ = bigjson()
-    _ = remap(_,
-            visit=idvisit, 
-            enter=identer,
-            exit=idexit,
-            )
-    return _
-
-
-def identify(j):
-    _ = remap(j,
-            visit=idvisit, 
-            enter=identer,
-            exit=idexit,
-            )
-    return _
-
-
-from dataclasses import dataclass
-@dataclass(frozen=True)
-class Triple:
-    subject: 's'
-    prediate: 'p'
-    object: 'o'
-
-    def __str__(self) -> str:
-        return f"{self.subject} {self.prediate} {self.object}."
-
-
-def spovisit(p, k, v):
-    return True
-    return k, Triple(v)
-    print(p, k, v)
-    return k, 
-
-
-def spoenter(p, k, v):
-    if isinstance(v, Object):
-        return [], ((ik, Triple(v.id, ik, iv)) for ik,iv in iter(v) )
-    else:
-        assert(isinstance(v, Triple))
-        if isinstance(v.object, Object):
-            return [], ((ik, Triple(v.object.id, ik, iv)) for ik,iv in iter(v.object) )
+    @classmethod
+    def enter(cls, p, k, v):
+        if isinstance(v, Object):
+            return [], ((ik, cls.Triple(v.id, ik, iv)) for ik,iv in iter(v) )
         else:
-            return v, False
+            assert(isinstance(v, cls.Triple))
+            if isinstance(v.object, Object):
+                return [], ((ik, cls.Triple(v.object.id, ik, iv)) for ik,iv in iter(v.object) )
+            else:
+                return v, False
 
-
-def spoexit(p, k, v,
+    @classmethod
+    def exit(cls, p, k, v,
             new_obj, new_items):
-    if isinstance(new_obj, list):
-        new_obj.extend(v for k,v in new_items)
-    else:
-        raise Exception('not handled')
-    return new_obj
+        if isinstance(new_obj, list):
+            new_obj.extend(v for k,v in new_items)
+        else:
+            raise Exception('not handled')
+        return new_obj
 
 
 def test():
-    _ = Object(1, Object(2, ['a', 'b', 'c', Object(3, [11,22,33]) ])  )
     _ = json()
-    _ = remap(_,
-              visit=spovisit,
-              enter=spoenter,
-              exit=spoexit,)
+    _ = Identification.map(_)
+    return _
+    _ = Tripling.map(_)
     return _
 
 # 1. id
