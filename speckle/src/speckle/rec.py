@@ -1,5 +1,5 @@
 
-class Object: # entity?
+class Object: # Entity?
     __slots__ = 'id', 'data'
     def __init__(self, id, data) -> None:
         self.id = id
@@ -43,8 +43,6 @@ terminals = tuple(terminals)
 
 class Remapping:
 
-    def __init__(self, d) -> None:
-        self.data = d
 
     @classmethod
     def map(cls, d):
@@ -54,9 +52,6 @@ class Remapping:
                 enter=cls.enter,
                 exit=cls.exit,
                 )
-    
-    def __call__(self):
-        return self.map(self.data)
 
 
 class Identification(Remapping):
@@ -127,7 +122,7 @@ class Tripling(Remapping):
         else:
             assert(isinstance(v, cls.Triple))
             if isinstance(v.object, Object): # some "nesting"
-                ptr_to_nested =  [ (0, cls.Triple(v.subject, v.prediate, v.object.id)  )  ]
+                ptr_to_nested = [ ('{}', cls.Triple(v.subject, v.prediate, v.object.id)  )  ]
                 nested = ((ik, cls.Triple(v.object.id, ik, iv)) for ik,iv in iter(v.object) )
                 return [], (chain(ptr_to_nested, nested))
             else:
@@ -145,11 +140,9 @@ class Tripling(Remapping):
     @classmethod
     def map(cls, d, progress=False):
         _ = super().map(d) # just creating triples (in nesting) is fast!
-        return _
-        def xflatten_iter(iterable, did=set()):
-            # most intensive part for some reason
-            # from boltons.iterutils import flatten_iter as flatten
-            # more optimized of
+        def flatten(iterable, out):
+            # some issue with dupes!!!
+            # cant fig out.
             """``flatten_iter()`` yields all the elements from *iterable* while
             collapsing any nested iterables.
 
@@ -159,49 +152,29 @@ class Tripling(Remapping):
             """
             for i in iterable:
                 if isinstance(i, list):
-                    yield from flatten_iter(i, did=did)
+                    flatten(i, out)
                 else:
                     assert(isinstance(i, cls.Triple))
-                    if i not in did:
-                        did.add(i)
-                        yield 1
-                    else:
-                        sdf
-                        continue
+                    out.add(i)
+                    
             # for item in iterable:
             #     if isinstance(item, list):
             #         yield from flatten_iter(item)
             #     else:
             #         yield item
-        from boltons.iterutils import flatten_iter
-        _ = flatten_iter(_)
+        s = set()
+        flatten(_, s) 
         #from tqdm import tqdm
         #_ = tqdm(_)
-        _ = list(_)
+        _ = (s)
         return _
-
 
 
 # RDFing
 # obj that are sub
 
 
-
-def json():
-    return { "stream": {"id": 'sid', "object": {'id': 'oid',
-    'p1': 123,
-    'p2': 'abc',}},}
-
-def json():
-    # connector triple is   (1, lp, 2)
-    return {'id':1, 'p': 3, 'lp': {'id': 2, 'p': 'np'}  }
-
-def json():
-    return {'id':3, 'l': [1,2, {'id': 5, 'pl': 'p'}  ] }
-
-
 from functools import cache
-@cache
 def bigjson():
     from json import load
     _ = load(open('./data.json'))
@@ -209,39 +182,27 @@ def bigjson():
     #_ = _['stream']['object']['children']['objects'][0]['data']['parameters']
     return _
 
-@cache
-def badjson():
-    #from json import load
-    #return load(open('./bad.json'))
-    _ = """
-{
-    "id": "5fd0c7fb45bc28ceb05176792e8b866d",
-    "Width": {
-        "id": "cfae8a1f16097bae925471679ec32abd",
-        "name": "Width",
-        "units": null,
-        "value": 2,
-        "isShared": false,
-        "isReadOnly": false,
-        "speckle_type": "Objects.BuiltElements.Revit.Parameter",
-        "applicationId": null,
-        "applicationUnit": "autodesk.unit.unit:feetFractionalInches-1.0.0",
-        "isTypeParameter": false,
-        "totalChildrenCount": 0,
-        "applicationUnitType": null,
-        "applicationInternalName": "Width"
-    }
-}
-"""
-    from json import loads
-    _ = '{"id":"3",  "lp": {"id": "sdfsdf", "pip":3 } }'
-    _ = loads(_)
+
+def propjson(n=10, p=10):
+    pd = lambda pp=20: {f"pn{i}":f"pv{i}" for i in range(pp) }
+    _ =  {f'pkey{i}': {'id':i,  **pd(p) } for i in range(n) }
+    _ = {'id':'r', **_ }
     return _
 
 def test():
-    _ = badjson()
+    _ = propjson(10,20)
+    _ = _.copy()
     #_ = [{'id':i, 'p':f"{i}"} for i in range(1)]
     _ = Identification.map(_)
     _ = Tripling.map(_)
     return _
 
+
+def trec():
+    ...
+
+
+if __name__ == '__main__':
+    print(
+    sum( len((test() )) for i in range(1_000)  )
+    )
