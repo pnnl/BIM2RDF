@@ -31,7 +31,9 @@ class MatrixList(list):
         return "encoded matrix list"
 
 terminals = {
-    int, float, str,
+    int, float,
+    str,
+    bool,
     type(None), # weird
     # does json have datetime?
     MatrixList, # don't traverse these if matrix
@@ -46,12 +48,13 @@ class Remapping:
         self.data = d
 
     @classmethod
-    def map(cls, j):
+    def map(cls, d):
         from boltons.iterutils import remap 
-        return remap(j,
+        return remap(d,
                 visit=cls.visit,
                 enter=cls.enter,
-                exit=cls.exit,)
+                exit=cls.exit,
+                )
     
     def __call__(self):
         return self.map(self.data)
@@ -70,22 +73,18 @@ class Identification(Remapping):
     def enter(cls, p, k, v):
         # for creating 'parents'
         # and id'ing things
-        def dicthasid(v):
-            if isinstance(v, dict):
-                if 'id' in v:
-                    return v.pop('id')
-                if 'referencedId' in v:
-                    return v.pop('referencedId')
+        def dicthasid(v): # dont mod dict
+            if ('referencedId' in v) or ('id' in v):
+                return v
             else:
-                return False
-        # dict w/ id -> Object
-        if did:=dicthasid(v):
-            o = Object(did, {})
-            return o, v.items()
-        elif isinstance(v, dict):
+                v = v.copy()
+                v['id'] = id(v)
+            return v
+        if isinstance(v, dict):
+            v = dicthasid(v)
             return Object(id(v), {}), v.items()
         elif isinstance(v, list):
-            #from uuid import uuid4 as uid.
+            #from uuid import uuid4 as uid
             # python already creates an id. just use it
             return Object(id(v), []), enumerate(v)  # why do i have to enum?
         else:
@@ -104,12 +103,10 @@ class Identification(Remapping):
         return new_obj
     
 
-
 class Tripling(Remapping):
     """
     (identified) objects -> triples
     """
-
     from dataclasses import dataclass
     @dataclass(frozen=True)
     class Triple:
@@ -132,9 +129,9 @@ class Tripling(Remapping):
         else:
             assert(isinstance(v, cls.Triple))
             if isinstance(v.object, Object): # some "nesting"
-                ptr_to_nested = [ (0, cls.Triple(v.subject, v.prediate, v.object.id)  )  ]
+                ptr_to_nested = []# [ ('sdfsdff', cls.Triple(v.subject, v.prediate, v.object.id)  )  ]
                 nested = ((ik, cls.Triple(v.object.id, ik, iv)) for ik,iv in iter(v.object) )
-                return [], chain(ptr_to_nested, nested)
+                return [], (chain(ptr_to_nested, nested))
             else:
                 return v, False
 
@@ -148,19 +145,47 @@ class Tripling(Remapping):
         return new_obj
     
     @classmethod
-    def map(cls, d):
-        _ = super().map(d)
-        from boltons.iterutils import flatten#, flatten_iter
-        _ = flatten(_)
+    def map(cls, d, progress=False):
+        _ = super().map(d) # just creating triples (in nesting) is fast!
+        def xflatten_iter(iterable, did=set()):
+            # most intensive part for some reason
+            # from boltons.iterutils import flatten_iter as flatten
+            # more optimized of
+            """``flatten_iter()`` yields all the elements from *iterable* while
+            collapsing any nested iterables.
+
+            >>> nested = [[1, 2], [[3], [4, 5]]]
+            >>> list(flatten_iter(nested))
+            [1, 2, 3, 4, 5]
+            """
+            for i in iterable:
+                if isinstance(i, list):
+                    yield from flatten_iter(i, did=did)
+                else:
+                    assert(isinstance(i, cls.Triple))
+                    if i not in did:
+                        did.add(i)
+                        yield 1
+                    else:
+                        sdf
+                        continue
+            # for item in iterable:
+            #     if isinstance(item, list):
+            #         yield from flatten_iter(item)
+            #     else:
+            #         yield item
+        from boltons.iterutils import flatten_iter
+        _ = flatten_iter(_)
+        #from tqdm import tqdm
+        #_ = tqdm(_)
+        _ = list(_)
         return _
 
 
-from functools import cache
-@cache
-def bigjson():
-    from json import load
-    _ = load(open('./data.json'))
-    return _
+
+# RDFing
+# obj that are sub
+
 
 
 def json():
@@ -172,16 +197,31 @@ def json():
     # connector triple is   (1, lp, 2)
     return {'id':1, 'p': 3, 'lp': {'id': 2, 'p': 'np'}  }
 
+def json():
+    return {'id':3, 'l': [1,2, {'id': 5, 'pl': 'p'}  ] }
 
+
+from functools import cache
+@cache
+def bigjson():
+    from json import load
+    _ = load(open('./data.json'))
+    #_ = _['stream']['object']['data'] # ok
+    #_ = _['stream']['object']['children']['objects'][0]['data']['parameters']
+    return _
+
+@cache
+def badjson():
+    from json import load
+    return load(open('./bad.json'))
+    _ = '{"id": 3, "p": "pp" }'
+    from json import loads
+    _ = loads(_)
+    return _
 
 def test():
-    _ = json()
+    _ = badjson()
     _ = Identification.map(_)
-    #return _
     _ = Tripling.map(_)
     return _
 
-# 1. id
-# 2. triple (in structure)
-# 3. flatten (take out structure)
-# 4. to str
