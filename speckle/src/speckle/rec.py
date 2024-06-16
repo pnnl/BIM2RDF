@@ -1,5 +1,5 @@
 
-class Object: # Entity?
+class Entity:
     __slots__ = 'id', 'data'
     def __init__(self, id, data) -> None:
         self.id = id
@@ -16,9 +16,7 @@ class Object: # Entity?
             self.data.update(items)
     
     def __iter__(self):
-        if isinstance(self.data, type(self)):
-            yield from self.data
-        elif isinstance(self.data, list):
+        if isinstance(self.data, list):
             yield from enumerate(self.data)
         else:
             assert(isinstance(self.data, dict))
@@ -43,7 +41,6 @@ terminals = tuple(terminals)
 
 class Remapping:
 
-
     @classmethod
     def map(cls, d):
         from boltons.iterutils import remap 
@@ -67,19 +64,19 @@ class Identification(Remapping):
     def enter(cls, p, k, v):
         # for creating 'parents'
         # and id'ing things
+        #from uuid import uuid4 as uid
+        # python already creates an id. just use it
         ids = {'referencedId', 'id'}
-        def dicthasid(v): # dont mod dict
+        def dicthasid(v): 
             for id in ids:
                 if id in v:
                     return id
         if isinstance(v, dict):
             did = dicthasid(v)
             items = v.items() if did is None else ((k,v) for k,v in v.items() if k !=did )
-            return Object(v[did] if did is not None else id(v), {}), items
+            return Entity(v[did] if did is not None else id(v), {}), items
         elif isinstance(v, list):
-            #from uuid import uuid4 as uid
-            # python already creates an id. just use it
-            return Object(id(v), []), enumerate(v)  # why do i have to enum?
+            return Entity(id(v), []), enumerate(v)  # why do i have to enum?
         else:
             assert(isinstance(v, terminals))
             return v, False
@@ -87,7 +84,7 @@ class Identification(Remapping):
     @classmethod
     def exit(cls, p, k, v,
             new_obj, new_items):
-        if isinstance(new_obj, Object):
+        if isinstance(new_obj, Entity):
             new_obj.update(new_items)
         else:
             raise Exception('not handled')
@@ -104,11 +101,11 @@ class Tripling(Remapping):
     @dataclass(frozen=True)
     class Triple:
         subject: 's'
-        prediate: 'p'
+        predicate: 'p'
         object: 'o'
 
         def __str__(self) -> str:
-            return f"{self.subject} {self.prediate} {self.object}."
+            return f"{self.subject} {self.predciate} {self.object}."
 
     @classmethod
     def visit(cls, p, k, v):
@@ -117,12 +114,13 @@ class Tripling(Remapping):
     @classmethod
     def enter(cls, p, k, v):
         from itertools import chain
-        if isinstance(v, Object):
+        if isinstance(v, Entity):
+            # should not put a 'complex' obj
             return [], ((ik, cls.Triple(v.id, ik, iv)) for ik,iv in iter(v) )
         else:
             assert(isinstance(v, cls.Triple))
-            if isinstance(v.object, Object): # some "nesting"
-                ptr_to_nested = [ ('{}', cls.Triple(v.subject, v.prediate, v.object.id)  )  ]
+            if isinstance(v.object, Entity): # some "nesting"
+                ptr_to_nested = [ ('{}', cls.Triple(v.subject, v.predicate, v.object.id)  )  ]
                 nested = ((ik, cls.Triple(v.object.id, ik, iv)) for ik,iv in iter(v.object) )
                 return [], (chain(ptr_to_nested, nested))
             else:
@@ -140,6 +138,7 @@ class Tripling(Remapping):
     @classmethod
     def map(cls, d, progress=False):
         _ = super().map(d) # just creating triples (in nesting) is fast!
+        return _
         def flatten(iterable, out):
             # some issue with dupes!!!
             # cant fig out.
@@ -175,11 +174,10 @@ class Tripling(Remapping):
 
 
 from functools import cache
+@cache
 def bigjson():
     from json import load
     _ = load(open('./data.json'))
-    #_ = _['stream']['object']['data'] # ok
-    #_ = _['stream']['object']['children']['objects'][0]['data']['parameters']
     return _
 
 
@@ -190,16 +188,11 @@ def propjson(n=10, p=10):
     return _
 
 def test():
-    _ = propjson(10,20)
-    _ = _.copy()
-    #_ = [{'id':i, 'p':f"{i}"} for i in range(1)]
+    _ = propjson(3, 5)
+    _ = {'l': [1,2, {'lp': 33} ], 'p':3,  }
     _ = Identification.map(_)
     _ = Tripling.map(_)
     return _
-
-
-def trec():
-    ...
 
 
 if __name__ == '__main__':
