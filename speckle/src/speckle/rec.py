@@ -135,22 +135,41 @@ class RDFing:
         base_uri = base_uri()
 
         def __str__(self) -> str:
-            _ = f'prefix {self.prefix}: <{self.base_uri}>  \n\n'
+            _ = f'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n'
+            _ = _ + f'prefix {self.prefix}: <{self.base_uri}>  \n\n'
             _ = _ + super().__str__()
             return _
     
     @classmethod
     def map(cls, d):
         def _(d):
+            m = {True: 'true', False:'false', None: '\"null\"'} # not rdf:nil which is specific to a rdf:List
+            from types import NoneType
             for (s,p,o) in ((t.subject, t.predicate, t.object) for t in d):
+                # SUBJECT
                 s = f'{cls.list.prefix}:{s}'
+                # PREDICATE
                 # just need to take care of int predicates
-                p = f'rdf:_{p}' if isinstance(p, int) else f'{cls.list.prefix}:{p}'
+                if isinstance(p, int):
+                    p = f'rdf:_{p}'
+                else:
+                    assert(isinstance(p, str))
+                    # illegal chars. TODO: url encodeing?
+                    p = p.replace(' ', '_').replace('@','').replace('@', '')
+                    p = f'{cls.list.prefix}:{p}'
+                # OBJECT
                 #      need to escape quotes
                 if isinstance(o, str):
-                    o = '"'+o.replace('"', r'\"')+'"'
-                elif o is None:
-                    o = 'rdf:nil'
+                    #  on \ w/ two \
+                    o = o.replace("\\", "\\\\")
+                    # inner quotes
+                    o = o.replace('"', r'\"')
+                    # quote str
+                    o = '"'+o+'"'
+                elif isinstance(o, (bool, NoneType)): # https://github.com/w3c/json-ld-syntax/issues/258
+                    o = m[o]
+                elif isinstance(o, Termination.NumList):
+                    o = '"'+str(o)+'"'
                 else:
                     o = str(o)
                 yield cls.Triple(s,p,o)
