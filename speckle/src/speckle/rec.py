@@ -137,7 +137,13 @@ class RDFing:
             for (s,p,o) in ((t.subject, t.predicate, t.object) for t in d):
                 s = f'{cls.prefix}:{s}'
                 p = f'rdf:_{p}' if isinstance(p, int) else f'{cls.prefix}:{p}'
-                o = str(o) if o is not None else "rdf:nil"
+                #      need to escape quotes
+                if isinstance(o, str):
+                    o = '"'+o.replace('"', r'\"')+'"'
+                elif o is None:
+                    o = 'rdf:nil'
+                else:
+                    o = str(o)
                 yield cls.Triple(s,p,o)
         _ = Tripling.list(_(d))
         return _
@@ -158,9 +164,9 @@ def propjson(n=10, p=10):
 
 def test():
     #_ = propjson(20, 20)
-    #_ = bigjson()
+    _ = bigjson()
     #_ = {'l': [1,2, {'lp': 33} ], 'p':3,  }
-    _ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2] }
+    #_ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2] }
     _ = Termination.map(_)
     _ = Identification.map(_)
     _ = Tripling.map(_)
