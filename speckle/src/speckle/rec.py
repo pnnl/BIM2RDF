@@ -1,19 +1,31 @@
 
 
-class MatrixList(list):
-    def __str__(self, ):
-        return "encoded matrix list"
+class Termination:
+    """ 'pre'-processing """
+    class MatrixList(list):
+        def __str__(self, ):
+            return "encoded matrix list"
+    terminals = {
+        int, float,
+        str,
+        bool,
+        type(None), # weird
+        # does json have datetime?
+        MatrixList, # don't traverse these if matrix
+        }
+    terminals = tuple(terminals)
+    @classmethod
+    def visit(cls, p, k, v):
+        if 'matrix' == k:
+            assert(isinstance(v, list))
+            return k, cls.MatrixList(v)
+        else:
+            return True
 
-terminals = {
-    int, float,
-    str,
-    bool,
-    type(None), # weird
-    # does json have datetime?
-    MatrixList, # don't traverse these if matrix
-    }
-terminals = tuple(terminals)
-
+    @classmethod
+    def map(cls, d):
+        from boltons.iterutils import remap
+        return remap(d, visit=cls.visit)
 
 
 class Identification:
@@ -32,7 +44,7 @@ class Identification:
         elif isinstance(v, list):
             return {'id': id(v)}, enumerate(v)
         else:
-            assert(isinstance(v, terminals))
+            assert(isinstance(v, Termination.terminals))
             return k, False
 
     
@@ -106,6 +118,8 @@ class Tripling:
 
 # RDFing
 # obj that are sub
+#class RDFing:
+
 
 from functools import cache
 @cache
@@ -122,9 +136,11 @@ def propjson(n=10, p=10):
 
 def test():
     #_ = propjson(20, 20)
-    _ = bigjson()
+    #_ = bigjson()
     #_ = {'l': [1,2, {'lp': 33} ], 'p':3,  }
-    #_ = {'p':3, 'lst': [0] }
+    _ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2] }
+    _ = Termination.map(_)
+    return _
     _ = Identification.map(_)
     _ = Tripling.map(_)
     return _
