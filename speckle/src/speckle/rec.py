@@ -1,4 +1,5 @@
 
+
 class Termination:
     """ 'pre'-processing """
     class NumList(tuple):
@@ -124,19 +125,27 @@ class Tripling:
 
 
 class RDFing:
-    prefix = 'spkl'
 
     class Triple(Tripling.Triple):
         def __str__(self) -> str:
             return super().__str__()+'.'
+    class list(Tripling.list):
+        prefix = 'spkl'
+        from . import base_uri
+        base_uri = base_uri()
+
+        def __str__(self) -> str:
+            _ = f'prefix {self.prefix}: <{self.base_uri}>  \n\n'
+            _ = _ + super().__str__()
+            return _
     
     @classmethod
     def map(cls, d):
-        # just need to take care of int predicates
         def _(d):
             for (s,p,o) in ((t.subject, t.predicate, t.object) for t in d):
-                s = f'{cls.prefix}:{s}'
-                p = f'rdf:_{p}' if isinstance(p, int) else f'{cls.prefix}:{p}'
+                s = f'{cls.list.prefix}:{s}'
+                # just need to take care of int predicates
+                p = f'rdf:_{p}' if isinstance(p, int) else f'{cls.list.prefix}:{p}'
                 #      need to escape quotes
                 if isinstance(o, str):
                     o = '"'+o.replace('"', r'\"')+'"'
@@ -145,7 +154,7 @@ class RDFing:
                 else:
                     o = str(o)
                 yield cls.Triple(s,p,o)
-        _ = Tripling.list(_(d))
+        _ = RDFing.list(_(d))
         return _
 
 
