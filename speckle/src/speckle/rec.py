@@ -2,9 +2,9 @@
 
 class Termination:
     """ 'pre'-processing """
-    class NumList(list):
+    class NumList(tuple):
         def __str__(self, ):
-            return "encoded matrix list"
+            return "encoded num list"
     terminals = {
         int, float,
         str,
@@ -105,6 +105,7 @@ class Tripling:
             return _
         else:
             _ = cls.flatten(_, seqtypes=(cls.list))
+            _ = frozenset(_)
             return _
     
     @classmethod
@@ -122,16 +123,15 @@ class Tripling:
         return flatten(items, seqtypes=seqtypes)
 
 
-# RDFing
-# obj that are sub
-# class RDFing:
-#     prefix = ''
 
-#     class Triple(Tripling.Triple):
-#         def __str__(self) -> str:
-#             return super().__str__()+'.'
-#     @classmethod
-#     def 
+class RDFing:
+    prefix = 'spkl'
+
+    class Triple(Tripling.Triple):
+        def __str__(self) -> str:
+            return super().__str__()+'.'
+    #@classmethod
+    #def 
     
 
 
