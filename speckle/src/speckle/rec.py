@@ -86,18 +86,22 @@ class Tripling:
         if not flatten:
             return _
         else:
-            def flatten(items, seqtypes=(list, )):
-                #https://stackoverflow.com/questions/10823877/what-is-the-fastest-way-to-flatten-arbitrarily-nested-lists-in-python
-                try:
-                    for i, x in enumerate(items):
-                        while isinstance(x, seqtypes):
-                            items[i:i+1] = x
-                            x = items[i]
-                except IndexError:
-                    pass
-                return items
-            _ = flatten(_)
+            _ = cls.flatten(_, seqtypes=(cls.list))
             return _
+    
+    @classmethod
+    def flatten(cls, items, seqtypes=(list, tuple)):
+        def flatten(items, seqtypes=seqtypes):
+            #https://stackoverflow.com/questions/10823877/what-is-the-fastest-way-to-flatten-arbitrarily-nested-lists-in-python
+            try:
+                for i, x in enumerate(items):
+                    while isinstance(x, seqtypes):
+                        items[i:i+1] = x
+                        x = items[i]
+            except IndexError:
+                pass
+            return items
+        return flatten(items, seqtypes=seqtypes)
 
 
 # RDFing
