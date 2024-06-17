@@ -38,10 +38,10 @@ class Identification:
             for id in ids:
                 if id in v:
                     return id
-        if isinstance(v, dict):
+        if type(v) is dict:
             did = dicthasid(v)
             return {'id': v['id'] if did is not None else id(v)}, v.items()
-        elif isinstance(v, list):
+        elif type(v) is list:
             return {'id': id(v)}, enumerate(v)
         else:
             assert(isinstance(v, Termination.terminals))
@@ -84,6 +84,7 @@ class Tripling:
                         #                   ptr to dict
                         yield from (cls.Triple(v['id'] , ik, iv['id'] ), iv )
                     else:
+                        assert(isinstance(iv, Termination.terminals))
                         yield cls.Triple(v['id'], ik, iv)
             return cls.list(), enumerate(_(v))
         else:
@@ -140,8 +141,8 @@ def test():
     #_ = {'l': [1,2, {'lp': 33} ], 'p':3,  }
     _ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2] }
     _ = Termination.map(_)
-    return _
     _ = Identification.map(_)
+    return _
     _ = Tripling.map(_)
     return _
 
