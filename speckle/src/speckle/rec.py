@@ -16,9 +16,13 @@ class Termination:
     terminals = tuple(terminals)
     @classmethod
     def visit(cls, p, k, v):
-        if k in {'matrix', 'data'}:
+        def allnum(it): return all(isinstance(i, (float, int) ) for i in it)
+        if k  == 'matrix':
             assert(isinstance(v, list))
-            assert(all(isinstance(i, (float, int) ) for i in v))
+            assert(allnum(v))
+            return k, cls.NumList(v)
+        elif k == 'data' and isinstance(v, list):
+            assert(allnum(v))
             return k, cls.NumList(v)
         else:
             return True
@@ -73,6 +77,7 @@ class Tripling:
         def __str__(self) -> str:
             _ = '\n'.join([str(i) for i in self])
             return _
+
     
     @classmethod
     def enter(cls, p, k, v):
@@ -119,7 +124,15 @@ class Tripling:
 
 # RDFing
 # obj that are sub
-#class RDFing:
+# class RDFing:
+#     prefix = ''
+
+#     class Triple(Tripling.Triple):
+#         def __str__(self) -> str:
+#             return super().__str__()+'.'
+#     @classmethod
+#     def 
+    
 
 
 from functools import cache
@@ -137,14 +150,19 @@ def propjson(n=10, p=10):
 
 def test():
     #_ = propjson(20, 20)
-    #_ = bigjson()
+    _ = bigjson()
     #_ = {'l': [1,2, {'lp': 33} ], 'p':3,  }
-    _ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2] }
+    #_ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2] }
     _ = Termination.map(_)
     _ = Identification.map(_)
     _ = Tripling.map(_)
     return _
 
+
+# downstream changes:
+# mainly in Connectors:
+# no need for complicated rdfList/*rest query
+# 
 
 
 if __name__ == '__main__':
