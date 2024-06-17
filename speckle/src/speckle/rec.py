@@ -54,7 +54,7 @@ class Tripling:
         object: 'o'
 
         def __str__(self) -> str:
-            return f"{self.subject} {self.predicate} {self.object}."
+            return f"{self.subject} {self.predicate} {self.object}"
         
     class list(list):
 
@@ -70,7 +70,7 @@ class Tripling:
                 for ik, iv in v.items():
                     if isinstance(iv, dict):
                         #                   ptr to dict
-                        yield from (iv, cls.Triple(v['id'] , ik, iv['id'] ) )
+                        yield from (cls.Triple(v['id'] , ik, iv['id'] ), iv )
                     else:
                         yield cls.Triple(v['id'], ik, iv)
             return cls.list(), enumerate(_(v))
