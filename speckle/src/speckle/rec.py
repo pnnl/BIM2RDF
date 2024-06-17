@@ -2,7 +2,7 @@
 
 class Termination:
     """ 'pre'-processing """
-    class MatrixList(list):
+    class NumList(list):
         def __str__(self, ):
             return "encoded matrix list"
     terminals = {
@@ -11,14 +11,15 @@ class Termination:
         bool,
         type(None), # weird
         # does json have datetime?
-        MatrixList, # don't traverse these if matrix
+        NumList, # don't traverse these if matrix
         }
     terminals = tuple(terminals)
     @classmethod
     def visit(cls, p, k, v):
-        if 'matrix' == k:
+        if k in {'matrix', 'data'}:
             assert(isinstance(v, list))
-            return k, cls.MatrixList(v)
+            assert(all(isinstance(i, (float, int) ) for i in v))
+            return k, cls.NumList(v)
         else:
             return True
 
@@ -46,7 +47,6 @@ class Identification:
         else:
             assert(isinstance(v, Termination.terminals))
             return k, False
-
     
     @classmethod
     def map(cls, d):
@@ -142,7 +142,6 @@ def test():
     _ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2] }
     _ = Termination.map(_)
     _ = Identification.map(_)
-    return _
     _ = Tripling.map(_)
     return _
 
