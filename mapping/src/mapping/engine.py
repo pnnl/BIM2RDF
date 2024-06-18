@@ -416,12 +416,15 @@ if __name__ == '__main__':
         g.serialize(opath, 'text/turtle')
         return opath
     
+    from ontologies import patch, definition
     def ontology(
-            def_: str='ontology',
+            definition: Path=definition,
+            patch: Path = patch,
             infer: str|None ='rdfs',
             opath: Path=Path('ontology.ttl') ):
         from ontologies.collect import process
-        _ = process(def_=def_, import_deps=True, remove_owl_imports=True)
+        _ = process(definition=definition, patch=patch,
+                    import_deps=True, remove_owl_imports=True)
         if infer:
             _ = get_closure(_, semantics=infer)
         _.serialize(opath, 'text/turtle')
