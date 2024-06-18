@@ -35,6 +35,7 @@ class Termination:
 
 class Identification:
     idkeys = {'id'}
+    # ref_idkeys
     
     @classmethod
     def enter(cls, p, k, v):
@@ -124,7 +125,7 @@ class Tripling:
         return flatten(items, seqtypes=seqtypes)
 
 
-class RDFing:
+class RDFing:  #TODO fix when object is id
 
     class Triple(Tripling.Triple):
         def __str__(self) -> str:
@@ -148,23 +149,35 @@ class RDFing:
             for (s,p,o) in ((t.subject, t.predicate, t.object) for t in d):
                 # SUBJECT
                 s = f'{cls.list.prefix}:{s}'
+
                 # PREDICATE
                 # just need to take care of int predicates
                 if isinstance(p, int):
                     p = f'rdf:_{p}'
                 else:
                     assert(isinstance(p, str))
-                    # illegal chars. TODO: url encodeing?
-                    p = p.replace(' ', '_').replace('@','').replace('@', '')
+                    p = p.replace(' ', '_')
+                    # create legal by dropping non alpha num
+                    # url encodeing?
+                    p = ''.join(c for c in p if c.isalnum() or c == '_' )
                     p = f'{cls.list.prefix}:{p}'
+                
                 # OBJECT
                 #      need to escape quotes
                 if isinstance(o, str):
-                    #  on \ w/ two \
+                    # dont want to encode('unicode_escape').decode()
+                    # to not lose unicode chars
+                    # escape all the backslashes, first..
                     o = o.replace("\\", "\\\\")
+                    # /then/ ...
+                    # escape spacing things
+                    o = o.replace('\n', '\\n')
+                    o = o.replace('\r', '\\r')
+                    o = o.replace('\f', '\\f')
+                    o = o.replace('\t', '\\t')
                     # inner quotes
-                    o = o.replace('"', r'\"')
-                    # quote str
+                    o = o.replace('"', '\\"')
+                    # outer quote
                     o = '"'+o+'"'
                 elif isinstance(o, (bool, NoneType)): # https://github.com/w3c/json-ld-syntax/issues/258
                     o = m[o]
@@ -209,6 +222,6 @@ def test():
 
 
 if __name__ == '__main__':
-    print(
-    sum( len((test() )) for i in range(1)  )
-    )
+    _ = test()
+    _ = str(_)
+    open('data.ttl', 'w').write(_)
