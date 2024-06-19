@@ -1,4 +1,6 @@
-
+# class Remapping
+# composition  would involve composing terminals
+# which are somehow the last thing in matching functions.
 
 class Termination:
     """ 'pre'-processing """
@@ -35,28 +37,55 @@ class Termination:
 
 class Identification:
     idkeys = {'id'}
-    # ref_idkeys
+    ref_idkeys = {
+        'referencedId',
+        'connectedConnectorIds'}
+
+    from dataclasses import dataclass
+    @dataclass(frozen=True)
+    class ID:
+        value: int | str # usually
+        def __str__(self) -> str:
+            return str(self.value)
+    
+    terminals = {Termination.terminals}|{ID}
+    terminals = tuple(terminals)
+    
+    @classmethod
+    def visit(cls, p, k, v):
+        # interpret identifier cases
+        if k in cls.ref_idkeys:
+            if isinstance(v, (int, str)):
+                return k, cls.ID(v)
+        if p: # example connectedIds: [id1,id2,id3]
+            if any(k in cls.ref_idkeys for k in p):
+                if isinstance(v, (int, str)):
+                    return k, cls.ID(v)
+        return True
     
     @classmethod
     def enter(cls, p, k, v):
         ids = cls.idkeys
-        def dicthasid(v): 
+        def dicthasid(v):
             for id in ids:
                 if id in v:
                     return id
         if type(v) is dict:
             did = dicthasid(v)
-            return {'id': v['id'] if did is not None else id(v)}, v.items()
+            return {'id': cls.ID(v['id']) if did is not None else cls.ID(id(v)) }, ((k,v) for k,v in  v.items() if k !=did)
         elif type(v) is list:
-            return {'id': id(v)}, enumerate(v)
+            return {'id': cls.ID(id(v)) }, enumerate(v)
         else:
-            assert(isinstance(v, Termination.terminals))
-            return k, False
+            assert(isinstance(v, cls.terminals ))
+            return k, False        
     
     @classmethod
     def map(cls, d):
         from boltons.iterutils import remap
-        return remap(d, enter=cls.enter)
+        return remap(d, enter=cls.enter, visit=cls.visit)
+
+
+# todo:maintain id value
 
 
 class Tripling:
@@ -90,7 +119,7 @@ class Tripling:
                         #                   ptr to dict
                         yield from (cls.Triple(v['id'] , ik, iv['id'] ), iv )
                     else:
-                        assert(isinstance(iv, Termination.terminals))
+                        assert(isinstance(iv, Identification.terminals ))
                         yield cls.Triple(v['id'], ik, iv)
             return cls.list(), enumerate(_(v))
         else:
@@ -125,7 +154,7 @@ class Tripling:
         return flatten(items, seqtypes=seqtypes)
 
 
-class RDFing:  #TODO fix when object is id
+class RDFing:  #TODO preserve data type of  (idref, id, idref->int|str)
 
     class Triple(Tripling.Triple):
         def __str__(self) -> str:
@@ -148,6 +177,7 @@ class RDFing:  #TODO fix when object is id
             from types import NoneType
             for (s,p,o) in ((t.subject, t.predicate, t.object) for t in d):
                 # SUBJECT
+                assert(isinstance(s, Identification.ID))
                 s = f'{cls.list.prefix}:{s}'
 
                 # PREDICATE
@@ -183,6 +213,8 @@ class RDFing:  #TODO fix when object is id
                     o = m[o]
                 elif isinstance(o, Termination.NumList):
                     o = '"'+str(o)+'"'
+                elif isinstance(o, Identification.ID):
+                    o = f'{cls.list.prefix}:{o}'
                 else:
                     o = str(o)
                 yield cls.Triple(s,p,o)
@@ -204,13 +236,19 @@ def propjson(n=10, p=10):
     return _
 
 def test():
-    #_ = propjson(20, 20)
+    #_ = propjson(33, 55)
+    #_ = {'id':3, 'p':3 }
     _ = bigjson()
+    #_ = { 'n': {}}
     #_ = {'l': [1,2, {'lp': 33} ], 'p':3,  }
-    #_ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2] }
+    #_ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2], 'referencedId': 3 }
+    # _ = {'id':3, 'connectedConnectorIds': ['ccid1','ccid2'], 'referencedId': 'rid',
+    #      'p': {'pp':  {'connectedConnectorIds': ['nccid1','nccid2'], }}, }
     _ = Termination.map(_)
     _ = Identification.map(_)
+    #return _
     _ = Tripling.map(_)
+    #return _
     _ = RDFing.map(_)
     return _
 
