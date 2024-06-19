@@ -215,11 +215,6 @@ def test():
     return _
 
 
-# downstream changes:
-# mainly in Connectors:
-# no need for complicated rdfList/*rest query
-# 
-
 
 if __name__ == '__main__':
     _ = test()
