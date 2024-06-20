@@ -2,11 +2,44 @@
 # composition  would involve composing terminals
 # which are somehow the last thing in matching functions.
 
+
 class Termination:
     """ 'pre'-processing """
     class NumList(tuple):
         def __str__(self, ):
             return "encoded num list"
+        
+        @staticmethod
+        def data_encode(d: list) -> str:
+            from numpy import savez_compressed as save, array
+            #from numpy import save
+            _ = d
+            _ = array(d, dtype='float16')
+            from io import BytesIO
+            def sv(d):
+                _ = BytesIO()
+                #save(_, d)
+                save(_, array=d)
+                return _
+            _ = sv(_)
+            _.seek(0)
+            _ = _.read()
+            from base64 import b64encode
+            _ = b64encode(_)
+            _ = _.decode()
+            return _
+        @staticmethod
+        def data_decode(d: str) -> 'array':
+            _ = d
+            from base64 import b64decode
+            _ = b64decode(_,)
+            from numpy import load
+            from io import BytesIO
+            _ = BytesIO(_)
+            _ = load(_)
+            _ = _['array']
+            return _
+        
     terminals = {
         int, float,
         str,
@@ -33,6 +66,7 @@ class Termination:
     def map(cls, d):
         from boltons.iterutils import remap
         return remap(d, visit=cls.visit)
+
 
 
 class Identification:
@@ -227,7 +261,7 @@ class RDFing:
         return _
 
 
-def tordf(d: int | dict):
+def to_rdf(d: str | dict):
     if isinstance(d, str):
         from json import loads
         d = loads(d)
@@ -236,20 +270,39 @@ def tordf(d: int | dict):
     _ = Identification.map(_)
     _ = Tripling.map(_)
     _ = RDFing.map(_)
+    _ = str(_)
     return _
 
 
-
 if __name__ == '__main__':
-    from fire import Fire
-    _tordf = tordf
     from pathlib import Path
-    def tordf(
-            input: Path = Path('data.json'),
-            output: Path= Path('data.ttl')):
-        input = Path(input)
-        _ = open(input).read()
-        _ = _tordf(_)
-        _ = str(_)
-        open(output, 'w').write(_)
-    Fire(tordf)
+
+    def _get_json(stream_id, object_id):
+        from speckle.graphql import queries, query
+        _ = queries()
+        _ = _.objects(stream_id, object_id)
+        _ = query(_) # dict
+        return _        
+
+    def json(stream_id, object_id,
+             path=Path('data.json'), ):
+        _ = _get_json(stream_id, object_id)
+        path = Path(path)
+        from json import dump
+        dump(_, open(path, 'w'),)
+        return path
+    
+    def ttl(stream_id, object_id,
+            path=Path('data.ttl'),):
+        path = Path(path)
+        _ = _get_json(stream_id, object_id)
+        _ = to_rdf(_)
+        open(path, 'w').write(_)
+        return path
+
+    import fire
+    fire.Fire({
+        'json': json,
+        'ttl': ttl,})
+
+
