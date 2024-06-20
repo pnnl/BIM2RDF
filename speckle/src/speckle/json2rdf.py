@@ -227,28 +227,11 @@ class RDFing:
         return _
 
 
-from functools import cache
-@cache
-def bigjson():
-    from json import load
-    _ = load(open('./data.json'))
-    return _
-
-def propjson(n=10, p=10):
-    pd = lambda pp=20: {f"pn{i}":f"pv{i}" for i in range(pp) }
-    _ =  {f'pkey{i}': {'id':f"pid{i}", **pd(p) } for i in range(n) }
-    _ = {'id':'r', **_ }
-    return _
-
-def test():
-    #_ = propjson(33, 55)
-    #_ = {'id':3, 'p':3 }
-    _ = bigjson()
-    #_ = { 'n': {}}
-    #_ = {'l': [1,2, {'lp': 33} ], 'p':3,  }
-    #_ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2], 'referencedId': 3 }
-    # _ = {'id':3, 'connectedConnectorIds': ['ccid1','ccid2'], 'referencedId': 'rid',
-    #       'p': {'pp':  {'connectedConnectorIds': ['nccid1','nccid2'], }}, }
+def tordf(d: int | dict):
+    if isinstance(d, str):
+        from json import loads
+        d = loads(d)
+    _ = d
     _ = Termination.map(_)
     _ = Identification.map(_)
     _ = Tripling.map(_)
@@ -258,6 +241,15 @@ def test():
 
 
 if __name__ == '__main__':
-    _ = test()
-    _ = str(_)
-    open('data.ttl', 'w').write(_)
+    from fire import Fire
+    _tordf = tordf
+    from pathlib import Path
+    def tordf(
+            input: Path = Path('data.json'),
+            output: Path= Path('data.ttl')):
+        input = Path(input)
+        _ = open(input).read()
+        _ = _tordf(_)
+        _ = str(_)
+        open(output, 'w').write(_)
+    Fire(tordf)
