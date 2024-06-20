@@ -73,8 +73,6 @@ if __name__ == '__main__':
         if (s.returncode != 0):
             print('ERRORS')
             print(s.stderr)
-            raise ChildProcessError
-        
         return s.stdout
     def cinfer(data: Path, shapes:Path=None, out=Path('shacl-infer.ttl')):
         data = Path(data)
