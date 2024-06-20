@@ -277,17 +277,12 @@ def to_rdf(d: str | dict):
 if __name__ == '__main__':
     from pathlib import Path
 
-    def _get_json(stream_id, object_id):
-        from speckle.graphql import queries, query
-        _ = queries()
-        _ = _.objects(stream_id, object_id)
-        _ = query(_) # dict
-        return _        
+    from .data import get_json
 
     def json(stream_id, object_id,
              path=Path('data.json'), ):
         """gets json"""
-        _ = _get_json(stream_id, object_id)
+        _ = get_json(stream_id, object_id)
         path = Path(path)
         from json import dump
         dump(_, open(path, 'w'),)
@@ -297,7 +292,7 @@ if __name__ == '__main__':
             path=Path('data.ttl'),):
         """gets json and converts it to ttl"""
         path = Path(path)
-        _ = _get_json(stream_id, object_id)
+        _ = get_json(stream_id, object_id)
         _ = to_rdf(_)
         open(path, 'w').write(_)
         return path
