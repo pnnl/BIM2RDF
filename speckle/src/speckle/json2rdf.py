@@ -85,8 +85,6 @@ class Identification:
         return remap(d, enter=cls.enter, visit=cls.visit)
 
 
-# todo:maintain id value
-
 
 class Tripling:
     """
@@ -108,6 +106,13 @@ class Tripling:
             _ = '\n'.join([str(i) for i in self])
             return _
 
+    @classmethod
+    def visit(cls, p, k, v):
+        if isinstance(v, cls.Triple):
+            if v.predicate in Identification.idkeys:
+                if isinstance(v.object, Identification.ID):
+                    return k, cls.Triple(v.subject, v.predicate, v.object.value)
+        return True
     
     @classmethod
     def enter(cls, p, k, v):
@@ -130,7 +135,7 @@ class Tripling:
     @classmethod
     def map(cls, d, flatten=True):
         from boltons.iterutils import remap
-        _ = remap(d, enter=cls.enter)
+        _ = remap(d, enter=cls.enter, visit=cls.visit)
         if not flatten:
             return _
         else:
@@ -154,7 +159,7 @@ class Tripling:
         return flatten(items, seqtypes=seqtypes)
 
 
-class RDFing:  #TODO preserve data type of  (idref, id, idref->int|str)
+class RDFing:
 
     class Triple(Tripling.Triple):
         def __str__(self) -> str:
@@ -243,12 +248,10 @@ def test():
     #_ = {'l': [1,2, {'lp': 33} ], 'p':3,  }
     #_ = {'p':3, 'lst': [0, {'pil':33}], 'matrix':[1,2], 'referencedId': 3 }
     # _ = {'id':3, 'connectedConnectorIds': ['ccid1','ccid2'], 'referencedId': 'rid',
-    #      'p': {'pp':  {'connectedConnectorIds': ['nccid1','nccid2'], }}, }
+    #       'p': {'pp':  {'connectedConnectorIds': ['nccid1','nccid2'], }}, }
     _ = Termination.map(_)
     _ = Identification.map(_)
-    #return _
     _ = Tripling.map(_)
-    #return _
     _ = RDFing.map(_)
     return _
 
