@@ -6,20 +6,28 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX meta: <http://meta>
 
 CONSTRUCT {
-?lum s223:cnx ?conn.
+?junction s223:cnx _:junctionoutlet.
+_:junctionoutlet a s223:BidirectionalConnectionPoint.
+_:junctionoutlet rdfs:label "BidirectionalConnectionPoint"^^xsd:string.
+_:junctionoutlet s223:hasMedium s223:PowerAndSignal-PoE.
+#_:junctionoutlet s223:composedOf _:prop1. 
+#_:prop1 a s223:Property. 
+#_:prop1 s223:ofConstituent s223:Electricity-DC. 
+#_:prop1 rdfs:label "Electricity-DC".
+#_:junctionoutlet s223:composedOf _:prop2. 
+#_:prop2 a s223:Property. 
+#_:prop2 s223:ofConstituent s223:Signal-Ethernet. 
+#_:prop2 rdfs:label "Signal-Ethernet".
+_:junctionoutlet s223:cnx _:luminairewire.
+_:luminairewire a s223:ElectricWire.
+_:luminairewire s223:hasMedium  s223:Constituent-Electricity.
+_:luminairewire rdfs:label "Connection"^^xsd:string.
+_:luminairewire s223:cnx ?conn.
 ?conn  a s223:InletConnectionPoint.
 ?conn rdfs:label "InletConnectionPoint"^^xsd:string.
-?conn s223:hasMedium s223:AC-120VLN-1Ph-60Hz. 
-?conn s223:cnx _:luminairewire.
-_:luminairewire a s223:ElectricWire.
-_:luminairewire s223:hasMedium  s223:Medium-Electricity.
-_:luminairewire rdfs:label "ElectricWire"^^xsd:string.
-_:luminairewire s223:cnx _:junctionoutlet.
-_:junctionoutlet a s223:OutletConnectionPoint.
-_:junctionoutlet rdfs:label "OutletConnectionPoint"^^xsd:string.
-_:junctionoutlet s223:hasMedium s223:AC-120VLN-1Ph-60Hz. 
-#?lum ?circuit _:junctionoutlet.
-_:junctionoutlet s223:cnx ?j.
+?conn s223:hasMedium s223:Constituent-Electricity.
+?conn s223:cnx ?lum.
+
 }
 WHERE {
 ?lum a s223:Luminaire.
@@ -35,9 +43,9 @@ WHERE {
  }
 
 {
-  ?j a s223:Junction.
-  <<?j spkl:category "Lighting Devices">> meta: <<?_ spkl:name "electrical/junction">>.
-  ?j spkl:parameters/spkl:RBS_ELEC_SWITCH_ID_PARAM  ?switch1.
+  ?junction a s223:PowerOverEthernetSwitch.
+  <<?junction spkl:category "Lighting Devices">> meta: <<?_ spkl:name "electrical/junction">>.
+  ?junction spkl:parameters/spkl:RBS_ELEC_SWITCH_ID_PARAM  ?switch1.
 	?switch1 spkl:value ?switchid.
 }
 }

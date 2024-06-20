@@ -8,15 +8,15 @@ CONSTRUCT {
  ?conn s223:cnx _:wirejunction.
 _:wirejunction a s223:ElectricWire.
 _:wirejunction rdfs:label "ElectricWire"^^xsd:string.
-_:wirejunction s223:hasMedium  s223:Medium-Electricity.
+_:wirejunction s223:hasMedium  s223:Constituent-Electricity.
 _:wirejunction s223:cnx _:i.
 _:i a s223:InletConnectionPoint. #circuitname can be applied here aswell
 _:i rdfs:label "InletConnectionPoint"^^xsd:string.
-_:i s223:hasMedium s223:AC-120VLN-1Ph-60Hz. 
+_:i s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
 _:i s223:cnx _:j.
 _:j a s223:Junction. #circuitname can be applied here aswell
 _:j rdfs:label "Junction"^^xsd:string.
-_:j s223:hasMedium  s223:Medium-Electricity.
+_:j s223:hasMedium  s223:Constituent-Electricity.
 ?elecbreaker ?circuit _:j.
 }  
 

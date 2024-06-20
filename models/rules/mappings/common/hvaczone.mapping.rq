@@ -10,11 +10,14 @@ CONSTRUCT {
 ?this   s223:hasDomain    s223:Domain-HVAC. 
 ?this rdfs:label "Zone-HVAC"^^xsd:string.
 #?this   rdfs:label        ?zn. # as it's a name
+?this s223:hasProperty ?zonename.
+?zonename a s223:Property.
+?zonename s223:hasValue ?name.
+?zonename rdfs:label "Property"^^xsd:string.
 
 } 
 WHERE { 
 <<?this spkl:category "HVAC Zones">> meta: <<?_ spkl:name "architecture/hvac zone">>. # TODO branchName could be used here
-#?this spkl:name ?zn.
-
-
+?this spkl:parameters/spkl:ZONE_NAME ?zonename. 
+?zonename spkl:value ?name. 
 }

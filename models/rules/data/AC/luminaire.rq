@@ -8,12 +8,12 @@ PREFIX meta: <http://meta>
 CONSTRUCT {
 ?conn s223:cnx _:luminairewire.
 _:luminairewire a s223:ElectricWire.
-_:luminairewire s223:hasMedium  s223:Medium-Electricity.
+_:luminairewire s223:hasMedium  s223:Constituent-Electricity.
 _:luminairewire rdfs:label "ElectricWire"^^xsd:string.
 _:luminairewire s223:cnx _:junctionoutlet.
 _:junctionoutlet a s223:OutletConnectionPoint.
 _:junctionoutlet rdfs:label "OutletConnectionPoint"^^xsd:string.
-_:junctionoutlet s223:hasMedium s223:AC-120VLN-1Ph-60Hz. 
+_:junctionoutlet s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
 ?lum ?circuit _:junctionoutlet.
 _:junctionoutlet s223:cnx ?j.
 }
