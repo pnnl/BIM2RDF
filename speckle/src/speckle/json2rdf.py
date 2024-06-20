@@ -286,6 +286,7 @@ if __name__ == '__main__':
 
     def json(stream_id, object_id,
              path=Path('data.json'), ):
+        """gets json"""
         _ = _get_json(stream_id, object_id)
         path = Path(path)
         from json import dump
@@ -294,6 +295,7 @@ if __name__ == '__main__':
     
     def ttl(stream_id, object_id,
             path=Path('data.ttl'),):
+        """gets json and converts it to ttl"""
         path = Path(path)
         _ = _get_json(stream_id, object_id)
         _ = to_rdf(_)
