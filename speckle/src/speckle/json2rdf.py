@@ -306,33 +306,27 @@ class RDFing:
         return _
 
 
-def test():
-    d = {'id': 3, 'p': 1}
-    #from json import load
-    #d = load(open('data.json'))
-    m = {'id': '002ffd7b02',
-       'name': 'architecture/lighting device',}
-    
 
-    def t(_):
+def to_rdf(data: str | dict, meta: str | dict = {}):
+    d = data
+    m = meta
+    def triples(data):
+        _ = data
         _ = Termination.map(_)
         _ = Identification.map(_)
         _ = Tripling.map(_)
         return _
-    
-    d = RDFing.map(t(d), t(m) )
-    return d
-
-
-def to_rdf(d: str | dict):
     if isinstance(d, str):
         from json import loads
         d = loads(d)
-    _ = d
-    _ = Termination.map(_)
-    _ = Identification.map(_)
-    _ = Tripling.map(_)
-    _ = RDFing.map(_)
+    if m:
+        if isinstance(m, str):
+            from json import loads
+            m = loads(m)
+    if m:
+        _ = RDFing.map(triples(d), meta=triples(m))
+    else:
+        _ = RDFing.map(triples(d),)
     _ = str(_)
     return _
 
