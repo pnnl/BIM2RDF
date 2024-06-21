@@ -296,7 +296,7 @@ class RDFing:
             return cls.triple(s,p,o)
 
     @classmethod
-    def map(cls, d, meta=[]):
+    def map(cls, d, meta=[], ):
         if meta:
             from itertools import product
             d = product(meta, d)
@@ -307,7 +307,10 @@ class RDFing:
 
 
 
-def to_rdf(data: str | dict, meta: str | dict = {}):
+def to_rdf(data: str | dict,
+           meta: str | dict = {},
+           asserted=True,
+           ):
     d = data
     m = meta
     def triples(data):
@@ -323,17 +326,27 @@ def to_rdf(data: str | dict, meta: str | dict = {}):
         if isinstance(m, str):
             from json import loads
             m = loads(m)
+
+    d = triples(d)    
     if m:
-        _ = RDFing.map(triples(d), meta=triples(m))
+        m = triples(m)
+        m = RDFing.map(d, meta=m)
+        if asserted:
+            # just pull rdfed
+            d = frozenset([t.object for t in m])
+        else:
+            d = frozenset()
+        # asserted 'data' triples + meta triples
+        d = RDFing.list(frozenset(m) | d )
     else:
-        _ = RDFing.map(triples(d),)
-    _ = str(_)
-    return _
+        d = RDFing.map(d)
+    d = str(d)
+    return d
+
 
 
 if __name__ == '__main__':
     from pathlib import Path
-
     from .data import get_json
 
     def json(stream_id, object_id,
