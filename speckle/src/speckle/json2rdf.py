@@ -238,14 +238,11 @@ class RDFing:
             p = f'rdf:_{p}'
         else:
             assert(isinstance(p, str))
-            if p == cls.list.meta_uri:
-                p = p
-            else:
-                p = p.replace(' ', '_')
-                # create legal by dropping non alpha num
-                # url encodeing?
-                p = ''.join(c for c in p if c.isalnum() or c == '_' )
-                p = f'{cls.list.prefix}:{p}'
+            p = p.replace(' ', '_')
+            # create legal by dropping non alpha num
+            # url encodeing?
+            p = ''.join(c for c in p if c.isalnum() or c == '_' )
+            p = f'{cls.list.prefix}:{p}'
         
         # OBJECT
         #      need to escape quotes
@@ -293,6 +290,7 @@ class RDFing:
         else:
             o = v.object
         if p == cls.list.meta_uri:
+            p = f"{cls.list.meta_prefix}:"
             return cls.Triple(s, p, o)
         else:
             return cls.triple(s,p,o)
@@ -310,7 +308,11 @@ class RDFing:
 
 def test():
     d = {'id': 3, 'p': 1}
-    m = {'f':'py', 'args':[1,3] }
+    #from json import load
+    #d = load(open('data.json'))
+    m = {'id': '002ffd7b02',
+       'name': 'architecture/lighting device',}
+    
 
     def t(_):
         _ = Termination.map(_)
