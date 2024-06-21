@@ -2,6 +2,8 @@
 # composition  would involve composing terminals
 # which are somehow the last thing in matching functions.
 
+# this /might/ be done faster using parsing like Lark
+
 
 class Termination:
     """ 'pre'-processing """
@@ -194,73 +196,130 @@ class Tripling:
 
 
 
-
 class RDFing:
 
     class Triple(Tripling.Triple):
         def __str__(self) -> str:
-            return super().__str__()+'.'
+            if isinstance(self.subject, Tripling.Triple):
+                #                     but take out the dot
+                s = f"<<{str(self.subject)[:-1]}>>"
+            else:
+                s = str(self.subject)
+            if isinstance(self.object, Tripling.Triple):
+                o = f"<<{str(self.object)[:-1]}>>"
+            else:
+                o = str(self.object)
+            return f"{s} {self.predicate} {o}."
     class list(Tripling.list):
         prefix = 'spkl'
         from . import base_uri
         base_uri = base_uri()
+        meta_prefix = 'meta'
+        meta_uri = "http://meta"
 
         def __str__(self) -> str:
             _ = f'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n'
-            _ = _ + f'prefix {self.prefix}: <{self.base_uri}>  \n\n'
+            _ = _ + f'prefix {self.prefix}: <{self.base_uri}>  \n'
+            _ = _ + f'prefix {self.meta_prefix}: <{self.meta_uri}>  \n\n'
             _ = _ + super().__str__()
             return _
     
     @classmethod
-    def map(cls, d):
-        def _(d):
-            m = {True: 'true', False:'false', None: '\"null\"'} # not rdf:nil which is specific to a rdf:List
-            from types import NoneType
-            for (s,p,o) in ((t.subject, t.predicate, t.object) for t in d):
-                # SUBJECT
-                assert(isinstance(s, Identification.ID))
-                s = f'{cls.list.prefix}:{s}'
+    def triple(cls, s, p, o):
+        m = {True: 'true', False:'false', None: '\"null\"'} # not rdf:nil which is specific to a rdf:List
+        from types import NoneType
+        # SUBJECT
+        assert(isinstance(s, Identification.ID))
+        s = f'{cls.list.prefix}:{s}'
 
-                # PREDICATE
-                # just need to take care of int predicates
-                if isinstance(p, int):
-                    p = f'rdf:_{p}'
-                else:
-                    assert(isinstance(p, str))
-                    p = p.replace(' ', '_')
-                    # create legal by dropping non alpha num
-                    # url encodeing?
-                    p = ''.join(c for c in p if c.isalnum() or c == '_' )
-                    p = f'{cls.list.prefix}:{p}'
-                
-                # OBJECT
-                #      need to escape quotes
-                if isinstance(o, str):
-                    # dont want to encode('unicode_escape').decode()
-                    # to not lose unicode chars
-                    # escape all the backslashes, first..
-                    o = o.replace("\\", "\\\\")
-                    # /then/ ...
-                    # escape spacing things
-                    o = o.replace('\n', '\\n')
-                    o = o.replace('\r', '\\r')
-                    o = o.replace('\f', '\\f')
-                    o = o.replace('\t', '\\t')
-                    # inner quotes
-                    o = o.replace('"', '\\"')
-                    # outer quote
-                    o = '"'+o+'"'
-                elif isinstance(o, (bool, NoneType)): # https://github.com/w3c/json-ld-syntax/issues/258
-                    o = m[o]
-                elif isinstance(o, Termination.NumList):
-                    o = '"'+str(o)+'"'
-                elif isinstance(o, Identification.ID):
-                    o = f'{cls.list.prefix}:{o}'
-                else:
-                    o = str(o)
-                yield cls.Triple(s,p,o)
-        _ = RDFing.list(_(d))
+        # PREDICATE
+        # just need to take care of int predicates
+        if isinstance(p, int):
+            p = f'rdf:_{p}'
+        else:
+            assert(isinstance(p, str))
+            if p == cls.list.meta_uri:
+                p = p
+            else:
+                p = p.replace(' ', '_')
+                # create legal by dropping non alpha num
+                # url encodeing?
+                p = ''.join(c for c in p if c.isalnum() or c == '_' )
+                p = f'{cls.list.prefix}:{p}'
+        
+        # OBJECT
+        #      need to escape quotes
+        if isinstance(o, str):
+            # dont want to encode('unicode_escape').decode()
+            # to not lose unicode chars
+            # escape all the backslashes, first..
+            o = o.replace("\\", "\\\\")
+            # /then/ ...
+            # escape spacing things
+            o = o.replace('\n', '\\n')
+            o = o.replace('\r', '\\r')
+            o = o.replace('\f', '\\f')
+            o = o.replace('\t', '\\t')
+            # inner quotes
+            o = o.replace('"', '\\"')
+            # outer quote
+            o = '"'+o+'"'
+        elif isinstance(o, (bool, NoneType)): # https://github.com/w3c/json-ld-syntax/issues/258
+            o = m[o]
+        elif isinstance(o, Termination.NumList):
+            o = '"'+str(o)+'"'
+        elif isinstance(o, Identification.ID):
+            o = f'{cls.list.prefix}:{o}'
+        else:
+            o = str(o)
+        return cls.Triple(s,p,o)
+
+    @classmethod
+    def visit(cls, v):
+        assert(isinstance(v, Tripling.Triple))
+        # meta tripling
+        # just do one-level in
+        if isinstance(v.subject, Tripling.Triple):
+            s = cls.triple(v.subject.subject,
+                           v.subject.predicate,
+                           v.subject.object)
+        else:
+            s = v.subject
+        p = v.predicate
+        if isinstance(v.object, Tripling.Triple):
+            o = cls.triple(v.object.subject,
+                           v.object.predicate,
+                           v.object.object)
+        else:
+            o = v.object
+        if p == cls.list.meta_uri:
+            return cls.Triple(s, p, o)
+        else:
+            return cls.triple(s,p,o)
+
+    @classmethod
+    def map(cls, d, meta=[]):
+        if meta:
+            from itertools import product
+            d = product(meta, d)
+            d = map(lambda mt: Tripling.Triple(mt[0], cls.list.meta_uri, mt[1]), d)
+        _ = map(cls.visit, d)
+        _ = cls.list(_)
         return _
+
+
+def test():
+    d = {'id': 3, 'p': 1}
+    m = {'f':'py', 'args':[1,3] }
+
+    def t(_):
+        _ = Termination.map(_)
+        _ = Identification.map(_)
+        _ = Tripling.map(_)
+        return _
+    
+    d = RDFing.map(t(d), t(m) )
+    return d
 
 
 def to_rdf(d: str | dict):
