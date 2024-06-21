@@ -193,6 +193,8 @@ class Tripling:
         return flatten(items, seqtypes=seqtypes)
 
 
+
+
 class RDFing:
 
     class Triple(Tripling.Triple):
