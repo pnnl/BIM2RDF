@@ -116,15 +116,15 @@ def namespaces():
     _ = tuple(_)
     return _
 
+
+
+
 from .cache import get_cache
 @get_cache('speckle', maxsize=100)
-def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
+def get_speckle_json(stream_id, object_id) -> dict:
     # stream_id is not a name here so caching is fine.
     from speckle.data import get_json
     _ = get_json(stream_id, object_id)
-    _ = to_rdf(_)
-    from .utils.data import get_data
-    _ = get_data(_)
     return _
 
 
@@ -135,7 +135,7 @@ def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
 #     return now + timedelta(hours=value.ttl)
 # @get_cache('specklemeta', type='TLRUCache', maxsize=1, ttu=my_ttu, timer=datetime.now ) #
 # IDK TODO:
-def query_speckle_meta():  
+def query_speckle_meta():
     from speckle.graphql import queries
     _ = queries()
     _ = _.general_meta()
@@ -145,7 +145,7 @@ def query_speckle_meta():
 # TODO: sparql query the full general_meta instead of writing python
 from functools import lru_cache
 @lru_cache
-def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
+def get_speckle_meta_json(stream_id, branch_id, object_id) -> dict:
     _ = query_speckle_meta()
     id = 'id'
     name = 'name'
@@ -156,26 +156,23 @@ def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
     referencedObject = 'referencedObject'
     commit = 'commit'; commits = 'commits'
     m = {}
+    
     for s in _[streams][items]:
         if stream_id == s[id]:
-            m[stream] = {id: s[id], name: s[name]}
+            #m[stream] = {id: s[id], name: s[name]}
             break
-    
+    # just keep branch Name. it's the only one that's used
     for b in s[branches][items]:
         if branch_id == b[id]:
-            m[branch] = {id: b[id], name: b[name], createdAt: b[createdAt] }
+            m[branch] = {id: b[id], name: b[name],} # createdAt: b[createdAt] }
             break
     
     for c in b[commits][items]:
         if object_id == c[referencedObject]:
-            m[commit] = {id: c[id], referencedObject: c[referencedObject], createdAt: c[createdAt] }
+            #m[commit] = {id: c[id], referencedObject: c[referencedObject], createdAt: c[createdAt] }
             break
     
     _ = m
-    from speckle.meta import to_rdf
-    _ = to_rdf(_) #
-    from .utils.data import get_data
-    _ = get_data(_)
     return _
 
 
@@ -223,9 +220,19 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
     _ = d
     assert(stream_id)
     assert(object_id)
+
+    def sideload(db: OxiGraph):
+        m = get_speckle_meta_json(stream_id, branch_id, object_id)
+        d = get_speckle_json(stream_id, object_id)
+        from speckle.json2rdf import to_rdf
+        _ = to_rdf(d, meta=m)
+        from io import StringIO
+        _ = StringIO(_)
+        db._store.bulk_load(_, 'text/turtle')
+        return Triples()
     return N(
-        objects=lambda db: _get_speckle(stream_id, object_id),
-        meta=lambda: get_speckle_meta(stream_id, branch_id, object_id)  )
+        objects=sideload,
+        meta=lambda: Triples()  )
         
 
 def fengine(og=OxiGraph(),
