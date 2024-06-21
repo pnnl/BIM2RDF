@@ -1,5 +1,5 @@
-from ast import Store
 from engine.triples import Engine, PyRuleCallable, Triples
+from speckle.json2rdf import to_rdf
 from .engine import ConstructRule, Rules, OxiGraph, Triples, PyRule
 from typing import Callable, Iterable
 from pathlib import Path
@@ -103,8 +103,7 @@ class SpeckleGetter(PyRule):
             yield cls(stream_id, branch_id=b, )
 
     def meta(self, ) -> Triples:
-        _ = self._getters.meta() 
-        #_ = Triples()
+        _ = self._getters.meta()
         return _
 
 def namespaces():
@@ -121,17 +120,13 @@ from .cache import get_cache
 @get_cache('speckle', maxsize=100)
 def _get_speckle(stream_id, object_id) -> Callable[[OxiGraph], Triples]:
     # stream_id is not a name here so caching is fine.
-    from speckle.graphql import queries
-    _ = queries()
-    _ = _.objects(stream_id, object_id)
-    _ = query(_,)
-    from speckle.objects import rdf as ordf
-    _ = ordf(_, stream_id=stream_id) #
-    _ = _.read()
-    d = _.decode()
+    from speckle.data import get_json
+    _ = get_json(stream_id, object_id)
+    _ = to_rdf(_)
     from .utils.data import get_data
-    _ = get_data(d)
+    _ = get_data(_)
     return _
+
 
 # from datetime import timedelta, datetime
 # from .cache import get_cache
@@ -177,11 +172,10 @@ def get_speckle_meta(stream_id, branch_id, object_id) -> Triples:
             break
     
     _ = m
-    from speckle.meta import rdf as mrdf
-    _ = mrdf(_) #
-    from pyoxigraph import parse
-    _ = parse(_, 'text/turtle')
-    _ = Triples(_) # ! important! has blank nodes  but handled  centrally by '.deanon()' in PyRule.
+    from speckle.meta import to_rdf
+    _ = to_rdf(_) #
+    from .utils.data import get_data
+    _ = get_data(_)
     return _
 
 

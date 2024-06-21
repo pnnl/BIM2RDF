@@ -1,18 +1,23 @@
 from pathlib import Path
 from typing import Callable
-from ..engine import Triples
+from ..engine import Triples, OxiGraph
 
 ttl = str
-from io import BytesIO
-def get_data(src: BytesIO | ttl | Path | Triples | Callable[[], ttl ]  ) -> Triples:
-    if isinstance(src, BytesIO):
-        from pyoxigraph import parse
-        _ = parse(src, 'text/turtle')
-        _ = Triples(_)
-        return _
+from io import StringIO, BytesIO
+def get_data(src: StringIO | ttl | Path | Triples | Callable[[], ttl ],
+             dst: None | OxiGraph = None
+               ) -> Triples | None:
+    if isinstance(src, (StringIO, BytesIO) ):
+        if not dst:
+            from pyoxigraph import parse
+            _ = parse(src, 'text/turtle')
+            _ = Triples(_)
+            return _
+        else:
+            dst._store.bulk_load(_, 'text/turtle')
     elif isinstance(src, ttl):
-        _ = src.encode()
-        _ = BytesIO(_)
+        _ = src
+        _ = StringIO(_)
         _ = get_data(_)
         return _
     elif isinstance(src, Path):
