@@ -54,7 +54,8 @@ def validate(data: Path, shapes:Path=None):
     from subprocess import run
     _ = run(
             cmd('validate', data, shapes), check=False, env=env(), shell=True,
-            capture_output=True, text=True )
+            capture_output=True,
+            text=True, encoding='utf-8' )
     _ = raisee(_)
     return _
 
@@ -62,7 +63,8 @@ def infer(data: Path, shapes:Path=None):
     from subprocess import run
     _ = run(
             cmd('infer', data, shapes), check=False, env=env(), shell=True,
-            capture_output=True, text=True )
+            capture_output=True,
+              text=True , encoding='utf-8' )
     _ = raisee(_)
     return _
 
