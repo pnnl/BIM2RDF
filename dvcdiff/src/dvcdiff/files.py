@@ -29,8 +29,6 @@ class Get:
         return _
     
     def __call__(self, ):
-        
-            
         class _:
             a = self.fs.a.open((self.pth.as_posix())) 
             b = self.fs.b.open((self.pth.as_posix()))
