@@ -1,9 +1,11 @@
 from types import SimpleNamespace as NS
 
+uncommitted = 'uncommitted'
 class Get:
+    
     def __init__(self,
             pth, *,
-            reva='uncommited',
+            reva=uncommitted,
             revb=None) -> None:
         from pathlib import Path
         self.pth = Path(pth)
@@ -13,13 +15,13 @@ class Get:
     from functools import cached_property
     @cached_property
     def fs(self):
-        if self.reva == 'uncommitted':
+        if self.reva == uncommitted:
             from fsspec.implementations.local import LocalFileSystem
             a = LocalFileSystem()
         else:
             from dvc.api import DVCFileSystem
             a = DVCFileSystem(rev=self.reva)
-        if self.revb == 'uncommitted':
+        if self.revb == uncommitted:
             from fsspec.implementations.local import LocalFileSystem
             b = LocalFileSystem()
         else:
@@ -74,6 +76,10 @@ from inspect import signature as sig
 def diff(pth, *,
          reva=sig(Get.__init__).parameters['reva'].default,
          revb=None):
+    f"""
+    if reva or revb is '{uncommitted}'
+    it takes the content of the local (uncommitted) file
+    """
     g = Get(pth, reva=reva, revb=revb)
     _ = Diff(g)
     _ = _()
