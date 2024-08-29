@@ -1,7 +1,10 @@
 from types import SimpleNamespace as NS
 
 class Get:
-    def __init__(self, pth, *, reva=None, revb=None) -> None:
+    def __init__(self,
+            pth, *,
+            reva='uncommited',
+            revb=None) -> None:
         from pathlib import Path
         self.pth = Path(pth)
         self.reva = reva
@@ -10,15 +13,26 @@ class Get:
     from functools import cached_property
     @cached_property
     def fs(self):
-        class _:
+        if self.reva == 'uncommitted':
+            from fsspec.implementations.local import LocalFileSystem
+            a = LocalFileSystem()
+        else:
             from dvc.api import DVCFileSystem
             a = DVCFileSystem(rev=self.reva)
+        if self.revb == 'uncommitted':
+            from fsspec.implementations.local import LocalFileSystem
+            b = LocalFileSystem()
+        else:
+            from dvc.api import DVCFileSystem
             b = DVCFileSystem(rev=self.revb)
+        _ = NS(a=a, b=b)
         return _
     
     def __call__(self, ):
+        
+            
         class _:
-            a = self.fs.a.open((self.pth.as_posix()))
+            a = self.fs.a.open((self.pth.as_posix())) 
             b = self.fs.b.open((self.pth.as_posix()))
         return _
 
@@ -58,7 +72,10 @@ class Diff:
         return _
 
 
-def diff(pth, *, reva=None, revb=None):
+from inspect import signature as sig
+def diff(pth, *,
+         reva=sig(Get.__init__).parameters['reva'].default,
+         revb=None):
     g = Get(pth, reva=reva, revb=revb)
     _ = Diff(g)
     _ = _()
