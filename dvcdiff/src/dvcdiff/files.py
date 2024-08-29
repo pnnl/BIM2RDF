@@ -65,5 +65,7 @@ def diff(pth, *, reva=None, revb=None):
 
 if __name__ == '__main__':
     from fire import Fire
+    print(
     Fire(diff)
+    )
 
