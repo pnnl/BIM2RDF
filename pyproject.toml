@@ -24,7 +24,6 @@ dev-dependencies = [
     # debugging
     "ipdb", 
     "icecream",
-     "mypy", 
      ]
 
 [tool.hatch.metadata]
@@ -34,7 +33,7 @@ allow-direct-references = true
 members = [
     "project",
     "project_azure", 
-    "project_dvc",
+    "project_dvc", "dvcdiff", 
     "doc",
     "ontologies",
     "graphdb",
