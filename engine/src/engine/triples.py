@@ -32,7 +32,6 @@ def isanon(n) -> bool:
         assert(isinstance(n, g.BlankNode))
         return True
 
-
 anon_uri = 'urn:anon:hash:'
 
 def mkctr(i=0):
@@ -68,7 +67,14 @@ def deanon(triples, notanon_hash=None) -> Iterable[g.Triple]:
             yield g.Triple(*map(replace, (s, p, o)))
 
 
-class Triples(b.Data):
+class Triples(b.Data): # TODO: create something backed by TTL
+    # peformance comparison of ~400,000 triples
+    #In [41]: %timeit g.Store().bulk_load('data.ttl', 'text/turtle')
+    #2.08 s ± 70.8 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    #In [26]: %timeit Store().bulk_extend(g.Quad(*t) for t in g.parse('data.ttl', 'text/turtle'   
+    #...: ) )
+    #2.89 s ± 78.6 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    # 27% faster
 
     def __init__(self, data: Iterable[g.Triple]=[]) -> None:
         if isinstance(data, self.__class__):

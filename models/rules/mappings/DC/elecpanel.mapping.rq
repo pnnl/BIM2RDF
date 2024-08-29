@@ -1,17 +1,32 @@
-PREFIX meta: <http://meta>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX meta: <http://meta>
 PREFIX spkl: <http://speckle.systems/> 
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
 
 CONSTRUCT { 
 ?this a s223:ElectricBreaker.
-#?this rdfs:label ?name . 
 ?this rdfs:label "ElectricBreaker"^^xsd:string.
+?this s223:cnx _:conn.
+_:conn a s223:OutletConnectionPoint.
+_:conn rdfs:label "OutletConnectionPoint"^^xsd:string.
+_:conn s223:hasMedium s223:Constituent-Electricity.
+_:conn s223:cnx _:wirejunction.
+_:wirejunction a s223:ElectricWire.
+_:wirejunction rdfs:label "ElectricWire"^^xsd:string.
+_:wirejunction s223:hasMedium  s223:Constituent-Electricity.
+_:wirejunction s223:cnx _:i.
+_:i a s223:InletConnectionPoint. #circuitname can be applied here aswell
+_:i rdfs:label "InletConnectionPoint"^^xsd:string.
+_:i s223:hasMedium s223:Constituent-Electricity.
+_:i s223:cnx ?junction.
 } 
 WHERE { 
 <<?this spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. # TODO branchName could be used here
     ?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types' 
-    #?this spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?name. 
+    ?this spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?circuit.
+    #?junction a s223:EthernetSwitch. 
+<<?junction spkl:category "Lighting Devices">> meta: <<?mi spkl:name "electrical/junction">>.
+    ?junction spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM/spkl:value  ?circuit. 
 }

@@ -1,17 +1,15 @@
 [project]
 name = "speckle"
 version = "0.1.0"
-description = "Add a short description here"
+description = "Mainly creates a ttl from a speckle json"
 authors = [
     {name =  "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
-    { name = "Bilal Faye", email = "bilal.faye@pnnl.gov" }
 ]
 dependencies = [
     "gql[requests]",
     "urllib3<2",
     #https://github.com/psf/requests/releases/tag/v2.30.0
-    "jsonpath-ng",
-    "rdflib",
+    "boltons",
     "numpy",]
 readme = "README.md"
 
@@ -23,8 +21,9 @@ build-backend = "hatchling.build"
 managed = true
 dev-dependencies = [
     "ipdb",
-    "pytest","pytest-watcher", # "pytest-accept", ?
-    "fire"] # the cmd only applies in the dev situation
+    "fire", # the cmd only applies in the dev situation
+    "rdflib",
+    ] 
 
 
 [tool.hatch.metadata]

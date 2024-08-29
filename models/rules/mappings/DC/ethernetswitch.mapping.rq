@@ -1,0 +1,23 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX meta: <http://meta>
+PREFIX spkl: <http://speckle.systems/> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+
+CONSTRUCT {
+?es a s223:PowerOverEthernetSwitch. 
+?es rdfs:label "PowerOverEthernetSwitch"^^xsd:string.
+#?es s223:hasMedium  s223:Medium-Electricity.
+?es s223:hasPhysicalLocation ?r.
+
+}  
+
+WHERE 
+{
+<<?es spkl:category "Lighting Devices">> meta: <<?si spkl:name "electrical/junction">>.
+?es spkl:phaseCreated ?_. #add another line to add switches explicitly
+?es spkl:roomId ?rl.
+<<?r spkl:category  "Rooms">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
+?r spkl:elementId ?rl.
+}
