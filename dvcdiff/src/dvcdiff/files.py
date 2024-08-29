@@ -1,4 +1,5 @@
 
+
 class Get:
     def __init__(self, pth, reva=None, revb=None) -> None:
         from pathlib import Path
@@ -24,17 +25,31 @@ class Get:
 
 class Diff:
     def __init__(self, getter) -> None:
-        self.getter = getter
+        self.g = self.getter = getter
     
 
-    def lines(self, a) -> list[str]:
-        ...
-
+    def lines(self) -> list[str]:
+        ext = self.g.pth.suffix[1:]
+        if ext in {'txt', 'yaml', 'yml', 'json'}:
+            class _:
+                _ = self.g()
+                a = '\n'.split(_.a.read().decode())
+                b = '\n'.split(_.b.read().decode()); del _
+            return _
+    
+    def __call__(self, *p, **k):
+        _ = self.lines()
+        from difflib import diff
+        _ = diff(
+            _.a, _.b,
+            fromfile=self.g.a, tofile=self.g.b,
+            n=3, lineterm='\n')
+        return _
 
 
 def diff(a, b, reva=None, revb=None):
     g = Get(a, b, reva=None, revb=None)
-    
+    return Diff(g)()
 
 
 

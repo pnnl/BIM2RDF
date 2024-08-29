@@ -7,8 +7,9 @@ app = marimo.App(width="full")
 @app.cell
 def __():
     import dvcdiff.files as ddf
-    ddf.Get('../models/params.yaml').pth
-    return ddf,
+    g = ddf.Get('../models/params.yaml', '')
+    ddf.Diff(g).lines()
+    return ddf, g
 
 
 @app.cell
@@ -22,6 +23,13 @@ def __():
     #                         modified:           run.building
     #                         modified:           run.variation
     return
+
+
+@app.cell
+def __():
+    from pathlib import Path
+    Path('a.txt').suffix
+    return Path,
 
 
 if __name__ == "__main__":
