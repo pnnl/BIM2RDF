@@ -23,6 +23,9 @@ class Get:
         return _
 
 
+txt_exts = {'txt', 'yaml', 'yml', 'json',
+                   'rq', 'ttl' }
+
 class Diff:
     def __init__(self, getter) -> None:
         self.g = self.getter = getter
@@ -30,7 +33,7 @@ class Diff:
     def lines(self) -> '_.a|_.b':
         ext = self.g.pth.suffix[1:]
         g = self.getter()
-        if ext in {'txt', 'yaml', 'yml', 'json'}:
+        if ext in txt_exts:
             _ = NS(    
                 a = g.a.read().decode().splitlines(),
                 b = g.b.read().decode().splitlines())
