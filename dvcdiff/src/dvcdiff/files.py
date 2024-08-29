@@ -5,8 +5,9 @@ class Get:
     
     def __init__(self,
             pth, *,
-            reva=uncommitted,
-            revb=None) -> None:
+            reva=None, # a for before
+            revb=uncommitted # b for after
+            ) -> None:
         from pathlib import Path
         self.pth = Path(pth)
         self.reva = reva
