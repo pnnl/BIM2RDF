@@ -1,7 +1,7 @@
-
+from types import SimpleNamespace as NS
 
 class Get:
-    def __init__(self, pth, reva=None, revb=None) -> None:
+    def __init__(self, pth, *, reva=None, revb=None) -> None:
         from pathlib import Path
         self.pth = Path(pth)
         self.reva = reva
@@ -18,8 +18,8 @@ class Get:
     
     def __call__(self, ):
         class _:
-            a = self.fs.a.open(self.pth, dvc_only=True)
-            b = self.fs.a.open(self.pth, dvc_only=True)
+            a = self.fs.a.open((self.pth.as_posix()))
+            b = self.fs.b.open((self.pth.as_posix()))
         return _
 
 
@@ -31,10 +31,10 @@ class Diff:
     def lines(self) -> list[str]:
         ext = self.g.pth.suffix[1:]
         if ext in {'txt', 'yaml', 'yml', 'json'}:
-            class _:
-                _ = self.g()
-                a = '\n'.split(_.a.read().decode())
-                b = '\n'.split(_.b.read().decode()); del _
+            _ = self.g()
+            _ = NS(    
+                a = _.a.read().decode().splitlines(),
+                b = _.b.read().decode().splitlines())
             return _
     
     def __call__(self, *p, **k):
@@ -47,7 +47,7 @@ class Diff:
         return _
 
 
-def diff(a, b, reva=None, revb=None):
+def diff(pth, *, reva=None, revb=None):
     g = Get(a, b, reva=None, revb=None)
     return Diff(g)()
 
