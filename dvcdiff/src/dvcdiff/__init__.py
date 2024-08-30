@@ -1,2 +1,1 @@
-def hello() -> str:
-    return "Hello from dvcdiff!"
+from .files import diff
