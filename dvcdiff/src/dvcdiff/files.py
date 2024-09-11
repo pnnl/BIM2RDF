@@ -26,10 +26,10 @@ class Get:
             fp = self.Path(__file__).parent.parent.parent.parent
             assert((fp / '.git').exists())
             fp = self.pth.resolve().absolute().relative_to(fp)
+            fp = fp.as_posix()
+            fp = '/'+str(fp)
         else:
             fp = self.pth
-        fp = fp.as_posix()
-        fp = str(fp)
         return self.fs.open(fp, mode=mode).read()
     
     def __call__(self,):
