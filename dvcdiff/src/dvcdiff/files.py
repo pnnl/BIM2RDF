@@ -44,7 +44,6 @@ class Get:
             _ = _.splitlines()
         else: # treat as binary
             _ = self()
-            _ = _.decode()
             from hashlib import md5
             _ = md5(_)
             _ = _.hexdigest()
