@@ -24,6 +24,7 @@ dev-dependencies = [
     # debugging
     "ipdb", 
     "icecream",
+    "rich",
      ]
 
 [tool.hatch.metadata]
