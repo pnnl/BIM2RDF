@@ -1,10 +1,10 @@
 
-current = 'current'
+workspace = 'workspace'
 class Get:
     from pathlib import Path    
     def __init__(self,
             pth, *,
-            rev=current,
+            rev=workspace,
             ) -> None:
         self.pth = self.Path(pth)
         self.rev = rev
@@ -12,12 +12,13 @@ class Get:
     from functools import cached_property, cache
     @cached_property
     def fs(self):
-        if self.rev == current:
+        if self.rev == workspace:
             from fsspec.implementations.local import LocalFileSystem
             return LocalFileSystem()
         else:
             from dvc.api import DVCFileSystem
             return DVCFileSystem(rev=self.rev)
+    
     
     @cache
     def read(self, mode='rb'):
@@ -84,7 +85,7 @@ def diff(
          context=sig(Diff.__init__).parameters['context'].default,
          ):
     f"""
-    if reva or revb is '{current}'
+    if reva or revb is '{workspace}'
     it takes the content of the local (uncommitted) file
     """
     if path_b is None:
