@@ -45,6 +45,8 @@ members = [
     "engine",
     "mapping",
     "topquadrant",
+    # products dir
+    "models",
    ]
 
 
