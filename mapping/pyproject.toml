@@ -16,7 +16,7 @@ dependencies = [
     "fire",
     "tqdm",
 ]
-readme = "readme.md"
+readme = "README.md"
 
 [build-system]
 requires = ["hatchling"]
