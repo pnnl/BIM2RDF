@@ -24,7 +24,7 @@ dev-dependencies = [
     # debugging
     "ipdb", 
     "icecream",
-     "mypy", 
+    "rich",
      ]
 
 [tool.hatch.metadata]
@@ -32,9 +32,12 @@ allow-direct-references = true
 
 [tool.rye.workspace]
 members = [
+    # dev
+    # TODO: want these as "dev" https://github.com/astral-sh/rye/issues/1361
     "project",
     "project_azure", 
-    "project_dvc",
+    "project_dvc",  "dvcdiff", 
+    # /dev
     "doc",
     "ontologies",
     "graphdb",
@@ -42,6 +45,8 @@ members = [
     "engine",
     "mapping",
     "topquadrant",
+    # products dir
+    "models",
    ]
 
 
