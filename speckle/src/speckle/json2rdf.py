@@ -334,7 +334,7 @@ def to_rdf(data: str | dict,
         m = RDFing.map(d, meta=m)
         if asserted:
             # just pull rdfed
-            d = frozenset([t.object for t in m])
+            d = frozenset([t.subject for t in m])
         else:
             d = frozenset()
         # asserted 'data' triples + meta triples
