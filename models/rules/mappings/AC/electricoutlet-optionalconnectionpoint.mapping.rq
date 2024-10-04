@@ -1,0 +1,23 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX meta: <http://meta>
+PREFIX spkl: <http://speckle.systems/> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+CONSTRUCT {
+?elecoutlet s223:cnx ?conn1.
+?conn1 a s223:OutletConnectionPoint.
+?elecoutlet s223:hasOptionalConnectionPoint ?conn1.
+?conn1 rdfs:label "OutletConnectionPoint"^^xsd:string.
+?conn1 s223:hasMedium s223:Constituent-Electricity. 
+}  
+
+WHERE 
+{
+
+<<?elecoutlet spkl:category  "Electrical Fixtures">> meta: <<?si spkl:name "electrical/electrical connection">>. 
+#?elecoutlet spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM ?circuit1.
+#?circuit1 spkl:value ?circuitname. 
+?elecoutlet spkl:Connectors/rdf:rest*/rdf:first ?conn1.
+
+}

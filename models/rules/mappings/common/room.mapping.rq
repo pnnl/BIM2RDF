@@ -50,15 +50,7 @@ OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "open")).  
-      BIND(recx:OpenOffice as ?rec_or_recx) 
-      ?rec_or_recx rdfs:label ?recname.
-    }
-OPTIONAL
-    {
-      ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "private")  
-            || contains(lcase(?lname), "enclosed" )).  
-      BIND(recx:PrivateOffice as ?rec_or_recx) 
+      BIND(rec:OfficeLandscape as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
@@ -106,25 +98,19 @@ OPTIONAL
       BIND(rec:DiningRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
-OPTIONAL
-    {
-      ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "lobby")).  
-      BIND(recx:Lobby as ?rec_or_recx) #change to rec once added in ontlogy
-      ?rec_or_recx rdfs:label ?recname.
-    }
+
 OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "lounge")).  
-      BIND(recx:Lounge as ?rec_or_recx) #change to rec once added in ontlogy
+      BIND(rec:RecreationalRoom as ?rec_or_recx) #change to rec once added in ontlogy
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "mechanical")).  
-      BIND(recx:MechanicalRoom as ?rec_or_recx) 
+      BIND(rec:ClimateControlRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
@@ -153,7 +139,7 @@ OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "computer")).  
-      BIND(recx:ComputerRoom as ?rec_or_recx) 
+      BIND(rec:GroupRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
@@ -180,7 +166,7 @@ OPTIONAL
 OPTIONAL
     {
       ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "office") || contains(lcase(?lname), "work" )).  
+       filter(contains(lcase(?lname), "private") || contains(lcase(?lname), "office" ) || contains(lcase(?lname), "work" )).
       BIND(rec:OfficeRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
@@ -236,8 +222,8 @@ OPTIONAL
     }
 OPTIONAL
     {
-      ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "welcome")).  
+      ?this spkl:name ?lname. 
+      filter(contains(lcase(?lname), "welcome") || contains(lcase(?lname), "lobby" )). 
       BIND(rec:Reception as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }

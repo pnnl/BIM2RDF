@@ -9,14 +9,14 @@ CONSTRUCT {
 #  no em-light connection equivalent like pipe and wire
 _:conn  a                       s223:Connection.
 _:conn rdfs:label  "Connection"^^xsd:string.
-_:conn  s223:hasMedium          s223:Light-Visible.
+_:conn  s223:hasMedium          s223:EM-Light.
 #_:conn  s223:connectsTo         ?o2.
 } 
 WHERE { 
 # or use rdfstar to refer to luminaire-space mapping output?
 
 ?o1 a s223:OutletConnectionPoint.
-?o1 s223:hasMedium s223:Light-Visible.
+?o1 s223:hasMedium s223:EM-Light.
 
 
 }

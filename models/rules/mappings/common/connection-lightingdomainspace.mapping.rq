@@ -13,7 +13,7 @@ WHERE {
 ?o s223:cnx ?c.
 ?c s223:cnx ?cp.
 ?cp a s223:InletConnectionPoint.
-?cp s223:hasMedium s223:Light-Visible.
+?cp s223:hasMedium s223:EM-Light.
 ?this a s223:DomainSpace.
 ?this s223:hasDomain s223:Domain-Lighting.
 ?this spkl:category "Spaces".

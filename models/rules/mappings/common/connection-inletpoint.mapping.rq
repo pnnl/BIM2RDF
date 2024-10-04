@@ -8,7 +8,7 @@ PREFIX meta: <http://meta>
 CONSTRUCT { 
 ?o1     s223:cnx  _:c.
 _:c a s223:InletConnectionPoint.
-_:c s223:hasMedium s223:Light-Visible.
+_:c s223:hasMedium s223:EM-Light.
 _:c rdfs:label "InletConnectionPoint"^^xsd:string.
 #  no em-light connection equivalent like pipe and wire
 
@@ -16,7 +16,7 @@ _:c rdfs:label "InletConnectionPoint"^^xsd:string.
 } 
 WHERE { 
 ?o1 a s223:Connection.
-?o1 s223:hasMedium s223:Light-Visible.
+?o1 s223:hasMedium s223:EM-Light.
 
 
 }
