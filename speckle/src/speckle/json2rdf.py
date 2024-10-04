@@ -356,7 +356,7 @@ if __name__ == '__main__':
         _ = get_json(stream_id, object_id)
         path = Path(path)
         from json import dump
-        dump(_, open(path, 'w'),)
+        dump(_, open(path, 'w'), indent=1)
         return path
     
     def ttl(stream_id, object_id,
