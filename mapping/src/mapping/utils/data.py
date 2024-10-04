@@ -7,14 +7,16 @@ from io import StringIO, BytesIO
 def get_data(src: StringIO | ttl | Path | Triples | Callable[[], ttl ],
              dst: None | OxiGraph = None
                ) -> Triples | None:
+    from pyoxigraph import RdfFormat as fmt
     if isinstance(src, (StringIO, BytesIO) ):
         if not dst:
             from pyoxigraph import parse
-            _ = parse(src, 'text/turtle')
+            _ = parse(src, format=fmt.TURTLE)
+            _ = map(lambda q: q.triple, _)
             _ = Triples(_)
             return _
         else:
-            dst._store.bulk_load(_, 'text/turtle')
+            dst._store.bulk_load(_, format=fmt.TURTLE )
     elif isinstance(src, ttl):
         _ = src
         _ = StringIO(_)

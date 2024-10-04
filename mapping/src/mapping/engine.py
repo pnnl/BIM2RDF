@@ -28,7 +28,7 @@ class ConstructRule(_ConstructRule):
         self.path = path
         # for the mapping case, we're starting from the file
         spec = open(path).read()
-        super().__init__(spec)
+        super().__init__(spec) # ??? 
     
     @property
     def name(self):
@@ -51,6 +51,7 @@ class ConstructRule(_ConstructRule):
                 NamedNode(f'{p}/constructquery#name'),
                 rdfLiteral(str(self.name))
                      )]
+
 
 class PyRule(_PyRule):
 
@@ -268,8 +269,6 @@ def fix(g: Graph) -> Graph:
 
 
 
-
-
 def get_ontology(_: OxiGraph,) -> Triples:
     from .utils.data import get_data
     from project import root
@@ -319,9 +318,11 @@ def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
 
 
 def shapes():
-    from pyoxigraph import parse
+    from pyoxigraph import parse, RdfFormat as fmt
     from project import root
-    return parse(root / 'models'  / 'ontology.ttl', 'text/turtle')
+    s = root / 'models'  / 'ontology.ttl'
+    s = open(s)
+    return parse(s, format=fmt.TURTLE)
 
 
 def topquadrant_rules(db: OxiGraph, shapes=shapes) -> Triples:
