@@ -1,5 +1,6 @@
-base_uri = lambda: f"http://speckle.systems/" # urn:speckle:concept
-meta_uri = lambda: 'http://meta'              # urn:speckle:meta
+# TODO: put in meta.py
+base_uri = lambda: f"http://speckle.systems/" # urn:speckle:concept TODO
+meta_uri = lambda: 'http://meta'              # urn:speckle:meta TODO
 
 
 def object_uri(stream_id, object_id=''):

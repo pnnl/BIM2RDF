@@ -211,6 +211,7 @@ class RDFing:
                 o = str(self.object)
             return f"{s} {self.predicate} {o}."
     class list(Tripling.list):
+        # TODO: DRY these
         prefix = 'spkl'
         from . import base_uri
         base_uri = base_uri()
@@ -299,7 +300,7 @@ class RDFing:
     def map(cls, d, meta=[], ):
         if meta:
             from itertools import product
-            d = product(meta, d)
+            d = product(d, meta)
             d = map(lambda mt: Tripling.Triple(mt[0], cls.list.meta_uri, mt[1]), d)
         _ = map(cls.visit, d)
         _ = cls.list(_)
