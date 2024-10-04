@@ -105,6 +105,7 @@ class SpeckleGetter(PyRule):
     def meta(self, ) -> Triples:
         _ = self._getters.meta()
         return _
+    
 
 def namespaces():
     _ = SpeckleGetter.get_streams()
@@ -115,7 +116,6 @@ def namespaces():
     _ = map(lambda i: namespace(f"{i.name}", URIRef(object_uri(i.id,)) ), _)
     _ = tuple(_)
     return _
-
 
 
 
@@ -222,6 +222,7 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
     assert(object_id)
 
     def sideload(db: OxiGraph):
+        # TODO: just the meta branch name is enough
         m = get_speckle_meta_json(stream_id, branch_id, object_id)
         d = get_speckle_json(stream_id, object_id)
         from speckle.json2rdf import to_rdf
@@ -232,7 +233,7 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         return Triples()
     return N(
         objects=sideload,
-        meta=lambda: Triples()  )
+        meta=lambda: Triples()  )  
         
 
 def fengine(og=OxiGraph(),

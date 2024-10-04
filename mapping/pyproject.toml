@@ -11,7 +11,7 @@ dependencies = [
     "pyyaml",
     "pyshacl",
     "owlrl",
-    "oxrdflib",
+    "oxrdflib", # TODO: remove, causes pyoxigraph update problems
     "requests-file",
     "fire",
     "tqdm",

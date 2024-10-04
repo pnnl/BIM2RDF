@@ -64,11 +64,12 @@ def tqshacl(
     datap = dir / 'tqshacl.data.tmp.ttl'
     datap.unlink(missing_ok=True)
     from pyoxigraph import serialize
-    serialize(data, datap, 'text/turtle')
+    from pyoxigraph import RdfFormat as fmt
+    serialize(data, output=datap, format=fmt.TURTLE)
     if shapes:
         shapesp = dir / 'tqshacl.shapes.tmp.ttl'
         shapesp.unlink(missing_ok=True)
-        serialize(shapes, shapesp, 'text/turtle')
+        serialize(shapes, output=shapesp, format=fmt.TURTLE)
         o = f(datap, shapesp,)
         shapesp.unlink(missing_ok=True)
     else:
