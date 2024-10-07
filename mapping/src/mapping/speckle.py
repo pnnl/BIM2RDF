@@ -1,5 +1,4 @@
 from engine.triples import Engine, PyRuleCallable, Triples
-from speckle.json2rdf import to_rdf
 from .engine import ConstructRule, Rules, OxiGraph, Triples, PyRule
 from typing import Callable, Iterable
 from pathlib import Path
@@ -119,15 +118,6 @@ def namespaces():
 
 
 
-from .cache import get_cache
-@get_cache('speckle', maxsize=100)
-def get_speckle_json(stream_id, object_id) -> dict:
-    # stream_id is not a name here so caching is fine.
-    from speckle.data import get_json
-    _ = get_json(stream_id, object_id)
-    return _
-
-
 # from datetime import timedelta, datetime
 # from .cache import get_cache
 # def my_ttu(_key, value, now):
@@ -224,12 +214,24 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
     def sideload(db: OxiGraph):
         # TODO: just the meta branch name is enough
         m = get_speckle_meta_json(stream_id, branch_id, object_id)
-        d = get_speckle_json(stream_id, object_id)
-        from speckle.json2rdf import to_rdf
-        _ = to_rdf(d, meta=m)
+        from .cache import get_cache as cache
+        # stream_id is not a name here so caching is fine.
+        from speckle.data import get_json
+        get_json = cache('speckle', maxsize=100)(get_json)
+        d = get_json(stream_id, object_id)
+        @cache('speckle_rdf', maxsize=100)
+        def to_rdf(stream_id, object_id):
+            # args are just used for the cache
+            # to identify the result
+            from speckle.json2rdf import to_rdf
+            _ = to_rdf(d, meta=m)
+            return _
+        _ = to_rdf(stream_id, object_id)
+        _ = _ + '\n'  # idk fixes issue to make rdfformat.turtle!!
         from io import StringIO
         _ = StringIO(_)
-        db._store.bulk_load(_, 'text/turtle')
+        from pyoxigraph import RdfFormat
+        db._store.bulk_load(_, RdfFormat.TURTLE)
         return Triples()
     return N(
         objects=sideload,
