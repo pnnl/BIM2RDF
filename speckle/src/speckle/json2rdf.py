@@ -110,6 +110,7 @@ class Identification:
             did = dicthasid(v)
             return {'id': cls.ID(v['id']) if did is not None else cls.ID(id(v)) }, ((k,v) for k,v in  v.items() if k !=did)
         elif type(v) is list:
+            # TODO: id(lst) is not deterministics
             return {'id': cls.ID(id(v)) }, enumerate(v)
         else:
             assert(isinstance(v, cls.terminals ))
