@@ -1,0 +1,4 @@
+# should be like gitignore
+# but not working like docker in podman
+*
+!requirements*.lock
