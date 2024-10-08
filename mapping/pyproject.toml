@@ -9,12 +9,9 @@ authors = [
 dependencies = [
     "rdflib",
     "pyyaml",
-    "pyshacl",
-    "owlrl",
-    "oxrdflib", # TODO: remove, causes pyoxigraph update problems
-    "requests-file",
+    "pyshacl", # TODO: could be optional
+    "owlrl",   # TODO: could be optional
     "fire",
-    "tqdm",
 ]
 readme = "README.md"
 
@@ -25,7 +22,7 @@ build-backend = "hatchling.build"
 [tool.rye]
 managed = true
 dev-dependencies = [
-    "pandas",
+    "pandas",  # TODO: it's just used in utils.tables.py. could extract out sparql_utils
     "shelved-cache",
      ]
 
