@@ -12,8 +12,14 @@ def config(dev = True):
         else: 
             return _
     else:
-        raise ValueError('speckle not configured')
+        # TODO: use systemized config
+        from project_azure.secret import get
+        with open(_, "w") as f:
+            import json
+            json.dump({"speckl_token": get('gitlab-speckle')}, f)
+        return _
 
 
 if __name__ == '__main__':
-    config()
+    from fire import Fire
+    Fire(config)
