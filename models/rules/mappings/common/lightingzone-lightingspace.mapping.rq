@@ -17,6 +17,9 @@ WHERE {
 <<?this spkl:category "HVAC Zones">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
 ?this spkl:elementId ?zn.
 <<?d spkl:category "Spaces">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
- ?d spkl:zone/spkl:elementId ?zn.
+ ?d spkl:zone ?zone.
+ #?zone spkl:referencedId ?ref.
+ ?zone spkl:elementId ?zn.
+ 
 
 }

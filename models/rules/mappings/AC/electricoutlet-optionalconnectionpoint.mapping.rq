@@ -18,6 +18,10 @@ WHERE
 <<?elecoutlet spkl:category  "Electrical Fixtures">> meta: <<?si spkl:name "electrical/electrical connection">>. 
 #?elecoutlet spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM ?circuit1.
 #?circuit1 spkl:value ?circuitname. 
-?elecoutlet spkl:Connectors/rdf:rest*/rdf:first ?conn1.
+?elecoutlet spkl:Connectors ?conn1.
+  #?l  ?in ?r.# list item
+  #?r  spkl:referencedId ?conn1.
+  #?li spkl:connectedConnectorIds ?conn1.
+  
 
 }

@@ -17,14 +17,22 @@ _:i s223:cnx _:j.
 _:j a s223:Junction. #circuitname can be applied here aswell
 _:j rdfs:label "Junction"^^xsd:string.
 _:j s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
-?elecbreaker ?circuit _:j.
+?elecbreaker ?q _:j.
 }  
 
 WHERE 
 {
 <<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. 
-?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME ?circuit.
-?circuit spkl:value ?circuitname. 
-?elecbreaker spkl:Connectors/rdf:rest*/rdf:first ?conn.
+?elecbreaker spkl:parameters ?circuit.
+  ?circuit ?a ?q.
+  ?q spkl:applicationInternalName "RBS_ELEC_PANEL_NAME".
+  ?q spkl:value ?circuitname.
+?elecbreaker spkl:Connectors ?conn.
+#?l  ?in ?r.# list item
+#?r  spkl:referencedId ?conn.
+#?li spkl:connectedConnectorIds ?conn.
+  #?lumcircuit spkl:Connectors ?list.
+  #list   ?_  ?conn.cd.
+
 
 }

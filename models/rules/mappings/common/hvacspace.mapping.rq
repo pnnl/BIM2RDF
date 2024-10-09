@@ -12,17 +12,19 @@ CONSTRUCT {
   ?this s223:hasDomain s223:Domain-HVAC.
   ?this rdfs:label "Domain-HVAC"^^xsd:string.
   #?this rdfs:label ?name. 
-  ?this s223:hasProperty ?p.
-?p a s223:QuantifiableProperty.
-?p qudt:hasQuantityKind qudtqk:Area.
-?p s223:hasValue ?vd.
-?p qudt:hasUnit unit:M2.
-?p rdfs:label "QuantifiableProperty"^^xsd:string.
+  ?this s223:hasProperty ?l.
+?l a s223:QuantifiableProperty.
+?l qudt:hasQuantityKind qudtqk:Area.
+?l s223:hasValue ?vd.
+?l qudt:hasUnit unit:M2.
+?l rdfs:label "QuantifiableProperty"^^xsd:string.
 } 
 WHERE { 
 <<?this spkl:category  "Spaces">> meta: <<?_ spkl:name "architecture/hvac zone">>. # TODO branchName could be used here
     #?this spkl:name ?name. 
-    ?this spkl:parameters/spkl:ROOM_AREA ?p.
-  ?p spkl:value ?v.
+    ?this spkl:parameters ?p.
+    ?p ?k ?l.
+    ?l spkl:applicationInternalName "ROOM_AREA".
+  ?l spkl:value ?v.
   BIND(xsd:decimal(?v) AS ?vd).
 }

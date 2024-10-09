@@ -15,18 +15,18 @@ CONSTRUCT {
 #?this a rec:Room.
 ?this a ?rec_or_recx.
 ?this rdfs:label ?recname.
-?this s223:hasProperty ?p.
-?p a s223:QuantifiableProperty.
-?p qudt:hasQuantityKind qudtqk:Area.
-?p s223:hasValue ?vd.
-?p qudt:hasUnit unit:M2.
-?p rdfs:label "QuantifiableProperty"^^xsd:string.
-?this s223:hasProperty ?number.
-?number a s223:Property.
-?number s223:hasValue ?roomnumber.
+?this s223:hasProperty ?l.
+?l a s223:QuantifiableProperty.
+?l qudt:hasQuantityKind qudtqk:Area.
+?l s223:hasValue ?vd.
+?l qudt:hasUnit unit:M2.
+?l rdfs:label "QuantifiableProperty"^^xsd:string.
+?this s223:hasProperty ?w.
+?w a s223:Property.
+?w s223:hasValue ?roomnumber.
     #?number s223:hasEnumerationKind qudt:AbstractQuantityKind. 
     #?number qudt:id ?roomnumber.
-?number rdfs:label "Property"^^xsd:string.
+?w rdfs:label "Property"^^xsd:string.
 #?this s223:hasProperty ?occupancy. #to get occupancy count from Rooms in Revit Model
 #?occupancy a s223:QuantifiableObservableProperty.
 #?occupancy s223:hasQuantityKind qudtqk:Population.
@@ -37,11 +37,15 @@ CONSTRUCT {
 } 
 WHERE { 
 <<?this spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
-  ?this spkl:parameters/spkl:ROOM_AREA ?p.
-  ?p spkl:value ?v.
+  ?this spkl:parameters ?p.
+  ?p ?k ?l. 
+  ?l spkl:applicationInternalName "ROOM_AREA".
+  ?l spkl:value ?v.
   BIND(xsd:decimal(?v) AS ?vd).
-  ?this spkl:parameters/spkl:ROOM_NUMBER ?number.
-  ?number spkl:value ?roomnumber.
+  ?this spkl:parameters ?number.
+  ?number ?d ?w.
+  ?w spkl:applicationInternalName "ROOM_NUMBER".
+  ?w spkl:value ?roomnumber.
   #?this spkl:parameters/spkl:ROOM_OCCUPANCY ?occupancy. 
   #?occupancy spkl:value ?occupancycount. 
   #BIND(xsd:decimal(?occupancycount) AS ?oc).

@@ -28,7 +28,10 @@ WHERE
 <<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. 
 ?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME ?circuit.
 ?circuit spkl:value ?circuitname. 
-?elecbreaker spkl:Connectors/rdf:rest*/rdf:first ?conn.
+?elecbreaker spkl:Connectors ?l.
+?l  ?in ?r.
+?r  spkl:referencedId ?conn.
+#?li spkl:connectedConnectorIds ?conn.
 <<?elecoutlet spkl:category  "Electrical Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>. 
 ?elecoutlet spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM ?circuit1.
 ?circuit1 spkl:value ?circuitname. 

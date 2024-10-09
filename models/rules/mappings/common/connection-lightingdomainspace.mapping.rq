@@ -9,7 +9,10 @@ CONSTRUCT {
 WHERE {
 ?l s223:cnx ?o.
 <<?l spkl:category "Lighting Fixtures">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
-?l spkl:parameters/spkl:c05b27f4-316d-447d-b99f-c0372ce73c7e/spkl:value ?id.
+?l spkl:parameters ?p.
+?p ?k ?o1.
+?o1 spkl:applicationInternalName "c05b27f4-316d-447d-b99f-c0372ce73c7e".
+?o1 spkl:value ?id.
 ?o s223:cnx ?c.
 ?c s223:cnx ?cp.
 ?cp a s223:InletConnectionPoint.

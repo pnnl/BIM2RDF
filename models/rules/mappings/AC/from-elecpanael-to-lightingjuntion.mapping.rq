@@ -14,7 +14,11 @@ WHERE
    {
 ?elecbreaker a s223:ElectricBreaker.    
 <<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. 
-?elecbreaker spkl:Connectors/rdf:rest*/rdf:first ?conn.
+?elecbreaker spkl:Connectors ?conn.
+  #?l  ?in ?r. # list item
+  #?r  spkl:referencedId ?conn.
+  #?li spkl:connectedConnectorIds ?conn.
+ 
 #?conn s223:cnx ?wirejunction.
 #?wirejunction a s223:ElectricWire.
 #?wirejunction rdfs:label "ElectricWire"^^xsd:string.
