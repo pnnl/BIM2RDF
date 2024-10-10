@@ -2,3 +2,4 @@
 # but not working like docker in podman
 *
 !requirements*.lock
+!.python-version
