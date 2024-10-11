@@ -30,7 +30,9 @@ def cmd(
 
     assert(cmd in {'validate', 'infer'})
     logging = f"-Dlog4j.configurationFile={logging}" if logging else ''
-    shacl_cp = f"-cp {shacl_cp}"
+    # class path
+    # quote so no funny shell parsing happens (on linux)
+    shacl_cp = f"-cp \"{shacl_cp}\"" 
     cmd = cmd[0].upper()+cmd[1:]
     cmd = f"java {jvm_args} {logging} {shacl_cp} org.topbraid.shacl.tools.{cmd}"
     _ = f"{cmd} -datafile {datafile} "
