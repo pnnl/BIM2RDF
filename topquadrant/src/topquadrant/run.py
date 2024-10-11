@@ -39,31 +39,34 @@ def cmd(
     return _
 
 
-def raisee(s: str):
+def check_proc_manually(cmd, proc):
     # further guard to fail
     # in case topquadrant does not exit with an error
     # that's why check is false below
-    if 'exception in thread' in s.stderr.lower():
+    if any(w in proc.stderr.lower() for w in {'exception', 'error'}):
+        from subprocess import CalledProcessError
         from sys import stderr
-        print(s.stderr, file=stderr)
-        raise Exception('topquadrant error')
+        print(proc.stderr, file=stderr)
+        raise CalledProcessError(proc.returncode, cmd, stderr=proc.stderr)
     else:
-        return s
+        return proc
 
 def validate(data: Path, shapes:Path=None):
     from subprocess import run
+    c = cmd('validate', data, shapes)
     _ = run(
-            cmd('validate', data, shapes), check=False, env=env(), shell=True,
+            c, check=False, env=env(), shell=True,
             capture_output=True, text=True )
-    _ = raisee(_)
+    _ = check_proc_manually(c, _)
     return _
 
 def infer(data: Path, shapes:Path=None):
     from subprocess import run
+    c = cmd('infer', data, shapes)
     _ = run(
-            cmd('infer', data, shapes), check=False, env=env(), shell=True,
+            c, check=False, env=env(), shell=True,
             capture_output=True, text=True )
-    _ = raisee(_)
+    _ = check_proc_manually(c, _)
     return _
 
 
