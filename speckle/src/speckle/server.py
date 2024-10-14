@@ -26,10 +26,10 @@ def test():
 
 
 def apikey():
-    import json
-    from project import root
-    _ = root / 'speckle' /'secret.json'
+    from pathlib import Path
+    _ = Path(__file__).parent / '..' / '..' / 'secret.json'
     _ = open(_)
+    import json
     _  = json.load(_)
     _ = _['speckl_token']
     return _
