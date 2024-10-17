@@ -9,27 +9,28 @@ CONSTRUCT {
 _:wirejunction a s223:ElectricWire.
 _:wirejunction rdfs:label "ElectricWire"^^xsd:string.
 _:wirejunction s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
-_:wirejunction s223:cnx _:i.
-_:i a s223:InletConnectionPoint. #circuitname can be applied here aswell
-_:i rdfs:label "InletConnectionPoint"^^xsd:string.
-_:i s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
-_:i s223:cnx _:j.
+_:wirejunction s223:cnx _:inlet.
+_:inlet a s223:InletConnectionPoint. #circuitname can be applied here aswell
+_:inlet rdfs:label "InletConnectionPoint"^^xsd:string.
+_:inlet s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
+_:inlet s223:cnx _:j.
 _:j a s223:Junction. #circuitname can be applied here aswell
 _:j rdfs:label "Junction"^^xsd:string.
 _:j s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
-?elecbreaker ?q _:j.
+?elecbreaker ?circuit _:j.
 }  
 
 WHERE 
 {
 <<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. 
-?elecbreaker spkl:parameters ?circuit.
-  ?circuit ?a ?q.
-  ?q spkl:applicationInternalName "RBS_ELEC_PANEL_NAME".
-  ?q spkl:value ?circuitname.
-?elecbreaker spkl:Connectors ?conn.
-#?l  ?in ?r.# list item
-#?r  spkl:referencedId ?conn.
+?elecbreaker spkl:parameters ?q.
+  ?q ?a ?circuit.
+  ?circuit spkl:applicationInternalName "RBS_ELEC_PANEL_NAME".
+  ?circuit spkl:value ?circuitname.
+?elecbreaker spkl:Connectors ?l.
+?l  ?in ?r.# list item
+?r  spkl:referencedId ?conn.
+#?conn a s223:OutletConnectionPoint.
 #?li spkl:connectedConnectorIds ?conn.
   #?lumcircuit spkl:Connectors ?list.
   #list   ?_  ?conn.cd.

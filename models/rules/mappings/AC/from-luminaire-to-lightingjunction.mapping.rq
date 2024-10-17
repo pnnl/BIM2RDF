@@ -23,9 +23,9 @@ WHERE {
 ?lum a s223:Luminaire.
 ?lum spkl:elementId ?eid.
   {
-  ?lumcircuit spkl:Connectors ?conn.
-  #?l  ?in ?r.# list item
-  #?r  spkl:referencedId ?conn.
+  ?lumcircuit spkl:Connectors ?l.
+  ?l  ?in ?r.# list item
+  ?r  spkl:referencedId ?conn.
   #?li spkl:connectedConnectorIds ?conn.
   #?lumcircuit spkl:Connectors ?list.
   #list   ?_  ?conn.cd..

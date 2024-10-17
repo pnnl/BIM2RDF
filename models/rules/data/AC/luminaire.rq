@@ -14,33 +14,33 @@ _:luminairewire s223:cnx _:junctionoutlet.
 _:junctionoutlet a s223:OutletConnectionPoint.
 _:junctionoutlet rdfs:label "OutletConnectionPoint"^^xsd:string.
 _:junctionoutlet s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
-?lum ?m _:junctionoutlet.
+?lum ?circuit1 _:junctionoutlet.
 _:junctionoutlet s223:cnx ?j.
 }
 WHERE {
 {
   
   <<?lumcircuit spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>.
-  ?lumcircuit spkl:Connectors ?conn.
-  #?l  ?in ?r.# list item
-  #?r  spkl:referencedId ?conn.
+  ?lumcircuit spkl:Connectors ?l.
+  ?l  ?in ?r.# list item
+  ?r  spkl:referencedId ?conn.
   #?li spkl:connectedConnectorIds ?conn.
   }
 
 {
-  ?lumcircuit spkl:parameters  ?circuit.
-  ?circuit ?k ?m. 
-  ?m spkl:applicationInternalName "RBS_ELEC_CIRCUIT_PANEL_PARAM".
-	?m spkl:value ?circuitname.
+  ?lumcircuit spkl:parameters ?m.
+  ?m ?k ?circuit1. 
+  ?circuit1 spkl:applicationInternalName "RBS_ELEC_CIRCUIT_PANEL_PARAM".
+	?circuit1 spkl:value ?circuitname.
  }
 
   {
   ?elecbreaker a s223:ElectricBreaker.
-  ?elecbreaker spkl:parameters ?circuit1.
-  ?circuit1 ?a ?q.
-  ?q spkl:applicationInternalName "RBS_ELEC_PANEL_NAME".
-  ?q spkl:value ?circuitname. 
-  ?elecbreaker ?q ?j.
+  ?elecbreaker spkl:parameters ?q.
+  ?q ?a ?circuit.
+  ?circuit spkl:applicationInternalName "RBS_ELEC_PANEL_NAME".
+  ?circuit spkl:value ?circuitname. 
+  ?elecbreaker ?circuit ?j.
   }
 {
   

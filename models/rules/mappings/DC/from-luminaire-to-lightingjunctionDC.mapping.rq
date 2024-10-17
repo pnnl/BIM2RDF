@@ -33,7 +33,10 @@ WHERE {
 ?lum a s223:Luminaire.
 ?lum spkl:elementId ?eid.
   {
-  ?lumcircuit spkl:Connectors/rdf:rest*/rdf:first ?conn.
+  ?lumcircuit spkl:Connectors ?l.
+  ?l  ?i ?r.# list item
+  ?r  spkl:referencedId ?li.
+  ?li ?p ?conn.
   <<?lumcircuit spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>.
   }
 ?lumcircuit spkl:elementId ?eid.
