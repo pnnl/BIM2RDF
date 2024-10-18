@@ -123,6 +123,7 @@ class Triples(b.Data): # TODO: create something backed by TTL
 
 
 class OxiGraph(b.DataBase):
+    # __id__ if backed by files, there is a IDENTITY file
     
     def __init__(self, db: g.Store=g.Store()) -> None:
         self._store = db
