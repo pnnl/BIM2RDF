@@ -6,8 +6,8 @@ and documentation.
 
 ## Structure
 
-The codebase is a standard Python project managed by [Rye](https://rye-up.com/).
-Each top-level folder is a component or workspace.
+The codebase is a standard Python project managed by [uv](https://docs.astral.sh/uv/).
+Each top-level folder is a component.
 * There should be a readme in each folder.
 * Each component should have a configuration program: `python -m <component>.config`. `python -m project.config` should trigger all.
 * There may be a command line interface for functionality defined in modules.
@@ -17,7 +17,7 @@ Each top-level folder is a component or workspace.
 These tools are standardized due to their high utility.
 
 * Source code is managed by [`git`](https://git-scm.com/).
-* Project Python structure is managed by [Rye](https://rye-up.com/).
+* Project Python structure is managed by [uv](https://docs.astral.sh/uv/).
 * Non-source code files (like data) and pipelines are managed by [dvc](http://dvc.org).
 As such the [.gitignore](./.gitignore) only allows source code files.
 * Documentation is generated with [Quarto](https://quarto.org/).
@@ -47,7 +47,7 @@ The Python-based setup is highly automated
 but non-Python tools have to be installed separately.
 
 0. **Before** getting code, install:
-    * [`rye`](https://rye-up.com/guide/installation/).
+    * [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
     Note instructions for getting `rye` to your `PATH`.
     Developer mode recommended for Windows.
     * `git`. Use your system manager: `winget install git.git` on Windows, `homebrew` on Mac. Figure it out on Linux.
@@ -59,16 +59,12 @@ but non-Python tools have to be installed separately.
 Clone under your personal folder outside of your OneDrive. On Windows this is c:\Users\myusername.
 
 2. **Setup**:
-    1. Install **dependencies**: `cd` into `semint`. Then `rye sync --no-lock`.
+    1. Install **dependencies**: `cd` into `semint`. Then `uv sync --frozen`.
     If there is a connectivity issue on the PNNL network, follow [instructions](https://sslfix.pnl.gov).
     2. **activate**: `rye shell` or use the activation scripts in the [virtual environment folder](.venv).
-    3. **configure**: `python -m project.config`. (run twice on windows. it will fail the first time.)
+    3. **configure**: `python -m project.config`.
 
-3. **Test by running a basic mapping**:
-    1. `cd` into `mapping`. Then `python -m mapping.speckle --help`. This will show the basic funtionality of the mapping.
-    2. While still in the `mapping` directory run `python -m mapping.speckle Pritoni --branch_ids="electrical/panels"`. 
-        * In this case `Pritoni` is the stream_id and `electrical/panels` is the branch_ids.
-    3. You should see some output in the terminal about each cycle. The result should be an output file called `out.ttl` that contains all the triples in the given branch_ids. 
+3. Build [models](./README.md).
 
 ### Visual Studio Code
 
