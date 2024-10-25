@@ -14,20 +14,20 @@ dependencies = [
     "fire",
 ]
 readme = "README.md"
+[project.optional-dependencies]
+# https://github.com/astral-sh/uv/issues/7541
+dev = [
+    "pandas",
+    "shelved-cache" ]
+# cant ref in toml
+# [tool.uv]
+# dev-dependencies = [
+#     "pandas",  # TODO: it's just used in utils.tables.py. could extract out sparql_utils
+#     "shelved-cache",
+# ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-managed = true
-dev-dependencies = [
-    "pandas",  # TODO: it's just used in utils.tables.py. could extract out sparql_utils
-    "shelved-cache",
-     ]
 
-[tool.hatch.metadata]
-allow-direct-references = true
-
-[tool.rye.scripts]
-mapping = "python -m mapping.speckle"

@@ -5,50 +5,80 @@ description = "Add a short description here"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
 ]
-dependencies = []
+dependencies = [
+    # 'local' ones
+    "engine",
+    "mapping",
+    "models", # borderline dev
+    "ontologies",
+    "speckle",
+    "topquadrant",
+    ]
 readme = "README.md"
+requires-python = "==3.11.9"
 
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-[tool.hatch.build.targets.wheel]
-bypass-selection = true
-
-
-[tool.rye]
-managed = true
+[tool.uv]
+override-dependencies = [
+    # assoc with dvc's deps.
+    # but it has to be here, in the root, according to the doc
+    "antlr4-python3-runtime==4.13.2", 
+    ] 
+# dev-deps are not installed transitively
+# https://github.com/astral-sh/uv/issues/6935
+#https://github.com/astral-sh/uv/issues/7541#issuecomment-2363210945
 dev-dependencies = [
     "ipython", 
-    "pip", # careful! only for one-offs!
+    #"pip", # careful! only for one-offs! check how uv does this
     # debugging
     "ipdb", 
     "icecream",
-    "rich",
+    # local. (could just list everything with pkg[dev])
+    "models[dev]",
+    "mapping[dev]",
+    "speckle[dev]",
+    # 'pure',  dev
+    #"cicd[dev]",
+    "project[dev]",
+    "project_azure[dev]",
+    "project_dvc[dev]",
+    "dvcdiff[dev]",
+    "graphdb[dev]",
      ]
+[tool.uv.sources]
+# just listing the dirs alphabetically
+cicd    =        { path = 'cicd'            , editable = true}
+doc    =         { path = 'doc'             , editable = true}
+dvcdiff =        { path = 'dvcdiff'         , editable = true}
+engine =         { path = 'engine'          , editable = true}
+graphdb =        { path = 'graphdb'         , editable = true}
+# # infra doesn't have 'code'
+mapping =        { path = 'mapping'         , editable = true}
+models =         { path = 'models'          , editable = true}
+ontologies =     { path = 'ontologies'      , editable = true}
+project =        { path = 'project'         , editable = true}
+project_azure =  { path = 'project_azure'   , editable = true}
+project_dvc =    { path = 'project_dvc'     , editable = true}
+speckle =        { path = 'speckle'         , editable = true}
+topquadrant =    { path = 'topquadrant'     , editable = true}
+viz =            { path = 'viz'             , editable = true}
 
-[tool.hatch.metadata]
-allow-direct-references = true
-
-[tool.rye.workspace]
-members = [
-    # dev
-    # TODO: want these as "dev" https://github.com/astral-sh/rye/issues/1361
-    "project",
-    "project_azure", 
-    "project_dvc",  "dvcdiff", 
-    # /dev
-    "doc",
-    "ontologies",
-    "graphdb",
-    "speckle",
-    "engine",
-    "mapping",
-    "topquadrant",
-    # products dir
-    "models",
-   ]
-
-
-[tool.rye.scripts]
-# per workspace tools are not 'collected'
+[tool.uv.workspace]
+# might do 'external'/'release'/'public' ws
+# members = [
+#     'cicd',
+#     'doc',
+#     'dvcdiff',
+#     'engine',
+#     'graphdb',
+#     # infra does't have 'code'
+#     'mapping',
+#     'models',
+#     'ontologies',
+#     'project',
+#     'project_azure',
+#     'project_dvc',
+#     'speckle',
+#     'topquadrant',
+#     'viz'
+#     ]
