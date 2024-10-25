@@ -10,28 +10,16 @@ dependencies = [
     "urllib3<2",
     #https://github.com/psf/requests/releases/tag/v2.30.0
     "boltons",
+    "rdflib",
     "numpy",]
 readme = "README.md"
+[project.optional-dependencies]
+dev = [
+    "fire", # the cmd only applies in the dev situation
+    ] 
+
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-managed = true
-dev-dependencies = [
-    "ipdb",
-    "fire", # the cmd only applies in the dev situation
-    "rdflib",
-    ] 
-
-
-[tool.hatch.metadata]
-allow-direct-references = true
-
-
-[tool.pytest.ini_options]
-addopts = ['-s']
-testpaths = ["tests/*.py"]
-[tool.pytest-watcher]
-now = true
