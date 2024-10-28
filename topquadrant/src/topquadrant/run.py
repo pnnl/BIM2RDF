@@ -50,8 +50,16 @@ def check_proc_manually(cmd, proc):
         from sys import stderr
         print(proc.stderr, file=stderr)
         raise CalledProcessError(proc.returncode, cmd, stderr=proc.stderr)
-    else:
-        return proc
+    
+    # filter out warnings to ensure valid ttl of stdout
+    _ = []
+    for l in proc.stdout.split('\n'):
+        if ('warn' and 'riot') in l.lower():
+            print(l)
+        else:
+            _.append(l)
+    proc.stdout = ''.join(_)
+    return proc
 
 def validate(data: Path, shapes:Path=None):
     from subprocess import run
