@@ -7,13 +7,15 @@ authors = [
 ]
 dependencies = [
     # 'local' ones
+    "cicd>=0.1.0",
+    # 'local' ones
     "engine",
     "mapping",
     "models", # borderline dev
     "ontologies",
     "speckle",
     "topquadrant",
-    ]
+]
 readme = "README.md"
 requires-python = "==3.11.9"
 
@@ -29,11 +31,12 @@ dev-dependencies = [
     "ipdb", 
     "icecream",
     # local. (could just list everything with pkg[dev])
+    # ..though uv gives warnings
     "models[dev]",
     "mapping[dev]",
     "speckle[dev]",
     # 'pure',  dev
-    #"cicd[dev]",
+    "cicd[dev]",
     "project[dev]",
     "project_azure[dev]",
     "project_dvc[dev]",
