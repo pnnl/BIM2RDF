@@ -1,5 +1,6 @@
 # should be like gitignore
 # but not working like docker in podman
 *
-!requirements*.lock
+!uv.lock
+!pyproject.toml
 !.python-version
