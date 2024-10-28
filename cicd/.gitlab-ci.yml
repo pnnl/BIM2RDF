@@ -1,0 +1,36 @@
+variables:
+ # azure container registry
+  ACR: prototypemodels.azurecr.io
+
+
+# TODO: delete old images task. or keep last n images
+.image:
+  # https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  stage: system
+  variables:
+    FQ_IMAGE_NAME: ${ACR}/${IMAGE_NAME}:${CI_COMMIT_SHA}
+  before_script:
+  # copy to a 'regular' path to potentially avoid some weird things
+    - cp -r ${CI_PROJECT_DIR} /code
+  # can check if needed TODO
+  script:
+    - cd /code
+    - /kaniko/executor
+      --context .
+      --dockerfile "${CI_PROJECT_DIR}/Containerfile"
+      --destination ${FQ_IMAGE_NAME}
+      --cache=true 
+# TODO: create rule to only build on chages to requirementes*.lock
+# but then img.name acr/img_name:ci_commit_sha wont exist
+
+
+# simplest thing:
+# one image for the repo
+img:
+  stage: system
+  extends: .image
+  variables:
+    IMAGE_NAME: ${CI_COMMIT_REF_NAME}
