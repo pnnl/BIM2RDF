@@ -19,11 +19,6 @@ requires-python = "==3.11.9"
 
 
 [tool.uv]
-override-dependencies = [
-    # assoc with dvc's deps.
-    # but it has to be here, in the root, according to the doc
-    "antlr4-python3-runtime==4.13.2", 
-    ] 
 # dev-deps are not installed transitively
 # https://github.com/astral-sh/uv/issues/6935
 #https://github.com/astral-sh/uv/issues/7541#issuecomment-2363210945
