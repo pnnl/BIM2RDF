@@ -1,7 +1,7 @@
 from inspect import signature as sig
 
 
-def changed_files(*, pattern='*',
+def changed_files(*, patterns=['*'],  # parse like this exactly from cli
         v1='HEAD',
         v2='HEAD~1'):
     """lists changed files"""
@@ -12,13 +12,13 @@ def changed_files(*, pattern='*',
     _ = _.split('\n')
     _ = (p.strip() for p in _ if p)
     _ = map(Path, _)
-    _ = (p for p in _ if p.match(pattern))
+    _ = (p for p in _ if any(p.match(ptrn) for ptrn in  patterns))
     _ = list(_)
     return _
 
 
 def is_changed(*,
-        pattern=sig(changed_files).parameters['pattern'].default,
+        pattern=sig(changed_files).parameters['patterns'].default,
         v1=     sig(changed_files).parameters['v1'].default,
         v2=     sig(changed_files).parameters['v2'].default,
         ):
