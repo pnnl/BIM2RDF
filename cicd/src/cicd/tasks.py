@@ -29,11 +29,24 @@ def is_changed(*,
         return False
 
 
+def dvc_force(*,
+        patterns=['*.py', 'uv.lock'],
+        v1=     sig(changed_files).parameters['v1'].default,
+        v2=     sig(changed_files).parameters['v2'].default,
+        ):
+    _ = changed_files(patterns=patterns, v1=v1, v2=v2)
+    if _:
+        return '--force'
+    else:
+        return ""
+
+
 if __name__ == '__main__':
     from fire import Fire
     _ = {f.__name__:f for f in
          {
             is_changed,
             changed_files,
+            dvc_force
           } }
     Fire(_)
