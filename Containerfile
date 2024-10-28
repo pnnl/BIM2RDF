@@ -10,6 +10,8 @@ FROM python:${PYVER}-alpine
 # might try a slimmed ubuntu
 # (see below)
 ARG WORKDIR=/install
+#https://github.com/astral-sh/uv/pull/6834
+ENV UV_PROJECT_ENVIRONMENT=${WORKDIR}/.venv
 ARG UV_OPTS=--frozen --locked
 
 
