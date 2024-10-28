@@ -35,6 +35,9 @@ WORKDIR ${WORKDIR}
 COPY .python-version .python-version
 COPY uv.lock uv.lock
 COPY pyproject.toml pyproject.toml
+# would have like to use uv sync.
+# the closest option to the below effect is --no-sources
+# but it's not the same as filtering out editable installs
 RUN uv export --format=requirements-txt ${UV_OPTS} --no-hashes > requirements-all.txt
 RUN uv venv
 # install (global) python deps
