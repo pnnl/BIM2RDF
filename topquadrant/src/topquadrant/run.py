@@ -40,7 +40,8 @@ def cmd(
         _ = _+f"-shapesfile {shapesfile}"
     return _
 
-
+import logging 
+logger = logging.getLogger('topquadrant')
 def check_proc_manually(cmd, proc):
     # further guard to fail
     # in case topquadrant does not exit with an error
@@ -55,7 +56,7 @@ def check_proc_manually(cmd, proc):
     _ = []
     for l in proc.stdout.split('\n'):
         if ('warn' and 'riot') in l.lower():
-            print(l)
+            logger.warn(l)
         else:
             _.append(l)
     proc.stdout = ''.join(_)
