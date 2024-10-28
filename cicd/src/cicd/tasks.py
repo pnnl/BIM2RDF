@@ -18,11 +18,11 @@ def changed_files(*, patterns=['*'],  # parse like this exactly from cli
 
 
 def is_changed(*,
-        pattern=sig(changed_files).parameters['patterns'].default,
+        patterns=sig(changed_files).parameters['patterns'].default,
         v1=     sig(changed_files).parameters['v1'].default,
         v2=     sig(changed_files).parameters['v2'].default,
         ):
-    _ = changed_files(pattern=pattern, v1=v1, v2=v2)
+    _ = changed_files(patterns=patterns, v1=v1, v2=v2)
     if _:
         return True
     else:
