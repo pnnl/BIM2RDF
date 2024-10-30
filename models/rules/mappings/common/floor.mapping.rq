@@ -11,18 +11,22 @@ CONSTRUCT {
 ?this a s223:PhysicalSpace.
 ?this rdfs:label "PhysicalSpace"^^xsd:string.
 #?this rdfs:label ?name.
-?this s223:hasProperty ?p.
-?p a s223:QuantifiableProperty.
-?p qudt:hasQuantityKind qudtqk:Area.
-?p s223:hasValue ?vd.
-?p qudt:hasUnit unit:M2.
-?p rdfs:label "QuantifiableProperty"^^xsd:string.
+?this s223:hasProperty ?l.
+?l a s223:QuantifiableProperty.
+?l qudt:hasQuantityKind qudtqk:Area.
+?l s223:hasValue ?vd.
+?l qudt:hasUnit unit:M2.
+?l rdfs:label "QuantifiableProperty"^^xsd:string.
 } 
 WHERE { 
 <<?this spkl:category  "Floors">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
    #                  or level?
     #?this spkl:level/spkl:name ?name. 
-    ?this spkl:parameters/spkl:HOST_AREA_COMPUTED ?p.
-    ?p spkl:value ?v.
+    #?this spkl:parameters/spkl:HOST_AREA_COMPUTED ?p.
+    ?this spkl:parameters ?p.
+    ?p ?k ?l.
+    ?l spkl:applicationInternalName "HOST_AREA_COMPUTED".
+    ?l spkl:value ?v.
+    #?p spkl:value ?v.
     BIND(xsd:decimal(?v) AS ?vd).
 }

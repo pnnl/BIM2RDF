@@ -15,18 +15,18 @@ CONSTRUCT {
 #?this a rec:Room.
 ?this a ?rec_or_recx.
 ?this rdfs:label ?recname.
-?this s223:hasProperty ?p.
-?p a s223:QuantifiableProperty.
-?p qudt:hasQuantityKind qudtqk:Area.
-?p s223:hasValue ?vd.
-?p qudt:hasUnit unit:M2.
-?p rdfs:label "QuantifiableProperty"^^xsd:string.
-?this s223:hasProperty ?number.
-?number a s223:Property.
-?number s223:hasValue ?roomnumber.
+?this s223:hasProperty ?l.
+?l a s223:QuantifiableProperty.
+?l qudt:hasQuantityKind qudtqk:Area.
+?l s223:hasValue ?vd.
+?l qudt:hasUnit unit:M2.
+?l rdfs:label "QuantifiableProperty"^^xsd:string.
+?this s223:hasProperty ?w.
+?w a s223:Property.
+?w s223:hasValue ?roomnumber.
     #?number s223:hasEnumerationKind qudt:AbstractQuantityKind. 
     #?number qudt:id ?roomnumber.
-?number rdfs:label "Property"^^xsd:string.
+?w rdfs:label "Property"^^xsd:string.
 #?this s223:hasProperty ?occupancy. #to get occupancy count from Rooms in Revit Model
 #?occupancy a s223:QuantifiableObservableProperty.
 #?occupancy s223:hasQuantityKind qudtqk:Population.
@@ -37,11 +37,15 @@ CONSTRUCT {
 } 
 WHERE { 
 <<?this spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
-  ?this spkl:parameters/spkl:ROOM_AREA ?p.
-  ?p spkl:value ?v.
+  ?this spkl:parameters ?p.
+  ?p ?k ?l. 
+  ?l spkl:applicationInternalName "ROOM_AREA".
+  ?l spkl:value ?v.
   BIND(xsd:decimal(?v) AS ?vd).
-  ?this spkl:parameters/spkl:ROOM_NUMBER ?number.
-  ?number spkl:value ?roomnumber.
+  ?this spkl:parameters ?number.
+  ?number ?d ?w.
+  ?w spkl:applicationInternalName "ROOM_NUMBER".
+  ?w spkl:value ?roomnumber.
   #?this spkl:parameters/spkl:ROOM_OCCUPANCY ?occupancy. 
   #?occupancy spkl:value ?occupancycount. 
   #BIND(xsd:decimal(?occupancycount) AS ?oc).
@@ -50,15 +54,7 @@ OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "open")).  
-      BIND(recx:OpenOffice as ?rec_or_recx) 
-      ?rec_or_recx rdfs:label ?recname.
-    }
-OPTIONAL
-    {
-      ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "private")  
-            || contains(lcase(?lname), "enclosed" )).  
-      BIND(recx:PrivateOffice as ?rec_or_recx) 
+      BIND(rec:OfficeLandscape as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
@@ -106,25 +102,19 @@ OPTIONAL
       BIND(rec:DiningRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
-OPTIONAL
-    {
-      ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "lobby")).  
-      BIND(recx:Lobby as ?rec_or_recx) #change to rec once added in ontlogy
-      ?rec_or_recx rdfs:label ?recname.
-    }
+
 OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "lounge")).  
-      BIND(recx:Lounge as ?rec_or_recx) #change to rec once added in ontlogy
+      BIND(rec:RecreationalRoom as ?rec_or_recx) #change to rec once added in ontlogy
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "mechanical")).  
-      BIND(recx:MechanicalRoom as ?rec_or_recx) 
+      BIND(rec:ClimateControlRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
@@ -153,7 +143,7 @@ OPTIONAL
     {
       ?this spkl:name ?lname.  
       filter(contains(lcase(?lname), "computer")).  
-      BIND(recx:ComputerRoom as ?rec_or_recx) 
+      BIND(rec:GroupRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
 OPTIONAL
@@ -180,7 +170,7 @@ OPTIONAL
 OPTIONAL
     {
       ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "office") || contains(lcase(?lname), "work" )).  
+       filter(contains(lcase(?lname), "private") || contains(lcase(?lname), "office" ) || contains(lcase(?lname), "work" )).
       BIND(rec:OfficeRoom as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }
@@ -236,8 +226,8 @@ OPTIONAL
     }
 OPTIONAL
     {
-      ?this spkl:name ?lname.  
-      filter(contains(lcase(?lname), "welcome")).  
+      ?this spkl:name ?lname. 
+      filter(contains(lcase(?lname), "welcome") || contains(lcase(?lname), "lobby" )). 
       BIND(rec:Reception as ?rec_or_recx) 
       ?rec_or_recx rdfs:label ?recname.
     }

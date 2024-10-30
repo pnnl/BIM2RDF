@@ -6,16 +6,12 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 
 CONSTRUCT { 
-?this a s223:ElectricBreaker.
-#?this rdfs:label ?name . 
-?this rdfs:label "ElectricBreaker"^^xsd:string.
 ?this s223:hasPhysicalLocation ?r.
 } 
 WHERE { 
+?this a s223:ElectricBreaker.
 <<?this spkl:category  "Electrical Equipment">> meta: <<?mi spkl:name "electrical/panels">>. # TODO branchName could be used here
-    ?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types' 
-    #?this spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?name. 
-     ?this spkl:roomId ?rl.
+?this spkl:roomId ?rl.
 <<?r spkl:category  "Rooms">> meta: <<?si spkl:name "architecture/rooms and lighting fixtures">>.
 ?r spkl:elementId ?rl.
 }

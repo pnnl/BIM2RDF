@@ -1,0 +1,40 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX meta: <http://meta>
+PREFIX spkl: <http://speckle.systems/> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+CONSTRUCT {
+?conn s223:cnx _:wirejunction.
+_:wirejunction a s223:ElectricWire.
+_:wirejunction rdfs:label "ElectricWire"^^xsd:string.
+_:wirejunction s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
+_:wirejunction s223:cnx _:i.
+_:i a s223:InletConnectionPoint. #circuitname can be applied here aswell
+_:i rdfs:label "InletConnectionPoint"^^xsd:string.
+_:i s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
+_:i s223:cnx ?elecoutlet.
+#_:j a s223:Junction. #circuitname can be applied here aswell
+#_:j rdfs:label "Junction"^^xsd:string.
+#?elecoutlet s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
+#?elecbreaker ?circuit _:j.
+#?conn1 a s223:OutletConnectionPoint.
+#?conn1 a s223:OptionalConnectionPoint.
+#?conn1 s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
+}  
+
+WHERE 
+{
+<<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. 
+?elecbreaker spkl:parameters/spkl:RBS_ELEC_PANEL_NAME ?circuit.
+?circuit spkl:value ?circuitname. 
+?elecbreaker spkl:Connectors ?l.
+?l  ?in ?r.
+?r  spkl:referencedId ?conn.
+#?li spkl:connectedConnectorIds ?conn.
+<<?elecoutlet spkl:category  "Electrical Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>. 
+?elecoutlet spkl:parameters/spkl:RBS_ELEC_CIRCUIT_PANEL_PARAM ?circuit1.
+?circuit1 spkl:value ?circuitname. 
+#?elecoutlet spkl:Connectors/rdf:rest*/rdf:first ?conn1.
+
+}

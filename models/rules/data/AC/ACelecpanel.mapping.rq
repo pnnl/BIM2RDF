@@ -8,16 +8,15 @@ CONSTRUCT {
 ?conn s223:cnx ?wirejunction.
 ?wirejunction a s223:ElectricWire.
 ?wirejunction rdfs:label "ElectricWire"^^xsd:string.
-?wirejunction s223:hasMedium  s223:Constituent-Electricity.
-?wirejunction s223:cnx ?i.
-?i a s223:InletConnectionPoint. #circuitname can be applied here aswell
-?i rdfs:label "InletConnectionPoint"^^xsd:string.
-?i s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
-?i s223:cnx ?j.
+?wirejunction s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
+?wirejunction s223:cnx ?inlet.
+?inlet a s223:InletConnectionPoint. #circuitname can be applied here aswell
+?inlet rdfs:label "InletConnectionPoint"^^xsd:string.
+?inlet s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
+?inlet s223:cnx ?j.
 ?j a s223:Junction. #circuitname can be applied here aswell
 ?j rdfs:label "Junction"^^xsd:string.
-?j s223:hasMedium  s223:Constituent-Electricity.
-
+?j s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
 
 }  
 
@@ -26,14 +25,14 @@ WHERE
 ?conn s223:cnx ?wirejunction.
 ?wirejunction a s223:ElectricWire.
 ?wirejunction rdfs:label "ElectricWire"^^xsd:string.
-?wirejunction s223:hasMedium  s223:Constituent-Electricity.
-?wirejunction s223:cnx ?i.
-?i a s223:InletConnectionPoint. #circuitname can be applied here aswell
-?i rdfs:label "InletConnectionPoint"^^xsd:string.
-?i s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
-?i s223:cnx ?j.
+?wirejunction s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
+?wirejunction s223:cnx ?inlet.
+?inlet a s223:InletConnectionPoint. #circuitname can be applied here aswell
+?inlet rdfs:label "InletConnectionPoint"^^xsd:string.
+?inlet s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
+?inlet s223:cnx ?j.
 ?j a s223:Junction. #circuitname can be applied here aswell
 ?j rdfs:label "Junction"^^xsd:string.
-?j s223:hasMedium  s223:Constituent-Electricity.
+?j s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
 ?elecbreaker ?circuit ?j.
 }

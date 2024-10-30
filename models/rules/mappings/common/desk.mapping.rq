@@ -14,6 +14,9 @@ CONSTRUCT {
 WHERE { 
 <<?desk spkl:category "Furniture">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
 ?desk spkl:phaseCreated ?_.
-?desk spkl:definition/spkl:type ?f.
+?desk spkl:definition ?_dr.
+?_dr spkl:referencedId ?type.
+?type spkl:type ?f.
+#?desk spkl:definition/spkl:type ?f.
 filter(contains(lcase(?f), "desk"))
 }

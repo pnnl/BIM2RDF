@@ -321,7 +321,7 @@ def shapes():
     from pyoxigraph import parse, RdfFormat as fmt
     from project import root
     s = root / 'models'  / 'ontology.ttl'
-    s = open(s)
+    s = open(s, mode='rt', encoding='utf-8')
     return parse(s, format=fmt.TURTLE)
 
 
