@@ -56,7 +56,7 @@ def check_proc_manually(cmd, proc):
     _ = []
     for l in proc.stdout.split('\n'):
         if ('warn' and 'riot') in l.lower():
-            logger.warn(l)
+            logger.warning(l)
         else:
             _.append(l)
     proc.stdout = ''.join(_)
