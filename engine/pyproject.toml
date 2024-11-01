@@ -6,7 +6,9 @@ authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" },
 ]
 dependencies = [
-    "pyoxigraph",]
+    "pyoxigraph",
+    "rdflib", # just for 'deanon', otherwise dont want this
+    ]
 readme = "README.md"
 
 [build-system]
