@@ -238,10 +238,9 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         meta=lambda: Triples()  )  
         
 
-def fengine(og=OxiGraph(),
+def fengine(og=OxiGraph(), *,
         rules=mk_rules(),
         validation=True,
-        block_seen=True,
         deanon=True,
         max_cycles=20) -> 'Engine':
     if validation:
@@ -251,7 +250,6 @@ def fengine(og=OxiGraph(),
     _ = Engine(
             rules,
             og,
-            block_seen=block_seen,
             deanon=deanon,
             MAX_ITER=max_cycles
             )
@@ -313,6 +311,7 @@ def map_(stream_id, *, branch_ids=None,
             og=init,
             rules=data_rules+(Rules([PyRule(get_ontology)]) if rules else Rules([]) ),
             validation=False,
+            deanon=False,
             max_cycles=1)() # no need to keep spinning
     if rules:
     # 2. "mappings"
@@ -321,6 +320,7 @@ def map_(stream_id, *, branch_ids=None,
                 paths=rules,
                 inference=False),
             validation=False,
+            deanon=True,
             max_cycles=max_cycles)()
     # 3. inferencing 
     if inference:
@@ -329,6 +329,7 @@ def map_(stream_id, *, branch_ids=None,
                 paths=None,
                 inference=inference),
             validation=False,
+            deanon=True,
             max_cycles=max_cycles)()
     # 4. validation
     if validation:
@@ -337,6 +338,7 @@ def map_(stream_id, *, branch_ids=None,
                 paths=None,
                 inference=False),
             validation=validation,
+            deanon=False, # doest matter.
             max_cycles=max_cycles)()
     
     return _.db._store
