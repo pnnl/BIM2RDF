@@ -466,6 +466,3 @@ class Engine(b.Engine): # rule app on Store
         return Result(db, True)
 
 
-if __name__ == '__main__':
-    # consume dir for data
-    ...
