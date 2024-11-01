@@ -8,64 +8,49 @@ import pyoxigraph as g
 from typing import Iterable, Iterator
 
 
-seenbatches = set()
+anon_uri = "urn:anon:hash:"
+def deanon(triples):
+    from pyoxigraph import Dataset, CanonicalizationAlgorithm
+    for i,ts in enumerate((triples,)):
+        d = Dataset(g.Quad(*t) for t in ts)
+        d.canonicalize(CanonicalizationAlgorithm.UNSTABLE) # ?? unstable??
+        for q in d: yield q.triple
+def deanon(triples):
+    # algo seems to get stuck on nested triples. split it as follows.
+    # i think it's ok as since nested triples are 'meta'
+    # and don't refer to s,p,o of 'data' triples
+    nested_subjets = [] 
+    nested_objects = []
+    not_nested = [] 
+    for t in triples:
+        s,p,o = t
+        if isinstance(s, g.Triple):
+            nested_subjets.append(s)
+        if isinstance(o, g.Triple):
+            nested_objects.append(o)
+        if (not isinstance(s, g.Triple,)) and  (not isinstance(p, g.Triple,)):
+            not_nested.append(t)
 
-def flatten(triples,):
-    for spo in triples:
-        for _ in spo:
-            if isinstance(_, g.Triple):
-                yield from flatten((_,))
-            else:
-                assert(isinstance(_, (g.BlankNode, g.NamedNode, g.Literal)))
-                yield _
-
-
-def isanon(n) -> bool:
-    if isinstance(n, g.NamedNode):
-        if n.value.startswith(anon_uri):
-            return True
+    from rdflib.compare import to_canonical_graph
+    import rdflib as r
+    def replace(n):
+        if isinstance(n, r.BNode):
+            return  f"<{anon_uri}{n}>"
+        elif isinstance(n, r.Literal):
+            return f'"{n}"'
         else:
-            return False
-    elif isinstance(n, g.Literal):
-        return False
-    else:
-        assert(isinstance(n, g.BlankNode))
-        return True
-
-anon_uri = 'urn:anon:hash:'
-
-def mkctr(i=0):
-    i = i
-    while True:
-        yield i
-        i += 1
-
-def deanon(triples, notanon_hash=None) -> Iterable[g.Triple]:
-    triples = tuple(triples)
-    if not notanon_hash:
-        notanon_hash = Triples(triples).notanon_hash() # same b/w python sessions
-        notanon_hash = abs(notanon_hash)
-    anons = {}
-    ctr = mkctr()
-    for n in flatten(triples):
-        if (n not in anons):
-            if isinstance(n, g.BlankNode):
-                anons[n] = g.NamedNode(f"{anon_uri}{notanon_hash}.{next(ctr)}")
-        del n
-    replace = lambda n: anons[n] if n in anons else n
-    for s, p, o in triples:
-        # not recursing though
-        if isinstance(s, g.Triple) or isinstance(o, g.Triple):
-            if isinstance(s, g.Triple):
-                s = g.Triple(*map(replace, s))
-            if isinstance(o, g.Triple):
-                o = g.Triple(*map(replace, o))
-            yield g.Triple(s, p, o)
-        else:
-            assert(not isinstance(s, g.Triple) )
-            assert(not isinstance(o, g.Triple) )
-            yield g.Triple(*map(replace, (s, p, o)))
-
+            assert(isinstance(n, r.URIRef))
+            return f"<{n}>"
+    for i,ts in enumerate((nested_subjets, nested_objects, not_nested)):
+        p = '.\n'.join(str(t) for t in ts)
+        if not p: continue
+        p = p+'.'
+        _ = r.Graph().parse(data=p, format='ntriples')
+        _ = to_canonical_graph(_)
+        _ = '.\n'.join(' '.join(map(replace, t)) for t in _)+'.'
+        s = g.Store()
+        s.bulk_load(_, format=g.RdfFormat.N_TRIPLES)
+        for q in s: yield q.triple
 
 class Triples(b.Data): # TODO: create something backed by TTL
     # peformance comparison of ~400,000 triples
@@ -96,29 +81,6 @@ class Triples(b.Data): # TODO: create something backed by TTL
     def __add__(self, data: 'Triples' ) -> 'Triples':
         from itertools import chain 
         return Triples(chain(self._data, data._data))
-    
-    def __hash__(self) -> int:
-        return hash((self._data)) if isinstance(self._data, (frozenset, set) ) \
-            else hash(frozenset(self._data))
-   
-    def notanon_hash(self) -> int:
-        if not self._data: return 0
-        _ = flatten(self)
-        _ = (n for n in _ if not isanon(n))
-        _ = frozenset(_)
-        return hash(_)
-
-   
-    def unseen(self) -> Iterable[g.Triple]:
-        # only produce "new" triple batches
-        # the 'identifier' is the context of named nodes in the triples 'batch'.
-        id = self.notanon_hash()
-        if not id: yield from []
-        if id in seenbatches:
-            yield from []
-        else:
-            yield from self
-            seenbatches.add(id)
 
 
 
@@ -368,14 +330,14 @@ logger = logging.getLogger('engine')
 
 class Engine(b.Engine): # rule app on Store
 
-    def __init__(self, rules: Rules, db: OxiGraph, MAX_ITER=999,
-                 block_seen=False, deanon=False,
+    def __init__(self, rules: Rules, db: OxiGraph,
+                 MAX_ITER=999,
+                 deanon=True,
                  log=True, print_log=True,
                  ) -> None:
         self._rules = rules
         self._db = db
         self.MAX_ITER = MAX_ITER
-        self.block_seen = block_seen
         self.deanon = deanon
         self.i = 0
         
@@ -418,8 +380,6 @@ class Engine(b.Engine): # rule app on Store
 
             # do
             _ = r(self.db)
-            if self.block_seen:
-                _ = Triples(_).unseen()
             if self.deanon:
                 _ = deanon(_)
             self.db._store.bulk_extend(g.Quad(*t) for t in _)
