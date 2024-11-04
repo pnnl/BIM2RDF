@@ -10,13 +10,15 @@ from typing import Iterable, Iterator
 
 anon_uri = "urn:anon:hash:"
 def deanon(triples):
+    # TODO:# algo seems to get stuck on nested triples.
+    # wait for update
     from pyoxigraph import Dataset, CanonicalizationAlgorithm
     for i,ts in enumerate((triples,)):
         d = Dataset(g.Quad(*t) for t in ts)
         d.canonicalize(CanonicalizationAlgorithm.UNSTABLE) # ?? unstable??
         for q in d: yield q.triple
 def deanon(triples):
-    # algo seems to get stuck on nested triples. split it as follows.
+    # in the mean time, split it as follows.
     # i think it's ok as since nested triples are 'meta'
     # and don't refer to s,p,o of 'data' triples
     nested_subjets = [] 
