@@ -8,34 +8,22 @@ import pyoxigraph as g
 from typing import Iterable, Iterator
 
 
-anon_uri = "urn:anon:hash:"
-def deanon(triples):
-    # TODO:# algo seems to get stuck on nested triples.
-    # wait for update
+def canon(triples):
+    # algo seems to gets stuck (slow?)
+    # wait for update TODO
     from pyoxigraph import Dataset, CanonicalizationAlgorithm
-    for i,ts in enumerate((triples,)):
-        d = Dataset(g.Quad(*t) for t in ts)
+    def _(triples):
+        d = Dataset(g.Quad(*t) for t in triples)
         d.canonicalize(CanonicalizationAlgorithm.UNSTABLE) # ?? unstable??
         for q in d: yield q.triple
-def deanon(triples):
-    # in the mean time, split it as follows.
-    # i think it's ok as since nested triples are 'meta'
-    # and don't refer to s,p,o of 'data' triples
-    nested_subjets = [] 
-    nested_objects = []
-    not_nested = [] 
-    for t in triples:
-        s,p,o = t
-        if isinstance(s, g.Triple):
-            nested_subjets.append(s)
-        if isinstance(o, g.Triple):
-            nested_objects.append(o)
-        if (not isinstance(s, g.Triple,)) and  (not isinstance(p, g.Triple,)):
-            not_nested.append(t)
+    return tuple(_(triples))
 
-    from rdflib.compare import to_canonical_graph
+anon_uri = "urn:anon:hash:"
+def canon(triples, ):
     import rdflib as r
-    def replace(n):
+    from functools import cache
+    @cache
+    def replace(n): # replace store
         if isinstance(n, r.BNode):
             return  f"<{anon_uri}{n}>"
         elif isinstance(n, r.Literal):
@@ -43,16 +31,29 @@ def deanon(triples):
         else:
             assert(isinstance(n, r.URIRef))
             return f"<{n}>"
-    for i,ts in enumerate((nested_subjets, nested_objects, not_nested)):
-        p = '.\n'.join(str(t) for t in ts)
-        if not p: continue
+    
+    def to_cg(triples): 
+        p = '.\n'.join(str(t) for t in triples)
+        if not p: return r.Graph()
+        from rdflib.compare import to_canonical_graph
         p = p+'.'
         _ = r.Graph().parse(data=p, format='ntriples')
         _ = to_canonical_graph(_)
-        _ = '.\n'.join(' '.join(map(replace, t)) for t in _)+'.'
+        return _
+    def rg2ogs(rg):
+        # 'convert' rdflib graph to pyoxigraph store through serialization
         s = g.Store()
-        s.bulk_load(_, format=g.RdfFormat.N_TRIPLES)
-        for q in s: yield q.triple
+        if len(rg):
+            _ = '.\n'.join(' '.join(map(replace, t)) for t in rg)+'.'
+            s.bulk_load(_, format=g.RdfFormat.N_TRIPLES)
+        return s
+            
+    _ = to_cg(triples)
+    _ = rg2ogs(_)
+    _ = tuple(q.triple for q in _)
+    return _
+
+
 
 class Triples(b.Data): # TODO: create something backed by TTL
     # peformance comparison of ~400,000 triples
@@ -185,8 +186,8 @@ class xCachedRuleCall:
 
 
 class RuleCall:
-    def __call__(self, db:OxiGraph) -> Iterable[g.Triple]:
-        yield from self.do(db)
+    def __call__(self, db:OxiGraph, **k) -> Iterable[g.Triple]:
+        yield from self.do(db, **k)
 
 
 class Rule(RuleCall, b.Rule):
@@ -195,11 +196,14 @@ class Rule(RuleCall, b.Rule):
         return hash(self.spec)
     meta_uri = 'http://meta'
 
-    def add_star_meta(self, data: Iterable[g.Triple]) -> Iterable[g.Triple]:
-        # nest
+    def add_star_meta(self, data: Iterable[g.Triple], deanon=False) -> Iterable[g.Triple]:
+        meta = tuple(self.meta())
+        if deanon:
+            data = canon(data)
+            meta = canon(meta)
         for t in data:
             yield t
-            for m in self.meta():
+            for m in meta:
                 #    ('data'triple,    meta  ,   'meta'triple)
                 yield g.Triple(t, g.NamedNode(self.meta_uri), m)
     
@@ -221,10 +225,10 @@ class ConstructRule(Rule):
         # TODO
         yield from []
 
-    def do(self, db: OxiGraph) -> Iterable[g.Triple]:
+    def do(self, db: OxiGraph, deanon=False, ) -> Iterable[g.Triple]:
         _ = db._store.query(str(self.spec))
         assert(isinstance(_, g.QueryTriples))
-        yield from self.add_star_meta(_)
+        yield from self.add_star_meta(_, deanon=deanon)
 
 
 from typing import Protocol, runtime_checkable
@@ -260,9 +264,9 @@ class PyRule(Rule):
     def __add__(self, rule: 'Rule') -> 'Rules':
         return Rules([self, rule])
     
-    def do(self, db: OxiGraph) -> Iterable[g.Triple]:
+    def do(self, db: OxiGraph, deanon=False) -> Iterable[g.Triple]:
         _ = self.spec(db)
-        yield from self.add_star_meta(_)
+        yield from self.add_star_meta(_, deanon=deanon)
 
 
 def _(db: OxiGraph): return Triples([])
@@ -299,8 +303,8 @@ class Rules(b.Rules):
         _ = list(self.rules)+list(rules.rules)
         return Rules(_)
     
-    def __call__(self, db: OxiGraph) -> Triples:
-        _ = map(lambda r: r(db)._data, self.rules)
+    def __call__(self, db: OxiGraph, **k) -> Triples:
+        _ = map(lambda r: r(db, **k)._data, self.rules)
         from itertools import chain
         _ = chain.from_iterable(_)
         _ = Triples(_)
@@ -381,9 +385,7 @@ class Engine(b.Engine): # rule app on Store
                 start_time = monotonic()
 
             # do
-            _ = r(self.db)
-            if self.deanon:
-                _ = deanon(_)
+            _ = r(self.db, deanon=self.deanon)
             self.db._store.bulk_extend(g.Quad(*t) for t in _)
             del _
 
