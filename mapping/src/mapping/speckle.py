@@ -26,6 +26,7 @@ def mk_rules(*,
             return mk_rules(paths=[paths], inference=inference)
         else:
             for p in paths:
+                assert(p.exists())
                 if p.is_dir():
                     _ = _ + rules_from_dir(p)
                 else:
