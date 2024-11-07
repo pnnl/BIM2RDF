@@ -1,3 +1,4 @@
+from sys import maxsize
 from engine.triples import Engine, PyRuleCallable, Triples
 from .engine import ConstructRule, Rules, OxiGraph, Triples, PyRule
 from typing import Callable, Iterable
@@ -69,8 +70,7 @@ class SpeckleGetter(PyRule):
         _ = _ + f"branch_id={self.branch_id},"
         _ = _ + f"object_id={self.object_id})"
         return _
-
-    @staticmethod
+    
     def get_branches(stream_id)-> 'branch names':
         assert(stream_id)
         _ = query_speckle_meta()
@@ -106,7 +106,6 @@ class SpeckleGetter(PyRule):
         _ = self._getters.meta()
         return _
     
-
 def namespaces():
     _ = SpeckleGetter.get_streams()
     from speckle import object_uri
@@ -120,12 +119,12 @@ def namespaces():
 
 
 # from datetime import timedelta, datetime
-# from .cache import get_cache
 # def my_ttu(_key, value, now):
 #     # assume value.ttl contains the item's time-to-live in hours
 #     return now + timedelta(hours=value.ttl)
 # @get_cache('specklemeta', type='TLRUCache', maxsize=1, ttu=my_ttu, timer=datetime.now ) #
-# IDK TODO:
+from .cache import get_cache
+@get_cache('specklemeta', maxsize=1)
 def query_speckle_meta():
     from speckle.graphql import queries
     _ = queries()
