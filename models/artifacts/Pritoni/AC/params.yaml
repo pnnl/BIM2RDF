@@ -1,0 +1,13 @@
+variation:
+  branches:
+  - architecture/rooms and lighting fixtures
+  - architecture/lighting device
+  - architecture/hvac zone
+  - electrical/panels
+  - electrical/electrical connection
+  sparql_rules:
+  - ./../../../rules/data/AC
+  - ./../../../rules/mappings/common
+  - ./../../../rules/mappings/AC
+  inference: true
+  validation: true
