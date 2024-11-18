@@ -14,9 +14,13 @@ def get_dir():
     return dir
 
 
-def get_cache(name, *p, dev=True, key=None, type='LRUCache', **k):
+def get_cache(name, *p,
+              dir = None,
+               dev=True, key=None, type='LRUCache', **k):
+    if not dir:
+        dir = get_dir()
     if dev:
-        fp = get_dir() / name
+        fp = dir / name
         from shelved_cache import PersistentCache
         import cachetools
         _ = getattr(cachetools, type)
