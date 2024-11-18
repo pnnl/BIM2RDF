@@ -312,6 +312,7 @@ class RDFing:
 def to_rdf(data: str | dict,
            meta: str | dict = {},
            asserted=True,
+           sort = True # (attempt to) make conversion deterministic
            ):
     d = data
     m = meta
@@ -329,7 +330,7 @@ def to_rdf(data: str | dict,
             from json import loads
             m = loads(m)
 
-    d = triples(d)    
+    d = triples(d)
     if m:
         m = triples(m)
         m = RDFing.map(d, meta=m)
@@ -339,8 +340,13 @@ def to_rdf(data: str | dict,
         else:
             d = frozenset()
         # asserted 'data' triples + meta triples
-        d = RDFing.list(frozenset(m) | d )
+        _ = frozenset(m) | d  # set->list source of indeterminism
+        if sort:
+            _ = sorted(_, key=str)
+        d = RDFing.list(_)
     else:
+        if sort:
+            d = sorted(d, key=str)
         d = RDFing.map(d)
     d = str(d)
     return d
