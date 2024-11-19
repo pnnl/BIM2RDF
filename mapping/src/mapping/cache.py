@@ -1,15 +1,26 @@
 
 def get_dir():
     from project import root
-    dir = root  / 'models' / 'cache'
+    from yaml import safe_load
+    p = root / 'models' / 'params.yaml'
+    p = open(p)
+    p = safe_load(p)['run']
+    dir = (
+        root / 'models' / 'artifacts'
+        / p['building'] / p['variation']
+        /'cache')
     if not dir.exists():
         dir.mkdir()
     return dir
 
 
-def get_cache(name, *p, dev=True, key=None, type='LRUCache', **k):
+def get_cache(name, *p,
+              dir = None,
+               dev=True, key=None, type='LRUCache', **k):
+    if not dir:
+        dir = get_dir()
     if dev:
-        fp = get_dir() / name
+        fp = dir / name
         from shelved_cache import PersistentCache
         import cachetools
         _ = getattr(cachetools, type)
