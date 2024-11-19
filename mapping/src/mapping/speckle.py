@@ -123,8 +123,8 @@ def namespaces():
 #     # assume value.ttl contains the item's time-to-live in hours
 #     return now + timedelta(hours=value.ttl)
 # @get_cache('specklemeta', type='TLRUCache', maxsize=1, ttu=my_ttu, timer=datetime.now ) #
-from .cache import get_cache
-@get_cache('specklemeta', maxsize=1)
+from .cache import get_cache, get_dir
+@get_cache('specklemeta', dir=get_dir() / 'data',  maxsize=1)
 def query_speckle_meta():
     from speckle.graphql import queries
     _ = queries()
@@ -214,12 +214,12 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
     def sideload(db: OxiGraph):
         # TODO: just the meta branch name is enough
         m = get_speckle_meta_json(stream_id, branch_id, object_id)
-        from .cache import get_cache as cache
+        from .cache import get_cache as cache, get_dir
         # stream_id is not a name here so caching is fine.
         from speckle.data import get_json
-        get_json = cache('speckle', maxsize=100)(get_json)
+        get_json = cache('speckle', dir=get_dir() / 'data', maxsize=100)(get_json)
         d = get_json(stream_id, object_id)
-        @cache('speckle_rdf', maxsize=100)
+        @cache('speckle_rdf', dir=get_dir() / 'func',  maxsize=100)
         def to_rdf(stream_id, object_id):
             # args are just used for the cache
             # to identify the result
