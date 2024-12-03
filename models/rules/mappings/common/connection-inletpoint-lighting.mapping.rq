@@ -1,3 +1,4 @@
+
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX spkl: <http://speckle.systems/> 
@@ -6,11 +7,12 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX meta: <http://meta>
 
 CONSTRUCT { 
+
 ?o1     s223:cnx  _:c.
 _:c a s223:InletConnectionPoint.
 _:c s223:hasMedium s223:EM-Light.
 _:c rdfs:label "InletConnectionPoint"^^xsd:string.
-#  no em-light connection equivalent like pipe and wire
+  #no em-light connection equivalent like pipe and wire
 
 
 } 

@@ -59,7 +59,7 @@ def check_proc_manually(cmd, proc):
             logger.warning(l)
         else:
             _.append(l)
-    proc.stdout = ''.join(_)
+    proc.stdout = '\n'.join(_)
     return proc
 
 def validate(data: Path, shapes:Path=None):

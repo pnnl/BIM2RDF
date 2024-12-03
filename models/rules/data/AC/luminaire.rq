@@ -6,11 +6,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX meta: <http://meta>
 
 CONSTRUCT {
-?conn s223:cnx _:luminairewire.
-_:luminairewire a s223:ElectricWire.
-_:luminairewire s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
-_:luminairewire rdfs:label "ElectricWire"^^xsd:string.
-_:luminairewire s223:cnx _:junctionoutlet.
+#?conn s223:cnx _:luminairewire.
+#_:luminairewire a s223:ElectricWire.
+#_:luminairewire s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
+#_:luminairewire rdfs:label "ElectricWire"^^xsd:string.
+?luminairewire s223:cnx _:junctionoutlet.
 _:junctionoutlet a s223:OutletConnectionPoint.
 _:junctionoutlet rdfs:label "OutletConnectionPoint"^^xsd:string.
 _:junctionoutlet s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
@@ -20,18 +20,24 @@ _:junctionoutlet s223:cnx ?j.
 WHERE {
 {
   
-  <<?lumcircuit spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>.
-  ?lumcircuit spkl:Connectors ?l.
-  ?l  ?in ?r.# list item
-  ?r  spkl:referencedId ?conn.
+  #<<?lumcircuit spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>.
+  #?lumcircuit spkl:Connectors ?l.
+  #?l  ?in ?r.# list item
+  #?r  spkl:referencedId ?conn.
   #?li spkl:connectedConnectorIds ?conn.
+
+ <<?luminairewire spkl:category  "Electrical Circuits">> meta: <<?si spkl:name "electrical/electrical connection">>.
+  ?luminairewire spkl:parameters ?m.
+  ?m ?y ?circuit1.
+  ?circuit1 spkl:applicationInternalName "RBS_ELEC_CIRCUIT_PANEL_PARAM".
+  ?circuit1 spkl:value ?circuitname.
   }
 
 {
-  ?lumcircuit spkl:parameters ?m.
-  ?m ?k ?circuit1. 
-  ?circuit1 spkl:applicationInternalName "RBS_ELEC_CIRCUIT_PANEL_PARAM".
-	?circuit1 spkl:value ?circuitname.
+  #?lumcircuit spkl:parameters ?m.
+  #?m ?k ?circuit1. 
+  #?circuit1 spkl:applicationInternalName "RBS_ELEC_CIRCUIT_PANEL_PARAM".
+	#?circuit1 spkl:value ?circuitname.
  }
 
   {

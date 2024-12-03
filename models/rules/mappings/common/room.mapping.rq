@@ -27,12 +27,12 @@ CONSTRUCT {
     #?number s223:hasEnumerationKind qudt:AbstractQuantityKind. 
     #?number qudt:id ?roomnumber.
 ?w rdfs:label "Property"^^xsd:string.
-#?this s223:hasProperty ?occupancy. #to get occupancy count from Rooms in Revit Model
-#?occupancy a s223:QuantifiableObservableProperty.
-#?occupancy s223:hasQuantityKind qudtqk:Population.
-#?occupancy qudt:hasUnit unit:NUM.
-#?occupancy s223:hasValue ?oc.
-#?occupancy rdfs:label "QuantifiableObservableProperty"^^xsd:string.
+?this s223:hasProperty ?occupancy. #to get occupancy count from Rooms in Revit Model
+?occupancy a s223:QuantifiableProperty.
+?occupancy s223:hasQuantityKind qudtqk:Population.
+?occupancy qudt:hasUnit unit:NUM.
+?occupancy s223:hasValue ?oc.
+?occupancy rdfs:label "QuantifiableProperty"^^xsd:string.
 
 } 
 WHERE { 
@@ -46,9 +46,11 @@ WHERE {
   ?number ?d ?w.
   ?w spkl:applicationInternalName "ROOM_NUMBER".
   ?w spkl:value ?roomnumber.
-  #?this spkl:parameters/spkl:ROOM_OCCUPANCY ?occupancy. 
-  #?occupancy spkl:value ?occupancycount. 
-  #BIND(xsd:decimal(?occupancycount) AS ?oc).
+  ?this spkl:parameters ?occ2. 
+  ?occ2 ?oc1 ?occupancy.
+  ?occupancy spkl:applicationInternalName "ROOM_OCCUPANCY". 
+  ?occupancy spkl:value ?occupancycount. 
+  BIND(xsd:decimal(?occupancycount) AS ?oc).
   
 OPTIONAL
     {

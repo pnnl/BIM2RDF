@@ -6,10 +6,10 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX meta: <http://meta>
 
 CONSTRUCT {
-?conn s223:cnx ?luminairewire.
-?luminairewire a s223:ElectricWire.
-?luminairewire s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
-?luminairewire rdfs:label "ElectricWire"^^xsd:string.
+#?conn s223:cnx ?luminairewire.
+#?luminairewire a s223:ElectricWire.
+#?luminairewire s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
+#?luminairewire rdfs:label "ElectricWire"^^xsd:string.
 ?luminairewire s223:cnx ?junctionoutlet.
 ?junctionoutlet a s223:OutletConnectionPoint.
 ?junctionoutlet rdfs:label "OutletConnectionPoint"^^xsd:string.
@@ -18,10 +18,10 @@ CONSTRUCT {
 }
 WHERE 
 {
-?conn s223:cnx ?luminairewire.
-?luminairewire a s223:ElectricWire.
-?luminairewire s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
-?luminairewire rdfs:label "ElectricWire"^^xsd:string.
+#?conn s223:cnx ?luminairewire.
+#?luminairewire a s223:ElectricWire.
+#?luminairewire s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
+#?luminairewire rdfs:label "ElectricWire"^^xsd:string.
 ?luminairewire s223:cnx ?junctionoutlet.
 ?junctionoutlet a s223:OutletConnectionPoint.
 ?junctionoutlet rdfs:label "OutletConnectionPoint"^^xsd:string.
