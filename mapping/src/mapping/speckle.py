@@ -1,3 +1,4 @@
+from sys import maxsize
 from engine.triples import Engine, PyRuleCallable, Triples
 from .engine import ConstructRule, Rules, OxiGraph, Triples, PyRule
 from typing import Callable, Iterable
@@ -26,6 +27,7 @@ def mk_rules(*,
             return mk_rules(paths=[paths], inference=inference)
         else:
             for p in paths:
+                assert(p.exists())
                 if p.is_dir():
                     _ = _ + rules_from_dir(p)
                 else:
@@ -68,8 +70,7 @@ class SpeckleGetter(PyRule):
         _ = _ + f"branch_id={self.branch_id},"
         _ = _ + f"object_id={self.object_id})"
         return _
-
-    @staticmethod
+    
     def get_branches(stream_id)-> 'branch names':
         assert(stream_id)
         _ = query_speckle_meta()
@@ -105,7 +106,6 @@ class SpeckleGetter(PyRule):
         _ = self._getters.meta()
         return _
     
-
 def namespaces():
     _ = SpeckleGetter.get_streams()
     from speckle import object_uri
@@ -119,12 +119,12 @@ def namespaces():
 
 
 # from datetime import timedelta, datetime
-# from .cache import get_cache
 # def my_ttu(_key, value, now):
 #     # assume value.ttl contains the item's time-to-live in hours
 #     return now + timedelta(hours=value.ttl)
 # @get_cache('specklemeta', type='TLRUCache', maxsize=1, ttu=my_ttu, timer=datetime.now ) #
-# IDK TODO:
+from .cache import get_cache, get_dir
+@get_cache('specklemeta', dir=get_dir() / 'data',  maxsize=1)
 def query_speckle_meta():
     from speckle.graphql import queries
     _ = queries()
@@ -214,12 +214,12 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
     def sideload(db: OxiGraph):
         # TODO: just the meta branch name is enough
         m = get_speckle_meta_json(stream_id, branch_id, object_id)
-        from .cache import get_cache as cache
+        from .cache import get_cache as cache, get_dir
         # stream_id is not a name here so caching is fine.
         from speckle.data import get_json
-        get_json = cache('speckle', maxsize=100)(get_json)
+        get_json = cache('speckle', dir=get_dir() / 'data', maxsize=100)(get_json)
         d = get_json(stream_id, object_id)
-        @cache('speckle_rdf', maxsize=100)
+        @cache('speckle_rdf', dir=get_dir() / 'func',  maxsize=100)
         def to_rdf(stream_id, object_id):
             # args are just used for the cache
             # to identify the result

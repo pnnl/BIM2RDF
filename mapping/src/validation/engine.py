@@ -46,7 +46,7 @@ def shacl_validation(db: OxiGraph,) -> Triples:
 
 def shapes():
     from project import root
-    shapes = root / 'models' / 'ontology.ttl'
+    shapes = root / 'models' / 'artifacts' / 'ontology.ttl'
     from mapping.utils.data import get_data
     return get_data(shapes)
 
