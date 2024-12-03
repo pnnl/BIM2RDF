@@ -272,7 +272,7 @@ def fix(g: Graph) -> Graph:
 def get_ontology(_: OxiGraph,) -> Triples:
     from .utils.data import get_data
     from project import root
-    _ = get_data(root / 'models' / 'ontology.ttl'  ) # collection
+    _ = get_data(root / 'models' / 'artifacts' / 'ontology.ttl'  ) # collection
     return _
 
 
@@ -320,7 +320,7 @@ def rdflib_rdfs(db: OxiGraph) -> Iterable[Triple]:
 def shapes():
     from pyoxigraph import parse, RdfFormat as fmt
     from project import root
-    s = root / 'models'  / 'ontology.ttl'
+    s = root / 'models' / 'artifacts' / 'ontology.ttl'
     s = open(s, mode='rt', encoding='utf-8')
     return parse(s, format=fmt.TURTLE)
 

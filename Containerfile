@@ -22,7 +22,7 @@ RUN apk add openjdk21-jre curl
 # install build utils. psutils wants it
 RUN apk add gcc musl-dev linux-headers
 # for convenience
-ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.cargo/bin
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.cargo/bin:/root/.local/bin
 # install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 # make dir inside container same as outside (?)
