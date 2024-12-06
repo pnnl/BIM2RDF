@@ -1,5 +1,5 @@
 variation:
-  branches:
+  models:
   - 7d076f9a92 # architecture/rooms and lighting fixtures
   - 0deebd69f8 # architecture/lighting device        
   - c08764c302 # architecture/hvac zone
