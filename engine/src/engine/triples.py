@@ -398,6 +398,7 @@ class Engine(b.Engine): # rule app on Store
                     logger.info(f"took {'{0:.2f}'.format(monotonic()-start_time)} seconds")
         
         self.i += 1
+        self.db._store.flush()
         self.db._store.optimize()
         return self.db
 
