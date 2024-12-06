@@ -1,3 +1,5 @@
+server = 'app.speckle.systems'
+
 
 def config(dev = True):
     from project import root
@@ -18,6 +20,7 @@ def config(dev = True):
             import json
             json.dump({"speckl_token": get('gitlab-speckle')}, f)
         return _
+
 
 
 if __name__ == '__main__':

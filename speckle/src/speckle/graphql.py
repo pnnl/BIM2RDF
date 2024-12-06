@@ -1,6 +1,6 @@
 
-
-gql_url = 'https://speckle.xyz/graphql'
+from .config import server
+gql_url = f'https://{server}/graphql'
 
 
 def client():
@@ -74,38 +74,38 @@ def queries(client=client):
     from .graphql import get_dsl_schema
     s = get_dsl_schema(client=client)
     
+    # dev the query at https://app.speckle.systems/graphql
     def general_meta():
-        return s.Query.streams.args(limit=biglim).select(
-            s.StreamCollection.items.select(
-                s.Stream.id,
-                s.Stream.name,
-                s.Stream.branches.select(
-                    s.BranchCollection.items.select(
-                        s.Branch.id,
-                        s.Branch.name,
-                        s.Branch.createdAt,
-                        s.Branch.commits.select(
-                            s.CommitCollection.items.select(
-                                s.Commit.id,
-                                s.Commit.referencedObject,
-                                s.Commit.createdAt
-                                )
-                            )
-                        )
-                )  )  )
+        return """ query  { activeUser {
+        projects { items {
+            id
+            name
+            models { items {
+                id
+                name
+                createdAt
+                versions { items {
+                    id
+                    referencedObject
+                    createdAt
+        }}}}}}}}
+        """
     
     # stick with the rest api b/c this add a lil more nesting?
-    def objects(stream_id, object_id):
-        return s.Query.stream.args(id=stream_id).select(
-                    s.Stream.id,
-                    s.Stream.object.args(id=object_id).select(
-                        s.Object.data,
-                        s.Object.children.args(limit=biglim, depth=biglim).select(
-                            s.ObjectCollection.totalCount,
-                            s.ObjectCollection.objects.select(
-                                s.Object.data,
-                            )
-                        )))
+    def objects(project_id, object_id):
+        _ = """ query {
+        project(id: "project_id") {
+            object(id: "object_id") {
+            data
+            children(limit: biglim, depth: biglim) {
+                objects {
+                data
+        }}}}}
+        """
+        _ = _.replace('project_id', project_id)
+        _ = _.replace('object_id',  object_id)
+        _ = _.replace('biglim', str(biglim))
+        return _
     
     return NS(general_meta=general_meta, objects=objects)
 
