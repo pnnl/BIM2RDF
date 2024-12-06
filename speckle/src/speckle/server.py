@@ -19,7 +19,7 @@ def rdf(d: dict):
 
 def test():
     from .graphql import queries, query
-    _ = queries().streams
+    _ = queries().projects
     _ = query(_)
     _ = rdf(_)
     return _
