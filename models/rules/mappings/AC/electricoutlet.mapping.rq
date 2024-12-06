@@ -7,6 +7,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 CONSTRUCT { 
 ?this a s223:ElectricOutlet.
+#?this s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
 #?this rdfs:label ?name . 
 ?this rdfs:label "ElectricOutlet"^^xsd:string.
 ?this s223:hasMedium s223:Constituent-Electricity.
@@ -14,10 +15,25 @@ CONSTRUCT {
  
 } 
 WHERE { 
+{
 <<?this spkl:category  "Electrical Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>. # TODO branchName could be used here
     ?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types' 
-    #?this spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?name. 
-     ?this spkl:roomId ?rl.
+    #?this spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?name.
+?this spkl:roomId ?rl.
 <<?r spkl:category  "Rooms">> meta: <<?si spkl:name "architecture/rooms and lighting fixtures">>.
-?r spkl:elementId ?rl.
+?r spkl:elementId ?rl. 
+
+}
+union   
+    {
+    <<?this spkl:category  "Electrical Fixtures">> meta: <<?mi spkl:name "electrical/electrical connection">>. # TODO branchName could be used here
+    ?this spkl:phaseCreated ?_. 
+    ?this spkl:parameters ?p.
+    ?p ?k ?o1.
+    ?o1 spkl:applicationInternalName "2aee439a-9568-46e6-be17-e9ccba6ff8d5".
+    ?o1 spkl:value ?rl.
+    <<?r spkl:category  "Rooms">> meta: <<?si spkl:name "architecture/rooms and lighting fixtures">>.
+    ?r spkl:elementId ?rl. 
+    }
+
 }

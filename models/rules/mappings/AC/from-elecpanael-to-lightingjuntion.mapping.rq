@@ -11,13 +11,13 @@ CONSTRUCT {
 ?conn s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
 } 
 WHERE 
-   {
+{
 ?elecbreaker a s223:ElectricBreaker.    
 <<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. 
 ?elecbreaker spkl:Connectors ?l.
-  ?l  ?in ?r. # list item
-  ?r  spkl:referencedId ?conn.
-  #?li spkl:connectedConnectorIds ?conn.
+?l  ?in ?r. # list item
+?r  spkl:referencedId ?conn.
+#?li spkl:connectedConnectorIds ?conn.
  
 #?conn s223:cnx ?wirejunction.
 #?wirejunction a s223:ElectricWire.
