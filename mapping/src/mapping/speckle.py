@@ -56,58 +56,58 @@ def query(q):
 
 class SpeckleGetter(PyRule):
 
-    def __init__(self, stream_id, branch_id=None, object_id=None) -> None:
-        self.stream_id = stream_id
-        self.branch_id = branch_id
+    def __init__(self, project_id, model_id=None, object_id=None) -> None:
+        self.project_id = project_id
+        self.model_id = model_id
         self.object_id = object_id
-        _ = get_speckle(stream_id, branch_id=branch_id, object_id=object_id)
+        _ = get_speckle(project_id, model_id=model_id, object_id=object_id)
         super().__init__(_.objects)
         self._getters = _
 
     def __repr__(self) -> str:
         _ = f"{self.__class__.__name__}"
-        _ = _ + f"(stream_id={self.stream_id},"
-        _ = _ + f"branch_id={self.branch_id},"
+        _ = _ + f"(project_id={self.project_id},"
+        _ = _ + f"model_id={self.model_id},"
         _ = _ + f"object_id={self.object_id})"
         return _
     
-    def get_branches(stream_id)-> 'branch names':
-        assert(stream_id)
+    def get_models(project_id)-> 'model names':
+        assert(project_id)
         _ = query_speckle_meta()
-        _ = _['streams']['items']
+        _ = _['projects']['items']
         for d in _:
-            if stream_id in {d['id'], d['name']}:
-                stream_id = d['id']
+            if project_id in {d['id'], d['name']}:
+                project_id = d['id']
                 break
-        if stream_id != d['id']: raise ValueError('stream not found')
+        if project_id != d['id']: raise ValueError('project not found')
         
-        _ = d['branches']['items']
+        _ = d['models']['items']
         _ = sorted(_, key=lambda i: i['createdAt'] )
         _ = tuple(d['name'] for d in _)
         return _
     
     @staticmethod
-    def get_streams() -> 'streams':
+    def get_projects() -> 'projects':
         _ = query_speckle_meta()
         from types import SimpleNamespace as NS
         return tuple(
             NS(id=i['id'], name=i['name'])
-            for i in  _['streams']['items'])
+            for i in  _['projects']['items'])
 
     @classmethod
-    def multiple(cls, stream_id, branch_ids=[]):  # object_ids = []
+    def multiple(cls, project_id, model_ids=[]):  # object_ids = []
         #  TODO 1:1 with object_id    (bid_n, oid_n) --> speckle export
-        if not branch_ids: # analagous behavior to branch_id=None
-            branch_ids = cls.get_branches(stream_id)
-        for b in branch_ids:
-            yield cls(stream_id, branch_id=b, )
+        if not model_ids: # analagous behavior to model_id=None
+            model_ids = cls.get_models(project_id)
+        for b in model_ids:
+            yield cls(project_id, model_id=b, )
 
     def meta(self, ) -> Triples:
         _ = self._getters.meta()
         return _
     
 def namespaces():
-    _ = SpeckleGetter.get_streams()
+    _ = SpeckleGetter.get_projects()
     from speckle import object_uri
     from ontologies import namespace
     from rdflib import URIRef
@@ -130,65 +130,66 @@ def query_speckle_meta():
     _ = queries()
     _ = _.general_meta()
     _ = query(_)
+    _ = _['activeUser']
     return _
 
 # TODO: sparql query the full general_meta instead of writing python
 from functools import lru_cache
 @lru_cache
-def get_speckle_meta_json(stream_id, branch_id, object_id) -> dict:
+def get_speckle_meta_json(project_id, model_id, object_id) -> dict:
     _ = query_speckle_meta()
     id = 'id'
     name = 'name'
     items = 'items'
-    stream = 'stream'; streams = 'streams'
-    branch = 'branch'; branches = 'branches'
+    project = 'project'; projects = 'projects'
+    model = 'model'; models = 'models'
     createdAt = 'createdAt'
     referencedObject = 'referencedObject'
-    commit = 'commit'; commits = 'commits'
+    version = 'version'; versions = 'versions'
     m = {}
     
-    for s in _[streams][items]:
-        if stream_id == s[id]:
-            #m[stream] = {id: s[id], name: s[name]}
+    for s in _[projects][items]:
+        if project_id == s[id]:
+            #m[project] = {id: s[id], name: s[name]}
             break
-    # just keep branch Name. it's the only one that's used
-    for b in s[branches][items]:
-        if branch_id == b[id]:
-            m[branch] = {id: b[id], name: b[name],} # createdAt: b[createdAt] }
+    # just keep model Name. it's the only one that's used
+    for b in s[models][items]:
+        if model_id == b[id]:
+            m[model] = {id: b[id], name: b[name],} # createdAt: b[createdAt] }
             break
     
-    for c in b[commits][items]:
+    for c in b[versions][items]:
         if object_id == c[referencedObject]:
-            #m[commit] = {id: c[id], referencedObject: c[referencedObject], createdAt: c[createdAt] }
+            #m[version] = {id: c[id], referencedObject: c[referencedObject], createdAt: c[createdAt] }
             break
     
     _ = m
     return _
 
 
-def get_speckle(stream_id, *, branch_id=None, object_id=None):
-    assert(stream_id)
+def get_speckle(project_id, *, model_id=None, object_id=None):
+    assert(project_id)
     _ = query_speckle_meta()
-    _ = _['streams']['items']
+    _ = _['projects']['items']
     for d in _:
-        if stream_id in {d['id'], d['name']}:
-            stream_id = d['id']
+        if project_id in {d['id'], d['name']}:
+            project_id = d['id']
             break
-    if stream_id != d['id']: raise ValueError('stream not found')
+    if project_id != d['id']: raise ValueError('project not found')
     
-    _ = d['branches']['items']
+    _ = d['models']['items']
     _ = sorted(_, key=lambda i: i['createdAt'] )
     for d in _:
-        if branch_id in {d['id'], d['name']}:
-            branch_id = d['id']
+        if model_id in {d['id'], d['name']}:
+            model_id = d['id']
             break
-    if branch_id:
-        if branch_id != d['id']:
-            raise ValueError('branch not found')
+    if model_id:
+        if model_id != d['id']:
+            raise ValueError('model not found')
     else:
-        branch_id = d['id']
+        model_id = d['id']
     
-    _ = d['commits']['items']
+    _ = d['versions']['items']
     from types import SimpleNamespace as N
     if not len(_):  # if there are no items
         return N(
@@ -208,25 +209,25 @@ def get_speckle(stream_id, *, branch_id=None, object_id=None):
         object_id = d['referencedObject']
 
     _ = d
-    assert(stream_id)
+    assert(project_id)
     assert(object_id)
 
     def sideload(db: OxiGraph):
-        # TODO: just the meta branch name is enough
-        m = get_speckle_meta_json(stream_id, branch_id, object_id)
+        # TODO: just the meta model name is enough
+        m = get_speckle_meta_json(project_id, model_id, object_id)
         from .cache import get_cache as cache, get_dir
-        # stream_id is not a name here so caching is fine.
+        # project_id is not a name here so caching is fine.
         from speckle.data import get_json
         get_json = cache('speckle', dir=get_dir() / 'data', maxsize=100)(get_json)
-        d = get_json(stream_id, object_id)
+        d = get_json(project_id, object_id)
         @cache('speckle_rdf', dir=get_dir() / 'func',  maxsize=100)
-        def to_rdf(stream_id, object_id):
+        def to_rdf(project_id, object_id):
             # args are just used for the cache
             # to identify the result
             from speckle.json2rdf import to_rdf
             _ = to_rdf(d, meta=m)
             return _
-        _ = to_rdf(stream_id, object_id)
+        _ = to_rdf(project_id, object_id)
         _ = _ + '\n'  # idk fixes issue to make rdfformat.turtle!!
         from io import StringIO
         _ = StringIO(_)
@@ -256,14 +257,14 @@ def fengine(og=OxiGraph(), *,
     return _
 
 
-allowed_branches = {
+allowed_models = {
     'architecture', 'electrical', 'mechanical', 'plumbing',
 }
 
 from pathlib import Path
 from typing import Iterable
 from pyoxigraph import Store
-def map_(stream_id, *, branch_ids=None,
+def map_(project_id, *, model_ids=None,
         rules: Path | Iterable[Path] | None = maps_dir,
         max_cycles=10,
         inference=False,
@@ -272,21 +273,21 @@ def map_(stream_id, *, branch_ids=None,
         ) -> Store:
     object_id=None
     assert(
-        (stream_id in (s.id for s in SpeckleGetter.get_streams()) )
+        (project_id in (s.id for s in SpeckleGetter.get_projects()) )
         or
-        (stream_id in (s.name for s in SpeckleGetter.get_streams()) )
+        (project_id in (s.name for s in SpeckleGetter.get_projects()) )
           )
 
-    # parsing of branch_id is relegated to
-    if branch_ids is None:
+    # parsing of model_id is relegated to
+    if model_ids is None:
         # figuring this is the default mode of working from now.
-        data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id) if sg.branch_id.split('/')[0].lower() in allowed_branches ])
-    elif isinstance(branch_ids, (list, tuple, set)):
-        data_rules = Rules([sg for sg in SpeckleGetter.multiple(stream_id, branch_ids)])
-    elif isinstance(branch_ids, str):
-        data_rules = Rules([SpeckleGetter(stream_id, branch_id=branch_ids, object_id=object_id),])
+        data_rules = Rules([sg for sg in SpeckleGetter.multiple(project_id) if sg.model_id.split('/')[0].lower() in allowed_models ])
+    elif isinstance(model_ids, (list, tuple, set)):
+        data_rules = Rules([sg for sg in SpeckleGetter.multiple(project_id, model_ids)])
+    elif isinstance(model_ids, str):
+        data_rules = Rules([SpeckleGetter(project_id, model_id=model_ids, object_id=object_id),])
     else:
-        raise TypeError('branch id not processed')
+        raise TypeError('model id not processed')
     
     if rules:
         if isinstance(rules, (list, tuple, set)):
@@ -344,7 +345,7 @@ def map_(stream_id, *, branch_ids=None,
     return _.db._store
 
 
-def write_map(stream_id, *, branch_ids=None,
+def write_map(project_id, *, model_ids=None,
             rules: Path | Iterable[Path] | None = maps_dir,
             max_cycles=10,
             inference=False,
@@ -358,7 +359,7 @@ def write_map(stream_id, *, branch_ids=None,
         if tuple(out.iterdir()):
             raise IOError(f'{out} not empty')
     init = OxiGraph(Store(out))
-    _ = map_(stream_id, branch_ids=branch_ids,
+    _ = map_(project_id, model_ids=model_ids,
             rules = rules,
             max_cycles=max_cycles,
             inference=inference,
