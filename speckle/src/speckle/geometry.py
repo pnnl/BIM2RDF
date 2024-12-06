@@ -5,7 +5,7 @@ from functools import lru_cache
 @lru_cache(maxsize=None)
 def has_property(store, property: str|tuple, category=None, subject=None, limit=1):
     # objects in the speckle sense (not semantic)
-    #no need for branch and graph specifiers
+    #no need for model and graph specifiers
     if isinstance(property, str):
         property = f"spkl:{property}"
     else:
@@ -53,11 +53,11 @@ def prefixes():
     return _
 
 
-def objectsq(cat, branch=None, graph=None):
+def objectsq(cat, model=None, graph=None):
     # objects in the speckle sense (not semantic)
     _ = f"?s spkl:category \"{cat}\""
-    if branch:
-        bl = f"""<< {_} >> meta: <<?branch spkl:name "{branch}" >>."""
+    if model:
+        bl = f"""<< {_} >> meta: <<?model spkl:name "{model}" >>."""
     else:
         bl = ''
     _ = f"""
@@ -68,23 +68,23 @@ def objectsq(cat, branch=None, graph=None):
         {_}.
         {bl}
     }}
-    """ # branchName could be used here TODO
+    """ # modelName could be used here TODO
     _ = Query(_)
     return _
 
 
-def get_objects(store, cat, branch=None, graph=None):
+def get_objects(store, cat, model=None, graph=None):
     # fast enough query
-    _ = objectsq(cat, branch=branch, graph=graph)
+    _ = objectsq(cat, model=model, graph=graph)
     _ = store.query(_)
     return tuple(r[0] for r in _)
 
 
-def geo_branch_selector(branch=None):
+def geo_model_selector(model=None):
     s = f'<<?_so ?_sp ?vl >>'
     p = "meta:"
-    o = f'<<?_branch spkl:name "{branch}" >>'  # branchName could be used here TODO
-    _ = f"{s} {p} {o}." if branch else ''
+    o = f'<<?_model spkl:name "{model}" >>'  # modelName could be used here TODO
+    _ = f"{s} {p} {o}." if model else ''
     return _
 
 
@@ -125,7 +125,7 @@ def geoq(subjects: str|tuple,
         assert(isinstance(subjects, (tuple, list, frozenset, set)))
     # single object at a time to not load all geometry in one query
     # using values seems to help with performance. (using filter was too slow)
-    # need branch selector if have subject?
+    # need model selector if have subject?
     if 'transform' == list_selector:
         select = f"select distinct ?s ?l"
         lines = list_selector_lines().transform
@@ -149,7 +149,7 @@ def geoq(subjects: str|tuple,
     where {{
     values ?s {{ {' '.join(str(s) for s in subjects)} }}
     {' '.join(lines)}
-    #{'branch_selector'} HUGE difference!!!!
+    #{'model_selector'} HUGE difference!!!!
     }}
     {grouping}
     """
@@ -267,9 +267,9 @@ def geometry_getter(store,
 @lru_cache(maxsize=None)
 def category_geom_getter(store,
                  cat, lst2arr: list_selection,
-                 branch=None,
+                 model=None,
                  graph=None):
-    os = get_objects(store, cat, branch=branch, graph=graph)
+    os = get_objects(store, cat, model=model, graph=graph)
     _ = geometry_getter(store, os, lst2arr, graph=graph)
     from types import SimpleNamespace as NS
     _ = NS(objects=os, getter=_)
@@ -305,7 +305,7 @@ objects_cache = {}
 class Object:
     # perhaps the speckle sdk is useful here,
     # so that i dont have to query
-    def __init__(self, uri, store, branch,
+    def __init__(self, uri, store, model,
             geom_getter_type:Literal['single']|Literal['category']='single') -> None:
         uri = str(uri)
         if (uri.startswith('<')):
@@ -314,7 +314,7 @@ class Object:
             uri = uri[:-1]
         self.uri = uri
         self.store = store
-        self.branch = branch # reqd to filter
+        self.model = model # reqd to filter
         self.geom_getter_type = geom_getter_type
     
     def __str__(self) -> str:
@@ -338,7 +338,7 @@ class Object:
             assert('category' == self.geom_getter_type)
             _ = self.has('category')
             _ = _.value
-            _ = category_geom_getter(store, _, lst2arr, self.branch, )
+            _ = category_geom_getter(store, _, lst2arr, self.model, )
             _ = _.getter
             _ = _()
             _ = _[s]
@@ -346,16 +346,16 @@ class Object:
         raise NotImplementedError('how to get geometry?')
     
     @classmethod
-    def get_objects(cls, store, category, branch, use_cache=True):
-        for uri in get_objects(store, category, branch=branch,):
+    def get_objects(cls, store, category, model, use_cache=True):
+        for uri in get_objects(store, category, model=model,):
             if not use_cache:
-                _ = cls(uri, store, branch, geom_getter_type='category')
+                _ = cls(uri, store, model, geom_getter_type='category')
                 yield _
             else:
                 if uri in objects_cache:
                     yield objects_cache[uri]
                 else:
-                    _ = cls(uri, store, branch, geom_getter_type='category')
+                    _ = cls(uri, store, model, geom_getter_type='category')
                     objects_cache[uri] = _
                     yield _
     
