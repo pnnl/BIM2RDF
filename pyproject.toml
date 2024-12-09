@@ -7,7 +7,7 @@ authors = [
 ]
 dependencies = [
     # 'local' ones
-    "cicd>=0.1.0",
+    "cicd",
     # 'local' ones
     "engine",
     "mapping",
@@ -15,6 +15,7 @@ dependencies = [
     "ontologies",
     "speckle",
     "topquadrant",
+    "json2rdf"
 ]
 readme = "README.md"
 requires-python = "==3.11.9"
@@ -60,8 +61,9 @@ project_dvc =    { path = 'project_dvc'     , editable = true}
 speckle =        { path = 'speckle'         , editable = true}
 topquadrant =    { path = 'topquadrant'     , editable = true}
 viz =            { path = 'viz'             , editable = true}
+json2rdf =       { path = 'json2rdf'        , editable = true}
 
-[tool.uv.workspace]
+
 # might do 'external'/'release'/'public' ws
 # members = [
 #     'cicd',

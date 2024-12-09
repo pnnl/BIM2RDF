@@ -1,0 +1,21 @@
+[project]
+name = "json2rdf"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" },
+    { name = "Majid alDosari", email = "majidaldosari-github@yahoo.com" }
+]
+requires-python = ">=3.11.9"
+dependencies = [
+    "boltons", # todo: vendor just the specific function used
+]
+
+[project.scripts]
+json2rdf = "json2rdf:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
