@@ -70,57 +70,68 @@ class Termination:
         return remap(d, visit=cls.visit)
 
 
-
 class Identification:
-    idkeys = {'id'}
-    ref_idkeys = {
-        'referencedId',
-        'connectedConnectorIds'}
+    types = (int, str)
 
     from dataclasses import dataclass
     @dataclass(frozen=True)
     class ID:
-        value: int | str # usually
+        value: int | str # usually. types above
         def __str__(self) -> str:
             return str(self.value)
+    class anonID(ID): ...
     
-    terminals = {Termination.terminals}|{ID}
+    terminals = {Termination.terminals}|{ID, anonID}
     terminals = tuple(terminals)
-    
+
+    subject_keys = ('id',)
+    from functools import cache
     @classmethod
-    def visit(cls, p, k, v):
-        # interpret identifier cases
-        if k in cls.ref_idkeys:
-            if isinstance(v, (int, str)):
-                return k, cls.ID(v)
-        if p: # example connectedIds: [id1,id2,id3]
-            if any(k in cls.ref_idkeys for k in p):
-                if isinstance(v, (int, str)):
-                    return k, cls.ID(v)
-        return True
-    
+    @cache  # how to class property??
+    def subject_key(cls): return cls.subject_keys[0]
+    object_keys = {'refid',}
+        
     @classmethod
     def enter(cls, p, k, v):
-        ids = cls.idkeys
+        ids = cls.subject_keys
         def dicthasid(v):
             for id in ids:
                 if id in v:
-                    return id
+                    yield id
         if type(v) is dict:
-            did = dicthasid(v)
-            return {'id': cls.ID(v['id']) if did is not None else cls.ID(id(v)) }, ((k,v) for k,v in  v.items() if k !=did)
+            dids = dicthasid(v)
+            dids = tuple(dids)
+            return (
+                #        wrap in ID
+                {sk: cls.ID(v[sk]) for sk in dids}
+                or {cls.subject_key(): cls.anonID(id(v))},
+                #       ..the rest of the data
+                ((k,v) for k,v in  v.items() if k not in dids ) )
         elif type(v) is list:
-            # TODO: id(lst) is not deterministics
-            return {'id': cls.ID(id(v)) }, enumerate(v)
+            # id(lst) is not deterministic. don't think it's a 'problem'
+            return ({cls.subject_key(): cls.anonID(id(v)) },
+                    enumerate(v))
         else:
-            assert(isinstance(v, cls.terminals ))
-            return k, False        
+            assert(isinstance(v, cls.terminals))
+            return k, False
     
+    @classmethod
+    def visit(cls, p, k, v):
+        # interpret object identifier cases
+        # no anon. it's there.
+        if k in cls.object_keys:
+            if isinstance(v, cls.types):
+                return k, cls.ID(v)
+        if p: # example connectedIds: [id1,id2,id3]
+            if any(k in cls.object_keys for k in p):
+                if isinstance(v, cls.types):
+                    return k, cls.ID(v)
+        return True
+
     @classmethod
     def map(cls, d):
         from boltons.iterutils import remap
         return remap(d, enter=cls.enter, visit=cls.visit)
-
 
 
 class Tripling:
@@ -142,32 +153,35 @@ class Tripling:
         def __str__(self) -> str:
             _ = '\n'.join([str(i) for i in self])
             return _
-
-    @classmethod
-    def visit(cls, p, k, v):
-        if isinstance(v, cls.Triple):
-            if v.predicate in Identification.idkeys:
-                if isinstance(v.object, Identification.ID):
-                    return k, cls.Triple(v.subject, v.predicate, v.object.value)
-        return True
     
     @classmethod
     def enter(cls, p, k, v):
         if isinstance(v, dict):
-            assert('id' in v)
+            assert(Identification.subject_key() in v)
             def _(v):
                 for ik, iv in v.items():
                     if isinstance(iv, dict):
-                        #                   ptr to dict
-                        yield from (cls.Triple(v['id'] , ik, iv['id'] ), iv )
+                        yield from (
+                            cls.Triple(v[Identification.subject_key()] , ik, iv[Identification.subject_key()] ),
+                            iv, )
                     else:
                         assert(isinstance(iv, Identification.terminals ))
-                        yield cls.Triple(v['id'], ik, iv)
+                        if not ((ik in Identification.subject_keys) and (type(iv) is Identification.anonID)):
+                            yield cls.Triple(v[Identification.subject_key()], ik, iv)
             return cls.list(), enumerate(_(v))
         else:
             assert(isinstance(v, cls.Triple))
             # no nesting. no need to 'enter'
             return None, False
+    
+    @classmethod
+    def visit(cls, p, k, v):
+        if isinstance(v, cls.Triple):
+            if v.predicate in Identification.subject_keys:
+                if isinstance(v.object, Identification.ID):
+                    return k, cls.Triple(v.subject, v.predicate, v.object.value)
+        return True
+
     
     @classmethod
     def map(cls, d, flatten=True):
@@ -196,7 +210,6 @@ class Tripling:
         return flatten(items, seqtypes=seqtypes)
 
 
-
 class RDFing:
 
     class Triple(Tripling.Triple):
@@ -212,17 +225,15 @@ class RDFing:
                 o = str(self.object)
             return f"{s} {self.predicate} {o}."
     class list(Tripling.list):
-        # TODO: DRY these
-        prefix = 'spkl'
-        from speckle import base_uri
-        base_uri = base_uri()
-        meta_prefix = 'meta'
-        meta_uri = "http://meta"
+        prefix =        'prefix'
+        uri =           f"urn:example:{prefix}:"
+        meta_prefix =   'meta'
+        meta_uri =      "urn:example:meta"
 
         def __str__(self) -> str:
-            _ = f'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n'
-            _ = _ + f'prefix {self.prefix}: <{self.base_uri}>  \n'
-            _ = _ + f'prefix {self.meta_prefix}: <{self.meta_uri}>  \n\n'
+            _ =     f'prefix rdf:                   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n'
+            _ = _ + f'prefix {self.prefix}:         <{self.uri}>  \n'
+            _ = _ + f'prefix {self.meta_prefix}:    <{self.meta_uri}>  \n\n'
             _ = _ + super().__str__()
             return _
     
@@ -232,7 +243,11 @@ class RDFing:
         from types import NoneType
         # SUBJECT
         assert(isinstance(s, Identification.ID))
-        s = f'{cls.list.prefix}:{s}'
+        if type(s) is Identification.ID:
+            s = f'{cls.list.prefix}:{s}'
+        else:
+            assert(type(s) is Identification.anonID)
+            s = f'_:{s}'
 
         # PREDICATE
         # just need to take care of int predicates
@@ -243,7 +258,7 @@ class RDFing:
             p = p.replace(' ', '_')
             # create legal by dropping non alpha num
             # url encodeing?
-            p = ''.join(c for c in p if c.isalnum() or c == '_' )
+            p = ''.join(c for c in p if c.isalnum() or c == '_')
             p = f'{cls.list.prefix}:{p}'
         
         # OBJECT
@@ -268,7 +283,11 @@ class RDFing:
         elif isinstance(o, Termination.NumList):
             o = '"'+str(o)+'"'
         elif isinstance(o, Identification.ID):
-            o = f'{cls.list.prefix}:{o}'
+            if type(o) is Identification.ID:
+                o = f'{cls.list.prefix}:{o}'
+            else:
+                assert(type(o) is Identification.anonID)
+                o = f'_:{o}'
         else:
             o = str(o)
         return cls.Triple(s,p,o)
@@ -308,12 +327,48 @@ class RDFing:
         return _
 
 
+def to_rdf(
+        data: str | dict,
+        meta: str | dict = {},
+        *,
+        asserted =      True,
+        sort =          True, # (attempt to) make conversion deterministic
+        # id interpretation
+        subject_keys =   Identification.subject_keys,
+        object_keys =    Identification.object_keys,
+        # uri construction
+        prefix =        RDFing.list.prefix, 
+        uri =           RDFing.list.uri,
+        meta_prefix =   RDFing.list.meta_prefix,
+        meta_uri =      RDFing.list.meta_uri
+        ):
+    """
+    meta: meta triples to associate with data triples:
+        <<data triple>> {meta_uri} <<meta triple n>>.
+    asserted: in the case of meta triples, should the data triples be separate?
+          data.subject data.predicate data.object.                                # include this?
+        <<data.subject data.predicate data.object>> {meta_uri} <<meta triple n>>. # ..in addition to this?
+    sort: the triples
+    subject_keys: set of keys to create a uri out of in for the *subject*.
+        the first key will be used to create a predicate if one does not exist.
+        example: {"id": 1, "key":"abc" } ->
+            prefix:1 prefix:key "abc".
+            prefix:1 prefix:id prefix:1.
+        example: case when no id key: {"key: "abc"} ->
+            prefix:generated prefix:key "abc".
+            prefix:generated prefix:id prefix:generated.
+    object_keys: set of keys to interpret as a uri out of as an *object*.
+        example: {"id": 1, "refid": 2,} ->
+            prefix:1 prefix:refid prefix:2.
+    """
+    Identification.subject_keys = [k for k in subject_keys if k in frozenset(subject_keys)]
+    Identification.object_keys = frozenset(object_keys)
 
-def to_rdf(data: str | dict,
-           meta: str | dict = {},
-           asserted=True,
-           sort = True # (attempt to) make conversion deterministic
-           ):
+    RDFing.list.prefix = prefix
+    RDFing.list.uri = uri
+    RDFing.list.meta_prefix = meta_prefix
+    RDFing.list.meta_uri = meta_uri
+
     d = data
     m = meta
     def triples(data):
