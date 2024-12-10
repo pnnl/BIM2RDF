@@ -42,6 +42,10 @@ class Termination:
             _ = _['array']
             return _
         
+        @staticmethod
+        def allnum(it): 
+            return all(isinstance(i, (float, int) ) for i in it)
+        
     terminals = {
         int, float,
         str,
@@ -53,13 +57,12 @@ class Termination:
     terminals = tuple(terminals)
     @classmethod
     def visit(cls, p, k, v):
-        def allnum(it): return all(isinstance(i, (float, int) ) for i in it)
         if k  == 'matrix':
             assert(isinstance(v, list))
-            assert(allnum(v))
+            assert(cls.NumList.allnum(v))
             return k, cls.NumList(v)
         elif k == 'data' and isinstance(v, list):
-            assert(allnum(v))
+            assert(cls.NumList.allnum(v))
             return k, cls.NumList(v)
         else:
             return True
