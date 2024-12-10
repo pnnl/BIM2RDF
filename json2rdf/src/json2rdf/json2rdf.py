@@ -87,7 +87,7 @@ class Identification:
     subject_keys = ('id',)
     from functools import cache
     @classmethod
-    @cache  # how to class property??
+    @cache  # how to class property?? # TODO: problem when subject_keys changes
     def subject_key(cls): return cls.subject_keys[0]
     object_keys = {'refid',}
         
@@ -225,15 +225,18 @@ class RDFing:
                 o = str(self.object)
             return f"{s} {self.predicate} {o}."
     class list(Tripling.list):
-        prefix =        'prefix'
-        uri =           f"urn:example:{prefix}:"
-        meta_prefix =   'meta'
-        meta_uri =      "urn:example:meta"
+        id_prefix =                 'id'
+        id_uri =                    f"urn:example:{id_prefix}:"
+        key_prefix =                'prefix'
+        key_uri =                   f"urn:example:{key_prefix}:"
+        meta_prefix =               'meta'
+        meta_uri =                  "urn:example:meta:"
 
         def __str__(self) -> str:
             _ =     f'prefix rdf:                   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n'
-            _ = _ + f'prefix {self.prefix}:         <{self.uri}>  \n'
-            _ = _ + f'prefix {self.meta_prefix}:    <{self.meta_uri}>  \n\n'
+            _ = _ + f'prefix {self.id_prefix}:      <{self.id_uri}>     \n'
+            _ = _ + f'prefix {self.key_prefix}:     <{self.key_uri}>    \n'
+            _ = _ + f'prefix {self.meta_prefix}:    <{self.meta_uri}>   \n\n'
             _ = _ + super().__str__()
             return _
     
@@ -244,7 +247,7 @@ class RDFing:
         # SUBJECT
         assert(isinstance(s, Identification.ID))
         if type(s) is Identification.ID:
-            s = f'{cls.list.prefix}:{s}'
+            s = f'{cls.list.id_prefix}:{s}'
         else:
             assert(type(s) is Identification.anonID)
             s = f'_:{s}'
@@ -259,7 +262,7 @@ class RDFing:
             # create legal by dropping non alpha num
             # url encodeing?
             p = ''.join(c for c in p if c.isalnum() or c == '_')
-            p = f'{cls.list.prefix}:{p}'
+            p = f'{cls.list.key_prefix}:{p}'
         
         # OBJECT
         #      need to escape quotes
@@ -284,7 +287,7 @@ class RDFing:
             o = '"'+str(o)+'"'
         elif isinstance(o, Identification.ID):
             if type(o) is Identification.ID:
-                o = f'{cls.list.prefix}:{o}'
+                o = f'{cls.list.id_prefix}:{o}'
             else:
                 assert(type(o) is Identification.anonID)
                 o = f'_:{o}'
@@ -331,16 +334,18 @@ def to_rdf(
         data: str | dict,
         meta: str | dict = {},
         *,
-        asserted =      True,
-        sort =          True, # (attempt to) make conversion deterministic
+        asserted =          True,
+        sort =              True, # (attempt to) make conversion deterministic
         # id interpretation
-        subject_keys =   Identification.subject_keys,
-        object_keys =    Identification.object_keys,
+        subject_id_keys =   Identification.subject_keys,
+        object_id_keys =    Identification.object_keys,
         # uri construction
-        prefix =        RDFing.list.prefix, 
-        uri =           RDFing.list.uri,
-        meta_prefix =   RDFing.list.meta_prefix,
-        meta_uri =      RDFing.list.meta_uri
+        id_prefix =         (RDFing.list.id_prefix,
+                             RDFing.list.id_uri),
+        key_prefix =        (RDFing.list.key_prefix,
+                             RDFing.list.key_uri),
+        meta_prefix =       (RDFing.list.meta_prefix,
+                             RDFing.list.meta_uri)
         ):
     """
     meta: meta triples to associate with data triples:
@@ -361,13 +366,12 @@ def to_rdf(
         example: {"id": 1, "refid": 2,} ->
             prefix:1 prefix:refid prefix:2.
     """
-    Identification.subject_keys = [k for k in subject_keys if k in frozenset(subject_keys)]
-    Identification.object_keys = frozenset(object_keys)
+    Identification.subject_keys = [k for k in subject_id_keys if k in frozenset(subject_id_keys)]
+    Identification.object_keys = frozenset(object_id_keys)
 
-    RDFing.list.prefix = prefix
-    RDFing.list.uri = uri
-    RDFing.list.meta_prefix = meta_prefix
-    RDFing.list.meta_uri = meta_uri
+    RDFing.list.id_prefix,      RDFing.list.id_uri =    id_prefix
+    RDFing.list.key_prefix,     RDFing.list.key_uri =   key_prefix
+    RDFing.list.meta_prefix,    RDFing.list.meta_uri =  meta_prefix
 
     d = data
     m = meta
