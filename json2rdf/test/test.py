@@ -44,7 +44,7 @@ def test():
 
     _ = json()
     from json2rdf.json2rdf import to_rdf
-    f = to_rdf(_, subject_keys=('id',) )
+    f = to_rdf(_, subject_id_keys=('id',) )
     print(f)
     #f = Graph().parse(data=f, format='text/turtle')
 
