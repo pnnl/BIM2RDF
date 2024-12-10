@@ -85,17 +85,17 @@ class Identification:
     terminals = tuple(terminals)
 
     subject_keys = ('id',)
-    from functools import cache
-    @classmethod
-    @cache  # how to class property?? # TODO: problem when subject_keys changes
-    def subject_key(cls): return cls.subject_keys[0]
+    # cant do 
+    # subject_key = subject_keys[0] 
+    # @classproperty 'deprecated'
+    # def subject_key
     object_keys = {'refid',}
         
     @classmethod
     def enter(cls, p, k, v):
-        ids = cls.subject_keys
+        subject_key = cls.subject_keys[0]
         def dicthasid(v):
-            for id in ids:
+            for id in cls.subject_keys:
                 if id in v:
                     yield id
         if type(v) is dict:
@@ -104,12 +104,12 @@ class Identification:
             return (
                 #        wrap in ID
                 {sk: cls.ID(v[sk]) for sk in dids}
-                or {cls.subject_key(): cls.anonID(id(v))},
+                or {subject_key: cls.anonID(id(v))},
                 #       ..the rest of the data
                 ((k,v) for k,v in  v.items() if k not in dids ) )
         elif type(v) is list:
             # id(lst) is not deterministic. don't think it's a 'problem'
-            return ({cls.subject_key(): cls.anonID(id(v)) },
+            return ({subject_key: cls.anonID(id(v)) },
                     enumerate(v))
         else:
             assert(isinstance(v, cls.terminals))
@@ -156,18 +156,19 @@ class Tripling:
     
     @classmethod
     def enter(cls, p, k, v):
+        subject_key = Identification.subject_keys[0]
         if isinstance(v, dict):
-            assert(Identification.subject_key() in v)
+            assert(subject_key in v)
             def _(v):
                 for ik, iv in v.items():
                     if isinstance(iv, dict):
                         yield from (
-                            cls.Triple(v[Identification.subject_key()] , ik, iv[Identification.subject_key()] ),
+                            cls.Triple(v[subject_key] , ik, iv[subject_key] ),
                             iv, )
                     else:
                         assert(isinstance(iv, Identification.terminals ))
                         if not ((ik in Identification.subject_keys) and (type(iv) is Identification.anonID)):
-                            yield cls.Triple(v[Identification.subject_key()], ik, iv)
+                            yield cls.Triple(v[subject_key], ik, iv)
             return cls.list(), enumerate(_(v))
         else:
             assert(isinstance(v, cls.Triple))
