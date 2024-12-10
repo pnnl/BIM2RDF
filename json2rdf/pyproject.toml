@@ -11,9 +11,16 @@ requires-python = ">=3.11.9"
 dependencies = [
     "boltons", # todo: vendor just the specific function used
 ]
+[tool.uv]
+dev-dependencies = [
+    'pytest',
+    'rdflib'  # shouldn't need this as a 'run' dep (above)
+]
+
 
 [project.scripts]
 json2rdf = "json2rdf:main"
+
 
 [build-system]
 requires = ["hatchling"]
