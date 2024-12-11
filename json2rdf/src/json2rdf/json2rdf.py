@@ -9,7 +9,8 @@ class Termination:
     """ 'pre'-processing """
     class NumList(tuple):
         def __str__(self, ):
-            return "encoded num list"
+            return self.data_encode(self)
+        keys = {'array', }
         
         @staticmethod
         def data_encode(d: list) -> str:
@@ -44,7 +45,7 @@ class Termination:
         
         @staticmethod
         def allnum(it): 
-            return all(isinstance(i, (float, int) ) for i in it)
+            return all(isinstance(i, (float, int, complex) ) for i in it)
         
     terminals = {
         int, float,
@@ -57,11 +58,8 @@ class Termination:
     terminals = tuple(terminals)
     @classmethod
     def visit(cls, p, k, v):
-        if k  == 'matrix':
+        if k in cls.NumList.keys:
             assert(isinstance(v, list))
-            assert(cls.NumList.allnum(v))
-            return k, cls.NumList(v)
-        elif k == 'data' and isinstance(v, list):
             assert(cls.NumList.allnum(v))
             return k, cls.NumList(v)
         else:
@@ -343,6 +341,8 @@ def to_rdf(
         # id interpretation
         subject_id_keys =   Identification.subject_keys,
         object_id_keys =    Identification.object_keys,
+        # array
+        array_keys =        Termination.NumList.keys,
         # uri construction
         id_prefix =         (RDFing.list.id_prefix,
                              RDFing.list.id_uri),
@@ -372,6 +372,8 @@ def to_rdf(
     """
     Identification.subject_keys = [k for k in subject_id_keys if k in frozenset(subject_id_keys)]
     Identification.object_keys = frozenset(object_id_keys)
+
+    Termination.NumList.keys = frozenset(array_keys)
 
     RDFing.list.id_prefix,      RDFing.list.id_uri =    id_prefix
     RDFing.list.key_prefix,     RDFing.list.key_uri =   key_prefix
