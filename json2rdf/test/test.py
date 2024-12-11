@@ -19,6 +19,9 @@ def json():
 def json():
     return {'id':'id', 'ID': 'ID', 'refid': 'id' }
 
+def json():
+    return {'id':'id', 'array': list(range(5))  }
+
 
 def rdf():
     return """
@@ -47,7 +50,7 @@ def test():
 
     _ = json()
     from json2rdf.json2rdf import to_rdf
-    f = to_rdf(_, subject_id_keys=('ID', 'id') )
+    f = to_rdf(_, )
     print()
     print(f)
     #f = Graph().parse(data=f, format='text/turtle')
