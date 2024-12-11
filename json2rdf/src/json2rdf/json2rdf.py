@@ -45,7 +45,11 @@ class Termination:
         
         @staticmethod
         def allnum(it): 
+            #                 dont think json has complex, so doesn't matter
             return all(isinstance(i, (float, int, complex) ) for i in it)
+        @staticmethod
+        def interpret(it):#  TODO: could interpret a list of whatever if needed
+            raise NotImplementedError
         
     terminals = {
         int, float,
