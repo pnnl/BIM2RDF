@@ -50,7 +50,7 @@ def test():
 
     _ = json()
     from json2rdf.json2rdf import to_rdf
-    f = to_rdf(_, )
+    f = to_rdf(_, array_keys = {'array',} )
     print()
     print(f)
     #f = Graph().parse(data=f, format='text/turtle')

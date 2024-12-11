@@ -342,7 +342,7 @@ def to_rdf(
         subject_id_keys =   Identification.subject_keys,
         object_id_keys =    Identification.object_keys,
         # array
-        array_keys =        Termination.NumList.keys,
+        array_keys =         {},#Termination.NumList.keys,
         # uri construction
         id_prefix =         (RDFing.list.id_prefix,
                              RDFing.list.id_uri),
