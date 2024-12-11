@@ -1,4 +1,3 @@
-from sys import maxsize
 from engine.triples import Engine, PyRuleCallable, Triples
 from .engine import ConstructRule, Rules, OxiGraph, Triples, PyRule
 from typing import Callable, Iterable
@@ -221,11 +220,11 @@ def get_speckle(project_id, *, model_id=None, object_id=None):
         get_json = cache('speckle', dir=get_dir() / 'data', maxsize=100)(get_json)
         d = get_json(project_id, object_id)
         @cache('speckle_rdf', dir=get_dir() / 'func',  maxsize=100)
-        def to_rdf(project_id, object_id):
+        def to_rdf(project_id, object_id): # object_id just used for cache lookup
             # args are just used for the cache
             # to identify the result
             from speckle.json2rdf import to_rdf
-            _ = to_rdf(d, meta=m)
+            _ = to_rdf(d, m, project_id=project_id)
             return _
         _ = to_rdf(project_id, object_id)
         _ = _ + '\n'  # idk fixes issue to make rdfformat.turtle!!
