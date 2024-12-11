@@ -44,30 +44,30 @@ class Termination:
             return _
         
         @staticmethod
-        def allnum(it): 
+        def allnum(it):
             #                 dont think json has complex, so doesn't matter
             return all(isinstance(i, (float, int, complex) ) for i in it)
         @staticmethod
         def interpret(it):#  TODO: could interpret a list of whatever if needed
             raise NotImplementedError
-        
+
     terminals = {
         int, float,
         str,
         bool,
         type(None), # weird
         # does json have datetime?
-        NumList, # don't traverse these if matrix
+        NumList, # don't traverse these if array
         }
     terminals = tuple(terminals)
     @classmethod
     def visit(cls, p, k, v):
         if k in cls.NumList.keys:
-            assert(isinstance(v, list))
-            assert(cls.NumList.allnum(v))
-            return k, cls.NumList(v)
-        else:
-            return True
+            # permissively create. don't insist on below conditions.
+            if isinstance(v, list):
+                if cls.NumList.allnum(v):
+                    return k, cls.NumList(v)
+        return True
 
     @classmethod
     def map(cls, d):
