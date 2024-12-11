@@ -9,7 +9,8 @@ authors = [
 ]
 requires-python = ">=3.11.9"
 dependencies = [
-    "boltons", # todo: vendor just the specific function used
+    "boltons", # TODO: vendor just the specific function used
+    "numpy", # could be optional TODO
 ]
 [tool.uv]
 dev-dependencies = [
