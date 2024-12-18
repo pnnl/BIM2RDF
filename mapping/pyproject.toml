@@ -6,6 +6,7 @@ authors = [
     { name = "Bilal Faye", email = "bilal.faye@pnnl.gov" }, 
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
 ]
+readme = "README.md"
 dependencies = [
     "rdflib",
     "pyyaml",
@@ -13,8 +14,7 @@ dependencies = [
     "owlrl",   # TODO: could be optional
     "fire",
 ]
-readme = "README.md"
-[project.optional-dependencies]
+[dependency-groups]
 # https://github.com/astral-sh/uv/issues/7541
 dev = [
     "pandas",

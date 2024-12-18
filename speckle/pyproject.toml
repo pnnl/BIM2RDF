@@ -5,6 +5,7 @@ description = "Mainly creates a ttl from a speckle json"
 authors = [
     {name =  "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
 ]
+readme = "README.md"
 dependencies = [
     "gql[requests]",
     "urllib3<2",
@@ -12,8 +13,7 @@ dependencies = [
     "boltons",
     "rdflib",
     "numpy",]
-readme = "README.md"
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "fire", # the cmd only applies in the dev situation
     ] 
