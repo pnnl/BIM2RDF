@@ -7,7 +7,7 @@ authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
 ]
 dependencies = ["fire", "pyprojroot"]
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pylint",
     "gitpython", "pre-commit"]

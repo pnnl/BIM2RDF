@@ -5,6 +5,8 @@ description = "Add a short description here"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
 ]
+readme = "README.md"
+requires-python = "==3.11.9"
 dependencies = [
     # 'local' ones
     "cicd",
@@ -17,33 +19,24 @@ dependencies = [
     "topquadrant",
     "json2rdf"
 ]
-readme = "README.md"
-requires-python = "==3.11.9"
 
-
-[tool.uv]
-# dev-deps are not installed transitively
-# https://github.com/astral-sh/uv/issues/6935
-#https://github.com/astral-sh/uv/issues/7541#issuecomment-2363210945
-dev-dependencies = [
+[dependency-groups]
+dev = [
+    #'aider-install', can uv pip install aider-install
     "ipython", 
-    #"pip", # careful! only for one-offs! check how uv does this
-    # debugging
     "ipdb", 
     "icecream",
-    # local. (could just list everything with pkg[dev])
-    # ..though uv gives warnings
-    "models[dev]",
-    "mapping[dev]",
-    "speckle[dev]",
-    # 'pure',  dev
-    "cicd[dev]",
-    "project[dev]",
-    "project_azure[dev]",
-    "project_dvc[dev]",
-    "dvcdiff[dev]",
-    "graphdb[dev]",
-     ]
+    "models",
+    "mapping",
+    "speckle",
+    "cicd",
+    "project",
+    "project_azure",
+    "project_dvc",
+    "dvcdiff",
+    "graphdb",
+]
+
 [tool.uv.sources]
 # just listing the dirs alphabetically
 cicd    =        { path = 'cicd'            , editable = true}
@@ -62,23 +55,3 @@ speckle =        { path = 'speckle'         , editable = true}
 topquadrant =    { path = 'topquadrant'     , editable = true}
 viz =            { path = 'viz'             , editable = true}
 json2rdf =       { path = 'json2rdf'        , editable = true}
-
-
-# might do 'external'/'release'/'public' ws
-# members = [
-#     'cicd',
-#     'doc',
-#     'dvcdiff',
-#     'engine',
-#     'graphdb',
-#     # infra does't have 'code'
-#     'mapping',
-#     'models',
-#     'ontologies',
-#     'project',
-#     'project_azure',
-#     'project_dvc',
-#     'speckle',
-#     'topquadrant',
-#     'viz'
-#     ]
