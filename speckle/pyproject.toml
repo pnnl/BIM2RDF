@@ -14,11 +14,16 @@ dependencies = [
     ]
 [dependency-groups]
 dev = [
+    "ipython", "ipdb",
+    "pytest",
     "json2rdf[cli]",
-    ] 
+    "project",
+    ]
 
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.uv.sources]
+project =        { path = '../project'         , editable = true}
