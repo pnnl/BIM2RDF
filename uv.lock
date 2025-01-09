@@ -789,10 +789,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [
-    { name = "fire" },
-    { name = "json2rdf", extras = ["cli"] },
-]
+dev = [{ name = "json2rdf", extras = ["cli"] }]
 
 [[package]]
 name = "stack-data"

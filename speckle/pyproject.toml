@@ -14,7 +14,6 @@ dependencies = [
     ]
 [dependency-groups]
 dev = [
-    "fire", # the cmd only applies in the dev situation
     "json2rdf[cli]",
     ] 
 
