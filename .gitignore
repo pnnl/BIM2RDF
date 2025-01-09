@@ -16,3 +16,4 @@
 # config
 !*.yaml
 !*.yml
+!uv.lock
