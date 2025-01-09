@@ -1,7 +1,7 @@
 [project]
 name = "speckle"
 version = "0.1.0"
-description = "Mainly creates a ttl from a speckle json"
+description = "access speckle data"
 authors = [
     {name =  "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
 ]
@@ -10,12 +10,12 @@ dependencies = [
     "gql[requests]",
     "urllib3<2",
     #https://github.com/psf/requests/releases/tag/v2.30.0
-    "boltons",
-    "rdflib",
-    "numpy",]
+    "json2rdf"
+    ]
 [dependency-groups]
 dev = [
     "fire", # the cmd only applies in the dev situation
+    "json2rdf[cli]",
     ] 
 
 
