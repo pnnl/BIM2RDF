@@ -6,11 +6,10 @@ readme = "README.md"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
 ]
-dependencies = ["fire", "pyprojroot"]
-[dependency-groups]
-dev = [
-    "pylint",
-    "gitpython", "pre-commit"]
+dependencies = [
+    "fire", "pyprojroot",
+    "gitpython", "pre-commit",
+    ]
 
 [build-system]
 requires = ["hatchling"]

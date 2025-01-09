@@ -9,7 +9,6 @@ readme = "README.md"
 requires-python = "==3.11.9"
 dependencies = [
     "pytqshacl",
-    "json2rdf",
     "rdf-engine",
     # 'local' ones
     "rules",
@@ -18,14 +17,17 @@ dependencies = [
     "speckle",
 ]
 [project.optional-dependencies]
-spklauto = ["specklepy"] # TODO
+spklauto = []  # ['spklauto'] TODO
 
 [dependency-groups]
 dev = [
-    "pytqshacl[java,cli]",
-    "json2rdf[cli]",
+    # tools
     #'aider-install', can uv pip install aider-install
-    "ipython", "ipdb", "icecream",
+    "ipython", "ipdb",
+    "icecream",
+    # automation
+    # local conveniences
+    "pytqshacl[java,cli]",
     "project",
     # spklauto
     # pydantic-settings
@@ -38,3 +40,8 @@ project =        { path = 'project'         , editable = true}
 rules =          { path = 'rules'           , editable = true}
 #ontologies =     { path = 'ontologies'      , editable = true}
 speckle =        { path = 'speckle'         , editable = true}
+# spklauto
+
+
+# include sparql in bld
+# TODO: build
