@@ -1,14 +1,11 @@
 [project]
-name = "engine"
+name = "rules"
 version = "0.1.0"
 description = "Add a short description here"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" },
 ]
-dependencies = [
-    "pyoxigraph",
-    "rdflib", # just for 'deanon', otherwise dont want this
-    ]
+dependencies = []
 readme = "README.md"
 
 [build-system]

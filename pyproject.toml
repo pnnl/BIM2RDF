@@ -1,57 +1,40 @@
 [project]
-name = "semint"
+name = "bim2rdf"
 version = "0.1.0"
-description = "Add a short description here"
+description = "Convert BIM data to RDF models"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
 ]
 readme = "README.md"
 requires-python = "==3.11.9"
 dependencies = [
+    "pytqshacl",
+    "json2rdf",
+    "rdf-engine",
     # 'local' ones
-    "cicd",
-    # 'local' ones
-    "engine",
+    "rules",
     "mapping",
-    "models", # borderline dev
-    "ontologies",
+    #"ontologies",
     "speckle",
-    "topquadrant",
-    "json2rdf"
 ]
+[project.optional-dependencies]
+spklauto = ["specklepy"] # TODO
 
 [dependency-groups]
 dev = [
+    "pytqshacl[java,cli]",
+    "json2rdf[cli]",
     #'aider-install', can uv pip install aider-install
-    "ipython", 
-    "ipdb", 
-    "icecream",
-    "models",
-    "mapping",
-    "speckle",
-    "cicd",
+    "ipython", "ipdb", "icecream",
     "project",
-    "project_azure",
-    "project_dvc",
-    "dvcdiff",
-    "graphdb",
+    # spklauto
+    # pydantic-settings
 ]
 
 [tool.uv.sources]
 # just listing the dirs alphabetically
-cicd    =        { path = 'cicd'            , editable = true}
-doc    =         { path = 'doc'             , editable = true}
-dvcdiff =        { path = 'dvcdiff'         , editable = true}
-engine =         { path = 'engine'          , editable = true}
-graphdb =        { path = 'graphdb'         , editable = true}
-# # infra doesn't have 'code'
 mapping =        { path = 'mapping'         , editable = true}
-models =         { path = 'models'          , editable = true}
-ontologies =     { path = 'ontologies'      , editable = true}
 project =        { path = 'project'         , editable = true}
-project_azure =  { path = 'project_azure'   , editable = true}
-project_dvc =    { path = 'project_dvc'     , editable = true}
+rules =          { path = 'rules'           , editable = true}
+#ontologies =     { path = 'ontologies'      , editable = true}
 speckle =        { path = 'speckle'         , editable = true}
-topquadrant =    { path = 'topquadrant'     , editable = true}
-viz =            { path = 'viz'             , editable = true}
-json2rdf =       { path = 'json2rdf'        , editable = true}

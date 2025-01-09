@@ -1,1 +1,0 @@
-TODO: remove dep on mapping/speckle.py/mapping_dir

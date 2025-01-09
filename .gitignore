@@ -1,0 +1,16 @@
+# Note: This is restrictive but it might be possible
+# by using a .gitignore there
+# First, ignore everything
+*
+# Now, whitelist anything that's a directory
+!*/
+# And all the file types you're interested in.
+# don't ignore gitignore, hah
+!.gitignore
+# scripts and progs
+!*.py
+# doc
+!*.md
+# config
+!*.yaml
+!*.yml
