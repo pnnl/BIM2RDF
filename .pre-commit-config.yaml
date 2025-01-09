@@ -1,0 +1,18 @@
+default_install_hook_types:
+  - pre-commit
+  - pre-push
+  - prepare-commit-msg
+
+repos:
+
+- hooks:
+  - id: prepend-workdir-to-commit-msg
+    name: prepend work directory to git commit message
+    entry: python -m project.tasks.git _prepare-commit-msg-hook
+    language: system
+    stages:
+    - prepare-commit-msg
+  
+  repo: local
+
+
