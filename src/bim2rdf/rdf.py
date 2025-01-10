@@ -21,20 +21,20 @@ def _():
 
     from dataclasses import dataclass
     @dataclass(frozen=True)
-    class NameSpace:
+    class Prefix:
         name:   str
-        prefix: URI   # field(converter=URI) need attrs or pydantic??
+        uri:    URI   # field(converter=URI) need attrs or pydantic??
                       # hackery below to avoid installing attrs or pydantic
-    return URI, NameSpace
+    return URI, Prefix
 from types import SimpleNamespace
 _ = _()
-locals()['types'] = SimpleNamespace(URI=_[0], NameSpace=_[1])
+locals()['types'] = SimpleNamespace(URI=_[0], Prefix=_[1])
 
 # constructors
-def NameSpace(name: str, prefix: types.URI) -> types.NameSpace:
-    return types.NameSpace(
+def Prefix(name: str, prefix: types.URI) -> types.Prefix:
+    return types.Prefix(
         name=name,
-        prefix=types.URI(prefix))
+        uri=types.URI(prefix))
 
 def URI(u: str) -> types.URI:
     return types.URI(u)
