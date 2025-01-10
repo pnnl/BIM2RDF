@@ -8,16 +8,20 @@ authors = [
 readme = "README.md"
 requires-python = "==3.11.9"
 dependencies = [
+    #"bim2rdf",
+    'dynaconf', # 'python-dotenv', vendored in dyanconf https://www.dynaconf.com/#vendored
+    #
     "pytqshacl",
     "rdf-engine",
     # 'local' ones
     "rules",
     "mapping",
-    #"ontologies",
+    #"ontologies", # ? need this? or just create a ttl loader rule
     "speckle",
 ]
+
 [project.optional-dependencies]
-spklauto = []  # ['spklauto'] TODO
+spklauto = []  # ['spklauto'] under bim2rdf TODO
 
 [dependency-groups]
 dev = [
@@ -38,10 +42,13 @@ dev = [
 mapping =        { path = 'mapping'         , editable = true}
 project =        { path = 'project'         , editable = true}
 rules =          { path = 'rules'           , editable = true}
-#ontologies =     { path = 'ontologies'      , editable = true}
+#ontologies =     { path = 'ontologies'      , editable = true} 
 speckle =        { path = 'speckle'         , editable = true}
-# spklauto
 
 
-# include sparql in bld
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+# include sparql and toml in bld
 # TODO: build
