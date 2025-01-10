@@ -3,7 +3,7 @@ class object:
     @staticmethod
     def uri(project_id, object_id=''):
         from .config import server
-        return f"http://{server}/projects/{project_id}/objects/{object_id}"
+        return f"https://{server}/projects/{project_id}/objects/{object_id}"
 
 
 class prefixes:
