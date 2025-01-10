@@ -3,3 +3,5 @@ class defaults:
 from bim2rdf.config import config
 config.speckle
 config = config.speckle
+locals().update(**config)
+del config
