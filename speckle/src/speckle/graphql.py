@@ -21,9 +21,6 @@ def get_schema(client=client):
     _.execute(gql('{_}')) # some kind of 'nothing' query just to initialize things
     _ = _.schema
     return _
-    from graphql import print_schema
-    _ = print_schema(_)
-    return _
 
 
 import gql.dsl as dsl
@@ -54,28 +51,23 @@ def query(q=get_void_query(), client=client) -> dict: # json
     _ = _.execute(q)
     return _
 
+class queries:
 
-biglim = 99999
-
-
-# could make it a class.
-# Queries
-# def query1
-# def execute
-def queries(client=client):
-    from types import SimpleNamespace as NS
-    _q = """
-    {
-    apps {
-        id
-    }
-    }
-    """
-    from .graphql import get_dsl_schema
-    s = get_dsl_schema(client=client)
+    biglim = int(1e6)
+    def __init__(self, client=client):
+        from types import SimpleNamespace as NS
+        _q = """
+        {
+        apps {
+            id
+        }
+        }
+        """
+        from .graphql import get_dsl_schema
+        self.schema = get_dsl_schema(client=client)
     
     # dev the query at https://app.speckle.systems/graphql
-    def general_meta():
+    def general_meta(self):
         return """ query  { activeUser {
         projects { items {
             id
@@ -91,8 +83,7 @@ def queries(client=client):
         }}}}}}}}
         """
     
-    # stick with the rest api b/c this add a lil more nesting?
-    def objects(project_id, object_id):
+    def objects(self, project_id, object_id):
         _ = """ query {
         project(id: "project_id") {
             object(id: "object_id") {
@@ -104,9 +95,7 @@ def queries(client=client):
         """
         _ = _.replace('project_id', project_id)
         _ = _.replace('object_id',  object_id)
-        _ = _.replace('biglim', str(biglim))
+        _ = _.replace('biglim', str(self.biglim))
         return _
-    
-    return NS(general_meta=general_meta, objects=objects)
 
-
+queries = queries()
