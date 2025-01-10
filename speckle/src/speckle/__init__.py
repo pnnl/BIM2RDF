@@ -1,7 +1,3 @@
-# TODO: put in meta.py
-base_uri = lambda: f"http://speckle.systems/" # urn:speckle:concept TODO
-meta_uri = lambda: 'http://meta'              # urn:speckle:meta TODO
-
 
 def object_uri(project_id, object_id=''):
     from .config import server
