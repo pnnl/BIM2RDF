@@ -10,9 +10,6 @@ requires-python = "==3.11.9"
 dependencies = [
     #"bim2rdf",
     'dynaconf', # 'python-dotenv', vendored in dyanconf https://www.dynaconf.com/#vendored
-    #
-    "pytqshacl",
-    "rdf-engine",
     # 'local' ones
     "rules",
     "mapping",
@@ -30,8 +27,6 @@ dev = [
     "ipython", "ipdb",
     "icecream",
     # automation
-    # local conveniences
-    "pytqshacl[java,cli]",
     "project",
     # spklauto
     # pydantic-settings
@@ -39,12 +34,13 @@ dev = [
 
 [tool.uv.sources]
 # just listing the dirs alphabetically
-mapping =        { path = 'mapping'         , editable = true}
-project =        { path = 'project'         , editable = true}
-rules =          { path = 'rules'           , editable = true}
+mapping =        { workspace=true}
+project =        { workspace=true}
+rules =          { workspace=true}
 #ontologies =     { path = 'ontologies'      , editable = true} 
-speckle =        { path = 'speckle'         , editable = true}
-
+speckle =        { workspace=true}
+[tool.uv.workspace]
+members = ["mapping", "project", "rules", "speckle", ]
 
 
 [build-system]

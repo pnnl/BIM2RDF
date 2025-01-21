@@ -11,6 +11,6 @@ The operationalized version will on [Speckle Automate](https://www.speckle.syste
 # Development
 
 ```
-> uv sync
+> uv sync --all-packages
 > uv run pre-commit install
 ```

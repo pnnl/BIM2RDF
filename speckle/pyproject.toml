@@ -10,7 +10,7 @@ dependencies = [
     "gql[requests]",
     "urllib3<2",
     #https://github.com/psf/requests/releases/tag/v2.30.0
-    "json2rdf"
+    "json2rdf[numarray]"
     ]
 [dependency-groups]
 dev = [
@@ -25,5 +25,3 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.uv.sources]
-project =        { path = '../project'         , editable = true}

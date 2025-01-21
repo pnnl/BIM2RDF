@@ -5,8 +5,16 @@ description = "Add a short description here"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" },
 ]
-dependencies = []
+dependencies = [
+    "pytqshacl", 
+    "rdf-engine",
+]
 readme = "README.md"
+
+[dependency-groups]
+dev = [
+    "pytqshacl[java,cli]",
+]
 
 [build-system]
 requires = ["hatchling"]
