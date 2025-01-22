@@ -83,7 +83,7 @@ class queries:
         }}}}}}}}
         """
     
-    def objects(self, project_id, object_id):
+    def objects(self, *, project_id, object_id):
         _ = """ query {
         project(id: "project_id") {
             object(id: "object_id") {
