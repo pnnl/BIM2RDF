@@ -1,6 +1,5 @@
 
 
-from icecream import ic
 
 def test():
     import speckle.data as sd
