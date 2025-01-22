@@ -14,3 +14,9 @@ The operationalized version will on [Speckle Automate](https://www.speckle.syste
 > uv sync --all-packages
 > uv run pre-commit install
 ```
+Make a .secrets.toml file with
+```toml
+[speckle]
+token = "yourtoken"
+```
+
