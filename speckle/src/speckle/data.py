@@ -95,8 +95,6 @@ class Model:
             def wo_geometry(self):
                 _ = self.data()
                 from boltons.iterutils import remap#, get_path
-                # can be used to extract the whole object but not doing it now.
-                types = {'Objects.Other.Transform', 'Objects.Geometry.Mesh'}
                 def notvec(p,k,v):
                     if p:
                         if k in {'matrix', 'data', 'faces', 'vertices'}:
@@ -104,7 +102,18 @@ class Model:
                                 if all(isinstance(e, (int, float)) for e in v):
                                     return False
                     return True
-                _ = remap(_, notvec)
+                # can be used to extract the whole object but not doing it now.
+                def notgeo(p,k,v):
+                    # should have the above vec keys
+                    types = {'Objects.Other.Transform', 'Objects.Geometry.Mesh'}
+                    id = 'id'
+                    st = 'speckle_type'
+                    if isinstance(v, dict):
+                        if (st in v) and (id in v):
+                            if v[st] in types:
+                                return False
+                    return True
+                _ = remap(_, notgeo)
                 return _
         def json(self):
             return self.Json(self)
