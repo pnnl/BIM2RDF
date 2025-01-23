@@ -102,7 +102,6 @@ class Model:
                                 if all(isinstance(e, (int, float)) for e in v):
                                     return False
                     return True
-                # can be used to extract the whole object but not doing it now.
                 def notgeo(p,k,v):
                     # should have the above vec keys
                     types = {'Objects.Other.Transform', 'Objects.Geometry.Mesh'}
