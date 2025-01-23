@@ -2,7 +2,7 @@
 class Project:
     """convenience wrapper around graphql"""
     def __init__(self, id: str):
-        _ = self.projects()
+        _ = self._s()
         for p in _:
             if id == p['id']: break
         if p['id'] != id:
@@ -19,19 +19,21 @@ class Project:
 
     @classmethod
     @cache
-    def projects(cls, *, filter=lambda p: True):
+    def _s(cls, *, filter=lambda p: True):
         from speckle.graphql import queries, query
         _ = queries.general_meta()
         _ = query(_)
         _ = _['activeUser']['projects']['items']
         _ = [p for p in _ if filter(p)]
         return _
+    @classmethod
+    def s(cls, *p, **kw):
+        return [cls(_['id']) for _ in cls._s(*p, **kw)]
     @cached_property
     def meta(self) -> dict:
-        for p in self.projects():
+        for p in self._s():
             if p['id'] == self.id:
                 return p
-
 
     @cached_property
     def models(self):

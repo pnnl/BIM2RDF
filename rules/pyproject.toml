@@ -8,6 +8,7 @@ authors = [
 dependencies = [
     "pytqshacl", 
     "rdf-engine",
+    "json2rdf",
 ]
 readme = "README.md"
 
