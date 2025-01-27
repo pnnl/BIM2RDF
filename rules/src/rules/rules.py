@@ -1,11 +1,12 @@
 from pyoxigraph import Store, Quad, Triple, NamedNode
+from typing import Iterable
 
-from bim2rdf.rdf import Prefix
-meta =    Prefix('meta',    'urn:meta:')    # https://www.iana.org/assignments/urn-formal/meta legit!
-meta_id = Prefix('meta.id', 'urn:meta:id:') # https://www.iana.org/assignments/urn-formal/meta legit!
 from rdf_engine.rules import Rule
+from bim2rdf.rdf import Prefix
 class Rule(Rule):
-    meta_uri = NamedNode(str(meta.uri))
+    meta_prefix =    Prefix('meta',    'urn:meta:bim2rdf:')    # https://www.iana.org/assignments/urn-formal/meta legit!
+    # shouldn need bc <<data >>  meta:key literal(value).
+    _metaid_prefix =  Prefix('meta.id', 'urn:meta:id:') # https://www.iana.org/assignments/urn-formal/meta legit!
     # for subclasses
     spec: dict
     def spec_base(self):
@@ -29,26 +30,37 @@ class Rule(Rule):
         from json2rdf import j2r
         from boltons.iterutils import remap
         def json(p,k,v):
+            err = ValueError(f'only simple key:value meta data allowed. got {repr({k:v})} ')
             if not isinstance(v, (list, dict)):
                 if not isinstance(v, (bool, str, float, int, type(None) )):
                     return k, str(v) # coerce to str
+            else: raise err
+            if not isinstance(k, str): raise err
             return k,v
         _ = remap(self.spec, visit=json)
         _ = j2r(_,
-                id_prefix=  str(meta_id .prefix),
-                key_prefix= str(meta    .prefix),
+                id_prefix=  (self._metaid_prefix.name, self._metaid_prefix.uri),
+                key_prefix= (self.meta_prefix   .name, self.meta_prefix.   uri),
                 )
-        from pyoxigraph import parse
-        _ = parse(_,)
+        from pyoxigraph import parse, RdfFormat
+        _ = parse(_, format=RdfFormat.TURTLE)
         _ = (q.triple for q in _)
         return tuple(_)
 
-    def __call__(self, db: Store):
-        _ = tuple(self.data(db))                # 
-        yield from _                            # can do without 'regular' triples?
+    def data(self, db: Store) -> Iterable[Triple]:
+        #yield from [] # be nice ?
+        raise NotImplementedError
+
+    def meta_and_data(self, db: Store) ->Iterable[Quad]:
+        _ = (self.data(db))           #
+        #_ = (Quad(*t) for t in _)    #
+        #yield from _                 # can do without 'regular' triples?
         for d in _:
             for m in self.meta:
-                yield Quad(d, self.meta_uri, m) # ... and just have "meta-d" triples?
+                assert(isinstance(d, Triple))
+                yield Quad(d, # nesting triple
+                           # no need for m.'id' bc simple as possible
+                           m.predicate, m.object) # ... and just have "meta" triples?
         # alt.
         # data triple: (s, p, o).
         # meta triple: (s, mp, mo).
@@ -57,6 +69,7 @@ class Rule(Rule):
         # WHERE {
         #     <<:man :hasSpouse :woman>> ?p ?o
         # }
+    def __call__(self, db): yield from self.meta_and_data(db)
 
 class ConstructQuery(Rule):
     def __init__(self, query: str, *, name=None):
@@ -86,6 +99,7 @@ class ConstructQuery(Rule):
 # need to create MappingConstructQuery(source, target)? 
 
 class SpeckleGetter(Rule):
+    meta_prefix =    Prefix('spkl.meta',    'urn:meta:speckle:')    # https://www.iana.org/assignments/urn-formal/meta legit!
     def __init__(self, *, project_id, version_id):
         self.project_id = project_id
         self.version_id = version_id
@@ -137,7 +151,7 @@ class SpeckleGetter(Rule):
     
     def __repr__(self):
         _ = {#'project': self.project.name,
-            'model': self.model.name,
+            'model_name': self.model.name,
              'version': self.version.id,
              **self.spec_base()}
         _ = self.repr(**_)
@@ -146,7 +160,7 @@ class SpeckleGetter(Rule):
     @cached_property
     def spec(self):
         _ = {#'project': self.project.name,
-             'model': self.model.name,
+             'model_name': self.model.name,
              **self.spec_base()}
         return _
     
@@ -156,6 +170,7 @@ class SpeckleGetter(Rule):
         _ = parse(_, format=RdfFormat.TURTLE)
         _ = (q.triple for q in _)
         yield from _
+
 
 #class TTLGetter
 

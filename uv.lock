@@ -363,15 +363,15 @@ wheels = [
 
 [[package]]
 name = "json2rdf"
-version = "67"
+version = "68"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
     { name = "numpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fe/9d/dbf6a48a9bab8ba99383cd828773b2b1ceb0844b57f2d1c9b26359a7f326/json2rdf-67.tar.gz", hash = "sha256:d8f0fb89e9d9e3d7ba01eefabf51e9221ac130f29baa5d7b5d703dc822b17b4d", size = 6363 }
+sdist = { url = "https://files.pythonhosted.org/packages/85/bc/d1f7177fb9b7fd0dc5e3b002ce8489f97a662cfdea6fff602500eb881c2f/json2rdf-68.tar.gz", hash = "sha256:98bc2030db553bfb8477ecfa31066ef4d149310a5e6a603df0e2d3a7430e4b54", size = 5836 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8e/24/980c0262d3cb94d3ce7ea3c8b99c58f3d187d17cc0ba7166b05b8ade5289/json2rdf-67-py3-none-any.whl", hash = "sha256:95dce76accee0a381bfaf279df5200303aef7e09e3e41e1363cf55a2107bc48c", size = 7070 },
+    { url = "https://files.pythonhosted.org/packages/5f/8d/a871b4ac5cb6ae449e3f6db8cfc432bb739b7f2725826f4e56cc7058b24e/json2rdf-68-py3-none-any.whl", hash = "sha256:ac7150146599d2031f4052574b252cccc743408e30996f02847cce8d885e37ea", size = 6520 },
 ]
 
 [package.optional-dependencies]
@@ -769,15 +769,15 @@ wheels = [
 
 [[package]]
 name = "rdf-engine"
-version = "204"
+version = "207"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyoxigraph" },
     { name = "rdflib" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cf/4b/ac3519d5a9607b96c9fa48978874c8c4565ac4cfb356e4e2851c9e7651be/rdf_engine-204.tar.gz", hash = "sha256:0b57e565325814cd7f2df7c6902c8ef8c72dcc23a5f4dc4b08dbd46b6ef1c765", size = 7228 }
+sdist = { url = "https://files.pythonhosted.org/packages/7d/c3/bd0009fc972cf65a26f42cb65ed938a1bd43b25d99945006563e941803e9/rdf_engine-207.tar.gz", hash = "sha256:5183a5735d871a31cb0794510fc637bdcfedaedfb0bdf631872a8f72ff1bfe7c", size = 7748 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e3/3a/1510534062cc37a217556a091e2bbc9988cd19b0d699a4c942f0068514a8/rdf_engine-204-py3-none-any.whl", hash = "sha256:6cea9c04b870e55901e8d73511e6b5ae88eaae0edac1fdc699b8edf6f63235a3", size = 9613 },
+    { url = "https://files.pythonhosted.org/packages/ab/4e/bd2e7f00367f418ede5d2a617ae1c078429c73ee421ecd8998736e8ed074/rdf_engine-207-py3-none-any.whl", hash = "sha256:f716b12da0e781f6090bbff6e9f14f63cc470edda7e4dd4594d80716470413b6", size = 10080 },
 ]
 
 [[package]]
@@ -829,6 +829,7 @@ name = "rules"
 version = "0.1.0"
 source = { editable = "rules" }
 dependencies = [
+    { name = "json2rdf" },
     { name = "pytqshacl" },
     { name = "rdf-engine" },
 ]
@@ -840,6 +841,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "json2rdf" },
     { name = "pytqshacl" },
     { name = "rdf-engine" },
 ]
