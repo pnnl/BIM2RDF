@@ -7,10 +7,10 @@ class Rule(Rule):
     meta_prefix =    Prefix('meta',    'urn:meta:bim2rdf:')    # https://www.iana.org/assignments/urn-formal/meta legit!
     # shouldn need bc <<data >>  meta:key literal(value).
     _metaid_prefix =  Prefix('meta.id', 'urn:meta:id:') # https://www.iana.org/assignments/urn-formal/meta legit!
-    # for subclasses
-    spec: dict
-    def spec_base(self):
-        return {'source': self.__class__.__name__}
+
+    @property
+    def spec(self) -> dict:
+        return {'class': self.__class__.__name__}
 
     @classmethod
     def repr(cls, **kw):
@@ -127,16 +127,14 @@ class SpeckleGetter(Rule):
     def __repr__(self):
         _ = {#'project': self.project.name,
             'model_name': self.model.name,
-             'version': self.version.id,
-             **self.spec_base()}
+             'version': self.version.id,}
         _ = self.repr(**_)
         return _
     
     @cached_property
     def spec(self):
         _ = {#'project': self.project.name,
-             'model_name': self.model.name,
-             **self.spec_base()}
+             'model_name': self.model.name, }
         return _
     
     def data(self, db: Store):
@@ -145,8 +143,6 @@ class SpeckleGetter(Rule):
         _ = parse(_, format=RdfFormat.TURTLE)
         _ = (q.triple for q in _)
         yield from _
-
-
 
 
 
@@ -176,7 +172,6 @@ class ConstructQuery(Rule):
         assert(isinstance(_, QueryTriples))
         yield from _
 # need to create MappingConstructQuery(source, target)? 
-
 
 
 
