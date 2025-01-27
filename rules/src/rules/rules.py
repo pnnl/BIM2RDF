@@ -71,32 +71,6 @@ class Rule(Rule):
         # }
     def __call__(self, db): yield from self.meta_and_data(db)
 
-class ConstructQuery(Rule):
-    def __init__(self, query: str, *, name=None):
-        assert('construct' in query.lower())
-        self.query = query
-        self.name = name
-    from pathlib import Path
-    @classmethod
-    def from_path(cls, p: Path):
-        _ = cls(open(p).read(), name=p.name)  #idk if name will be unique enough
-        _.path = p
-        return _
-    
-    from functools import cached_property
-    @cached_property
-    def spec(self):
-        _ = {'name': self.name, **self.spec_base()}
-        if hasattr(self, 'path'):
-            _['path'] = str(self.path)
-        return _
-
-    def data(self, db: Store):
-        _ =  db.query(str(self.query),)
-        from pyoxigraph import QueryTriples
-        assert(isinstance(_, QueryTriples))
-        yield from _
-# need to create MappingConstructQuery(source, target)? 
 
 class SpeckleGetter(Rule):
     meta_prefix =    Prefix('spkl.meta',    'urn:meta:speckle:')    # https://www.iana.org/assignments/urn-formal/meta legit!
@@ -170,6 +144,39 @@ class SpeckleGetter(Rule):
         _ = parse(_, format=RdfFormat.TURTLE)
         _ = (q.triple for q in _)
         yield from _
+
+
+
+
+
+class ConstructQuery(Rule):
+    def __init__(self, query: str, *, name=None):
+        assert('construct' in query.lower())
+        self.query = query
+        self.name = name
+    from pathlib import Path
+    @classmethod
+    def from_path(cls, p: Path):
+        _ = cls(open(p).read(), name=p.name)  #idk if name will be unique enough
+        _.path = p
+        return _
+    
+    from functools import cached_property
+    @cached_property
+    def spec(self):
+        _ = {'name': self.name, **self.spec_base()}
+        if hasattr(self, 'path'):
+            _['path'] = str(self.path)
+        return _
+
+    def data(self, db: Store):
+        _ =  db.query(str(self.query),)
+        from pyoxigraph import QueryTriples
+        assert(isinstance(_, QueryTriples))
+        yield from _
+# need to create MappingConstructQuery(source, target)? 
+
+
 
 
 #class TTLGetter
