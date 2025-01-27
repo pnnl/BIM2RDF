@@ -73,7 +73,8 @@ class Rule(Rule):
 
 
 class SpeckleGetter(Rule):
-    meta_prefix =    Prefix('spkl.meta',    'urn:meta:speckle:')    # https://www.iana.org/assignments/urn-formal/meta legit!
+    from speckle.meta import prefixes
+    meta_prefix = prefixes.meta
     def __init__(self, *, project_id, version_id):
         self.project_id = project_id
         self.version_id = version_id

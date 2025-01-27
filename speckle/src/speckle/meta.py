@@ -12,7 +12,7 @@ class prefixes:
     def data(cls, *, project_id, object_id):
         _ = object.uri(project_id=project_id, object_id=object_id)
         return cls.Prefix('spkl.data',  _)
-    concept =   Prefix('spkl',       "urn:speckle:concept")
-    meta    =   Prefix('spkl.meta',  "urn:speckle:meta")
+    concept =   Prefix('spkl',       "urn:speckle:concept:")
+    meta    =   Prefix('spkl.meta',  "urn:speckle:meta:")
 
 
