@@ -10,8 +10,14 @@ def test():
     #d = tuple(r.data(_))
     #print(len(d))
     #assert(d)
-    from rdf_engine import Engine
-    db = Engine([sg], derand=False, MAX_NCYCLES=1, ).run()
+    from rdf_engine import Engine, logger
+    import logging
+    logging.basicConfig(force=True) # force removes other loggers that got picked up.
+    #import logging
+    #logging.basicConfig(force=True) 
+    logger.setLevel(logging.INFO)
+
+    db = Engine([sg], derand=False, MAX_NCYCLES=1, log_print=True ).run()
     assert(len(db))
     from pyoxigraph import RdfFormat
     db.dump('db.ttl', format=RdfFormat.N_QUADS)
