@@ -1,4 +1,4 @@
-from pyoxigraph import Store, Quad, Triple, NamedNode
+from pyoxigraph import Store, Quad, Triple
 from typing import Iterable
 
 from rdf_engine.rules import Rule
@@ -60,9 +60,6 @@ class Rule(Rule):
                 yield Quad(d, # nesting triple  # meta quads
                            # no need for m.'id' bc simple as possible
                            m.predicate, m.object)
-        # alt.
-        # data triple: (s, p, o).
-        # meta triple: (s, mp, mo).
         # List all metadata for the given reference to a statement
         # SELECT *
         # WHERE {
@@ -71,8 +68,6 @@ class Rule(Rule):
     def __call__(self, db): yield from self.meta_and_data(db)
 
 
-from .speckle.rule      import SpeckleGetter
-from .construct.rule    import ConstructQuery
 
 
 
