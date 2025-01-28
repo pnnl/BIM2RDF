@@ -10,7 +10,7 @@ prefix spkl: <urn:speckle:concept:>
 
 CONSTRUCT { 
     ?this a s223:Luminaire.
-    #?this rdfs:label ?name.
+    ?this rdfs:label ?name.
     ?this rdfs:label "Luminaire"^^xsd:string.
     ?this s223:hasProperty ?p.
     ?p a s223:QuantifiableProperty.
@@ -23,18 +23,17 @@ CONSTRUCT {
     ?type s223:hasAspect s223:Aspect-Model.
     ?type s223:hasValue ?typename.
     ?type rdfs:label "Property"^^xsd:string.
-  
 } 
 WHERE { 
     # keep this mapping 'pure' to arch. elec stuff somewhere else.
     <<?this spkl:category  "Lighting Fixtures">> spkl.meta:model_name "pritoni 1.ifc". 
-    ?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types'
+    ?this spkl:phaseCreated ?_.     # to say it's being 'used' in the plan and not part of the 'types'
     ?this spkl:definition ?_dr.
     ?_dr spkl:referencedId ?type.
     ?type spkl:type ?typename.
-    ?this spkl:parameters ?s.
-    ?s ?o ?p.
-    ?p spkl:applicationInternalName "FBX_LIGHT_WATTAGE".
-    ?p spkl:value ?v.
+    ?this spkl:parameters ?params.
+    ?params ?p ?o.
+    ?o spkl:applicationInternalName "FBX_LIGHT_WATTAGE".
+    ?o spkl:value ?v.
     BIND(xsd:decimal(?v) AS ?vd).
 }

@@ -52,13 +52,12 @@ class Rule(Rule):
         raise NotImplementedError
 
     def meta_and_data(self, db: Store) ->Iterable[Quad]:
-        _ = (self.data(db))           #
-        #_ = (Quad(*t) for t in _)    #
-        #yield from _                 # can do without 'regular' triples?
-        for d in _:
-            for m in self.meta:
-                assert(isinstance(d, Triple))
-                yield Quad(d, # nesting triple
+        data = tuple(self.data(db))         #
+        yield from (Quad(*t) for t in data)     # data quads
+        for d in data:                          #
+            for m in self.meta:                 #
+                assert(isinstance(d, Triple))   #
+                yield Quad(d, # nesting triple  # meta quads
                            # no need for m.'id' bc simple as possible
                            m.predicate, m.object) # ... and just have "meta" triples?
         # alt.
