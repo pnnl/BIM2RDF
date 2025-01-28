@@ -106,12 +106,12 @@ class Model:
                     return True
                 def notgeo(p,k,v):
                     # should have the above vec keys
-                    types = {'Objects.Other.Transform', 'Objects.Geometry.Mesh'}
+                    types = {'Objects.Other.Transform', "Speckle.Core.Models.DataChunk"}
                     id = 'id'
                     st = 'speckle_type'
                     if isinstance(v, dict):
                         if (st in v) and (id in v):
-                            if v[st] in types:
+                            if (v[st] in types) or (v[st].lower().startswith('objects.geometry') ):
                                 return False
                     return True
                 _ = remap(_, notgeo)
@@ -119,13 +119,14 @@ class Model:
         def json(self):
             return self.Json(self)
         
-        def ttl(self, *, json_method=Json.wo_geometry, **kw):
+        from typing import Callable
+        def ttl(self, *, json_method:str|Callable=Json.wo_geometry, **kw):
             from .meta import prefixes
             prefixes.meta, prefixes.concept
             dp = prefixes.data(project_id=self.model.project.id, object_id="") # objid filled in
             from json2rdf import j2r
             _ = self.json()
-            _ = getattr(_, json_method.__name__) # ?
+            _ = getattr(_, json_method.__name__ if not isinstance(json_method, str) else json_method) # ?
             _ = _()
             _ = j2r(_,
                     subject_id_keys=('id',),     object_id_keys=('referencedId', 'connectedConnectorIds'),
@@ -151,11 +152,11 @@ if __name__ == '__main__':
             for v in m.versions:
                 if v.id == version_id:
                     return v
-    def ttl(project_id, version_id):
-        return version(project_id, version_id).ttl()
+    def ttl(project_id, version_id, geometry: bool=False):
+        return version(project_id, version_id).ttl(json_method='data' if geometry else 'wo_geometry')
     def json(project_id, version_id):
         _ = version(project_id, version_id)
-        _ = _.json().wo_geometry()
+        _ = _.json().data()
         from json import dumps
         _ = dumps(_, indent=2)
         return _
