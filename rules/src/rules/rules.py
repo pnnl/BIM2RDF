@@ -59,7 +59,7 @@ class Rule(Rule):
                 assert(isinstance(d, Triple))   #
                 yield Quad(d, # nesting triple  # meta quads
                            # no need for m.'id' bc simple as possible
-                           m.predicate, m.object) # ... and just have "meta" triples?
+                           m.predicate, m.object)
         # alt.
         # data triple: (s, p, o).
         # meta triple: (s, mp, mo).
