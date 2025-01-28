@@ -53,7 +53,7 @@ def query(q=get_void_query(), client=client) -> dict: # json
 
 class queries:
 
-    biglim = 999999 # 100_000 # doesnt work. bug?!
+    biglim = 999999 # https://github.com/specklesystems/speckle-server/issues/3908
     def __init__(self, client=client):
         from types import SimpleNamespace as NS
         _q = """
