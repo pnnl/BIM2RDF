@@ -1,5 +1,6 @@
-from ..rules import Rule, Store, Prefix
+from ..rule import Rule
 class ConstructQuery(Rule):
+    from ..rule import Prefix
     meta_prefix =    Prefix('meta',    'urn:meta:bim2rdf:ConstructQuery:')
     def __init__(self, query: str, *, name=None):
         assert('construct' in query.lower())
@@ -20,6 +21,7 @@ class ConstructQuery(Rule):
         #    _['path'] = str(self.path)
         return _
 
+    from ..rule import Store
     def data(self, db: Store):
         _ =  db.query(str(self.query),)
         from pyoxigraph import QueryTriples

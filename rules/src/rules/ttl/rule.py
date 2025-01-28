@@ -1,8 +1,8 @@
-from ..rules import Rule, Store
-from bim2rdf.rdf import Prefix# , URI
+from ..rule import Rule
 class URI(str): ...
 
 class ttlLoader(Rule):
+    from bim2rdf.rdf import Prefix# , URI
     meta_prefix = Prefix('ttl.meta', "urn:meta:bim2rdf:ttlLoader:")
 
     from pathlib import Path

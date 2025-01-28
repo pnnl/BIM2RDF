@@ -1,4 +1,4 @@
-from ..rules import Rule, Store
+from ..rule import Rule, Store
 
 class SpeckleGetter(Rule):
     from speckle.meta import prefixes
