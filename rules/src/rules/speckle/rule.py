@@ -67,6 +67,7 @@ class SpeckleGetter(Rule):
     
     def data(self, db: Store):
         _ = self.version.ttl()
+        _ = _+'\n' # https://github.com/oxigraph/oxigraph/issues/1164
         from pyoxigraph import parse, RdfFormat
         _ = parse(_, format=RdfFormat.TURTLE)
         _ = (q.triple for q in _)
