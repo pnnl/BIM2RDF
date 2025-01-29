@@ -16,7 +16,10 @@ def test():
     logger.setLevel(logging.INFO)
     db = Engine([sg, tl], db=db, derand=False, MAX_NCYCLES=1, log_print=True ).run()
     from pathlib import Path
-    m = r.ConstructQuery.from_path( Path('../rules/test') / 'mapping' / 'luminaire.mapping.rq' )
+    m = [
+        r.ConstructQuery.from_path( Path('../rules/test') / 'mapping' / 'luminaire.mapping.rq' ),
+        r.ConstructQuery.from_path( Path('../rules/test') / 'mapping' / 'room.mapping.rq' ),
+    ]
     dq = """
     prefix q: <urn:meta:bim2rdf:ConstructQuery:>
     construct {?s ?p ?o.}
@@ -33,25 +36,11 @@ def test():
     }
     """
     tq = r.TopQuadrantInference(data=dq, shapes=sq)
-    db = Engine([m, tq], db=db, derand='canonicalize', log_print=True ).run()
+    db = Engine(m+[tq], db=db, derand='canonicalize', log_print=True ).run()
     print(len(db))
-    from pyoxigraph import RdfFormat
-    db.dump('db.ttl', format=RdfFormat.N_QUADS)
+    #from pyoxigraph import RdfFormat
+    #db.dump('db.ttl', format=RdfFormat.N_QUADS)
 
-
-def xtest():
-    import rules as r
-    tf = r.ttlLoader('test.ttl')
-    tu = r.ttlLoader('https://raw.githubusercontent.com/sparkica/rdf-extension/refs/heads/master/test/com/google/refine/test/org/deri/reconcile/files/sample.ttl')
-    from rdf_engine import Engine, logger
-    import logging
-    logging.basicConfig(force=True) # force removes other loggers that got picked up.
-    #import logging
-    #logging.basicConfig(force=True) 
-    logger.setLevel(logging.INFO)
-    db = Engine([tf, tu], derand=False, MAX_NCYCLES=1, log_print=True ).run()
-    from pyoxigraph import RdfFormat
-    db.dump('db.ttl', format=RdfFormat.N_QUADS)
 
 
 if __name__ ==  '__main__':
