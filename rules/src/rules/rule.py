@@ -17,7 +17,7 @@ class Rule(Rule):
         nm = cls.__name__
         kw = {k:v for k,v in kw.items()
             # dont need to repr this
-            if k not in {'source'} }
+            if k not in {'class'} }
         from types import SimpleNamespace as NS
         _ = repr(NS(**kw)).replace('namespace', nm)
         return _
