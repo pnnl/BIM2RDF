@@ -32,7 +32,7 @@ def test():
     filter (CONTAINS(?mo, "223p.ttl") ) 
     }
     """
-    tq = r.TopQuadrant(data=dq, shapes=sq)
+    tq = r.TopQuadrantInference(data=dq, shapes=sq)
     db = Engine([m, tq], db=db, derand='canonicalize', log_print=True ).run()
     print(len(db))
     from pyoxigraph import RdfFormat
