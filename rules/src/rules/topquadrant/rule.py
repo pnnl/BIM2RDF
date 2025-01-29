@@ -1,8 +1,8 @@
 from ..rule import Rule
 class Query(str): ...
-class TopQuadrant(Rule):
+class TopQuadrantInference(Rule):
     from bim2rdf.rdf import Prefix
-    meta_prefix = Prefix('tq.meta', "urn:meta:bim2rdf:TopQuadrant:")
+    meta_prefix = Prefix('tq.meta', "urn:meta:bim2rdf:TopQuadrantInference:")
     def __init__(self, *, data: Query, shapes: Query):
         assert('construct' in data.lower())
         assert('construct' in shapes.lower())
@@ -47,7 +47,6 @@ class TopQuadrant(Rule):
         inputs.dp.unlink()
         inputs.sp.unlink()
         from pyoxigraph import parse, RdfFormat
-        breakpoint()
         _ =  parse(_.stdout, format=RdfFormat.TURTLE)
         _ = (q.triple for q in _)
         yield from _
