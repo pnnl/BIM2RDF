@@ -729,11 +729,11 @@ wheels = [
 
 [[package]]
 name = "pytqshacl"
-version = "135"
+version = "137"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ba/60/f34037d502d821e12f8ab391751b97bbeadc1cbb67508533d5b575b0b977/pytqshacl-135.tar.gz", hash = "sha256:829819387143082479b8ac19c538fbf5a9c192dbc212963c8ea3b7e151efe118", size = 20463861 }
+sdist = { url = "https://files.pythonhosted.org/packages/49/6e/dbfa93dbaa99f73bac91d2085da452cd9999a442cb855b429aa9be474428/pytqshacl-137.tar.gz", hash = "sha256:fd969c6c77efa4739195fc2848bc434a7f5b4ab059578ce028832938d73b1a71", size = 21272612 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/20/03db714a19814ad04b113b91f2d13bf1e4e6a040203e20b0a34f43f40e14/pytqshacl-135-py2.py3-none-any.whl", hash = "sha256:273225a8ca1f1a7280c9fb39885c68c53e118472a7de7d018b47415994001a1c", size = 20473251 },
+    { url = "https://files.pythonhosted.org/packages/be/ef/858428c29d5f90d04b032703d9d55fd75f835f676653e51676299d26aaa7/pytqshacl-137-py2.py3-none-any.whl", hash = "sha256:f59e9be4d793b389b5b95a263750265f003691f8453e7e6e28881af9cfa8a7f0", size = 21287004 },
 ]
 
 [package.optional-dependencies]
