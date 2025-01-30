@@ -7,8 +7,11 @@ authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
 ]
 requires-python = "==3.11.9"
-dependencies = ["specklepy"]
-
+dependencies = [
+    "dynaconf",
+    "specklepy", ]
+[dependency-groups]
+dev = ["pytest"]
 
 [build-system]
 requires = ["hatchling"]
