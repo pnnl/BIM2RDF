@@ -7,13 +7,7 @@ config = Dynaconf(
     load_dotenv=True,
 )
 
-
-# def spkl():
-#     from speckle.config import defaults
-#     config.setdefault('speckle', {})
-#     config.speckle.setdefault('server', defaults.server)
-# spkl()
-locals().update(**config)
+#locals().update(**config)  make a problem in test! idk!
 
 if __name__ == '__main__':
     # print the config
