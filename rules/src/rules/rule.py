@@ -4,9 +4,9 @@ from typing import Iterable
 from rdf_engine.rules import Rule
 from bim2rdf.rdf import Prefix
 class Rule(Rule):
-    meta_prefix =    Prefix('meta',    'urn:meta:bim2rdf:')    # https://www.iana.org/assignments/urn-formal/meta legit!
+    meta_prefix =    Prefix('meta',    'urn:meta:bim2rdf:') # https://www.iana.org/assignments/urn-formal/meta legit!
     # shouldn need bc <<data >>  meta:key literal(value).
-    _metaid_prefix =  Prefix('meta.id', 'urn:meta:id:') # https://www.iana.org/assignments/urn-formal/meta legit!
+    _metaid_prefix =  Prefix('meta.id', 'urn:meta:id:')     # https://www.iana.org/assignments/urn-formal/meta legit!
 
     @property
     def spec(self) -> dict:
@@ -67,10 +67,5 @@ class Rule(Rule):
         # }
     def __call__(self, db): yield from self.meta_and_data(db)
 
-
-
-
-
-#class TTLGetter
 
 # class PyRule(Rule): need this?

@@ -1,1 +1,1 @@
-delete this folder eventually
+main contribution of bim2rdf are these rules 
