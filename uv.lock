@@ -87,15 +87,6 @@ wheels = [
 ]
 
 [[package]]
-name = "cachetools"
-version = "5.5.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/c3/38/a0f315319737ecf45b4319a8cd1f3a908e29d9277b46942263292115eee7/cachetools-5.5.0.tar.gz", hash = "sha256:2cc24fb4cbe39633fb7badd9db9ca6295d766d9c2995f245725a46715d050f2a", size = 27661 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a4/07/14f8ad37f2d12a5ce41206c21820d8cb6561b728e51fad4530dff0552a67/cachetools-5.5.0-py3-none-any.whl", hash = "sha256:02134e8439cdc2ffb62023ce1debca2944c3f289d66bb17ead3ab3dede74b292", size = 9524 },
-]
-
-[[package]]
 name = "certifi"
 version = "2019.3.9"
 source = { registry = "https://pypi.org/simple" }
@@ -253,15 +244,6 @@ wheels = [
 ]
 
 [[package]]
-name = "html5rdf"
-version = "1.2.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4c/55/1b839c43f5ed8207e17a9a02d8b395179520b8b4f00c00a41e113bc205ca/html5rdf-1.2.1.tar.gz", hash = "sha256:ace9b420ce52995bb4f05e7425eedf19e433c981dfe7a831ab391e2fa2e1a195", size = 287899 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7d/c9/f6e1e8567660bc5b0aba281f2b0017b2a7665fcad6bf3ed67286a0c72cd4/html5rdf-1.2.1-py2.py3-none-any.whl", hash = "sha256:1f519121bc366af3e485310dc8041d2e86e5173c1a320fac3dc9d2604069b83e", size = 109765 },
-]
-
-[[package]]
 name = "icecream"
 version = "2.1.4"
 source = { registry = "https://pypi.org/simple" }
@@ -292,18 +274,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ad/13/eb56951b6f7950cadb579ca166e448ba77f9d24efc03edd7e55fa57d04b7/idna-2.8.tar.gz", hash = "sha256:c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407", size = 174481 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/14/2c/cd551d81dbe15200be1cf41cd03869a46fe7226e7450af7a6545bfc474c9/idna-2.8-py2.py3-none-any.whl", hash = "sha256:ea8b7f6188e6fa117537c3df7da9fc686d485087abf6ac197f9c46432f7e4a3c", size = 58594 },
-]
-
-[[package]]
-name = "importlib-metadata"
-version = "8.5.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "zipp" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/cd/12/33e59336dca5be0c398a7482335911a33aa0e20776128f038019f1a95f1b/importlib_metadata-8.5.0.tar.gz", hash = "sha256:71522656f0abace1d072b9e5481a48f07c138e00f079c38c8f883823f9c26bd7", size = 55304 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a0/d9/a1e041c5e7caa9a05c925f4bdbdfb7f006d1f74996af53467bc394c97be7/importlib_metadata-8.5.0-py3-none-any.whl", hash = "sha256:45e54197d28b7a7f1559e60b95e7c567032b602131fbd588f1497f47880aa68b", size = 26514 },
 ]
 
 [[package]]
@@ -383,34 +353,11 @@ cli = [
 name = "mapping"
 version = "0.1.0"
 source = { editable = "mapping" }
-dependencies = [
-    { name = "fire" },
-    { name = "owlrl" },
-    { name = "pyshacl" },
-    { name = "pyyaml" },
-    { name = "rdflib" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pandas" },
-    { name = "shelved-cache" },
-]
 
 [package.metadata]
-requires-dist = [
-    { name = "fire" },
-    { name = "owlrl" },
-    { name = "pyshacl" },
-    { name = "pyyaml" },
-    { name = "rdflib" },
-]
 
 [package.metadata.requires-dev]
-dev = [
-    { name = "pandas" },
-    { name = "shelved-cache" },
-]
+dev = []
 
 [[package]]
 name = "matplotlib-inline"
@@ -476,48 +423,6 @@ wheels = [
 ]
 
 [[package]]
-name = "owlrl"
-version = "7.1.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "rdflib" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/7b/24/39e525e8f8519315b97cc80fd285ebc16df134c63d3bf5ceee551d95c984/owlrl-7.1.2.tar.gz", hash = "sha256:966136f303f08f3eb190f6631c31a03b1bc5744d6c15189d7fb638a563ee61d2", size = 44944 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/1d/5d3ab93a88643c6f87c370d10e500bd8d710900492f3142ff78867c9ba49/owlrl-7.1.2-py3-none-any.whl", hash = "sha256:b4234191d1981ee7c551fa203cc0d21470c38e624e6795f3ecac55651dab26b1", size = 51690 },
-]
-
-[[package]]
-name = "packaging"
-version = "24.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d0/63/68dbb6eb2de9cb10ee4c9c14a0148804425e13c4fb20d61cce69f53106da/packaging-24.2.tar.gz", hash = "sha256:c228a6dc5e932d346bc5739379109d49e8853dd8223571c7c5b55260edc0b97f", size = 163950 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/88/ef/eb23f262cca3c0c4eb7ab1933c3b1f03d021f2c48f54763065b6f0e321be/packaging-24.2-py3-none-any.whl", hash = "sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759", size = 65451 },
-]
-
-[[package]]
-name = "pandas"
-version = "2.2.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-    { name = "python-dateutil" },
-    { name = "pytz" },
-    { name = "tzdata" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/9c/d6/9f8431bacc2e19dca897724cd097b1bb224a6ad5433784a44b587c7c13af/pandas-2.2.3.tar.gz", hash = "sha256:4f18ba62b61d7e192368b84517265a99b4d7ee8912f8708660fb4a366cc82667", size = 4399213 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/44/d9502bf0ed197ba9bf1103c9867d5904ddcaf869e52329787fc54ed70cc8/pandas-2.2.3-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:66108071e1b935240e74525006034333f98bcdb87ea116de573a6a0dccb6c039", size = 12602222 },
-    { url = "https://files.pythonhosted.org/packages/52/11/9eac327a38834f162b8250aab32a6781339c69afe7574368fffe46387edf/pandas-2.2.3-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:7c2875855b0ff77b2a64a0365e24455d9990730d6431b9e0ee18ad8acee13dbd", size = 11321274 },
-    { url = "https://files.pythonhosted.org/packages/45/fb/c4beeb084718598ba19aa9f5abbc8aed8b42f90930da861fcb1acdb54c3a/pandas-2.2.3-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:cd8d0c3be0515c12fed0bdbae072551c8b54b7192c7b1fda0ba56059a0179698", size = 15579836 },
-    { url = "https://files.pythonhosted.org/packages/cd/5f/4dba1d39bb9c38d574a9a22548c540177f78ea47b32f99c0ff2ec499fac5/pandas-2.2.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c124333816c3a9b03fbeef3a9f230ba9a737e9e5bb4060aa2107a86cc0a497fc", size = 13058505 },
-    { url = "https://files.pythonhosted.org/packages/b9/57/708135b90391995361636634df1f1130d03ba456e95bcf576fada459115a/pandas-2.2.3-cp311-cp311-musllinux_1_2_aarch64.whl", hash = "sha256:63cc132e40a2e084cf01adf0775b15ac515ba905d7dcca47e9a251819c575ef3", size = 16744420 },
-    { url = "https://files.pythonhosted.org/packages/86/4a/03ed6b7ee323cf30404265c284cee9c65c56a212e0a08d9ee06984ba2240/pandas-2.2.3-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:29401dbfa9ad77319367d36940cd8a0b3a11aba16063e39632d98b0e931ddf32", size = 14440457 },
-    { url = "https://files.pythonhosted.org/packages/ed/8c/87ddf1fcb55d11f9f847e3c69bb1c6f8e46e2f40ab1a2d2abadb2401b007/pandas-2.2.3-cp311-cp311-win_amd64.whl", hash = "sha256:3fc6873a41186404dad67245896a6e440baacc92f5b716ccd1bc9ed2995ab2c5", size = 11617166 },
-]
-
-[[package]]
 name = "parso"
 version = "0.8.4"
 source = { registry = "https://pypi.org/simple" }
@@ -561,18 +466,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/2e/c8/e22c292035f1bac8b9f5237a2622305bc0304e776080b246f3df57c4ff9f/pre_commit-4.0.1.tar.gz", hash = "sha256:80905ac375958c0444c65e9cebebd948b3cdb518f335a091a670a89d652139d2", size = 191678 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/16/8f/496e10d51edd6671ebe0432e33ff800aa86775d2d147ce7d43389324a525/pre_commit-4.0.1-py2.py3-none-any.whl", hash = "sha256:efde913840816312445dc98787724647c65473daefe420785f885e8ed9a06878", size = 218713 },
-]
-
-[[package]]
-name = "prettytable"
-version = "3.12.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "wcwidth" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/3b/8a/de4dc1a6098621781c266b3fb3964009af1e9023527180cb8a3b0dd9d09e/prettytable-3.12.0.tar.gz", hash = "sha256:f04b3e1ba35747ac86e96ec33e3bb9748ce08e254dc2a1c6253945901beec804", size = 59539 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/73/19/4bb9530512432774fdd7cb7c020851d4decbb811d95f86fd4f6a870a6d3e/prettytable-3.12.0-py3-none-any.whl", hash = "sha256:77ca0ad1c435b6e363d7e8623d7cc4fcf2cf15513bf77a1c1b2e814930ac57cc", size = 31105 },
 ]
 
 [[package]]
@@ -700,34 +593,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pyshacl"
-version = "0.29.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "importlib-metadata" },
-    { name = "owlrl" },
-    { name = "packaging" },
-    { name = "prettytable" },
-    { name = "rdflib", extra = ["html"] },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/0c/c6/c9d0af1596af7da34dd4df15c4cf3e274735aeb0f8406434cb1af8a07d04/pyshacl-0.29.1.tar.gz", hash = "sha256:7944f9860677bd82c0b5877d50a971ad2ea3e646076174f9c1b6d1b91e3b8496", size = 1398086 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a1/fa/bf5492b471bfa94897ec130860a1cca367daffd7473e71875005d9461543/pyshacl-0.29.1-py3-none-any.whl", hash = "sha256:dd6320fe6e176d3778ea05af730fa6d8c38aef365a9eca0d7f9cbc0bf6149870", size = 1321572 },
-]
-
-[[package]]
-name = "python-dateutil"
-version = "2.9.0.post0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3", size = 342432 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427", size = 229892 },
-]
-
-[[package]]
 name = "pytqshacl"
 version = "138"
 source = { registry = "https://pypi.org/simple" }
@@ -742,15 +607,6 @@ cli = [
 ]
 java = [
     { name = "install-jdk" },
-]
-
-[[package]]
-name = "pytz"
-version = "2024.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3a/31/3c70bf7603cc2dca0f19bdc53b4537a797747a58875b552c8c413d963a3f/pytz-2024.2.tar.gz", hash = "sha256:2aa355083c50a0f93fa581709deac0c9ad65cca8a9e9beac660adcbd493c798a", size = 319692 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/11/c3/005fcca25ce078d2cc29fd559379817424e94885510568bc1bc53d7d5846/pytz-2024.2-py2.py3-none-any.whl", hash = "sha256:31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725", size = 508002 },
 ]
 
 [[package]]
@@ -793,11 +649,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/62/b6/4cee25689c7a3dfafeb481d358e74696fe3a8543da4cb2c1b71c0cb6583d/rdflib-7.1.1.tar.gz", hash = "sha256:164de86bd3564558802ca983d84f6616a4a1a420c7a17a8152f5016076b2913e", size = 4864216 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d2/7d/9add7b22a4e695c4f3011ed084ecf725e1f03954b9fa071f1766890b4989/rdflib-7.1.1-py3-none-any.whl", hash = "sha256:e590fa9a2c34ba33a667818b5a84be3fb8a4d85868f8038f17912ec84f912a25", size = 562443 },
-]
-
-[package.optional-dependencies]
-html = [
-    { name = "html5rdf" },
 ]
 
 [[package]]
@@ -851,27 +702,6 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [{ name = "pytqshacl", extras = ["java", "cli"] }]
-
-[[package]]
-name = "shelved-cache"
-version = "0.4.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "cachetools" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/35/f8/f305abd2649539a059147df87fbce38ae2aae15fe982010a8f7162a6fe6b/shelved_cache-0.4.0.tar.gz", hash = "sha256:59c003f715d69f7bfadf461b68fae262db39cf6ab71d288dfeb24cc8637abece", size = 6776 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/6c/01/79f4dbc62b3e10293e4b5b3ac3bae39302979c3632e5b89590b1c8f0e864/shelved_cache-0.4.0-py3-none-any.whl", hash = "sha256:37eb48da1b91dee27157a50a045cb433dc6486528279804e6189fd7a2d755a5e", size = 8116 },
-]
-
-[[package]]
-name = "six"
-version = "1.17.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050 },
-]
 
 [[package]]
 name = "smmap"
@@ -968,15 +798,6 @@ wheels = [
 ]
 
 [[package]]
-name = "tzdata"
-version = "2024.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e1/34/943888654477a574a86a98e9896bae89c7aa15078ec29f490fef2f1e5384/tzdata-2024.2.tar.gz", hash = "sha256:7d85cc416e9382e69095b7bdf4afd9e3880418a2413feec7069d533d6b4e31cc", size = 193282 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a6/ab/7e5f53c3b9d14972843a647d8d7a853969a58aecc7559cb3267302c94774/tzdata-2024.2-py2.py3-none-any.whl", hash = "sha256:a48093786cdcde33cad18c2555e8532f34422074448fbc874186f0abd79565cd", size = 346586 },
-]
-
-[[package]]
 name = "urllib3"
 version = "1.25.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1036,13 +857,4 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/9a/7a/4c571597589da4cd5c14ed2a0b17ac56ec9ee7ee615013f74653169e702d/yarl-1.18.3-cp311-cp311-win32.whl", hash = "sha256:61b1a825a13bef4a5f10b1885245377d3cd0bf87cba068e1d9a88c2ae36880e1", size = 84402 },
     { url = "https://files.pythonhosted.org/packages/ae/7b/8600250b3d89b625f1121d897062f629883c2f45339623b69b1747ec65fa/yarl-1.18.3-cp311-cp311-win_amd64.whl", hash = "sha256:b9d60031cf568c627d028239693fd718025719c02c9f55df0a53e587aab951b5", size = 91030 },
     { url = "https://files.pythonhosted.org/packages/f5/4b/a06e0ec3d155924f77835ed2d167ebd3b211a7b0853da1cf8d8414d784ef/yarl-1.18.3-py3-none-any.whl", hash = "sha256:b57f4f58099328dfb26c6a771d09fb20dbbae81d20cfb66141251ea063bd101b", size = 45109 },
-]
-
-[[package]]
-name = "zipp"
-version = "3.21.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3f/50/bad581df71744867e9468ebd0bcd6505de3b275e06f202c2cb016e3ff56f/zipp-3.21.0.tar.gz", hash = "sha256:2c9958f6430a2040341a52eb608ed6dd93ef4392e02ffe219417c1b28b5dd1f4", size = 24545 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/1a/7e4798e9339adc931158c9d69ecc34f5e6791489d469f5e50ec15e35f458/zipp-3.21.0-py3-none-any.whl", hash = "sha256:ac1bbe05fd2991f160ebce24ffbac5f6d11d83dc90891255885223d42b3cd931", size = 9630 },
 ]
