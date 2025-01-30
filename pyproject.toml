@@ -53,5 +53,3 @@ members = [ # same order as above
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-# include sparql and toml in bld
-# TODO: build
