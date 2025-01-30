@@ -1,15 +1,14 @@
 [project]
-name = "project"
+name = "spklauto"
 version = "0.1.0"
-description = "generic project utils"
+description = "BIM2RDF/speckle automate"
 readme = "README.md"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
 ]
-dependencies = [
-    "fire", "pyprojroot",
-    "gitpython", "pre-commit",
-    ]
+requires-python = "==3.11.9"
+dependencies = ["specklepy"]
+
 
 [build-system]
 requires = ["hatchling"]

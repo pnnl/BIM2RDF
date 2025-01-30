@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-spklauto = []  # ['spklauto'] under bim2rdf TODO
+spklauto = [ "spklauto" ]
 
 [dependency-groups]
 dev = [
@@ -28,19 +28,26 @@ dev = [
     "icecream",
     # automation
     "project",
-    # spklauto
+    "bim2rdf[spklauto]",#nice
     # pydantic-settings
 ]
 
 [tool.uv.sources]
 # just listing the dirs alphabetically
 mapping =        { workspace=true}
+#ontologies =     { path = 'ontologies'      , editable = true} 
 project =        { workspace=true}
 rules =          { workspace=true}
-#ontologies =     { path = 'ontologies'      , editable = true} 
 speckle =        { workspace=true}
+spklauto =       { workspace=true}
 [tool.uv.workspace]
-members = ["mapping", "project", "rules", "speckle", ]
+members = [ # same order as above
+"mapping",
+"project",
+"rules",
+"speckle",
+"spklauto",
+ ]
 
 
 [build-system]

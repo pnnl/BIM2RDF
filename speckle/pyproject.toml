@@ -1,7 +1,7 @@
 [project]
 name = "speckle"
 version = "0.1.0"
-description = "access speckle data"
+description = "BIM2RDF/access speckle data"
 authors = [
     {name =  "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
 ]
@@ -16,8 +16,7 @@ dependencies = [
 dev = [
     "ipython", "ipdb",
     "json2rdf[cli]",
-    "project",
-    ]
+    "project",]
 
 
 [build-system]

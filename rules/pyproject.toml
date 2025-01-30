@@ -1,7 +1,7 @@
 [project]
 name = "rules"
 version = "0.1.0"
-description = "Add a short description here"
+description = "BIM2RDF/rules"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" },
 ]
