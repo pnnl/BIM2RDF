@@ -16,7 +16,6 @@ dependencies = [
     #"ontologies", # ? need this? or just create a ttl loader rule
     "speckle",
 ]
-
 [project.optional-dependencies]
 spklauto = [ "spklauto" ]
 
