@@ -17,7 +17,8 @@ dependencies = [
     "speckle",
 ]
 [project.optional-dependencies]
-spklauto = [ "spklauto" ]
+spklauto = ["spklauto"]
+cli = ["fire"]
 
 [dependency-groups]
 dev = [
@@ -27,7 +28,7 @@ dev = [
     "icecream",
     # automation
     "project",
-    "bim2rdf[spklauto]",#nice
+    "bim2rdf[spklauto, cli]",#nice
 ]
 
 [tool.uv.sources]
