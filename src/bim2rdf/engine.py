@@ -24,7 +24,7 @@ class Run:
     def run(self, *,
             ontology:       Path,
             project_name:   str,
-            model_name:     str,
+            model_name:     str,  # TODO: nameS
             map_dirs = defaults.mapdirs,
             MAX_NCYCLES=defaults.MAX_NCYCLES,
             log=True,
@@ -49,6 +49,7 @@ class Run:
                 yield from d.glob('*/**/*.rq')
         m = [r.ConstructQuery.from_path(p)
              for p in m()]
+        # TODO: file this under 'rules/tq'?
         dq = """
         prefix q: <urn:meta:bim2rdf:ConstructQuery:>
         construct {?s ?p ?o.}
@@ -56,6 +57,7 @@ class Run:
         <<?s ?p ?o>> q:name ?mo.
         filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data.") ) 
         }"""
+        # TODO: file this under 'rules/ttl'?
         sq = """
         prefix ttl: <urn:meta:bim2rdf:ttlLoader:>
         construct {?s ?p ?o.}

@@ -59,7 +59,40 @@ def automate_function(
         automate_context.mark_run_success("No forbidden types found.")
     # If the function generates file results, this is how it can be
     # attached to the Speckle project/model
-    # automate_context.store_file_result("./report.pdf")
+    #automate_context.store_file_result("./report.pdf")
+    #_ = engine_run(automate_context)
+    #automate_context.store_file_result(_)
+    from pathlib import Path
+    _ = Path('223p.ttl')
+    assert(_.exists())
+    automate_context.store_file_result(_)
+    automate_context.mark_run_success("you good")
+
+def engine_run(ctx: AutomationContext):
+    pid = ctx.automation_run_data.project_id
+    from speckle.data import Project
+    pn = Project(pid).name
+    from bim2rdf.engine import Run
+    r = Run()
+    from pathlib import Path
+    _ = r.run(
+        ontology=Path('223p.ttl'),
+        project_name=pn,
+        model_name='pritoni 1.ifc', )
+    dq = """
+        prefix q: <urn:meta:bim2rdf:ConstructQuery:>
+        construct {?s ?p ?o.}
+        WHERE {
+        <<?s ?p ?o>> q:name ?mo.
+        filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data.") ) 
+        }"""
+    _ = _.query(dq)
+    from pyoxigraph import serialize, RdfFormat
+    # rdflib is nicer though
+    o = 'mapped.ttl'
+    _ = serialize(_, open(o, 'wb'), RdfFormat.TURTLE)
+    return o
+
 
 
 def automate_function_without_inputs(automate_context: AutomationContext) -> None:
