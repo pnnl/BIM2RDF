@@ -2,8 +2,8 @@ from requests.auth import AuthBase
 
 class TokenAuth(AuthBase):
     def __init__(self,):
-        from .config import token
-        self.token = token
+        from bim2rdf.config import config
+        self.token = config.speckle.token
         self.auth_scheme = 'Bearer'
         
     def __call__(self, request):

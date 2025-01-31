@@ -2,8 +2,8 @@
 class object:
     @classmethod
     def uri(cls, project_id, object_id):
-        from .config import server
-        return f"https://{server}/projects/{project_id}/objects/{object_id}"
+        from bim2rdf.config import config
+        return f"https://{config.speckle.server}/projects/{project_id}/objects/{object_id}"
 
 
 class prefixes:
@@ -14,5 +14,3 @@ class prefixes:
         return cls.Prefix('spkl.data',  _)
     concept =   Prefix('spkl',       "urn:speckle:concept:")
     meta    =   Prefix('spkl.meta',  "urn:speckle:meta:")
-
-
