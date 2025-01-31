@@ -46,7 +46,7 @@ class Run:
             for d in map_dirs:
                 d = self.Path(d)
                 assert(d.exists())
-                yield from d.glob('*/**/*.rq')
+                yield from d.glob('**/*.rq')
         m = [r.ConstructQuery.from_path(p)
              for p in m()]
         # TODO: file this under 'rules/tq'?
