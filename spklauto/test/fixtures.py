@@ -1,20 +1,20 @@
 # removing pytest from
 # https://github.com/specklesystems/specklepy/blob/78c55b787f1ebd51df04adcb5971a39627bd1b04/src/speckle_automate/fixtures.py
 """Some useful helpers for working with automation data."""
-from pydantic_settings import BaseSettings, SettingsConfigDict
-class TestAutomationEnvironment(BaseSettings): # TODO remove pydantic_settings and use project's config
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        env_prefix="speckle_",
-        extra="ignore",
-    )
-    from pydantic import Field
-    token: str = Field()
-    server_url: str = Field()
-    project_id: str = Field()
-    automation_id: str = Field()
-testenv = TestAutomationEnvironment()
+from dataclasses import dataclass
+@dataclass
+class TestAutomationEnvironment:
+    token: str
+    server_url: str
+    project_id: str
+    automation_id: str
+from bim2rdf.config import config
+testenv = TestAutomationEnvironment(
+    token=config.speckle.token,
+    server_url=f'https://{config.speckle.server}',
+    project_id=config.speckle.automate.project_id,
+    automation_id=config.speckle.automate.project_id,
+)
 
 
 from speckle_automate.schema import AutomationRunData, TestAutomationRunData

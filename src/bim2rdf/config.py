@@ -1,9 +1,9 @@
 # dev mode config
-
 envvar_prefix='B2R'
 from dynaconf import Dynaconf
 config = Dynaconf(
     environments=False,  #  top-level [default] [dev] ...
+    merge_enabled=True,
     settings_files=['config.toml', '.secrets.toml'],
     envvar_prefix = envvar_prefix,    
     load_dotenv=True,
@@ -15,6 +15,9 @@ def spkl():
     config.setdefault('speckle', {})
     config.speckle.setdefault('server', defaults.server)
 spkl()
+
+config.speckle.setdefault('automate', {})
+
 
 if __name__ == '__main__':
     # print the config

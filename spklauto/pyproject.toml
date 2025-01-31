@@ -9,7 +9,6 @@ authors = [
 requires-python = "==3.11.9"
 dependencies = [
     "specklepy",
-    "pydantic-settings" # for specklepy/speckle_automate. why do i have to spec??
      ]
 [dependency-groups]
 dev = []
