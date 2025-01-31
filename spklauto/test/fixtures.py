@@ -13,7 +13,7 @@ testenv = TestAutomationEnvironment(
     token=config.speckle.token,
     server_url=f'https://{config.speckle.server}',
     project_id=config.speckle.automate.project_id,
-    automation_id=config.speckle.automate.project_id,
+    automation_id=config.speckle.automate.automation_id,
 )
 
 
