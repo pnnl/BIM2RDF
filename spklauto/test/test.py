@@ -1,18 +1,17 @@
-"""Run integration tests with a speckle server."""
-from speckle_automate import (
-    AutomationContext,
-    AutomationRunData,
-    AutomationStatus,
-    run_function
-)
-from spklauto.main import FunctionInputs, automate_function
-from speckle_automate.fixtures import *
+# """Run integration tests with a speckle server."""
+# from speckle_automate import (
+#     AutomationContext,
+#     AutomationStatus,
+#     run_function
+# )
+# from spklauto.main import FunctionInputs, automate_function
+# import fixtures as f
 
 
-def test_function_run(test_automation_run_data: AutomationRunData, test_automation_token: str):
+def test():
     """Run an integration test for the automate function."""
     automation_context = AutomationContext.initialize(
-        test_automation_run_data, test_automation_token
+        f.automation_run_data(), f.testenv.token
     )
     automate_sdk = run_function(
         automation_context,
@@ -23,3 +22,15 @@ def test_function_run(test_automation_run_data: AutomationRunData, test_automati
     )
     assert automate_sdk.run_status == AutomationStatus.SUCCEEDED
 
+
+def test():
+    from specklepy.api.client import SpeckleClient
+    u = "https://app.speckle.systems"
+    _ = SpeckleClient(u,u.startswith("https"),)
+    #speckle_client.authenticate_with_token(speckle_token)
+    print(
+    _.httpclient.execute("sfsdf")
+    )
+
+if __name__ == '__main__':
+    test()

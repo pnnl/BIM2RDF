@@ -4,10 +4,7 @@ def test_engine():
     run()
 
 
-def test_speckle_automate():
-    ...
-
 
 if __name__ ==  '__main__':
-    test = test_speckle_automate
+    test = test_engine
     test()

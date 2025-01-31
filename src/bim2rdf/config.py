@@ -9,12 +9,12 @@ config = Dynaconf(
     load_dotenv=True,
 )
 
+# have to consolidate here
 def spkl():
     from speckle.config import defaults
     config.setdefault('speckle', {})
     config.speckle.setdefault('server', defaults.server)
 spkl()
-
 
 if __name__ == '__main__':
     # print the config

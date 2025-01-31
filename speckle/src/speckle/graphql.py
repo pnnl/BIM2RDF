@@ -7,6 +7,8 @@ def client():
     from .requests import TokenAuth
     from gql.transport.requests import RequestsHTTPTransport
     default_transport = RequestsHTTPTransport(url=gql_url, auth=TokenAuth())
+    #from gql.transport.aiohttp import AIOHTTPTransport
+    #default_transport = AIOHTTPTransport(url=gql_url,headers= {'Authorization': TokenAuth().token}  )
     _ = Client(transport = default_transport, fetch_schema_from_transport=True)
     return _
 
