@@ -1,7 +1,6 @@
-
-from .config import server
-gql_url = f'https://{server}/graphql'
-
+from bim2rdf.config import config
+gql_url = f'https://{config.speckle.server}/graphql'
+del config
 
 def client():
     from gql import Client
@@ -53,16 +52,7 @@ def query(q=get_void_query(), client=client) -> dict: # json
 
 class queries:
 
-    biglim = 999999 # https://github.com/specklesystems/speckle-server/issues/3908
     def __init__(self, client=client):
-        from types import SimpleNamespace as NS
-        _q = """
-        {
-        apps {
-            id
-        }
-        }
-        """
         from .graphql import get_dsl_schema
         self.schema = get_dsl_schema(client=client)
     
@@ -83,6 +73,7 @@ class queries:
         }}}}}}}}
         """
     
+    biglim = 999999 # https://github.com/specklesystems/speckle-server/issues/3908
     def objects(self, *, project_id, object_id):
         _ = """ query {
         project(id: "project_id") {
@@ -99,3 +90,15 @@ class queries:
         return _
 
 queries = queries()
+
+
+if __name__ == '__main__':
+    from fire import Fire
+    from pathlib import Path
+    def _(q: str | Path,):
+        """query"""
+        if isinstance(q, str):
+            if Path(q).exists():
+                q = Path(q).read_text()
+        return query(q)
+    Fire({'query': _, 'queries': queries})

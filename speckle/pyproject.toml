@@ -8,12 +8,11 @@ authors = [
 readme = "README.md"
 dependencies = [
     "gql[requests]",
-    "urllib3<2", # TODO: can be updated?
-    #https://github.com/psf/requests/releases/tag/v2.30.0
     "json2rdf>=67", "boltons",
     ]
 [dependency-groups]
 dev = [
+    "fire",
     "ipython", "ipdb",
     "json2rdf[cli]",
     "project",]
