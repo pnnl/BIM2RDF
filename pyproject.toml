@@ -29,7 +29,6 @@ dev = [
     # automation
     "project",
     "bim2rdf[spklauto]",#nice
-    # pydantic-settings
 ]
 
 [tool.uv.sources]
