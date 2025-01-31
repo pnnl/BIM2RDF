@@ -12,7 +12,7 @@ dependencies = [
     "pydantic-settings" # for specklepy/speckle_automate. why do i have to spec??
      ]
 [dependency-groups]
-dev = ["pytest"]
+dev = []
 
 [build-system]
 requires = ["hatchling"]
