@@ -63,7 +63,7 @@ def automate_function(
     #_ = engine_run(automate_context)
     #automate_context.store_file_result(_)
     from pathlib import Path
-    _ = Path('223p.ttl')
+    _ = engine_run(automate_context)
     assert(_.exists())
     automate_context.store_file_result(_)
     automate_context.mark_run_success("you good")
@@ -89,7 +89,8 @@ def engine_run(ctx: AutomationContext):
     _ = _.query(dq)
     from pyoxigraph import serialize, RdfFormat
     # rdflib is nicer though
-    o = 'mapped.ttl'
+    from pathlib import Path
+    o = Path('mapped.ttl')
     _ = serialize(_, open(o, 'wb'), RdfFormat.TURTLE)
     return o
 
