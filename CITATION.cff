@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "BIM2RDF"
+version: "1.0.0"
+date-released: "2023-12-13"
+authors:
+  - family-names: "alDosari"
+    given-names: "Majid"
+  - family-names: "Trisha"
+    given-names: "Gupta"
+repository-code: "https://github.com/pnnl/BIM2RDF"
+abstract: "This software tool automatically creates the semantic model that building system applications need by leveraging data that exists in existing practice building design tools."
