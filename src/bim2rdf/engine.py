@@ -31,22 +31,27 @@ class Run:
             MAX_NCYCLES:    int             =defaults.MAX_NCYCLES,
             log=True,
             ):
-        # DATA LOADING PHASE
+        from rdf_engine import Engine, logger
+        if log:
+            import logging
+            logging.basicConfig(force=True) # force removes other loggers that got picked up.
+            logger.setLevel(logging.INFO)
+        def plg(phase):
+            div = '========='
+            l = f"{div}{phase.upper()+' PHASE'}{div}"
+            if log: logger.info(l)
+            
+        plg('1. data loading')
         db = self.db
         import rules as r
         sg = r.SpeckleGetter.from_names(project=project_name, model=model_name)
         # gl https://raw.githubusercontent.com/open223/defs.open223.info/0a70c244f7250734cc1fd59742ab9e069919a3d8/ontologies/223p.ttl
         # https://github.com/open223/defs.open223.info/blob/4a6dd3a2c7b2a7dfc852ebe71887ebff483357b0/ontologies/223p.ttl
         ttls = [r.ttlLoader(self.Path(ttl)) for ttl in ttls]
-        from rdf_engine import Engine, logger
-        if log:
-            import logging
-            logging.basicConfig(force=True) # force removes other loggers that got picked up.
-            logger.setLevel(logging.INFO)
         # data loading phase.                            no need to cycle
         db = Engine([sg,]+ttls, db=db, derand=False, MAX_NCYCLES=1, log_print=True ).run()
 
-        # MAPPING PHASE
+        plg('2. mapping and inferencing')
         def m():
             for d in map_dirs:
                 d = self.Path(d)
@@ -77,4 +82,6 @@ class Run:
                       MAX_NCYCLES=MAX_NCYCLES,
                       derand='canonicalize',
                       log_print=True ).run()
+        plg('3. validation')
+
 
