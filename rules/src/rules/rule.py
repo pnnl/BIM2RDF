@@ -52,12 +52,11 @@ class Rule(Rule):
         raise NotImplementedError
 
     def meta_and_data(self, db: Store) ->Iterable[Quad]:
-        data = tuple(self.data(db))         #
-        yield from (Quad(*t) for t in data)     # data quads
-        for d in data:                          #
+        for d in self.data(db):                 
+            yield Quad(*d)                      # data
             for m in self.meta:                 #
                 assert(isinstance(d, Triple))   #
-                yield Quad(d, # nesting triple  # meta quads
+                yield Quad(d, # nesting triple  # meta
                            # no need for m.'id' bc simple as possible
                            m.predicate, m.object)
         # List all metadata for the given reference to a statement
