@@ -32,16 +32,16 @@ class Run:
             log=True,
             ):
         from rdf_engine import Engine, logger
-        if log:
-            import logging
-            logging.basicConfig(force=True) # force removes other loggers that got picked up.
-            logger.setLevel(logging.INFO)
-        def plg(phase):
-            div = '========='
-            l = f"{div}{phase.upper()+' PHASE'}{div}"
-            if log: logger.info(l)
+        def lg(phase):
+            if log:
+                import logging
+                logging.basicConfig(force=True) # force removes other loggers that got picked up.
+                logger.setLevel(logging.INFO)
+                div = '========='
+                l = f"{div}{phase.upper()+' PHASE'}{div}"
+                logger.info(l)
             
-        plg('[1/3] data loading')
+        lg('[1/3] data loading')
         db = self.db
         import rules as r
         sg = r.SpeckleGetter.from_names(project=project_name, model=model_name)
@@ -49,9 +49,9 @@ class Run:
         # https://github.com/open223/defs.open223.info/blob/4a6dd3a2c7b2a7dfc852ebe71887ebff483357b0/ontologies/223p.ttl
         ttls = [r.ttlLoader(self.Path(ttl)) for ttl in ttls]
         # data loading phase.                            no need to cycle
-        db = Engine([sg,]+ttls, db=db, derand=False, MAX_NCYCLES=1, log_print=True ).run()
+        db = Engine([sg,]+ttls, db=db, derand=False, MAX_NCYCLES=1, log_print=log).run()
 
-        plg('[2/3] mapping and inferencing')
+        lg('[2/3] mapping and inferencing')
         def m():
             for d in map_dirs:
                 d = self.Path(d)
@@ -81,7 +81,7 @@ class Run:
                       db=db,
                       MAX_NCYCLES=MAX_NCYCLES,
                       derand='canonicalize',
-                      log_print=True ).run()
-        plg('[3/3] validation')
+                      log_print=log).run()
+        lg('[3/3] validation')
 
 
