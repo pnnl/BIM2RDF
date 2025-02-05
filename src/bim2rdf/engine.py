@@ -1,5 +1,3 @@
-# do i need this module to specify something?
-# rdf-engine program?
 class Run:
     class defaults:
         from pathlib import Path
