@@ -23,7 +23,6 @@ class String:
             if isinstance(n, str): n = Variable(n)
             else: assert(isinstance(n, Variable))
             _ = s.replace(str(n), str(v))
-            print(i, _)
             if _ == s: break
             else: s = _
         return s
