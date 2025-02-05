@@ -6,7 +6,7 @@ class SpeckleGetter(Rule):
     def __init__(self, *, project_id, version_id):
         self.project_id = project_id
         self.version_id = version_id
-    
+        
     @classmethod
     def from_names(cls, *, project, model):
         from speckle.data import Project

@@ -4,8 +4,16 @@ class Run:
     class defaults:
         from pathlib import Path
         from mapping import dir as mapdir
-        mapdirs = [ mapdir / 'test' ]
+        map_dirs = [ mapdir / 'test' ]
+        map_substitutions = {}
         ttls = [Path('ontology.ttl')]
+        model_names = [
+            'architecture/hvac zones',
+            'architecture/lighting devices',
+            'architecture/rooms and lighting fixtures',
+            'electrical/panels',
+            'electrical/electrical connections',
+                       ]
         MAX_NCYCLES = 10
         del Path
 
@@ -25,9 +33,12 @@ class Run:
     from typing import Iterable
     def run(self, *,
             project_name:   str,
-            model_name:     str,  # TODO: nameS, w/ versions. use ver if given [{mdlnm:ver},...] or [mdlver, ...]
+            project_id:     str="",
+            model_names:   Iterable[str]   =defaults.model_names,
+            model_versions: Iterable[str]   = [],
             ttls:           Iterable[Path]  =defaults.ttls,
-            map_dirs:       Iterable[Path]  =defaults.mapdirs,
+            map_dirs:       Iterable[Path]  =defaults.map_dirs,
+            map_substitutions: dict         =defaults.map_substitutions, # TODO
             MAX_NCYCLES:    int             =defaults.MAX_NCYCLES,
             log=True,
             ):
@@ -40,17 +51,41 @@ class Run:
                 div = '========='
                 l = f"{div}{phase.upper()+' PHASE'}{div}"
                 logger.info(l)
-            
+        
+        if project_name and project_id:
+            raise ValueError('use project_id OR project_name')
+        import speckle.data as sd
+        if project_id:
+            project = sd.Project(project_id)
+        else:
+            assert(project_name)
+            _ = [p for p in sd.Project.s() if p.name == project_name]
+            if (len(_) > 1):    raise ValueError('project name not unique')
+            if (len(_) == 0):   raise ValueError('project name not found')
+            assert(len(_) == 1)
+            project = _[0]
+
+        
+        #####
         lg('[1/3] data loading')
         db = self.db
         import rules as r
-        sg = r.SpeckleGetter.from_names(project=project_name, model=model_name)
+        model_names =    tuple(model_names)
+        model_versions = tuple(model_versions)
+        if model_names and model_versions:
+            raise ValueError('use model names OR versions')
+        if model_names:
+            sgs = [r.SpeckleGetter.from_names(project=project.name, model=n) for n in model_names]
+        else:
+            assert(model_versions)
+            sgs = [r.SpeckleGetter(project_id=project.id, version_id=v) for v in model_versions]
         # gl https://raw.githubusercontent.com/open223/defs.open223.info/0a70c244f7250734cc1fd59742ab9e069919a3d8/ontologies/223p.ttl
         # https://github.com/open223/defs.open223.info/blob/4a6dd3a2c7b2a7dfc852ebe71887ebff483357b0/ontologies/223p.ttl
         ttls = [r.ttlLoader(self.Path(ttl)) for ttl in ttls]
-        # data loading phase.                            no need to cycle
-        db = Engine([sg,]+ttls, db=db, derand=False, MAX_NCYCLES=1, log_print=log).run()
+        # data loading phase.                          no need to cycle
+        db = Engine(sgs+ttls, db=db, derand=False, MAX_NCYCLES=1, log_print=log).run()
 
+        #######
         lg('[2/3] mapping and inferencing')
         def m():
             for d in map_dirs:
@@ -82,6 +117,8 @@ class Run:
                       MAX_NCYCLES=MAX_NCYCLES,
                       derand='canonicalize',
                       log_print=log).run()
+        
+        ######
         lg('[3/3] validation')
 
 

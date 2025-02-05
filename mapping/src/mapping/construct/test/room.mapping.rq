@@ -38,7 +38,7 @@ CONSTRUCT {
 
 } 
 WHERE {
-<<?this spkl:category  "Rooms">> spkl.meta:model_name "pritoni 1.ifc".
+<<?this spkl:category  "Rooms">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
   ?this spkl:parameters ?p.
   ?p ?k ?l. 
   ?l spkl:applicationInternalName "ROOM_AREA".
