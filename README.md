@@ -7,7 +7,7 @@ Each top-level directory is a 'component' of the project.
 Furthermore, the following dependencies were extracted as
 generic stand-alone libraries:
 * [PyTQSHACL](https://github.com/pnnl/pytqshacl/)
-* [RDF-Engine](https://github.com/pnnl/pytqshacl/)
+* [RDF-Engine](https://github.com/pnnl/rdf-engine/)
 * [JSON2RDF](https://github.com/pnnl/json2rdf/)
 
 
