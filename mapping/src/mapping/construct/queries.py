@@ -4,9 +4,11 @@ class Query:
     class defaults:
         dir = Path(__file__).parent
         from speckle.meta import prefixes as spkl_prefixes
+        from rules.rule import Rule
         substitutions = {
             'prefix.spkl':      spkl_prefixes.concept.uri,
             'prefix.spkl.meta': spkl_prefixes.meta.uri,
+            'prefix.meta':      Rule.meta_prefix.uri,
             'model.arch.rooms&lights.name': 'architecture/rooms and lighting fixtures',
         }
 
@@ -37,19 +39,17 @@ class Query:
           *, substitutions=defaults.substitutions) -> Iterable[Self]:
         for src in source:
             if isinstance(src, str):
-                if Path(src).exists(): src = Path(src)
-                else: src = None
+                if Path(src).exists():
+                    _ = cls.from_path(src, substitutions=substitutions)
+                    _.source = Path(src)
+                    yield _
+                else:
+                    yield cls(src, substitutions=substitutions)
             else:
-                assert(isinstance(src, Path))
-                assert(src.exists())
-            if src:
                 assert(isinstance(src, Path))
                 _ = cls.from_path(src, substitutions=substitutions)
-                _.source = src
+                _.source = Path(src)
                 yield _
-            else:
-                assert(src is None)
-                yield cls(_, substitutions)
     
 default = tuple(Query.s())
 
