@@ -20,7 +20,9 @@ class Query:
     def from_path(cls, p: Path, *, substitutions=defaults.substitutions) -> Self:
         p = Path(p)
         assert(p.exists())
-        return cls(p.read_text(), substitutions=substitutions)
+        _ = cls(p.read_text(), substitutions=substitutions)
+        _.source = p
+        return _
 
     from functools import cached_property
     @cached_property
@@ -29,27 +31,28 @@ class Query:
         from bim2rdf.utils.substitution import String
         _ = String(_)
         _ = _.substitue(self.substitutions)
+        #assert('construct' in _.lower())
         return _
     def __str__(self): return self.string
 
     from typing import Iterable
     @classmethod
     def s(cls,
-          source: Iterable = tuple(defaults.dir.glob('**/*.rq')),
+          source: Iterable = [defaults.dir],
           *, substitutions=defaults.substitutions) -> Iterable[Self]:
         for src in source:
             if isinstance(src, str):
                 if Path(src).exists():
-                    _ = cls.from_path(src, substitutions=substitutions)
-                    _.source = Path(src)
-                    yield _
+                    yield from cls.s([src], substitutions=substitutions)
                 else:
                     yield cls(src, substitutions=substitutions)
             else:
                 assert(isinstance(src, Path))
-                _ = cls.from_path(src, substitutions=substitutions)
-                _.source = Path(src)
-                yield _
+                if src.is_dir():
+                    yield from cls.s(src.glob('**/*.rq'), substitutions=substitutions)
+                else:
+                    assert(src.is_file())
+                    yield cls.from_path(src, substitutions=substitutions)
     
 default = tuple(Query.s())
 
@@ -67,7 +70,8 @@ if __name__ == '__main__':
             from yaml import safe_load
             substitutions = safe_load(open(substitutions))
         o = Path(o)
-        for q in Query.s(i.glob('**/*.rq'), substitutions=substitutions):
+        for q in Query.s([i], substitutions=substitutions):
+            assert(isinstance(q.source, Path))
             p = q.source.relative_to(i)
             p: Path = o / p
             p.parent.mkdir(parents=True, exist_ok=True)
