@@ -1,7 +1,7 @@
 from ..rule import Rule, Store
 
 class SpeckleGetter(Rule):
-    from speckle.meta import prefixes
+    from bim2rdf_speckle.meta import prefixes
     meta_prefix = prefixes.meta
     def __init__(self, *, project_id, version_id):
         self.project_id = project_id
@@ -9,7 +9,7 @@ class SpeckleGetter(Rule):
         
     @classmethod
     def from_names(cls, *, project, model):
-        from speckle.data import Project
+        from bim2rdf_speckle.data import Project
         p = [p for p in cls.projects() if p.name == project]
         assert(len(p) == 1)
         p: Project = p[0]
@@ -22,7 +22,7 @@ class SpeckleGetter(Rule):
         v = v[0]
         return cls(project_id=p.id, version_id=v.id)
 
-    from speckle.data import Project, Model
+    from bim2rdf_speckle.data import Project, Model
     from functools import cache
     @classmethod
     @cache
@@ -32,7 +32,7 @@ class SpeckleGetter(Rule):
     from functools import cached_property
     @cached_property
     def project(self) ->Project:
-        from speckle.data import Project
+        from bim2rdf_speckle.data import Project
         p = [p for p in self.projects() if p.id == self.project_id]
         assert(len(p) == 1)
         p: Project = p[0]

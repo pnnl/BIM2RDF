@@ -1,5 +1,5 @@
 # dev mode config
-envvar_prefix='B2R'
+envvar_prefix='BIM2RDF'
 from dynaconf import Dynaconf
 config = Dynaconf(
     environments=False,  #  top-level [default] [dev] ...
@@ -11,7 +11,7 @@ config = Dynaconf(
 
 # have to consolidate here
 def spkl():
-    from speckle.config import defaults
+    from bim2rdf_speckle.config import defaults
     config.setdefault('speckle', {})
     config.speckle.setdefault('server', defaults.server)
 spkl()

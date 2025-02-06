@@ -4,7 +4,7 @@ from speckle_automate import (
     AutomationStatus,
     run_function
 )
-from spklauto.main import FunctionInputs, automate_function
+from bim2rdf_spklauto.main import FunctionInputs, automate_function
 import fixtures as f
 
 

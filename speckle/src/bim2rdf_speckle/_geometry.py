@@ -42,7 +42,7 @@ def has_property(store, property: str|tuple, category=None, subject=None, limit=
 def from_graph(graph:str=''):
     return ('from'+graph) if graph else ''
 
-from speckle import base_uri, meta_uri
+from bim2rdf_speckle import base_uri, meta_uri
 
 def prefixes():
     _ = f"""
@@ -227,7 +227,7 @@ def geometry_getter(store,
         elif lst2arr == 'transform':    shape = ( 4, 4)
         else:                           #shape = (-1,) # nothing. makes no sense to keep going
             raise ValueError(f"converting {lst2arr} list to array not defined")
-        from speckle.objects import data_decode
+        from bim2rdf_speckle.objects import data_decode
         _ = ls; del ls
         _ = map(lambda _: data_decode(_), _)
         if 'faces' in lst2arr:

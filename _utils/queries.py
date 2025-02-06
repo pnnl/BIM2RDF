@@ -20,10 +20,10 @@ def namespaces(unique=True):
             for pfx, ns in nss.namespaces():
                 yield namespace(pfx, ns)
     def s():
-        from speckle import namespaces
+        from bim2rdf_speckle import namespaces
         return namespaces()
     def ms():
-        from mapping.speckle import namespaces
+        from bim2rdf_mapping.speckle import namespaces
         return namespaces()
     def e():
         from ..engine import namespaces

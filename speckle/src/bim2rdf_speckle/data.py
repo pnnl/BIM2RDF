@@ -20,7 +20,7 @@ class Project:
     @classmethod
     @cache
     def _s(cls, *, filter=lambda p: True):
-        from speckle.graphql import queries, query
+        from bim2rdf_speckle.graphql import queries, query
         _ = queries.general_meta()
         _ = query(_)
         _ = _['activeUser']['projects']['items']

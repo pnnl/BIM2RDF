@@ -1,7 +1,7 @@
 class Run:
     class defaults:
         from pathlib import Path
-        from mapping import dir as mapdir
+        from bim2rdf_mapping.construct import default_dir as mapdir
         map_dirs = [ mapdir / 'test' ]
         map_substitutions = {}
         ttls = [Path('ontology.ttl')]
@@ -52,7 +52,7 @@ class Run:
         
         if project_name and project_id:
             raise ValueError('use project_id OR project_name')
-        import speckle.data as sd
+        import bim2rdf_speckle.data as sd
         if project_id:
             project = sd.Project(project_id)
         else:
@@ -67,7 +67,7 @@ class Run:
         #####
         lg('[1/3] data loading')
         db = self.db
-        import rules as r
+        import bim2rdf_rules as r
         model_names =    tuple(model_names)
         model_versions = tuple(model_versions)
         if model_names and model_versions:

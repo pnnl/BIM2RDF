@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Self
-class Query:
+class Query: # so generic
     class defaults:
         dir = Path(__file__).parent
-        from speckle.meta import prefixes as spkl_prefixes
-        from rules.rule import Rule
+        from bim2rdf_speckle.meta import prefixes as spkl_prefixes
+        from bim2rdf_rules.rule import Rule
         substitutions = {
             'prefix.spkl':      spkl_prefixes.concept.uri,
             'prefix.spkl.meta': spkl_prefixes.meta.uri,
