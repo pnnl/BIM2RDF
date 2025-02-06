@@ -47,7 +47,7 @@ class Run:
                 logging.basicConfig(force=True) # force removes other loggers that got picked up.
                 logger.setLevel(logging.INFO)
                 div = '========='
-                l = f"{div}{phase.upper()+' PHASE'}{div}"
+                l = f"{div}{phase.upper()}{div}"
                 logger.info(l)
         
         if project_name and project_id:
