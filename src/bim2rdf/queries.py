@@ -1,18 +1,25 @@
-from pathlib import Path
-from typing import Self
-
 
 def default_substitutions() -> dict:
-    from bim2rdf_speckle.meta import prefixes as spkl_prefixes
-    from bim2rdf_rules.rule import Rule
-    return {
-    'prefix.spkl':      spkl_prefixes.concept.uri,
-    'prefix.spkl.meta': spkl_prefixes.meta.uri,
-    'prefix.meta':      Rule.meta_prefix.uri,
-    'model.arch.rooms&lights.name': 'architecture/rooms and lighting fixtures',
-    }
+    from bim2rdf_speckle.meta import prefixes as                        spkl_prefixes
+    from bim2rdf_rules.rule import                                      Rule
+    from bim2rdf_rules.construct.rule import ConstructQuery as          CQ
+    from bim2rdf_rules.topquadrant.rule import TopQuadrantInference as  TQI
+    from bim2rdf_rules.ttl.rule import                                  ttlLoader
+    _ = (
+    (f'prefix.{Rule.meta_prefix.name}',         Rule.meta_prefix.uri,),
+    (f'prefix.{ttlLoader.meta_prefix.name}',    ttlLoader.meta_prefix.uri),
+    (f'prefix.{spkl_prefixes.concept.name}',    spkl_prefixes.concept.uri,),
+    (f'prefix.{spkl_prefixes.meta.name}',       spkl_prefixes.meta.uri,),
+    (f'prefix.{CQ.meta_prefix.name}',           CQ.meta_prefix.uri),
+    (f'prefix.{TQI.meta_prefix.name}',          TQI.meta_prefix.uri),
+    ('model.arch.rooms&lights.name',            'architecture/rooms and lighting fixtures',),
+    )
+    assert(len(set(kv[0] for kv in _)) == len([kv[1] for kv in _]))
+    _ = {kv[0]:kv[1] for kv in _}
+    return _
 
-
+from pathlib import Path
+from typing import Self
 class SPARQLQuery:
     class defaults:
         from bim2rdf_mapping.construct import default_dir as cdefault_dir
@@ -103,4 +110,4 @@ if __name__ == '__main__':
         return odir
 
     from fire import Fire
-    Fire({f.__name__:f for f in {sparql,}})
+    Fire({f.__name__:f for f in {sparql, default_substitutions}})

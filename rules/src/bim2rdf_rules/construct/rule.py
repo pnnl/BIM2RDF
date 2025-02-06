@@ -1,7 +1,7 @@
 from ..rule import Rule
 class ConstructQuery(Rule):
     from ..rule import Prefix
-    meta_prefix =    Prefix('meta',    'urn:meta:bim2rdf:ConstructQuery:')
+    meta_prefix =    Prefix('meta.construct',    'urn:meta:bim2rdf:ConstructQuery:')
     def __init__(self, query: str, *, name=None):
         assert('construct' in query.lower())
         self.query = query
