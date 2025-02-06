@@ -96,6 +96,7 @@ class SPARQLQuery:
                     yield cls.from_path(src, substitutions=substitutions)
 
 
+
 if __name__ == '__main__':
     from typing import Literal, List
     def sparql(*, idirs: List[Path]=SPARQLQuery.defaults.dirs,

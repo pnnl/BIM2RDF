@@ -2,7 +2,7 @@ class Run:
     class defaults:
         from pathlib import Path
         from bim2rdf_mapping.construct import default_dir as mapdir
-        map_dirs = [ mapdir / 'test' ]
+        map_dirs = [ mapdir  ]
         map_substitutions = {}
         ttls = [Path('ontology.ttl')]
         model_names = [
