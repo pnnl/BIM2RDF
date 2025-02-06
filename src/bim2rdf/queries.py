@@ -23,6 +23,11 @@ class SPARQLQuery:
         self._s = _s
         self.substitutions = substitutions.copy()
     
+    def check(self):
+        from pyoxigraph import Store
+        Store().query(self._s)
+        return True
+    
     @classmethod
     def from_path(cls, p: Path, *, substitutions=defaults.substitutions) -> Self:
         p = Path(p)
@@ -30,6 +35,7 @@ class SPARQLQuery:
         _ = cls(p.read_text(), substitutions=substitutions)
         _.source = p
         return _
+    
 
     from functools import cached_property
     @cached_property
@@ -39,6 +45,7 @@ class SPARQLQuery:
         _ = String(_)
         _ = _.substitue(self.substitutions)
         #assert('construct' in _.lower())
+        self.check()
         return _
     def __str__(self): return self.string
 
@@ -67,8 +74,10 @@ if __name__ == '__main__':
     from typing import Literal, List
     def sparql(*, idirs: List[Path]=SPARQLQuery.defaults.dirs,
           substitutions: Path|Literal['default']='default',
-          odir=Path('substituted')):
-        """substitute sparql queries"""
+          odir=Path('substituted'),
+          check=False,
+          ):
+        """evaluate templated sparql queries"""
         idirs = [Path(d) for d in idirs]
         for d in idirs: assert(d.is_dir())
         if substitutions == 'default':
@@ -81,6 +90,10 @@ if __name__ == '__main__':
         odir = Path(odir)
         for d in idirs:
             for q in SPARQLQuery.s([d], substitutions=substitutions):
+                if check:
+                    try: q.check()
+                    except SyntaxError as se:
+                        raise SyntaxError(str(se)+f' in {q.source}')
                 assert(isinstance(q.source, Path))
                 p: Path = odir / q.source.relative_to(d)
                 p.parent.mkdir(parents=True, exist_ok=True)
