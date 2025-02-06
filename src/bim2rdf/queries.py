@@ -14,14 +14,21 @@ def default_substitutions() -> dict:
     (f'prefix.{TQI.meta_prefix.name}',          TQI.meta_prefix.uri),
     )
     def models():
+        abbrs = {
+            'arch': 'architecture',
+            'elec': 'electrical',
+            }
         _ = (
-        ('arch.rooms&lights',   'architecture/rooms and lighting fixtures',),
-        ('arch.hvaczones',      'architecture/hvac zones',),
-        ('elec.panels',         'electrical/panels'),
-        ('elec.conn',           'electrical/electrical connections'),
-        ('elec.lights',         'architecture/lighting devices',),
+        ('arch.rooms&lights',   'rooms and lighting fixtures',),
+        ('arch.lights',         'lighting devices',),
+        ('arch.hvaczones',      'hvac zones',),
+        ('elec.panels',         'panels'),
+        ('elec.conn',           'electrical connections'),
         )
-        _ = tuple((f"model.{t[0]}.name", t[1]) for t in _)
+        _ = tuple(
+            (f"model.{t[0]}.name",
+             f"{abbrs[t[0].split('.')[0]]}/{t[1]}" )
+             for t in _)
         from .engine import Run
         assert(set(_[1] for _ in _) == set(Run.defaults.model_names) )
         return _
