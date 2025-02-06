@@ -12,10 +12,22 @@ def default_substitutions() -> dict:
     (f'prefix.{spkl_prefixes.meta.name}',       spkl_prefixes.meta.uri,),
     (f'prefix.{CQ.meta_prefix.name}',           CQ.meta_prefix.uri),
     (f'prefix.{TQI.meta_prefix.name}',          TQI.meta_prefix.uri),
-    ('model.arch.rooms&lights.name',            'architecture/rooms and lighting fixtures',),
     )
+    def models():
+        _ = (
+        ('arch.rooms&lights',   'architecture/rooms and lighting fixtures',),
+        ('arch.hvaczones',      'architecture/hvac zones',),
+        ('elec.panels',         'electrical/panels'),
+        ('elec.conn',           'electrical/electrical connections'),
+        ('elec.lights',         'architecture/lighting devices',),
+        )
+        _ = tuple((f"model.{t[0]}.name", t[1]) for t in _)
+        from .engine import Run
+        assert(set(_[1] for _ in _) == set(Run.defaults.model_names) )
+        return _
+    _ = _+models()
     assert(len(set(kv[0] for kv in _)) == len([kv[1] for kv in _]))
-    _ = {kv[0]:kv[1] for kv in _}
+    _ = {kv[0]:kv[1] for kv in sorted(_, key=lambda t:t[0] )}
     return _
 
 from pathlib import Path

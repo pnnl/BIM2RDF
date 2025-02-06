@@ -32,7 +32,7 @@ class Run:
     def run(self, *,
             project_name:   str,
             project_id:     str="",
-            model_names:   Iterable[str]   =defaults.model_names,
+            model_names:    Iterable[str]   =defaults.model_names,
             model_versions: Iterable[str]   = [],
             ttls:           Iterable[Path]  =defaults.ttls,
             map_dirs:       Iterable[Path]  =defaults.map_dirs,
