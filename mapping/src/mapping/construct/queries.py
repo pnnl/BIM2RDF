@@ -43,6 +43,7 @@ class Query:
         for src in source:
             if isinstance(src, str):
                 if Path(src).exists():
+                    src = Path(src)
                     yield from cls.s([src], substitutions=substitutions)
                 else:
                     yield cls(src, substitutions=substitutions)
