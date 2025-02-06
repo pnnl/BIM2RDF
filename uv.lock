@@ -84,6 +84,7 @@ dependencies = [
 [package.optional-dependencies]
 cli = [
     { name = "fire" },
+    { name = "pyyaml" },
 ]
 spklauto = [
     { name = "spklauto" },
@@ -103,6 +104,7 @@ requires-dist = [
     { name = "dynaconf" },
     { name = "fire", marker = "extra == 'cli'" },
     { name = "mapping", editable = "mapping" },
+    { name = "pyyaml", marker = "extra == 'cli'" },
     { name = "rules", editable = "rules" },
     { name = "speckle", editable = "speckle" },
     { name = "spklauto", marker = "extra == 'spklauto'", editable = "spklauto" },

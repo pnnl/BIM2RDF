@@ -18,7 +18,10 @@ dependencies = [
 ]
 [project.optional-dependencies]
 spklauto = ["spklauto"]
-cli = ["fire"]
+cli = ["fire", "pyyaml"]
+
+[project.scripts]
+bim2rdf = "bim2rdf:cli"
 
 [dependency-groups]
 dev = [

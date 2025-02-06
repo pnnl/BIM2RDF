@@ -10,6 +10,4 @@ def f(config: Path= Path('params.yaml')):
     _ = r.run(**config)
     return db
 f = Fire(f)
-
-if __name__ == '__main__':
-    f
+exit(0)
