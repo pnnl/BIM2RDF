@@ -5,7 +5,7 @@ class Run:
         model_versions = []
         use_default_mappings = True
         from pathlib import Path
-        additional_mapping_dirs = [  ]
+        additional_mapping_paths = [  ]
         from .queries import SPARQLQuery
         map_substitutions = [SPARQLQuery.defaults.substitutions]; del SPARQLQuery
         ttls = [Path('ontology.ttl')]
@@ -26,7 +26,7 @@ class Run:
             model_versions: Iterable[str]       =defaults.model_versions,
             ttls:           Iterable[Path]      =defaults.ttls,
             use_default_mappings:bool           =defaults.use_default_mappings,
-            additional_mapping_dirs:Iterable[Path]  =defaults.additional_mapping_dirs,
+            additional_mapping_paths:Iterable[Path]  =defaults.additional_mapping_paths,
             map_substitutions: Iterable[dict]   =defaults.map_substitutions,
             inference                           =defaults.inference,
             MAX_NCYCLES:    int                 =defaults.MAX_NCYCLES,
@@ -86,12 +86,12 @@ class Run:
         substitutions = _
         if use_default_mappings:
             from bim2rdf_mapping.construct import default_dir as dmd
-            map_dirs = [dmd]
+            map_paths = [dmd]
         else:
-            map_dirs = []
-        map_dirs = tuple(additional_mapping_dirs)+tuple(map_dirs)
+            map_paths = []
+        map_paths = tuple(additional_mapping_paths)+tuple(map_paths)
         def unique_queries():
-            qs = SPARQLQuery.s((map_dirs), substitutions=substitutions)
+            qs = SPARQLQuery.s((map_paths), substitutions=substitutions)
             from collections import defaultdict
             dd = defaultdict(list)
             for q in qs: dd[q.string].append(q)
