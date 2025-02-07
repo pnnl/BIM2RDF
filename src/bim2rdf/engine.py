@@ -1,14 +1,15 @@
 class Run:
     class defaults:
+        from .queries import DefaultSubstitutions
+        model_names = frozenset(t[1] for t in DefaultSubstitutions.models()); del DefaultSubstitutions
+        model_versions = []
         from pathlib import Path
         from bim2rdf_mapping.construct import default_dir as mapdir
         map_dirs = [ mapdir  ]; del mapdir
         from .queries import SPARQLQuery
         map_substitutions = [SPARQLQuery.defaults.substitutions]; del SPARQLQuery
         ttls = [Path('ontology.ttl')]
-        from .queries import DefaultSubstitutions
-        model_names = frozenset(t[1] for t in DefaultSubstitutions.models()); del DefaultSubstitutions
-        model_versions = []
+        inference = True
         MAX_NCYCLES = 10
         del Path
 
@@ -26,6 +27,7 @@ class Run:
             ttls:           Iterable[Path]      =defaults.ttls,
             map_dirs:       Iterable[Path]      =defaults.map_dirs,
             map_substitutions: Iterable[dict]   =defaults.map_substitutions,
+            inference                           =defaults.inference,
             MAX_NCYCLES:    int                 =defaults.MAX_NCYCLES,
             log=True,
             ):
@@ -76,7 +78,7 @@ class Run:
         db = Engine(sgs+ttls, db=db, derand=False, MAX_NCYCLES=1, log_print=log).run()
 
         #######
-        lg('[2/3] mapping and inferencing')
+        lg('[2/3] mapping and maybe inferencing')
         from .queries import SPARQLQuery
         _ = {}
         for ms in map_substitutions: _.update(ms)
@@ -102,14 +104,13 @@ class Run:
         filter (CONTAINS(?mo, "223p.ttl") )
         }
         """
-        tq = r.TopQuadrantInference(data=dq, shapes=sq)
-        return Engine(ms+[tq],
+        inf = [r.TopQuadrantInference(data=dq, shapes=sq)] if inference else []
+        return Engine(ms+inf,
                       db=db,
                       MAX_NCYCLES=MAX_NCYCLES,
-                      derand='canonicalize',
+                      #derand='canonicalize',
                       log_print=log).run()
         
         ######
         lg('[3/3] validation')
-
 
