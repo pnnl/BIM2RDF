@@ -1,28 +1,27 @@
 
-def default_substitutions() -> dict:
-    _ = tuple()
-    def models():
+class DefaultSubstitutions:
+    from typing import List, Tuple
+    @classmethod
+    def models(cls) -> List[Tuple[str, str]]:
         abbrs = {
             'arch': 'architecture',
             'elec': 'electrical',
             }
-        _ = (
+        _ = [
         ('arch.rooms&lights',   'rooms and lighting fixtures',),
         ('arch.lights',         'lighting devices',),
         ('arch.hvaczones',      'hvac zones',),
         ('elec.panels',         'panels'),
         ('elec.conn',           'electrical connections'),
-        )
-        _ = tuple(
+        ]
+        _ = [
             (f"model.{t[0]}.name",
              f"{abbrs[t[0].split('.')[0]]}/{t[1]}" )
-             for t in _)
-        from .engine import Run
-        assert(set(_[1] for _ in _) == set(Run.defaults.model_names) )
+             for t in _]
         return _
-    _ = _+models()
-
-    def prefixes():
+    
+    @classmethod
+    def prefixes(cls) -> List[Tuple[str, str]]:
         from bim2rdf_speckle.meta import prefixes as                        spkl_prefixes
         from bim2rdf_rules.rule import                                      Rule
         from bim2rdf_rules.construct.rule import ConstructQuery as          CQ
@@ -47,14 +46,27 @@ def default_substitutions() -> dict:
         subs = tuple((f"prefix.{p.name}", p.uri) for p in objs)
         query = '\n'.join(f'PREFIX {p.name}: <{p.uri}>' for p in objs)
         _ = subs + (('query.prefixes', query ),)
-        return _
-    _ = _+prefixes()
+        return list(_)
     
-    # enforce uniqueness of keys should 'match' values.
-    # before putting it into a dictionary
-    assert(len(set(kv[0] for kv in _)) == len([kv[1] for kv in _]))
-    _ = {kv[0]:kv[1] for kv in sorted(_, key=lambda t:t[0] )}
-    return _
+    @staticmethod
+    def check_unique(subs: List[Tuple[str, str]]) -> bool:
+        # check uniqueness of keys should 'match' values.
+        return len(set(kv[0] for kv in subs)) == len([kv[1] for kv in subs])
+    
+    @classmethod
+    def mk(cls, subs: List[Tuple[str, str]],) -> dict:
+        # before putting it into a dictionary
+        assert(cls.check_unique(subs))
+        _ = {kv[0]:kv[1] for kv in sorted(subs, key=lambda t:t[0] )}
+        return _
+    
+    @classmethod
+    def dict(cls, groups: set={'prefixes', 'models'}) -> dict:
+        groups = set(groups)
+        _ = []
+        for g in groups: _ = _ + getattr(cls, g)()
+        _ = cls.mk(_)
+        return _
 
 from pathlib import Path
 from typing import Self
@@ -62,7 +74,8 @@ class SPARQLQuery:
     class defaults:
         from bim2rdf_mapping.construct import default_dir as cdefault_dir
         dirs = [cdefault_dir]
-        substitutions = default_substitutions()
+        #                    more explicit as it's under sparqlqauery
+        substitutions = DefaultSubstitutions.dict({'prefixes', 'models'})
 
     def __init__(self, _s: str, *, substitutions=defaults.substitutions):
         self._s = _s
@@ -150,6 +163,7 @@ if __name__ == '__main__':
         (    odir / '.gitignore').touch()
         open(odir / '.gitignore', 'w').write('*')
         return odir
-
+    
     from fire import Fire
+    def default_substitutions(): return SPARQLQuery.defaults.substitutions
     Fire({f.__name__:f for f in {sparql, default_substitutions}})
