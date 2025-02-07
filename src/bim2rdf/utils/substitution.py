@@ -9,21 +9,44 @@ class Variable:
         return '${'+str(self.name)+'}'
 
 class String:
-    def __init__(self, s: str):
+    def __init__(self, s: str, *,
+                 substitutions: dict[Variable|str, str]={},
+                 MAX_SUBS=999):
         self.value = s
-        
-    def substitue(self, subs: dict[Variable|str, str], MAX_SUBS=999) -> str:
-        from itertools import cycle
+        _ = {}
+        for var,val in substitutions.items():
+            if isinstance(var, str): var = Variable(var)
+            else: assert(isinstance(var, Variable))
+            _[var] = val
+        self.substitions = _
+        self.MAX_SUBS = MAX_SUBS
+    
+    def onepass(self):
         s = self.value
-        for i, (n,v) in enumerate(cycle(subs.items())):
-            if i>MAX_SUBS:
-                from warnings import warn
-                warn('reached substitition lim')
-                return s
-            if isinstance(n, str): n = Variable(n)
-            else: assert(isinstance(n, Variable))
-            _ = s.replace(str(n), str(v))
-            if _ == s: break
-            else: s = _
-        return s
+        for var,val in self.substitions.items():
+            _ = s.replace(str(var), str(val))
+            if s != _: yield _
+            s = _
 
+    from functools import cache
+    @cache
+    def __str__(self):
+        return self.substitute()
+    def substitute(self):
+        for _ in self: pass
+        return _
+        
+    def __iter__(self):
+        i = 0
+        for _p in range(99999):
+            for s in self.onepass():
+                if i>=self.MAX_SUBS:
+                    from warnings import warn
+                    warn(f'reached substitition limit of {self.MAX_SUBS}')
+                    yield s
+                i += 1
+            if self.value == s:
+                yield s
+                return
+            self = self.__class__(s, substitutions=self.substitions)
+        raise Exception('substutution state should not be here')
