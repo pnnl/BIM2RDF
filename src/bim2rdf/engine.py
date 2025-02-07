@@ -5,13 +5,12 @@ class Run:
         map_dirs = [ mapdir  ]
         map_substitutions = {}
         ttls = [Path('ontology.ttl')]
-        model_names = [
+        model_names = frozenset((
             'architecture/hvac zones',
             'architecture/lighting devices',
             'architecture/rooms and lighting fixtures',
             'electrical/panels',
-            'electrical/electrical connections',
-                       ]
+            'electrical/electrical connections',))
         MAX_NCYCLES = 10
         del Path
 
@@ -68,8 +67,8 @@ class Run:
         lg('[1/3] data loading')
         db = self.db
         import bim2rdf_rules as r
-        model_names =    tuple(model_names)
-        model_versions = tuple(model_versions)
+        model_names =    frozenset(model_names)
+        model_versions = frozenset(model_versions)
         if model_names and model_versions:
             raise ValueError('use model names OR versions')
         if model_names:
