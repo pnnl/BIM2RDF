@@ -3,14 +3,11 @@ class Run:
         from pathlib import Path
         from bim2rdf_mapping.construct import default_dir as mapdir
         map_dirs = [ mapdir  ]
-        map_substitutions = {}
+        from .queries import SPARQLQuery
+        map_substitutions = [SPARQLQuery.defaults.substitutions]
         ttls = [Path('ontology.ttl')]
-        model_names = frozenset((
-            'architecture/hvac zones',
-            'architecture/lighting devices',
-            'architecture/rooms and lighting fixtures',
-            'electrical/panels',
-            'electrical/electrical connections',))
+        from .queries import DefaultSubstitutions
+        model_names = frozenset(t[1] for t in DefaultSubstitutions.models())
         MAX_NCYCLES = 10
         del Path
 
@@ -19,7 +16,7 @@ class Run:
         self.db = db
     from pathlib import Path
     @classmethod
-    def from_path(cls, pth: Path|str, clear=True):
+    def from_path(cls, pth: Path|str, clear=True,):
         if isinstance(pth, str): pth = cls.Path(pth)
         if clear:
             if pth.exists():
@@ -27,18 +24,22 @@ class Run:
                 rmtree(pth)
         return cls(cls.Store(str(pth)))
 
+
     from typing import Iterable
     def run(self, *,
             project_name:   str,
             project_id:     str="",
-            model_names:    Iterable[str]   =defaults.model_names,
-            model_versions: Iterable[str]   = [],
-            ttls:           Iterable[Path]  =defaults.ttls,
-            map_dirs:       Iterable[Path]  =defaults.map_dirs,
-            map_substitutions: dict         =defaults.map_substitutions, # TODO
-            MAX_NCYCLES:    int             =defaults.MAX_NCYCLES,
+            model_names:    Iterable[str]       =defaults.model_names,
+            model_versions: Iterable[str]       = [],
+            ttls:           Iterable[Path]      =defaults.ttls,
+            map_dirs:       Iterable[Path]      =defaults.map_dirs,
+            map_substitutions: Iterable[dict]   =defaults.map_substitutions,
+            MAX_NCYCLES:    int                 =defaults.MAX_NCYCLES,
             log=True,
             ):
+        """
+        map_substitutions is a list. later mappings will override earlier ones.
+        """
         from rdf_engine import Engine, logger
         def lg(phase):
             if log:
@@ -84,13 +85,11 @@ class Run:
 
         #######
         lg('[2/3] mapping and inferencing')
-        def m():
-            for d in map_dirs:
-                d = self.Path(d)
-                assert(d.exists())
-                yield from d.glob('**/*.rq')
-        m = [r.ConstructQuery.from_path(p)
-             for p in m()]
+        from .queries import SPARQLQuery
+        _ = {}
+        for ms in map_substitutions: _.update(ms)
+        _ = SPARQLQuery.s(tuple(map_dirs), substitutions=_)
+        ms = [r.ConstructQuery.from_path(q.source) for q in _]
         # TODO: file this under 'rules/tq'?
         dq = """
         prefix q: <urn:meta:bim2rdf:ConstructQuery:>
@@ -109,7 +108,7 @@ class Run:
         }
         """
         tq = r.TopQuadrantInference(data=dq, shapes=sq)
-        return Engine(m+[tq],
+        return Engine(ms+[tq],
                       db=db,
                       MAX_NCYCLES=MAX_NCYCLES,
                       derand='canonicalize',
