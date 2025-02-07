@@ -3,9 +3,9 @@ class Run:
         from .queries import DefaultSubstitutions
         model_names = frozenset(t[1] for t in DefaultSubstitutions.models()); del DefaultSubstitutions
         model_versions = []
+        use_default_mappings = True
         from pathlib import Path
-        from bim2rdf_mapping.construct import default_dir as mapdir
-        map_dirs = [ mapdir  ]; del mapdir
+        additional_mapping_dirs = [  ]
         from .queries import SPARQLQuery
         map_substitutions = [SPARQLQuery.defaults.substitutions]; del SPARQLQuery
         ttls = [Path('ontology.ttl')]
@@ -25,7 +25,8 @@ class Run:
             model_names:    Iterable[str]       =defaults.model_names,
             model_versions: Iterable[str]       =defaults.model_versions,
             ttls:           Iterable[Path]      =defaults.ttls,
-            map_dirs:       Iterable[Path]      =defaults.map_dirs,
+            use_default_mappings:bool           =defaults.use_default_mappings,
+            additional_mapping_dirs:Iterable[Path]  =defaults.additional_mapping_dirs,
             map_substitutions: Iterable[dict]   =defaults.map_substitutions,
             inference                           =defaults.inference,
             MAX_NCYCLES:    int                 =defaults.MAX_NCYCLES,
@@ -69,7 +70,7 @@ class Run:
         if model_names:
             sgs = [r.SpeckleGetter.from_names(project=project.name, model=n) for n in model_names]
         else:
-            assert(model_versions)
+            #assert(model_versions) to allow no models
             sgs = [r.SpeckleGetter(project_id=project.id, version_id=v) for v in model_versions]
         # gl https://raw.githubusercontent.com/open223/defs.open223.info/0a70c244f7250734cc1fd59742ab9e069919a3d8/ontologies/223p.ttl
         # https://github.com/open223/defs.open223.info/blob/4a6dd3a2c7b2a7dfc852ebe71887ebff483357b0/ontologies/223p.ttl
@@ -82,11 +83,24 @@ class Run:
         from .queries import SPARQLQuery
         _ = {}
         for ms in map_substitutions: _.update(ms)
-        _ = SPARQLQuery.s(tuple(map_dirs), substitutions=_)
+        substitutions = _
+        if use_default_mappings:
+            from bim2rdf_mapping.construct import default_dir as dmd
+            map_dirs = [dmd]
+        else:
+            map_dirs = []
+        map_dirs = tuple(additional_mapping_dirs)+tuple(map_dirs)
+        def unique_queries():
+            qs = SPARQLQuery.s((map_dirs), substitutions=substitutions)
+            from collections import defaultdict
+            dd = defaultdict(list)
+            for q in qs: dd[q.string].append(q)
+            #      take the first
+            return [q[0] for q in dd.values()]
         ms = [r.ConstructQuery(
                     q.string,
                     name=r.ConstructQuery.mk_name(q.source))
-              for q in _]
+              for q in unique_queries()]
         # TODO: file this under 'rules/tq'?
         dq = """
         prefix q: <urn:meta:bim2rdf:ConstructQuery:>
@@ -108,7 +122,7 @@ class Run:
         return Engine(ms+inf,
                       db=db,
                       MAX_NCYCLES=MAX_NCYCLES,
-                      #derand='canonicalize',
+                      derand='canonicalize',
                       log_print=log).run()
         
         ######
