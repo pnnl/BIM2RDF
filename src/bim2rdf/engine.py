@@ -14,17 +14,8 @@ class Run:
     from pyoxigraph import Store
     def __init__(self, db=Store()):
         self.db = db
+    
     from pathlib import Path
-    @classmethod
-    def from_path(cls, pth: Path|str, clear=True,):
-        if isinstance(pth, str): pth = cls.Path(pth)
-        if clear:
-            if pth.exists():
-                from shutil import rmtree
-                rmtree(pth)
-        return cls(cls.Store(str(pth)))
-
-
     from typing import Iterable
     def run(self, *,
             project_name:   str,
