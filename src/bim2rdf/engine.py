@@ -2,12 +2,13 @@ class Run:
     class defaults:
         from pathlib import Path
         from bim2rdf_mapping.construct import default_dir as mapdir
-        map_dirs = [ mapdir  ]
+        map_dirs = [ mapdir  ]; del mapdir
         from .queries import SPARQLQuery
-        map_substitutions = [SPARQLQuery.defaults.substitutions]
+        map_substitutions = [SPARQLQuery.defaults.substitutions]; del SPARQLQuery
         ttls = [Path('ontology.ttl')]
         from .queries import DefaultSubstitutions
-        model_names = frozenset(t[1] for t in DefaultSubstitutions.models())
+        model_names = frozenset(t[1] for t in DefaultSubstitutions.models()); del DefaultSubstitutions
+        model_versions = []
         MAX_NCYCLES = 10
         del Path
 
@@ -21,7 +22,7 @@ class Run:
             project_name:   str,
             project_id:     str="",
             model_names:    Iterable[str]       =defaults.model_names,
-            model_versions: Iterable[str]       = [],
+            model_versions: Iterable[str]       =defaults.model_versions,
             ttls:           Iterable[Path]      =defaults.ttls,
             map_dirs:       Iterable[Path]      =defaults.map_dirs,
             map_substitutions: Iterable[dict]   =defaults.map_substitutions,
