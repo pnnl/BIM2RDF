@@ -49,7 +49,9 @@ def default_substitutions() -> dict:
         _ = subs + (('query.prefixes', query ),)
         return _
     _ = _+prefixes()
-
+    
+    # enforce uniqueness of keys should 'match' values.
+    # before putting it into a dictionary
     assert(len(set(kv[0] for kv in _)) == len([kv[1] for kv in _]))
     _ = {kv[0]:kv[1] for kv in sorted(_, key=lambda t:t[0] )}
     return _
