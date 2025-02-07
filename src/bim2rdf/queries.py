@@ -1,18 +1,6 @@
 
 def default_substitutions() -> dict:
-    from bim2rdf_speckle.meta import prefixes as                        spkl_prefixes
-    from bim2rdf_rules.rule import                                      Rule
-    from bim2rdf_rules.construct.rule import ConstructQuery as          CQ
-    from bim2rdf_rules.topquadrant.rule import TopQuadrantInference as  TQI
-    from bim2rdf_rules.ttl.rule import                                  ttlLoader
-    _ = (
-    (f'prefix.{Rule.meta_prefix.name}',         Rule.meta_prefix.uri,),
-    (f'prefix.{ttlLoader.meta_prefix.name}',    ttlLoader.meta_prefix.uri),
-    (f'prefix.{spkl_prefixes.concept.name}',    spkl_prefixes.concept.uri,),
-    (f'prefix.{spkl_prefixes.meta.name}',       spkl_prefixes.meta.uri,),
-    (f'prefix.{CQ.meta_prefix.name}',           CQ.meta_prefix.uri),
-    (f'prefix.{TQI.meta_prefix.name}',          TQI.meta_prefix.uri),
-    )
+    _ = tuple()
     def models():
         abbrs = {
             'arch': 'architecture',
@@ -33,6 +21,35 @@ def default_substitutions() -> dict:
         assert(set(_[1] for _ in _) == set(Run.defaults.model_names) )
         return _
     _ = _+models()
+
+    def prefixes():
+        from bim2rdf_speckle.meta import prefixes as                        spkl_prefixes
+        from bim2rdf_rules.rule import                                      Rule
+        from bim2rdf_rules.construct.rule import ConstructQuery as          CQ
+        from bim2rdf_rules.topquadrant.rule import TopQuadrantInference as  TQI
+        from bim2rdf_rules.ttl.rule import                                  ttlLoader
+        _ = (
+        (f'{Rule.meta_prefix.name}',        Rule.meta_prefix.uri,),
+        (f'{ttlLoader.meta_prefix.name}',   ttlLoader.meta_prefix.uri),
+        (f'{spkl_prefixes.concept.name}',   spkl_prefixes.concept.uri,),
+        (f'{spkl_prefixes.meta.name}',      spkl_prefixes.meta.uri,),
+        (f'{CQ.meta_prefix.name}',          CQ.meta_prefix.uri),
+        (f'{TQI.meta_prefix.name}',         TQI.meta_prefix.uri),
+        ('rdfs',                            'http://www.w3.org/2000/01/rdf-schema#'),
+        ('s223',                            'http://data.ashrae.org/standard223#'),
+        ('qudtqk',                          'http://qudt.org/vocab/quantitykind/'),
+        ('qudt',                            'http://qudt.org/schema/qudt/'),
+        ('xsd',                             'http://www.w3.org/2001/XMLSchema#'),
+        ('unit',                            'http://qudt.org/vocab/unit/'),
+        )
+        from bim2rdf.rdf import Prefix as P
+        objs = tuple(P(t[0], t[1]) for t in _)
+        subs = tuple((f"prefix.{p.name}", p.uri) for p in objs)
+        query = '\n'.join(f'PREFIX {p.name}: <{p.uri}>' for p in objs)
+        _ = subs + (('query.prefixes', query ),)
+        return _
+    _ = _+prefixes()
+
     assert(len(set(kv[0] for kv in _)) == len([kv[1] for kv in _]))
     _ = {kv[0]:kv[1] for kv in sorted(_, key=lambda t:t[0] )}
     return _
@@ -49,11 +66,6 @@ class SPARQLQuery:
         self._s = _s
         self.substitutions = substitutions.copy()
     
-    def check(self):
-        from pyoxigraph import Store
-        Store().query(self._s)
-        return True
-    
     @classmethod
     def from_path(cls, p: Path, *, substitutions=defaults.substitutions) -> Self:
         p = Path(p)
@@ -62,17 +74,25 @@ class SPARQLQuery:
         _.source = p
         return _
     
-
-    from functools import cached_property
-    @cached_property
-    def string(self):
+    from functools import cached_property, cache
+    @cache
+    def check(self) -> bool:
+        from pyoxigraph import Store
+        _ = self.substitute()
+        Store().query(_) # err
+        return True
+    @cache
+    def substitute(self) -> str:
         _ = self._s
         from bim2rdf.utils.substitution import String
-        _ = String(_)
-        _ = _.substitue(self.substitutions)
-        #assert('construct' in _.lower())
-        self.check()
+        _ = String(_, substitutions=self.substitutions)
+        _ = _.substitute()
         return _
+        #assert('construct' in _.lower())
+    @cached_property
+    def string(self):
+        self.check() # err if syntax issue
+        return self.substitute()
     def __str__(self): return self.string
 
     from typing import Iterable
@@ -124,8 +144,8 @@ if __name__ == '__main__':
                 assert(isinstance(q.source, Path))
                 p: Path = odir / q.source.relative_to(d)
                 p.parent.mkdir(parents=True, exist_ok=True)
-                open(p, 'w').write(q.string)
-        (odir / '.gitignore').touch()
+                open(p, 'w').write(q.substitute())
+        (    odir / '.gitignore').touch()
         open(odir / '.gitignore', 'w').write('*')
         return odir
 
