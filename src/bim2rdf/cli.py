@@ -27,14 +27,17 @@ def attdoc(f):
     _ = [atr for atr in dir(defaults) if not atr.startswith('_')]
     ms = 'map_substitutions'
     assert(ms in _)
+    pn = 'project_name'
+    pi = 'project_id'
     def gt(atr):
         if ms == atr: return 'list[mapping]'
         return type(getattr(defaults, atr)).__name__
     _ = [f"{atr}:{gt(atr)}" for atr in _]
-    _ = _ + [f"{db_dir}:list"]
+    _ = _ + [f"{db_dir}:list", pn, pi ]
     _ = '\n'.join(_)
     _ = f"""
-    config can have keys:
+    Required keys: {pn} OR {pi}.
+    Optional config keys:
     {_}
     """
     f.__doc__ = _
