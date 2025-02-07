@@ -38,6 +38,7 @@ class String:
         
     def __iter__(self):
         i = 0
+        s = self.value
         for _p in range(99999):
             for s in self.onepass():
                 if i>=self.MAX_SUBS:
