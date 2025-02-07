@@ -6,10 +6,18 @@ class ConstructQuery(Rule):
         assert('construct' in query.lower())
         self.query = query
         self.name = name
+    
     from pathlib import Path
     @classmethod
+    def mk_name(cls, src: Path) -> str:
+        assert(isinstance(src, cls.Path))
+        _ = src.name
+        return _
+
+    @classmethod
     def from_path(cls, p: Path):
-        _ = cls(open(p).read(), name=p.name)  #idk if name will be unique enough
+        p = cls.Path(p)
+        _ = cls(open(p).read(), name=cls.mk_name(p) )  #idk if name will be unique enough
         _.path = p
         return _
     

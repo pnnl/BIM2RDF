@@ -81,7 +81,10 @@ class Run:
         _ = {}
         for ms in map_substitutions: _.update(ms)
         _ = SPARQLQuery.s(tuple(map_dirs), substitutions=_)
-        ms = [r.ConstructQuery.from_path(q.source) for q in _]
+        ms = [r.ConstructQuery(
+                    q.string,
+                    name=r.ConstructQuery.mk_name(q.source))
+              for q in _]
         # TODO: file this under 'rules/tq'?
         dq = """
         prefix q: <urn:meta:bim2rdf:ConstructQuery:>
