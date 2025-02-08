@@ -762,15 +762,15 @@ wheels = [
 
 [[package]]
 name = "rdf-engine"
-version = "217"
+version = "218"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyoxigraph" },
     { name = "rdflib" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fd/79/f58e1a1a0eff941d12679a5d5ff65dd1ad980e64d5b9f19919e0f03bb9e3/rdf_engine-217.tar.gz", hash = "sha256:a8ee8f5b2d7a355559fb30b803f7602c1eaa4078cf39095ee5d2391a23c25904", size = 7913 }
+sdist = { url = "https://files.pythonhosted.org/packages/4e/ae/f7a2a64e1f66f84a828a2405de90ee9af214c247699b8aca36d4efb93408/rdf_engine-218.tar.gz", hash = "sha256:4440afaa02689103b9e9c30eebe1078b56ff47e5697661b2710d051de4b1f9d5", size = 7966 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cf/e3/fd916770831593ef5ab3a8ba3d077884d3e1b3d63f23bfcf2b252a99ee83/rdf_engine-217-py3-none-any.whl", hash = "sha256:fe75ad10c0f64bf461982850ca5b6ac3af2ad92eae3395c61e990f9ea920c116", size = 10258 },
+    { url = "https://files.pythonhosted.org/packages/e5/9f/02c7fee059d31d931291122fc6f4181d4a10acb63d55e69ed2f14ab1e96b/rdf_engine-218-py3-none-any.whl", hash = "sha256:5d90aa40eb8a2bb6a4dd27ada2cc5e340c31981166b3c6db8fbbb0637d29109c", size = 10304 },
 ]
 
 [[package]]
