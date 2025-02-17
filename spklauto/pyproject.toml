@@ -1,5 +1,5 @@
 [project]
-name = "spklauto"
+name = "bim2rdf-spklauto"
 version = "0.1.0"
 description = "BIM2RDF/speckle automate"
 readme = "README.md"

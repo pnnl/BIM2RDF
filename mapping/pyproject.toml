@@ -1,5 +1,5 @@
 [project]
-name = "mapping"
+name = "bim2rdf-mapping"
 version = "0.1.0"
 description = "BIM2RDF/mapping"
 authors = [

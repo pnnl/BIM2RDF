@@ -11,13 +11,13 @@ dependencies = [
     #"bim2rdf",
     'dynaconf', # 'python-dotenv', vendored in dyanconf https://www.dynaconf.com/#vendored
     # 'local' ones
-    "rules",
-    "mapping",
+    "bim2rdf_rules",
+    "bim2rdf_mapping",
     #"ontologies", # ? need this? or just create a ttl loader rule
-    "speckle",
+    "bim2rdf_speckle",
 ]
 [project.optional-dependencies]
-spklauto = ["spklauto"]
+spklauto = ["bim2rdf_spklauto"]
 cli = ["fire", "pyyaml"]
 
 [project.scripts]
@@ -25,11 +25,11 @@ bim2rdf = "bim2rdf:cli"
 
 [dependency-groups]
 dev = [
-    # tools
     #'aider-install', can uvx aider-install
     "ipython", "ipdb",
     "icecream",
     "marimo",
+    "cachier",
     # automation
     "project",
     "bim2rdf[spklauto, cli]",#nice
@@ -37,12 +37,12 @@ dev = [
 
 [tool.uv.sources]
 # just listing the dirs alphabetically
-mapping =        { workspace=true}
+bim2rdf-mapping =   { workspace=true}
 #ontologies =     { path = 'ontologies'      , editable = true} 
-project =        { workspace=true}
-rules =          { workspace=true}
-speckle =        { workspace=true}
-spklauto =       { workspace=true}
+project =           { workspace=true}
+bim2rdf-rules =     { workspace=true}
+bim2rdf-speckle =   { workspace=true}
+bim2rdf-spklauto =  { workspace=true}
 [tool.uv.workspace]
 members = [ # same order as above
 "mapping",
@@ -50,7 +50,7 @@ members = [ # same order as above
 "rules",
 "speckle",
 "spklauto",
- ]
+]
 
 
 [build-system]

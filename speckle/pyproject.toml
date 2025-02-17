@@ -1,5 +1,5 @@
 [project]
-name = "speckle"
+name = "bim2rdf-speckle"
 version = "0.1.0"
 description = "BIM2RDF/access speckle data"
 authors = [
@@ -8,8 +8,7 @@ authors = [
 readme = "README.md"
 dependencies = [
     "gql[requests]",
-    "json2rdf>=67", "boltons",
-    ]
+    "json2rdf>=67", "boltons",]
 [dependency-groups]
 dev = [
     "fire",
@@ -17,11 +16,7 @@ dev = [
     "json2rdf[cli]",
     "project",]
 
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-[tool.hatch.build.targets.wheel] # ????
-include = [
-    'src/**/*.py',
-]
+
