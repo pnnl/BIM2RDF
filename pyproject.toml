@@ -26,9 +26,10 @@ bim2rdf = "bim2rdf:cli"
 [dependency-groups]
 dev = [
     # tools
-    #'aider-install', can uv pip install aider-install
+    #'aider-install', can uvx aider-install
     "ipython", "ipdb",
     "icecream",
+    "marimo",
     # automation
     "project",
     "bim2rdf[spklauto, cli]",#nice
