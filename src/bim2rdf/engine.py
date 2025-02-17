@@ -97,8 +97,10 @@ class Run:
         #######
         lg('[2/3] mapping and maybe inferencing')
         mapping_subsitutitions.update(mapping_subs_overrides)
+        included_mappings = tuple(included_mappings)
         if included_mappings:
             from bim2rdf_mapping.construct import included_dir
+            for _ in included_mappings: assert((included_dir / _).exists() )
             included_mappings = [(included_dir / _) for _ in included_mappings]
         else:
             included_mappings = []
