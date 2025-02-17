@@ -50,9 +50,14 @@ class Run:
             validation:                 bool                =defaults.validation,
             MAX_NCYCLES:                int                 =defaults.MAX_NCYCLES,
             log:                        bool                =defaults.log,
-            ):
+            )->Store:
         """
         """
+        model_names =       tuple(model_names)
+        model_versions =    tuple(model_versions)
+        if not (model_names or model_versions):
+            return self.Store()
+
         n_phases = 3 if validation else 2
         from rdf_engine import Engine, logger
         def lg(phase):
