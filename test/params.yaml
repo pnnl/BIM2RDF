@@ -4,6 +4,7 @@ project_name: test
 #ttls: []
 included_mappings:
   - data
+  - mappings/AC
 #additional_mapping_paths:
   #- maps
   #- maps/luminaire.mapping.rq
