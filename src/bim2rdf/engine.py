@@ -1,17 +1,33 @@
 class Run:
-    class defaults:
-        from .queries import DefaultSubstitutions
-        model_names = frozenset(t[1] for t in DefaultSubstitutions.models()); del DefaultSubstitutions
+    class _defaults:
+        @property
+        def model_names(self):
+            from .queries import DefaultSubstitutions
+            return frozenset(t[1] for t in DefaultSubstitutions.models()); del DefaultSubstitutions
         model_versions = []
-        use_default_mappings = True
-        from pathlib import Path
-        additional_mapping_paths = [  ]
-        from .queries import SPARQLQuery
-        map_substitutions = [SPARQLQuery.defaults.substitutions]; del SPARQLQuery
-        ttls = [Path('ontology.ttl')]
+        @property
+        def included_mappings(self):
+            from bim2rdf_mapping.construct import included_dir
+            _ = list(included_dir.glob('**'))
+            _ = [_.relative_to(included_dir) for _ in _]
+            _ = [_ for _ in _ if _.parts and not _.name.startswith('_') ]
+            _ = [str(_.as_posix()) for _ in _]
+            return _
+        additional_mapping_paths = []
+        @property
+        def mapping_substitutions(self):
+            from .queries import SPARQLQuery
+            _ = SPARQLQuery.defaults.substitutions; del SPARQLQuery
+            return _
+        mapping_subs_overrides = {}
+        @property
+        def ttls(self):
+            from pathlib import Path
+            return [Path('ontology.ttl')]
         inference = True
         MAX_NCYCLES = 10
-        del Path
+        log = True
+    defaults = _defaults()
 
     from pyoxigraph import Store
     def __init__(self, db=Store()):
@@ -20,20 +36,20 @@ class Run:
     from pathlib import Path
     from typing import Iterable
     def run(self, *,
-            project_name:   str,
-            project_id:     str="",
-            model_names:    Iterable[str]       =defaults.model_names,
-            model_versions: Iterable[str]       =defaults.model_versions,
-            ttls:           Iterable[Path]      =defaults.ttls,
-            use_default_mappings:bool           =defaults.use_default_mappings,
-            additional_mapping_paths:Iterable[Path]  =defaults.additional_mapping_paths,
-            map_substitutions: Iterable[dict]   =defaults.map_substitutions,
-            inference                           =defaults.inference,
-            MAX_NCYCLES:    int                 =defaults.MAX_NCYCLES,
-            log=True,
+            project_name:               str,
+            project_id:                 str="",
+            model_names:                Iterable[str]       =defaults.model_names,
+            model_versions:             Iterable[str]       =defaults.model_versions,
+            ttls:                       Iterable[Path|str]  =defaults.ttls,
+            included_mappings:          Iterable[str]       =defaults.included_mappings,
+            additional_mapping_paths:   Iterable[Path]      =defaults.additional_mapping_paths,
+            mapping_subsitutitions:     dict[str, str]      =defaults.mapping_substitutions,
+            mapping_subs_overrides:     dict[str, str]      =defaults.mapping_subs_overrides,
+            inference:                  bool                =defaults.inference,
+            MAX_NCYCLES:                int                 =defaults.MAX_NCYCLES,
+            log:                        bool                =defaults.log,
             ):
         """
-        map_substitutions is a list. later mappings will override earlier ones.
         """
         from rdf_engine import Engine, logger
         def lg(phase):
@@ -80,18 +96,17 @@ class Run:
 
         #######
         lg('[2/3] mapping and maybe inferencing')
-        from .queries import SPARQLQuery
-        _ = {}
-        for ms in map_substitutions: _.update(ms)
-        substitutions = _
-        if use_default_mappings:
-            from bim2rdf_mapping.construct import default_dir as dmd
-            map_paths = [dmd]
+        mapping_subsitutitions.update(mapping_subs_overrides)
+        if included_mappings:
+            from bim2rdf_mapping.construct import included_dir
+            included_mappings = [(included_dir / _) for _ in included_mappings]
         else:
-            map_paths = []
-        map_paths = tuple(additional_mapping_paths)+tuple(map_paths)
+            included_mappings = []
+        from pathlib import Path
+        map_paths = tuple(included_mappings)+tuple(Path(p) for p in additional_mapping_paths)
         def unique_queries():
-            qs = SPARQLQuery.s((map_paths), substitutions=substitutions)
+            from .queries import SPARQLQuery
+            qs = SPARQLQuery.s((map_paths), substitutions=mapping_subsitutitions)
             from collections import defaultdict
             dd = defaultdict(list)
             for q in qs: dd[q.string].append(q)
@@ -122,7 +137,7 @@ class Run:
         return Engine(ms+inf,
                       db=db,
                       MAX_NCYCLES=MAX_NCYCLES,
-                      derand='canonicalize',
+                      #derand='canonicalize', #can spin out of control!
                       log_print=log).run()
         
         ######

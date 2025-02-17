@@ -72,8 +72,8 @@ from pathlib import Path
 from typing import Self
 class SPARQLQuery:
     class defaults:
-        from bim2rdf_mapping.construct import default_dir as cdefault_dir
-        dirs = [cdefault_dir]
+        from bim2rdf_mapping.construct import included_dir
+        dirs = [included_dir]
         #                    more explicit as it's under sparqlqauery
         substitutions = DefaultSubstitutions.dict({'prefixes', 'models'})
 

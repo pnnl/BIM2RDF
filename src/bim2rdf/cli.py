@@ -25,12 +25,14 @@ def attdoc(f):
     # bc it wont show up if it's not the first line
     defaults = Run.defaults
     _ = [atr for atr in dir(defaults) if not atr.startswith('_')]
-    ms = 'map_substitutions'
-    assert(ms in _)
+    im = 'included_mappings'
+    assert(im in _)
     pn = 'project_name'
     pi = 'project_id'
     def gt(atr):
-        if ms == atr: return 'list[mapping]'
+        if im == atr:
+            _ = '|'.join(defaults.included_mappings)
+            return f'list[{_}]'
         return type(getattr(defaults, atr)).__name__
     _ = [f"{atr}:{gt(atr)}" for atr in _]
     _ = _ + [f"{db_dir}:list", pn, pi ]

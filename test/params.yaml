@@ -2,8 +2,10 @@ db_dir: db
 project_name: test
 #model_names: []
 #ttls: []
-additional_mapping_paths:
-  - maps
+included_mappings:
+  - data
+#additional_mapping_paths:
+  #- maps
   #- maps/luminaire.mapping.rq
 #   - maps/luminaire-outletconn.mapping.rq
 #   - maps/luminaire-connection.mapping.rq # makes it spin
@@ -11,5 +13,4 @@ additional_mapping_paths:
 #  - 'maps'
 #   - maps/test.rq
 #   - maps/test2.rq
-use_default_mappings: False
 inference: False
