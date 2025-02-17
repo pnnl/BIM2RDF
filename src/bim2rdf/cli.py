@@ -13,7 +13,7 @@ class Run(Run):
     
 db_dir = 'db_dir'
 
-def f(config: Path= Path('config.yaml')):
+def f(config: Path= Path('params.yaml')):
     config = Path(config)
     from yaml import safe_load
     config = safe_load(open(config))
