@@ -1,8 +1,6 @@
 from ..rule import Rule
 class Query(str): ...
-class TopQuadrantInference(Rule):
-    from bim2rdf.rdf import Prefix
-    meta_prefix = Prefix('tq.meta', "urn:meta:bim2rdf:TopQuadrantInference:")
+class _TQ(Rule):
     def __init__(self, *, data: Query, shapes: Query):
         assert('construct' in data.lower())
         assert('construct' in shapes.lower())
@@ -41,13 +39,23 @@ class TopQuadrantInference(Rule):
         # inputs.sp.unlink()
 
     def data(self, db: Store):
-        from pytqshacl import infer
+        if 'infer' in self.__class__.__name__.lower():
+            from pytqshacl import infer as tq
+        else:
+            assert('valid' in self.__class__.__name__.lower())
+            from pytqshacl import validate as tq
         inputs = self.prep(db)
-        _ = infer(inputs.dp, shapes=inputs.sp)
+        _ = tq(inputs.dp, shapes=inputs.sp)
         inputs.dp.unlink()
         inputs.sp.unlink()
         from pyoxigraph import parse, RdfFormat
         _ =  parse(_.stdout, format=RdfFormat.TURTLE)
         _ = (q.triple for q in _)
         yield from _
-        
+
+class TopQuadrantInference(_TQ):
+    from bim2rdf.rdf import Prefix
+    meta_prefix = Prefix('tq.meta', "urn:meta:bim2rdf:TopQuadrantInference:")
+class TopQuadrantValidation(_TQ):
+    from bim2rdf.rdf import Prefix
+    meta_prefix = Prefix('tq.meta', "urn:meta:bim2rdf:TopQuadrantValidation:")

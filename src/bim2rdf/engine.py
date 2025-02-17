@@ -25,6 +25,7 @@ class Run:
             from pathlib import Path
             return [Path('ontology.ttl')]
         inference = True
+        validation = True
         MAX_NCYCLES = 10
         log = True
     defaults = _defaults()
@@ -46,11 +47,13 @@ class Run:
             mapping_subsitutitions:     dict[str, str]      =defaults.mapping_substitutions,
             mapping_subs_overrides:     dict[str, str]      =defaults.mapping_subs_overrides,
             inference:                  bool                =defaults.inference,
+            validation:                 bool                =defaults.validation,
             MAX_NCYCLES:                int                 =defaults.MAX_NCYCLES,
             log:                        bool                =defaults.log,
             ):
         """
         """
+        n_phases = 3 if validation else 2
         from rdf_engine import Engine, logger
         def lg(phase):
             if log:
@@ -76,7 +79,7 @@ class Run:
 
         
         #####
-        lg('[1/3] data loading')
+        lg(f'[1/{n_phases}] data loading')
         db = self.db
         import bim2rdf_rules as r
         model_names =    frozenset(model_names)
@@ -95,7 +98,7 @@ class Run:
         db = Engine(sgs+ttls, db=db, derand=False, MAX_NCYCLES=1, log_print=log).run()
 
         #######
-        lg('[2/3] mapping and maybe inferencing')
+        lg(f'[2/{n_phases}] mapping and maybe inferencing')
         mapping_subsitutitions.update(mapping_subs_overrides)
         included_mappings = tuple(included_mappings)
         if included_mappings:
@@ -136,12 +139,17 @@ class Run:
         }
         """
         inf = [r.TopQuadrantInference(data=dq, shapes=sq)] if inference else []
-        return Engine(ms+inf,
+        db = Engine(ms+inf,
                       db=db,
                       MAX_NCYCLES=MAX_NCYCLES,
                       #derand='canonicalize', #can spin out of control!
                       log_print=log).run()
         
         ######
-        lg('[3/3] validation')
-
+        lg(f'[3/{n_phases}] validation')
+        if validation:
+            db = Engine([r.TopQuadrantValidation(data=dq, shapes=sq)],
+                         db=db,
+                         MAX_NCYCLES=1,  # just one
+                         log_print=log,).run()
+        return db
