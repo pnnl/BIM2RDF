@@ -46,7 +46,7 @@ class DefaultSubstitutions:
         from bim2rdf.rdf import Prefix as P
         objs = tuple(P(t[0], t[1]) for t in _)
         subs = tuple((f"prefix.{p.name}", p.uri) for p in objs)
-        query = '\n'.join(f'PREFIX {p.name}: <{p.uri}>' for p in objs)
+        query = '\n'.join(f'PREFIX {p.name}: <{p.uri}>' for p in objs)+'\n\n'
         _ = subs + (('query.prefixes', query ),)
         return list(_)
     
