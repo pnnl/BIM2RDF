@@ -38,10 +38,10 @@ class DefaultSubstitutions:
         (f'{TQV.meta_prefix.name}',         TQV.meta_prefix.uri),
         ('rdfs',                            'http://www.w3.org/2000/01/rdf-schema#'),
         ('s223',                            'http://data.ashrae.org/standard223#'),
-        ('qudtqk',                          'http://qudt.org/vocab/quantitykind/'),
         ('qudt',                            'http://qudt.org/schema/qudt/'),
+        ('qudt.unit',                       'http://qudt.org/vocab/unit/'),
+        ('qudt.kind',                       'http://qudt.org/vocab/quantitykind/'),
         ('xsd',                             'http://www.w3.org/2001/XMLSchema#'),
-        ('unit',                            'http://qudt.org/vocab/unit/'),
         )
         from bim2rdf.rdf import Prefix as P
         objs = tuple(P(t[0], t[1]) for t in _)
