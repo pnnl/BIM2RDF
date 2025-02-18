@@ -1,7 +1,7 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX spkl: <http://speckle.systems/>
-PREFIX meta: <http://meta>
+prefix spkl.meta: <urn:speckle:meta:>
+prefix spkl: <urn:speckle:concept:>
 
 CONSTRUCT {
 ?p s223:encloses ?d.
@@ -10,7 +10,7 @@ WHERE {
 
 {
     # common
-   <<?p spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+   <<?p spkl:category  "Rooms">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
     ?p spkl:elementId ?ei.
      ?d spkl:category  "Spaces".
     # /common
@@ -19,7 +19,7 @@ WHERE {
 union
 {
     # common
-  <<?p spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+  <<?p spkl:category  "Rooms">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
     ?p spkl:elementId ?ei.
      ?d spkl:category  "Spaces".
     # /common

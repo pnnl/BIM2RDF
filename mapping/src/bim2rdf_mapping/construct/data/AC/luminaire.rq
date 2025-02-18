@@ -1,9 +1,9 @@
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX spkl: <http://speckle.systems/> 
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX meta: <http://meta>
+prefix spkl.meta: <urn:speckle:meta:>
+prefix spkl: <urn:speckle:concept:>
 
 CONSTRUCT {
 #?conn s223:cnx _:luminairewire.
@@ -26,7 +26,7 @@ WHERE {
   #?r  spkl:referencedId ?conn.
   #?li spkl:connectedConnectorIds ?conn.
 
- <<?luminairewire spkl:category  "Electrical Circuits">> meta: <<?si spkl:name "electrical/electrical connection">>.
+ <<?luminairewire spkl:category  "Electrical Circuits">> spkl.meta:model_name "electrical/electrical connection".
   ?luminairewire spkl:parameters ?m.
   ?m ?y ?circuit1.
   ?circuit1 spkl:applicationInternalName "RBS_ELEC_CIRCUIT_PANEL_PARAM".

@@ -1,9 +1,10 @@
 PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX spkl: <http://speckle.systems/> 
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX meta: <http://meta>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX rec: <https://w3id.org/rec#>
+
+prefix spkl.meta: <urn:speckle:meta:>
+prefix spkl: <urn:speckle:concept:>
 
 CONSTRUCT { 
 ?desk a rec:Desk.
@@ -12,7 +13,7 @@ CONSTRUCT {
 
 } 
 WHERE { 
-<<?desk spkl:category "Furniture">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
+<<?desk spkl:category "Furniture">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
 ?desk spkl:phaseCreated ?_.
 ?desk spkl:definition ?_dr.
 ?_dr spkl:referencedId ?type.

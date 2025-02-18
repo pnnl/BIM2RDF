@@ -1,7 +1,8 @@
 PREFIX meta: <http://meta>
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX spkl: <http://speckle.systems/> 
-
+prefix spkl.meta: <urn:speckle:meta:>
+prefix spkl: <urn:speckle:concept:>
 
 CONSTRUCT { 
 ?o1 s223:hasPhysicalLocation ?o2. 
@@ -9,16 +10,16 @@ CONSTRUCT {
 WHERE { 
 {
 ?o1 a s223:Luminaire.
-<<?o1 spkl:category "Lighting Fixtures">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
-<<?o2 spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+<<?o1 spkl:category "Lighting Fixtures">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
+<<?o2 spkl:category  "Rooms">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
 ?o2 spkl:elementId ?rl.
 ?o1 spkl:roomId ?rl.
 }
 union
     {
     ?o1 a s223:Luminaire.
-    <<?o1 spkl:category "Lighting Fixtures">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
-    <<?o2 spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+    <<?o1 spkl:category "Lighting Fixtures">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
+    <<?o2 spkl:category  "Rooms">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
     ?o2 spkl:elementId ?rl.
     ?o1 spkl:parameters ?p.
     ?p ?k ?t.

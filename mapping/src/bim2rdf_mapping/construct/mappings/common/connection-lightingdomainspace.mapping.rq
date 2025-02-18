@@ -1,14 +1,14 @@
 PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX meta: <http://meta>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX spkl: <http://speckle.systems/> 
+prefix spkl.meta: <urn:speckle:meta:>
+prefix spkl: <urn:speckle:concept:>
 
 CONSTRUCT {
     ?cp s223:cnx ?this.
 }
 WHERE {
 ?l s223:cnx ?o.
-<<?l spkl:category "Lighting Fixtures">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+<<?l spkl:category "Lighting Fixtures">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
 ?l spkl:parameters ?p.
 ?p ?k ?o1.
 ?o1 spkl:applicationInternalName "c05b27f4-316d-447d-b99f-c0372ce73c7e".
