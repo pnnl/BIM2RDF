@@ -144,6 +144,16 @@ class Run:
         }
         """
         inf = [r.TopQuadrantInference(data=dq, shapes=sq)] if inference else []
+        _ = ['ontology.ttl' in str(t.source) for t in ttls]
+        if sum(_) == 0:
+            if inference:
+                from warnings import warn
+                warn('ontology.ttl not found')
+                inf = []
+        if sum(_) > 1:
+            if inference:
+                from warnings import warn
+                warn('more than one ontology.ttl found')
         db = Engine(ms+inf,
                       db=db,
                       MAX_NCYCLES=MAX_NCYCLES,
