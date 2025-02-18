@@ -579,7 +579,7 @@ cli = [
 
 [[package]]
 name = "marimo"
-version = "0.11.5"
+version = "0.11.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -600,9 +600,9 @@ dependencies = [
     { name = "uvicorn" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/36/a5/529f211194f6776f8d62321ef529e1f87205163bc8bf63e49e71eb93b07e/marimo-0.11.5.tar.gz", hash = "sha256:4842e82fdc9c7d101eab8edd56209cbad67a960e4b51d52d7096e3f7737a8a0e", size = 10609017 }
+sdist = { url = "https://files.pythonhosted.org/packages/08/6d/078848a3dd6a0c7494a41395d2adbbace2662937a6df75117d7d68b10f91/marimo-0.11.6.tar.gz", hash = "sha256:e0c8390ab91f19a65d0b3a4a85468597c5b16e43a42659105531c3c56aec6bfa", size = 10612190 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/30/9a/e6863cfb68473d5500178505c93bd4e4920eaf1613912f4e7e584a202039/marimo-0.11.5-py3-none-any.whl", hash = "sha256:e8e0c2b94b868c106de86b0a0b176405d8da436c407748c52a51a2e8d8b22aff", size = 10947930 },
+    { url = "https://files.pythonhosted.org/packages/97/f4/0eecdf87f543f293a1ca93a7ae60e91a4e1e18715fe207b5d68d42b08259/marimo-0.11.6-py3-none-any.whl", hash = "sha256:98c2be11fdf959ee5769808be71e613a40b0b07dc52a4f11834e2f9ec605c547", size = 10951396 },
 ]
 
 [[package]]
@@ -1010,15 +1010,14 @@ wheels = [
 
 [[package]]
 name = "rdf-engine"
-version = "218"
+version = "219"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyoxigraph" },
     { name = "rdflib" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4e/ae/f7a2a64e1f66f84a828a2405de90ee9af214c247699b8aca36d4efb93408/rdf_engine-218.tar.gz", hash = "sha256:4440afaa02689103b9e9c30eebe1078b56ff47e5697661b2710d051de4b1f9d5", size = 7966 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/9f/02c7fee059d31d931291122fc6f4181d4a10acb63d55e69ed2f14ab1e96b/rdf_engine-218-py3-none-any.whl", hash = "sha256:5d90aa40eb8a2bb6a4dd27ada2cc5e340c31981166b3c6db8fbbb0637d29109c", size = 10304 },
+    { url = "https://files.pythonhosted.org/packages/a1/84/2459dce7216f91d1cec0b6a32e717c00e61d17ba050bfeec5bc58b23ff6e/rdf_engine-219-py3-none-any.whl", hash = "sha256:72c109a8e5123bd0d4bc804a442f365e7b54895942886b743d5ab79730bb4b23", size = 10271 },
 ]
 
 [[package]]
