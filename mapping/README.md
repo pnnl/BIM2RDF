@@ -14,3 +14,6 @@ Use `--check=True` to check sparql syntax.
 However, this will not check for variables embedded in strings
 like `"Hello. My name is ${name}."`
 as this would still be a valid string in sparql.
+
+Use `python -m bim2rdf.queries default_substitutions`
+to inspect defined variables.
