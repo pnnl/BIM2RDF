@@ -152,8 +152,8 @@ class Run:
         
 
         ######
-        lg(f'[3/{n_phases}] validation')
         if validation:
+            lg(f'[3/{n_phases}] validation')
             db = Engine([r.TopQuadrantValidation(
                                 data=queries.data,
                                 shapes=queries.ontology)],
