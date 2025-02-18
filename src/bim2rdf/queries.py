@@ -26,6 +26,7 @@ class DefaultSubstitutions:
         from bim2rdf_rules.rule import                                      Rule
         from bim2rdf_rules.construct.rule import ConstructQuery as          CQ
         from bim2rdf_rules.topquadrant.rule import TopQuadrantInference as  TQI
+        from bim2rdf_rules.topquadrant.rule import TopQuadrantValidation as TQV
         from bim2rdf_rules.ttl.rule import                                  ttlLoader
         _ = (
         (f'{Rule.meta_prefix.name}',        Rule.meta_prefix.uri,),
@@ -34,6 +35,7 @@ class DefaultSubstitutions:
         (f'{spkl_prefixes.meta.name}',      spkl_prefixes.meta.uri,),
         (f'{CQ.meta_prefix.name}',          CQ.meta_prefix.uri),
         (f'{TQI.meta_prefix.name}',         TQI.meta_prefix.uri),
+        (f'{TQV.meta_prefix.name}',         TQV.meta_prefix.uri),
         ('rdfs',                            'http://www.w3.org/2000/01/rdf-schema#'),
         ('s223',                            'http://data.ashrae.org/standard223#'),
         ('qudtqk',                          'http://qudt.org/vocab/quantitykind/'),
