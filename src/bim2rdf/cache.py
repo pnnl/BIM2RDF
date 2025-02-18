@@ -1,7 +1,7 @@
 """persistent caching"""
 try:
-    from pyprojroot import here
-    dir = here() / 'cache'
+    from pathlib import Path
+    dir = Path('.') / 'cache'
     dir.mkdir(exist_ok=True)
     def cache(f, *p, dir=dir, **k):
         from cachier import cachier
