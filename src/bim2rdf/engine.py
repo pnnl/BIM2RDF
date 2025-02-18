@@ -102,6 +102,7 @@ class Run:
         # data loading phase.                          no need to cycle
         db = Engine(sgs+ttls, db=db, derand=False, MAX_NCYCLES=1, log_print=log).run()
 
+
         #######
         lg(f'[2/{n_phases}] mapping and maybe inferencing')
         mapping_subsitutitions.update(mapping_subs_overrides)
@@ -149,6 +150,7 @@ class Run:
                       #derand='canonicalize', #can spin out of control!
                       log_print=log).run()
         
+
         ######
         lg(f'[3/{n_phases}] validation')
         if validation:
@@ -156,6 +158,7 @@ class Run:
                                 data=queries.data,
                                 shapes=queries.ontology)],
                          db=db,
+                         derand=False,
                          MAX_NCYCLES=1,  # just one
                          log_print=log,).run()
         return db
