@@ -1,11 +1,12 @@
 from ..rule import Rule
-class Query(str): ...
+Query = str
 class _TQ(Rule):
     def __init__(self, *, data: Query, shapes: Query):
         assert('construct' in data.lower())
         assert('construct' in shapes.lower())
-        data =   Query(data)
-        shapes = Query(shapes)
+        from bim2rdf.queries import SPARQLQuery
+        data:str =   str(SPARQLQuery(data))
+        shapes:str = str(SPARQLQuery(shapes))
         self.tqdata = data
         self.shapes = shapes
 
@@ -55,7 +56,7 @@ class _TQ(Rule):
 
 class TopQuadrantInference(_TQ):
     from bim2rdf.rdf import Prefix
-    meta_prefix = Prefix('tq.meta', "urn:meta:bim2rdf:TopQuadrantInference:")
+    meta_prefix = Prefix('tq.inf', "urn:meta:bim2rdf:TopQuadrantInference:")
 class TopQuadrantValidation(_TQ):
     from bim2rdf.rdf import Prefix
-    meta_prefix = Prefix('tq.meta', "urn:meta:bim2rdf:TopQuadrantValidation:")
+    meta_prefix = Prefix('tq.val', "urn:meta:bim2rdf:TopQuadrantValidation:")
