@@ -126,24 +126,13 @@ class Run:
                     q.string,
                     name=r.ConstructQuery.mk_name(q.source))
               for q in unique_queries()]
-        # TODO: file this under 'rules/tq'?
-        dq = """
-        prefix q: <urn:meta:bim2rdf:ConstructQuery:>
-        construct {?s ?p ?o.}
-        WHERE {
-        <<?s ?p ?o>> q:name ?mo.
-        filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data.") ) 
-        }"""
-        # TODO: file this under 'rules/ttl'?
-        sq = """
-        prefix ttl: <urn:meta:bim2rdf:ttlLoader:>
-        construct {?s ?p ?o.}
-        WHERE {
-        <<?s ?p ?o>> ttl:source ?mo.
-        filter (CONTAINS(?mo, "223p.ttl") )
-        }
-        """
-        inf = [r.TopQuadrantInference(data=dq, shapes=sq)] if inference else []
+        
+        if inference:
+            inf = [r.TopQuadrantInference(
+                        data=queries.data,
+                        shapes=queries.ontology)]
+        else:
+            inf = []
         _ = ['ontology.ttl' in str(t.source) for t in ttls]
         if sum(_) == 0:
             if inference:
@@ -163,8 +152,50 @@ class Run:
         ######
         lg(f'[3/{n_phases}] validation')
         if validation:
-            db = Engine([r.TopQuadrantValidation(data=dq, shapes=sq)],
+            db = Engine([r.TopQuadrantValidation(
+                                data=queries.data,
+                                shapes=queries.ontology)],
                          db=db,
                          MAX_NCYCLES=1,  # just one
                          log_print=log,).run()
         return db
+
+
+class _queries:
+    @property
+    def data(self) -> str:
+        _ ="""
+        prefix c: <${prefix.construct.meta}>
+        construct {?s ?p ?o.}
+        WHERE {
+        <<?s ?p ?o>> c:name ?mo.
+        filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data.") ) 
+        }"""
+        return self.mk(_)
+    @property
+    def ontology(self) -> str:
+        _ = """
+        prefix t: <${prefix.ttl.meta}>
+        construct {?s ?p ?o.}
+        WHERE {
+        <<?s ?p ?o>> t:source ?mo.
+        filter (CONTAINS(?mo, "ontology.ttl") )
+        }"""
+        return self.mk(_)
+
+    @property
+    def _test(self):
+        return self.mk("""
+        ${query.prefixes}
+        construct {?s ?p ?o} where {?s ?p ?o}
+        """)
+    
+    @classmethod
+    def mk(cls, q: str, subs=True):
+        if subs:
+            from .queries import SPARQLQuery
+            return str(SPARQLQuery(q))
+        else:
+            return q
+
+queries = _queries()
