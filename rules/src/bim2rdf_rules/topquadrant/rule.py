@@ -56,7 +56,7 @@ class _TQ(Rule):
 
 class TopQuadrantInference(_TQ):
     from bim2rdf.rdf import Prefix
-    meta_prefix = Prefix('tq.inf', "urn:meta:bim2rdf:TopQuadrantInference:")
+    meta_prefix = Prefix('tq.inf.meta', "urn:meta:bim2rdf:TopQuadrantInference:")
 class TopQuadrantValidation(_TQ):
     from bim2rdf.rdf import Prefix
-    meta_prefix = Prefix('tq.val', "urn:meta:bim2rdf:TopQuadrantValidation:")
+    meta_prefix = Prefix('tq.val.meta', "urn:meta:bim2rdf:TopQuadrantValidation:")
