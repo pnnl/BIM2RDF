@@ -1,7 +1,5 @@
 PREFIX rec: <https://w3id.org/rec#> 
 PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX spkl: <http://speckle.systems/> 
-PREFIX meta: <http://meta>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -9,6 +7,9 @@ prefix recx: <urn:rec:extentions:>
 PREFIX qudt: <http://qudt.org/schema/qudt/>
 PREFIX qudtqk: <http://qudt.org/vocab/quantitykind/>
 PREFIX unit: <http://qudt.org/vocab/unit/>
+
+prefix spkl.meta: <urn:speckle:meta:>
+prefix spkl: <urn:speckle:concept:>
 
 CONSTRUCT { 
 #?this a s223:PhysicalSpace.
@@ -36,7 +37,7 @@ CONSTRUCT {
 
 } 
 WHERE { 
-<<?this spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
+<<?this spkl:category  "Rooms">> spkl.meta:model_name "architecture/rooms and lighting fixtures". # TODO branchName could be used here
   ?this spkl:parameters ?p.
   ?p ?k ?l. 
   ?l spkl:applicationInternalName "ROOM_AREA".

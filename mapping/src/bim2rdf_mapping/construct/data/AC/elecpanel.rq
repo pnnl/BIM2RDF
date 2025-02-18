@@ -1,9 +1,10 @@
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX meta: <http://meta>
-PREFIX spkl: <http://speckle.systems/> 
 prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix spkl.meta: <urn:speckle:meta:>
+prefix spkl: <urn:speckle:concept:>
+
 CONSTRUCT {
  ?conn s223:cnx _:wirejunction.
 _:wirejunction a s223:ElectricWire.
@@ -22,7 +23,7 @@ _:j s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
 
 WHERE 
 {
-<<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. 
+<<?elecbreaker spkl:category  "Electrical Equipment">> spkl.meta:model_name "electrical/panels". 
 ?elecbreaker spkl:parameters ?q.
   ?q ?a ?circuit.
   ?circuit spkl:applicationInternalName "RBS_ELEC_PANEL_NAME".

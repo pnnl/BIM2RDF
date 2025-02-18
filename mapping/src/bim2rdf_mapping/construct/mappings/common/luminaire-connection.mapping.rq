@@ -1,9 +1,10 @@
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX spkl: <http://speckle.systems/> 
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX meta: <http://meta>
+prefix spkl.meta: <urn:speckle:meta:>
+prefix spkl: <urn:speckle:concept:>
+
 CONSTRUCT { 
 ?o1     s223:cnx   _:conn.
 #  no em-light connection equivalent like pipe and wire
