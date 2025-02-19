@@ -1016,6 +1016,7 @@ dependencies = [
     { name = "pyoxigraph" },
     { name = "rdflib" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/a2/23/a545ff4e720e19f6ca8a26edfd2d915d2f8d31a1d5bed8606d015b5dd206/rdf_engine-219.tar.gz", hash = "sha256:c0ad4e3dc132b50fc42efbbd2dfec6fa356257c39944edfd9c9bc1eea78e23c3", size = 7937 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a1/84/2459dce7216f91d1cec0b6a32e717c00e61d17ba050bfeec5bc58b23ff6e/rdf_engine-219-py3-none-any.whl", hash = "sha256:72c109a8e5123bd0d4bc804a442f365e7b54895942886b743d5ab79730bb4b23", size = 10271 },
 ]
