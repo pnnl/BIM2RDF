@@ -134,7 +134,7 @@ class Run:
                         shapes=queries.ontology)]
         else:
             inf = []
-        _ = ['ontology.ttl' in str(t.source) for t in ttls]
+        _ = ['ontology' in str(t.source) for t in ttls if isinstance(t.source, Path) ]
         if sum(_) == 0:
             if inference:
                 from warnings import warn
