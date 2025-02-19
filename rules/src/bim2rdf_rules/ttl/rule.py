@@ -17,7 +17,7 @@ class ttlLoader(Rule):
     def parse_src(cls, source):
         from pyoxigraph import parse, RdfFormat
         if isinstance(source, cls.Path):
-            return parse(open(source), format=RdfFormat.TURTLE)
+            return parse(open(source, encoding="utf-8"), format=RdfFormat.TURTLE)
         else:
             assert(isinstance(source, (str, URI)))
             if isinstance(source, str):
