@@ -22,3 +22,27 @@ Make a [`.secrets.toml`](./.secrets.toml) file with
 [speckle]
 token = "yourtoken"
 ```
+
+# Usage
+
+## [CLI](./src/bim2rdf/cli.py)
+```bash
+bim2rdf --help
+```
+
+## [Function](./src/bim2rdf/engine.py)
+
+```python
+from bim2rdf import Run
+# initialize with a db
+from pyoxigraph import Store
+db = Store()
+r = Run(db)
+# execute with desired options
+help(Run.run)
+```
+
+In development, a `cache` directory will be created in the working directory
+to save expensive expensive processing in general
+but mainly to save Speckle query results.
+Thus, the user must clear the cache to be able to access new data.
