@@ -15,6 +15,7 @@ dependencies = [
     "bim2rdf_mapping",
     #"ontologies", # ? need this? or just create a ttl loader rule
     "bim2rdf_speckle",
+    "rdflib", # just to make a nice looking ttl bc pyoxigraph doesn't. otherwise dont want to use!
 ]
 [project.optional-dependencies]
 spklauto = ["bim2rdf_spklauto"]

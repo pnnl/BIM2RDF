@@ -175,16 +175,52 @@ class Queries:
         construct {?s ?p ?o} where {?s ?p ?o}
         """)
     
+    @property
+    def names(self):
+        _ = (a for a in dir(self)
+            if (not a.startswith('_')) and (a not in {'mk', 'names'}))
+        _ = frozenset(_)
+        return _
+    
     @classmethod
     def mk(cls, q: str, subs=True):
         if subs:
-            from .queries import SPARQLQuery
             return str(SPARQLQuery(q))
         else:
             return q
 
 queries = Queries()
 
+
+def query(*, db_dir: Path, query: str|Path, out:Path|str|None=Path('result.ttl')):
+    """
+    evaluate construct query mainly to extract subgraphs of the bim2rdf process
+    'query' will either be the /name/ of the query or can be a path to a query
+    """
+    if Path(query).exists():
+        query = Path(query).read_text()
+    else:
+        assert(isinstance(query, str))
+        assert(query in dir(queries))
+        query = getattr(queries, query)
+    assert('construct' in query.lower() )
+    query = str(SPARQLQuery(query))
+    db_dir = Path(db_dir)
+    assert(db_dir.exists())
+    assert(db_dir.is_dir())
+    from pyoxigraph import Store, serialize, RdfFormat
+    db = Store(db_dir)
+    r = db.query(query)
+    r = serialize(r, format=RdfFormat.TURTLE)
+    from rdflib import Graph
+    r = Graph().parse(data=r, format='ttl')
+    r = r.serialize()
+    if isinstance(out, (str, Path)):
+        out.write_text(r)
+        return out
+    else:
+        assert(out is None)
+        return r
 
 
 if __name__ == '__main__':
@@ -221,11 +257,10 @@ if __name__ == '__main__':
     
     def list():
         d = {}
-        for a in (a for a in dir(queries)
-                if (not a.startswith('_')) and (a not in {'mk'})):
-            _ = getattr(queries, a)
+        for n in queries.names:
+            _ = getattr(queries, n)
             assert(isinstance(_, str))
-            d[a] = _
+            d[n] = _
         for n,q in d.items():
             print(n+':')
             print('')
@@ -235,4 +270,4 @@ if __name__ == '__main__':
     
     from fire import Fire
     def default_substitutions(): return SPARQLQuery.defaults.substitutions
-    Fire({f.__name__:f for f in {sparql, list, default_substitutions}})
+    Fire({f.__name__:f for f in {sparql, list, query, default_substitutions}})
