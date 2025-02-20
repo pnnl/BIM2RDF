@@ -122,16 +122,14 @@ class Model:
         from typing import Callable
         def ttl(self, *, json_method:str|Callable=Json.wo_geometry, **kw):
             from .meta import prefixes
-            prefixes.meta, prefixes.concept
             dp = prefixes.data(project_id=self.model.project.id, object_id="") # objid filled in
-            from json2rdf import j2r
             _ = self.json()
             _ = getattr(_, json_method.__name__ if not isinstance(json_method, str) else json_method) # ?
             _ = _()
-            _ = j2r(_,
+            _ = json2rdf(_,
                     subject_id_keys=('id',),     object_id_keys=('referencedId', 'connectedConnectorIds'),
-                    id_prefix=(dp.name, dp.uri),
-                    key_prefix=(prefixes.concept.name, prefixes.concept.uri),
+                    id_prefix=(str(dp.name), str(dp.uri)),
+                    key_prefix=(str(prefixes.concept.name), str(prefixes.concept.uri)),
                     **kw)
             return _
 
@@ -140,7 +138,11 @@ class Model:
         return [self.Version(id=v['id'], model=self)
                 for v in self.meta['versions']['items']]
 
-
+from bim2rdf.cache import cache
+@cache
+def json2rdf(*p, **k):
+    from json2rdf import j2r
+    return j2r(*p, **k)
 
 
 if __name__ == '__main__':
