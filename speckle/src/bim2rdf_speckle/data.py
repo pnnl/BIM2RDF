@@ -8,6 +8,12 @@ class Project:
         if p['id'] != id:
             raise ValueError('project not found')
         self.id = id
+    
+    @classmethod
+    def from_name(cls, name: str):
+        _ = [p for p in cls.s() if p.name == name ]
+        assert(len(_) == 1)
+        return _[0]
 
     from functools import cached_property, cache
     @cached_property
