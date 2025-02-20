@@ -16,9 +16,11 @@ db_dir = 'db_dir'
 def f(config: Path= Path('params.yaml')):
     config = Path(config)
     from yaml import safe_load
-    config = safe_load(open(config))
+    config: dict = safe_load(open(config))
     db = Path(config.pop(db_dir))
     r = Run.from_path(db)
+    config.setdefault('project_id',     '')
+    config.setdefault('project_name',   '')
     _ = r.run(**config)
     return db
 def attdoc(f):
