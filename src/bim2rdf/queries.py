@@ -176,6 +176,32 @@ class Queries:
         where {<<?s ?p ?o>> v:data ?_.}
         """
         return self.mk(_)
+    #     @property just for ref. does not gen triples
+    # def shacl_report(self):
+    #     from .query import Prefixes, Node, known_prefixes
+    #     S = lambda n: Node('sh', n)
+    #     vr = S('ValidationResult')
+    #     fn = S('focusNode')
+    #     rm = S('resultMessage')
+    #     vl = S('value')
+    #     rp = S('resultPath')
+    #     ss = S('sourceShape')  
+    #     sv = S('resultSeverity')
+    #     sc = S('sourceConstraintComponent')
+    #     _ = Prefixes(p for p in known_prefixes if 'shacl' in str(p.uri) )
+    #     _ = str(_)
+    #     _ = _ + f"""
+    #     select  {fn.var} {rm.var} {vl.var} {rp.var} {sv.var} {ss.var} where {{
+    #     {vr.var} a {vr}.
+    #     optional {{{vr.var} {fn} {fn.var}}}.
+    #     optional {{{vr.var} {rm} {rm.var}}}.
+    #     optional {{{vr.var} {vl} {vl.var}}}.
+    #     optional {{{vr.var} {rp} {rp.var}}}.
+    #     optional {{{vr.var} {sv} {sv.var}}}.
+    #     optional {{{vr.var} {ss} {ss.var}}}.
+    #     }}
+    #     """
+    #     return _
 
     @property
     def _test(self):
