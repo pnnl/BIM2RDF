@@ -227,7 +227,8 @@ class Queries:
 queries = Queries()
 
 
-def query(*, db_dir: Path, query: str|Path,
+from pyoxigraph import Store
+def query(*, db: Path|Store|str=Path('db'), query: str|Path,
           run_params: dict|Path=None,
           out:Path|str|None=Path('result.ttl'),):
     """
@@ -243,11 +244,14 @@ def query(*, db_dir: Path, query: str|Path,
         query = getattr(queries, query)
     assert('construct' in query.lower() )
     query = str(SPARQLQuery(query))
-    db_dir = Path(db_dir)
-    assert(db_dir.exists())
-    assert(db_dir.is_dir())
-    from pyoxigraph import Store, serialize, RdfFormat
-    db = Store(db_dir)
+    if isinstance(db, (Path,str)):
+        db = Path(db)
+        assert(db.exists())
+        assert(db.is_dir())
+        db = Store(db)
+    else:
+        assert(isinstance(db, Store))
+    from pyoxigraph import serialize, RdfFormat
     r = db.query(query)
     r = serialize(r, format=RdfFormat.TURTLE)
     from rdflib import Graph
