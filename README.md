@@ -13,9 +13,11 @@ generic stand-alone libraries:
 
 # Development
 
-```
+```bash
 > uv sync --all-packages
 > uv run pre-commit install
+# activate environment
+> .venv/Scripts/activate
 ```
 Make a [`.secrets.toml`](./.secrets.toml) file with
 ```toml
