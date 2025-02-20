@@ -133,6 +133,59 @@ class SPARQLQuery:
                     yield cls.from_path(src, substitutions=substitutions)
 
 
+class Queries:
+    @property
+    def mapped(self) -> str:
+        _ ="""
+        prefix c: <${prefix.construct.meta}>
+        construct {?s ?p ?o.}
+        WHERE {
+        <<?s ?p ?o>> c:name ?mo.
+        filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data.") ) 
+        }"""
+        return self.mk(_)
+    @property
+    def mapped_and_inferred(self) -> str:
+        _ ="""
+        prefix c: <${prefix.construct.meta}>
+        prefix i: <${prefix.tq.inf.meta}>
+        construct {?s ?p ?o.}
+        WHERE {
+            {<<?s ?p ?o>> c:name ?mo.
+            filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data."))}
+        union
+            {<<?s ?p ?o>> i:data ?_. } # there's also i:shapes
+        }"""
+        return self.mk(_)
+    @property
+    def ontology(self) -> str:
+        _ = """
+        prefix t: <${prefix.ttl.meta}>
+        construct {?s ?p ?o.}
+        WHERE {
+        <<?s ?p ?o>> t:source ?mo.
+        filter (CONTAINS(?mo, "ontology.ttl") )
+        }"""
+        return self.mk(_)
+
+    @property
+    def _test(self):
+        return self.mk("""
+        ${query.prefixes}
+        construct {?s ?p ?o} where {?s ?p ?o}
+        """)
+    
+    @classmethod
+    def mk(cls, q: str, subs=True):
+        if subs:
+            from .queries import SPARQLQuery
+            return str(SPARQLQuery(q))
+        else:
+            return q
+
+queries = Queries()
+
+
 
 if __name__ == '__main__':
     from typing import Literal, List
@@ -166,6 +219,20 @@ if __name__ == '__main__':
         open(odir / '.gitignore', 'w').write('*')
         return odir
     
+    def list():
+        d = {}
+        for a in (a for a in dir(queries)
+                if (not a.startswith('_')) and (a not in {'mk'})):
+            _ = getattr(queries, a)
+            assert(isinstance(_, str))
+            d[a] = _
+        for n,q in d.items():
+            print(n+':')
+            print('')
+            print(q)
+        return 
+
+    
     from fire import Fire
     def default_substitutions(): return SPARQLQuery.defaults.substitutions
-    Fire({f.__name__:f for f in {sparql, default_substitutions}})
+    Fire({f.__name__:f for f in {sparql, list, default_substitutions}})

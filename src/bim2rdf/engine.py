@@ -128,9 +128,10 @@ class Run:
                     name=r.ConstructQuery.mk_name(q.source))
               for q in unique_queries()]
         
+        from .queries import queries
         if inference:
             inf = [r.TopQuadrantInference(
-                        data=queries.data,
+                        data=queries.mapped,
                         shapes=queries.ontology)]
         else:
             inf = []
@@ -155,7 +156,7 @@ class Run:
         if validation:
             lg(f'[3/{n_phases}] validation')
             db = Engine([r.TopQuadrantValidation(
-                                data=queries.data,
+                                data=queries.mapped,
                                 shapes=queries.ontology)],
                          db=db,
                          derand=False,
@@ -164,43 +165,6 @@ class Run:
         return db
 
 
-class _queries:
-    @property
-    def data(self) -> str:
-        _ ="""
-        prefix c: <${prefix.construct.meta}>
-        construct {?s ?p ?o.}
-        WHERE {
-        <<?s ?p ?o>> c:name ?mo.
-        filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data.") ) 
-        }"""
-        return self.mk(_)
-    @property
-    def ontology(self) -> str:
-        _ = """
-        prefix t: <${prefix.ttl.meta}>
-        construct {?s ?p ?o.}
-        WHERE {
-        <<?s ?p ?o>> t:source ?mo.
-        filter (CONTAINS(?mo, "ontology.ttl") )
-        }"""
-        return self.mk(_)
 
-    @property
-    def _test(self):
-        return self.mk("""
-        ${query.prefixes}
-        construct {?s ?p ?o} where {?s ?p ?o}
-        """)
-    
-    @classmethod
-    def mk(cls, q: str, subs=True):
-        if subs:
-            from .queries import SPARQLQuery
-            return str(SPARQLQuery(q))
-        else:
-            return q
-
-queries = _queries()
 
 __all__ = ['Run']

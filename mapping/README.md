@@ -17,3 +17,6 @@ as this would still be a valid string in sparql.
 
 Use `python -m bim2rdf.queries default_substitutions`
 to inspect defined variables.
+
+Use `python -m bim2rdf.queries list`
+to list defined queries.
