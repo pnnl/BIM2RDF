@@ -148,7 +148,7 @@ class Run:
         db = Engine(ms+inf,
                       db=db,
                       MAX_NCYCLES=MAX_NCYCLES,
-                      #derand='canonicalize', #can spin out of control!
+                      #derand='canonicalize', # gets stuck! probably bc some bad interaction with inferencing
                       log_print=log).run()
         
 
