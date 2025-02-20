@@ -80,6 +80,7 @@ dependencies = [
     { name = "bim2rdf-rules" },
     { name = "bim2rdf-speckle" },
     { name = "dynaconf" },
+    { name = "rdflib" },
 ]
 
 [package.optional-dependencies]
@@ -111,6 +112,7 @@ requires-dist = [
     { name = "dynaconf" },
     { name = "fire", marker = "extra == 'cli'" },
     { name = "pyyaml", marker = "extra == 'cli'" },
+    { name = "rdflib" },
 ]
 provides-extras = ["spklauto", "cli"]
 
