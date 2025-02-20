@@ -214,6 +214,8 @@ def query(*, db_dir: Path, query: str|Path, out:Path|str|None=Path('result.ttl')
     r = serialize(r, format=RdfFormat.TURTLE)
     from rdflib import Graph
     r = Graph().parse(data=r, format='ttl')
+    for n,u in SPARQLQuery.defaults.substitutions.items():
+        r.bind(n, u)
     r = r.serialize()
     if isinstance(out, (str, Path)):
         out.write_text(r)
