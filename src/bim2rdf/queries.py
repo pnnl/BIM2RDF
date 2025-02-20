@@ -192,10 +192,13 @@ class Queries:
 queries = Queries()
 
 
-def query(*, db_dir: Path, query: str|Path, out:Path|str|None=Path('result.ttl')):
+def query(*, db_dir: Path, query: str|Path,
+          run_params: dict|Path=None,
+          out:Path|str|None=Path('result.ttl'),):
     """
     evaluate construct query mainly to extract subgraphs of the bim2rdf process
     'query' will either be the /name/ of the query or can be a path to a query
+    params is used just to make a spkl.data prefix
     """
     if Path(query).exists():
         query = Path(query).read_text()
@@ -214,7 +217,24 @@ def query(*, db_dir: Path, query: str|Path, out:Path|str|None=Path('result.ttl')
     r = serialize(r, format=RdfFormat.TURTLE)
     from rdflib import Graph
     r = Graph().parse(data=r, format='ttl')
-    for n,u in SPARQLQuery.defaults.substitutions.items():
+    prefixes = {'.'.join(n.split('.')[1:]):s
+                for n,s in SPARQLQuery.defaults.substitutions.items()
+                if n.startswith('prefix.') }
+    if Path(run_params).exists():
+        run_params = Path(run_params)
+        from yaml import safe_load
+        run_params = safe_load(open(run_params).read())
+    assert(isinstance(run_params, dict))
+    if 'project_name' in run_params:
+        from bim2rdf_speckle.data import Project
+        _ = Project.from_name(run_params['project_name'])
+        project_id = _.id
+    else:
+        project_id = run_params['project_id']
+    from bim2rdf_speckle.meta import prefixes as sp
+    _ = sp.data(project_id=project_id, object_id="")
+    prefixes[_.name] = _.uri
+    for n,u in prefixes.items():
         r.bind(n, u)
     r = r.serialize()
     if isinstance(out, (str, Path)):
