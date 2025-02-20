@@ -1,2 +1,5 @@
-1. [develop mappings](../mapping/README.md)
-2. run `bim2rdf --help`
+1. [Develop mappings](../mapping/README.md).
+2. Run `bim2rdf --help`.
+   Inspect results by querying (oxigraph server)[https://github.com/oxigraph/oxigraph/releases].
+3. Regression test with `pytest`.
+   Regression query results show up in the [test directory](./test/).

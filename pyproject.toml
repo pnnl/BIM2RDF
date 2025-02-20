@@ -33,7 +33,10 @@ dev = [
     "cachier",
     # automation
     "project",
-    "bim2rdf[spklauto, cli]",#nice
+    "bim2rdf[spklauto, cli]", #nice
+    # testing
+    "pytest", "pytest-regressions",
+    "rdflib", # just to check if the same
 ]
 
 [tool.uv.sources]
