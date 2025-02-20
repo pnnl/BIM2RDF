@@ -20,3 +20,6 @@ to inspect defined variables.
 
 Use `python -m bim2rdf.queries list`
 to list defined queries.
+
+Use `python -m bim2rdf.queries query`
+to extract data.
