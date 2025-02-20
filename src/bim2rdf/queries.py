@@ -167,6 +167,15 @@ class Queries:
         filter (CONTAINS(?mo, "ontology.ttl") )
         }"""
         return self.mk(_)
+    
+    @property
+    def validation(self) -> str:
+        _ = """
+        prefix v: <${prefix.tq.val.meta}>
+        construct {?s ?p ?o.}
+        where {<<?s ?p ?o>> v:data ?_.}
+        """
+        return self.mk(_)
 
     @property
     def _test(self):
@@ -238,6 +247,7 @@ def query(*, db_dir: Path, query: str|Path,
         r.bind(n, u)
     r = r.serialize()
     if isinstance(out, (str, Path)):
+        out = Path(out)
         out.write_text(r)
         return out
     else:
