@@ -229,8 +229,9 @@ queries = Queries()
 
 from pyoxigraph import Store
 def query(*, db: Path|Store|str=Path('db'), query: str|Path,
-          run_params: dict|Path=None,
+          run_params: dict|Path=Path('params.yaml'),
           out:Path|str|None=Path('result.ttl'),):
+    # mostly meant to be used from the cli
     """
     evaluate construct query mainly to extract subgraphs of the bim2rdf process
     'query' will either be the /name/ of the query or can be a path to a query
