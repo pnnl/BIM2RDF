@@ -1,3 +1,4 @@
+
 from pathlib import Path
 from .engine import Run
 class Run(Run):
@@ -10,10 +11,10 @@ class Run(Run):
                 from shutil import rmtree
                 rmtree(pth)
         return cls(cls.Store(str(pth)))
-    
+        
 db_dir = 'db_dir'
 
-def f(config: Path= Path('params.yaml')):
+def run(config: Path= Path('params.yaml')):
     config = Path(config)
     from yaml import safe_load
     config: dict = safe_load(open(config))
@@ -22,6 +23,7 @@ def f(config: Path= Path('params.yaml')):
     config.setdefault('project_id',     '')
     config.setdefault('project_name',   '')
     _ = r.run(**config)
+    return 0  #success
     return db
 def attdoc(f):
     # bc it wont show up if it's not the first line
@@ -46,7 +48,7 @@ def attdoc(f):
     """
     f.__doc__ = _
     return f
+run = attdoc(run)
 from fire import Fire
-f = attdoc(f)
-f = Fire(f)
-exit(0)
+run = Fire(run)
+

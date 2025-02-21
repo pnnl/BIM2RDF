@@ -22,7 +22,7 @@ spklauto = ["bim2rdf_spklauto"]
 cli = ["fire", "pyyaml"]
 
 [project.scripts]
-bim2rdf = "bim2rdf:cli"
+bim2rdf = "bim2rdf.cli:run"
 
 [dependency-groups]
 dev = [
