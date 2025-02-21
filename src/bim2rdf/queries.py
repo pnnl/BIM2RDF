@@ -141,7 +141,7 @@ class Queries:
         for q in SPARQLQuery.s():
             n  = q.source
             assert(isinstance(n, Path))
-            n = n.stem.replace('-', '_').replace(' ', '_')
+            n = n.stem#.replace('-', '_').replace(' ', '_')
             setattr(self, n, q.string)
 
     @property
@@ -233,8 +233,8 @@ class Queries:
             return str(SPARQLQuery(q))
         else:
             return q
-queries = Queries()
-
+_ = Queries()
+queries = {n:getattr(_, n) for n in _.names} ; del _
 
 from pyoxigraph import Store
 def query(*, db: Path|Store|str=Path('db'), query: str|Path,
@@ -328,12 +328,8 @@ if __name__ == '__main__':
         return odir
     
     def list():
-        d = {}
-        for n in queries.names:
-            _ = getattr(queries, n)
-            assert(isinstance(_, str))
-            d[n] = _
-        for n,q in d.items():
+        for n,q in queries.items():
+            print('='*80)
             print(n+':')
             print('')
             print(q)
