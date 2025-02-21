@@ -14,15 +14,15 @@ class Run(Run):
         
 db_dir = 'db_dir'
 
-def run(config: Path= Path('params.yaml')):
-    config = Path(config)
+def run(params: Path= Path('params.yaml')):
+    params = Path(params)
     from yaml import safe_load
-    config: dict = safe_load(open(config))
-    db = Path(config.pop(db_dir))
+    params: dict = safe_load(open(params))
+    db = Path(params.pop(db_dir))
     r = Run.from_path(db)
-    config.setdefault('project_id',     '')
-    config.setdefault('project_name',   '')
-    _ = r.run(**config)
+    params.setdefault('project_id',     '')
+    params.setdefault('project_name',   '')
+    _ = r.run(**params)
     return 0  #success
     return db
 def attdoc(f):
