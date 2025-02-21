@@ -13,6 +13,8 @@ generic stand-alone libraries:
 
 # Development
 
+## Setup
+
 ```bash
 > uv sync --all-packages
 > uv run pre-commit install
@@ -24,6 +26,10 @@ Make a [`.secrets.toml`](./.secrets.toml) file with
 [speckle]
 token = "yourtoken"
 ```
+
+## Process
+
+Follow [test](./test/) [instructions](./test/README.md).
 
 # Usage
 
