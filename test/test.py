@@ -18,11 +18,10 @@ def params():
 #check_call('bim2rdf -p params.yaml')
 
 
-from rdflib import Graph
-def is_eq(g1: Graph|str, g2: Graph|str):
+def is_eq(g1: str, g2: str):
     from rdflib import Graph
-    g1 = Graph().parse(data=g1, format='text/turtle') if isinstance(g1, str) else g1
-    g2 = Graph().parse(data=g2, format='text/turtle') if isinstance(g2, str) else g2
+    g1: Graph = Graph().parse(data=g1, format='text/turtle') if isinstance(g1, str) else g1
+    g2: Graph = Graph().parse(data=g2, format='text/turtle') if isinstance(g2, str) else g2
     from rdflib.compare import isomorphic
     return isomorphic(g1, g2)
 
