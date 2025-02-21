@@ -134,6 +134,16 @@ class SPARQLQuery:
 
 
 class Queries:
+    def __init__(self):
+        self._set_included_mappings()
+    
+    def _set_included_mappings(self):
+        for q in SPARQLQuery.s():
+            n  = q.source
+            assert(isinstance(n, Path))
+            n = n.stem.replace('-', '_').replace(' ', '_')
+            setattr(self, n, q.string)
+
     @property
     def mapped(self) -> str:
         _ ="""
@@ -223,7 +233,6 @@ class Queries:
             return str(SPARQLQuery(q))
         else:
             return q
-
 queries = Queries()
 
 

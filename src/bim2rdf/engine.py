@@ -131,8 +131,8 @@ class Run:
         from .queries import queries
         if inference:
             inf = [r.TopQuadrantInference(
-                        data=queries.mapped,
-                        shapes=queries.ontology)]
+                        data=queries['mapped'],
+                        shapes=queries['ontology'])]
         else:
             inf = []
         _ = ['ontology' in str(t.source) for t in ttls if isinstance(t.source, Path) ]
@@ -156,8 +156,8 @@ class Run:
         if validation:
             lg(f'[3/{n_phases}] validation')
             db = Engine([r.TopQuadrantValidation(
-                                data=queries.mapped,
-                                shapes=queries.ontology)],
+                                data=queries['mapped'],
+                                shapes=queries['ontology'])],
                          db=db,
                          derand=False,
                          MAX_NCYCLES=1,  # just one
