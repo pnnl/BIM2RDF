@@ -3,12 +3,19 @@ import pytest
     
 
 #@pytest.fixture
+from functools import cache
+@cache
 def params():
     _ = Path('params.yaml')
     _ = _.read_text()
     from yaml import safe_load
     _ = safe_load(_)
     return _
+
+#@pytest.fixture
+#def db():#(params)
+#from subprocess import check_call
+#check_call('bim2rdf -p params.yaml')
 
 
 from rdflib import Graph
@@ -20,9 +27,8 @@ def is_eq(g1: Graph|str, g2: Graph|str):
     return isomorphic(g1, g2)
 
 
-
 from bim2rdf.queries import queries
-@pytest.fixture(params=list(n for n in queries.names if n not in {'ontology'}))
+@pytest.fixture(params=list(n for n in queries if n not in {'ontology'}))
 def query(request):
     return request.param
     #_ = getattr(queries, request.param)
