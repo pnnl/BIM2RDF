@@ -250,7 +250,7 @@ def query(*, db: Path|Store|str=Path('db'), query: str|Path,
         query = Path(query).read_text()
     else:
         assert(isinstance(query, str))
-        assert(query in dir(queries))
+        assert(query in (queries))
         query = getattr(queries, query)
     assert('construct' in query.lower() )
     query = str(SPARQLQuery(query))
