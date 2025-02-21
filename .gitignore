@@ -9,6 +9,8 @@
 !.gitignore
 # scripts and progs
 !*.py
+# scratch
+_.py 
 # sparql
 !*.rq 
 # doc
