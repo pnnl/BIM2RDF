@@ -23,7 +23,6 @@ def run(params: Path= Path('params.yaml')):
     params.setdefault('project_id',     '')
     params.setdefault('project_name',   '')
     _ = r.run(**params)
-    return 0  #success
     return db
 def attdoc(f):
     # bc it wont show up if it's not the first line
@@ -51,4 +50,4 @@ def attdoc(f):
 run = attdoc(run)
 from fire import Fire
 run = Fire(run)
-
+exit(0)
