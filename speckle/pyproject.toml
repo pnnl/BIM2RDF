@@ -1,6 +1,6 @@
 [project]
 name = "bim2rdf-speckle"
-version = "0.1.0"
+dynamic = ['version']
 description = "BIM2RDF/access speckle data"
 authors = [
     {name =  "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 

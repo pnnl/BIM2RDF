@@ -1,6 +1,6 @@
 [project]
 name = "bim2rdf-mapping"
-version = "0.1.0"
+dynamic = [ 'version']
 description = "BIM2RDF/mapping"
 authors = [
     { name = "Trisha Gupta",    email =   "trisha.gupta@pnnl.gov" }, 
@@ -19,4 +19,3 @@ include = [
     'src/**/*.py',
     'src/**/*.rq'
 ]
-

@@ -1,21 +1,22 @@
 [project]
 name = "bim2rdf-rules"
-version = "0.1.0"
+dynamic = [ 'version']
 description = "BIM2RDF/rules"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" },
 ]
-dependencies = [
-    "pytqshacl", 
-    "rdf-engine",
-    "json2rdf",
-]
 readme = "README.md"
-
+dependencies = [
+    "pytqshacl[java]",    #@ git+https://github.com/pnnl/pytqshacl.git@a337df458d4ab1a9ee1f31ba784659546c5dc58f",
+    "rdf-engine",         #@ git+https://github.com/pnnl/rdf-engine.git@8ca92a88ad588de1f8024ba8d9419d7ac72f0220",
+    "json2rdf"            #@ git+https://github.com/pnnl/json2rdf.git@59b021e623dd169ad9d208d48b6913c7395b7bab",
+]
 [dependency-groups]
 dev = [
-    "pytqshacl[java,cli]",
+    "pytqshacl[java,cli]",# @ git+https://github.com/pnnl/pytqshacl.git@a337df458d4ab1a9ee1f31ba784659546c5dc58f",
 ]
+[tool.hatch.metadata]
+#allow-direct-references = true
 
 [build-system]
 requires = ["hatchling"]
