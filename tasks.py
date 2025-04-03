@@ -42,7 +42,7 @@ def ver(*,increment=False):
     dt = dt.now()
     mjr = str(dt.year)
     mnr = str(dt.month)
-    pch = str(ncommits()+1 if increment else 0)
+    pch = str(ncommits()+(1 if increment else 0))
     return f"{mjr}.{mnr}.{pch}"
 
 def chk_ver():
@@ -60,5 +60,5 @@ def test():
 
 if __name__ == '__main__':
     from fire import Fire
-    _ = {f.__name__:f for f in {build, chk_ver, test, ncommits}}
+    _ = {f.__name__:f for f in {build, chk_ver, test, ncommits, ver}}
     Fire(_)
