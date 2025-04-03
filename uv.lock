@@ -73,7 +73,6 @@ wheels = [
 
 [[package]]
 name = "bim2rdf"
-version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "bim2rdf-mapping" },
@@ -117,7 +116,7 @@ requires-dist = [
     { name = "pyyaml", marker = "extra == 'cli'" },
     { name = "rdflib" },
 ]
-provides-extras = ["spklauto", "cli"]
+provides-extras = ["cli", "spklauto"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -135,7 +134,7 @@ dev = [
 
 [[package]]
 name = "bim2rdf-mapping"
-version = "0.1.0"
+version = "0"
 source = { editable = "mapping" }
 
 [package.metadata]
@@ -145,11 +144,11 @@ dev = []
 
 [[package]]
 name = "bim2rdf-rules"
-version = "0.1.0"
+version = "0"
 source = { editable = "rules" }
 dependencies = [
     { name = "json2rdf" },
-    { name = "pytqshacl" },
+    { name = "pytqshacl", extra = ["java"] },
     { name = "rdf-engine" },
 ]
 
@@ -161,7 +160,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "json2rdf" },
-    { name = "pytqshacl" },
+    { name = "pytqshacl", extras = ["java"] },
     { name = "rdf-engine" },
 ]
 
@@ -170,7 +169,7 @@ dev = [{ name = "pytqshacl", extras = ["java", "cli"] }]
 
 [[package]]
 name = "bim2rdf-speckle"
-version = "0.1.0"
+version = "0"
 source = { editable = "speckle" }
 dependencies = [
     { name = "boltons" },
@@ -205,14 +204,18 @@ dev = [
 
 [[package]]
 name = "bim2rdf-spklauto"
-version = "0.1.0"
+version = "0"
 source = { editable = "spklauto" }
 dependencies = [
+    { name = "rdflib" },
     { name = "specklepy" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "specklepy" }]
+requires-dist = [
+    { name = "rdflib" },
+    { name = "specklepy" },
+]
 
 [package.metadata.requires-dev]
 dev = []

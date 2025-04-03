@@ -1,6 +1,6 @@
 [project]
 name = "bim2rdf-mapping"
-dynamic = [ 'version']
+version = "0"
 description = "BIM2RDF/mapping"
 authors = [
     { name = "Trisha Gupta",    email =   "trisha.gupta@pnnl.gov" }, 

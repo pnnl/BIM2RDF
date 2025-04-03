@@ -1,6 +1,6 @@
 [project]
 name = "bim2rdf-speckle"
-dynamic = ['version']
+version = "0"
 description = "BIM2RDF/access speckle data"
 authors = [
     {name =  "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
@@ -19,4 +19,3 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-

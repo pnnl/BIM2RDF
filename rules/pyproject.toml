@@ -1,6 +1,6 @@
 [project]
 name = "bim2rdf-rules"
-dynamic = [ 'version']
+version = "0"
 description = "BIM2RDF/rules"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" },
