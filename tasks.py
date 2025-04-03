@@ -23,9 +23,9 @@ def build(commit=False):
         from subprocess import check_call as run
         from pathlib import Path
         return run(cmd, *p, cwd=Path(__file__).parent, shell=True, **k)
-    if commit:
+    if commit:  
         run(f'uvx hatchling version {ver(increment=True)}', )
-        run(f'uv lock --upgrade-package {pkg}', )
+        for pkg in pkgs: run(f'uv lock --upgrade-package {pkg}', ) 
         # https://github.com/pre-commit/pre-commit/issues/747#issuecomment-386782080
         run('git add -u', )
     run('uv build', )
@@ -45,9 +45,9 @@ def ver(*,increment=False):
     pch = str(ncommits()+1 if increment else 0)
     return f"{mjr}.{mnr}.{pch}"
 
-def chk_ver(rev=rev):
+def chk_ver():
     from bim2rdf import __version__ as v
-    return str(v) == str(ncommits(rev=rev))
+    return str(v) == str(ver())
 
 
 def test():
