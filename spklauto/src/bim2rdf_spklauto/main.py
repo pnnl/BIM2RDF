@@ -2,7 +2,7 @@
 This module contains the function's business logic.
 Use the automation_context module to wrap your function in an Automate context helper.
 """
-from pydantic import Field
+from pydantic import Field, SecretStr
 from speckle_automate import (
     AutomateBase,
     AutomationContext,
@@ -10,8 +10,19 @@ from speckle_automate import (
 )
 
 class FunctionInputs(AutomateBase):
-    models: str = Field(title="csv of models")
+    """These are function author-defined values.
 
+    Automate will make sure to supply them matching the types specified here.
+    Please use the pydantic model schema to define your inputs:
+    https://docs.pydantic.dev/latest/usage/models/
+    """
+    # An example of how to use secret values.
+    whisper_message: SecretStr = Field(title="This is a secret message")
+    forbidden_speckle_type: str = Field(
+        title="Forbidden speckle type",
+        description=(
+            "If a object has the following speckle_type,"
+            " it will be marked with an error."),)
 
 def automate_function(
     automate_context: AutomationContext,
@@ -26,9 +37,13 @@ def automate_function(
             It also has convenient methods for attaching result data to the Speckle model.
         function_inputs: An instance object matching the defined schema.
     """
+    #db = engine_run(automate_context)
     # The context provides a convenient way to receive the triggering version.
     version_root_object = automate_context.receive_version()
 
+    #os = RunOutputs(db)
+    #shacl = os.shacl_report()
+    #shacl = [s for s in shacl]
     # objects_with_forbidden_speckle_type = [
     #     b
     #     for b in flatten_base(version_root_object)
@@ -56,45 +71,66 @@ def automate_function(
         # automate_context.set_context_view()
         ...
     else:
-        automate_context.mark_run_success("No forbidden types found.")
+        automate_context.mark_run_success("no errors")
     # If the function generates file results, this is how it can be
     # attached to the Speckle project/model
-    #automate_context.store_file_result("./report.pdf")
-    #_ = engine_run(automate_context)
-    #automate_context.store_file_result(_)
-    from pathlib import Path
-    _ = engine_run(automate_context)
-    assert(_.exists())
-    automate_context.store_file_result(_)
-    automate_context.mark_run_success("you good")
+
 
 def engine_run(ctx: AutomationContext):
     pid = ctx.automation_run_data.project_id
-    from speckle.data import Project
+    from bim2rdf_speckle.data import Project
     pn = Project(pid).name
     from bim2rdf.engine import Run
     r = Run()
-    from pathlib import Path
-    _ = r.run(
-        ontology=Path('223p.ttl'),
-        project_name=pn,
-        model_name='pritoni 1.ifc', )
-    dq = """
-        prefix q: <urn:meta:bim2rdf:ConstructQuery:>
-        construct {?s ?p ?o.}
-        WHERE {
-        <<?s ?p ?o>> q:name ?mo.
-        filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data.") ) 
-        }"""
-    _ = _.query(dq)
-    from pyoxigraph import serialize, RdfFormat
-    # rdflib is nicer though
-    from pathlib import Path
-    o = Path('mapped.ttl')
-    _ = serialize(_, open(o, 'wb'), RdfFormat.TURTLE)
-    return o
+    _ = r.run(project_name=pn)
+    return _
 
-
+class RunOutputs:
+    def __init__(self, store) -> None:
+        from pyoxigraph import Store
+        self.store: Store = store
+    
+    def mapped(self):
+        from bim2rdf.queries import queries
+        _ = self.store.query(queries['mapped_and_inferred'])
+        from pyoxigraph import serialize, RdfFormat
+        # rdflib is nicer though
+        from pathlib import Path
+        o = Path('mapped_and_inferred.ttl')
+        _ = serialize(_, open(o, 'wb'), RdfFormat.TURTLE)
+        return o
+        #automate_context.store_file_result(_)
+    
+    def shacl_report(self):
+        class Node:
+            ns = 'http://www.w3.org/ns/shacl#'
+            def __init__(self, term):
+                self.term = term
+                self.var = self.term
+            def __str__(self) -> str:
+                return f"<{self.ns}{self.term}>"
+        S = Node
+        vr = S('ValidationResult')
+        fn = S('focusNode')
+        rm = S('resultMessage')
+        vl = S('value')
+        rp = S('resultPath')
+        ss = S('sourceShape')  
+        sv = S('resultSeverity')
+        sc = S('sourceConstraintComponent')
+        _ = f"""
+        select  {fn.var} {rm.var} {vl.var} {rp.var} {sv.var} {ss.var} where {{
+        {vr.var} a {vr}.
+        optional {{{vr.var} {fn} {fn.var}}}.
+        optional {{{vr.var} {rm} {rm.var}}}.
+        optional {{{vr.var} {vl} {vl.var}}}.
+        optional {{{vr.var} {rp} {rp.var}}}.
+        optional {{{vr.var} {sv} {sv.var}}}.
+        optional {{{vr.var} {ss} {ss.var}}}.
+        }}
+        """
+        _ = self.store.query(_)
+        return _
 
 def automate_function_without_inputs(automate_context: AutomationContext) -> None:
     """A function example without inputs.

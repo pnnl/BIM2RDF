@@ -13,11 +13,13 @@ def test():
     automation_context = AutomationContext.initialize(
         f.automation_run_data(), f.testenv.token
     )
+    from pydantic import SecretStr
     automate_sdk = run_function(
         automation_context,
         automate_function,
         FunctionInputs(
-            models='arch/rooms, mech/hvac,',
+            whisper_message=SecretStr("sdfsdsdf"),
+            forbidden_speckle_type="sdfsd",
         ),
     )
     assert automate_sdk.run_status == AutomationStatus.SUCCEEDED

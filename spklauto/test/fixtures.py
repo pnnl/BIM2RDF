@@ -21,6 +21,7 @@ from speckle_automate.schema import AutomationRunData, TestAutomationRunData
 def automation_run(
 ) -> TestAutomationRunData:
     """Create test run to report local test results to"""
+    #https://github.com/specklesystems/specklepy/blob/6c33c61a6de7032a0f14663efac1770c71f27643/src/speckle_automate/fixtures.py#L58
     _ = """ mutation { projectMutations {
         automationMutations(projectId: "_pid") {
             createTestAutomationRun(automationId: "_aid") {
