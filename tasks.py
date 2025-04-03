@@ -24,7 +24,7 @@ def build(commit=False):
         from pathlib import Path
         return run(cmd, *p, cwd=Path(__file__).parent, shell=True, **k)
     if commit:
-        run(f'uvx hatchling version {ncommits()+1}', )
+        run(f'uvx hatchling version {ver(increment=True)}', )
         run(f'uv lock --upgrade-package {pkg}', )
         # https://github.com/pre-commit/pre-commit/issues/747#issuecomment-386782080
         run('git add -u', )
@@ -37,9 +37,16 @@ def ncommits(rev=rev):
     return int(c)
 
 
+def ver(*,increment=False):
+    from datetime import datetime as dt
+    dt = dt.now()
+    mjr = str(dt.year)
+    mnr = str(dt.month)
+    pch = str(ncommits()+1 if increment else 0)
+    return f"{mjr}.{mnr}.{pch}"
+
 def chk_ver(rev=rev):
-    from pytqshacl import __version__ as v
-    assert(pkg) in locals()
+    from bim2rdf import __version__ as v
     return str(v) == str(ncommits(rev=rev))
 
 
@@ -53,5 +60,5 @@ def test():
 
 if __name__ == '__main__':
     from fire import Fire
-    _ = {f.__name__:f for f in {build, chk_ver, test}}
+    _ = {f.__name__:f for f in {build, chk_ver, test, ncommits}}
     Fire(_)
