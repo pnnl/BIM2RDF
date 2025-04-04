@@ -31,12 +31,6 @@ def build(commit=False):
     run('uv build', )
 
 
-def ncommits(rev=rev):
-    from subprocess import check_output as run
-    c = run(f'git rev-list --count {rev}', text=True).strip()
-    return int(c)
-
-
 def ver(*,increment=False):
     from datetime import datetime as dt
     dt = dt.now()
@@ -44,6 +38,10 @@ def ver(*,increment=False):
     mnr = str(dt.month)
     pch = str(ncommits()+(1 if increment else 0))
     return f"{mjr}.{mnr}.{pch}"
+def ncommits(rev=rev):
+    from subprocess import check_output as run
+    c = run(f'git rev-list --count {rev}', text=True).strip()
+    return int(c)
 
 def chk_ver():
     from bim2rdf import __version__ as v
