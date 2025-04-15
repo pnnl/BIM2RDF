@@ -42,9 +42,9 @@ def schema():
     _ = _ + [f"{db_dir}:list", pn, pi ]
     _ = '\n'.join(_)
     _ = f"""
-    Required keys: {pn} OR {pi}.
-    Optional config keys:
-    {_}
+Required keys: {pn} OR {pi}.
+Optional config keys:
+{_}
     """
     return _
 from fire import Fire

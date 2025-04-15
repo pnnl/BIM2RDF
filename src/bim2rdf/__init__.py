@@ -1,4 +1,4 @@
-__version__ = '2025.4.1774'
+__version__ = '2025.4.1775'
 # reset to 0 if problem
 from .config import config
 from .engine import *
