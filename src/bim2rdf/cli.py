@@ -39,7 +39,7 @@ def schema():
             return f'list[{_}]'
         return type(getattr(defaults, atr)).__name__
     _ = [f"{atr}:{gt(atr)}" for atr in _]
-    _ = _ + [f"{db_dir}:list", pn, pi ]
+    _ = _ + [f"{db_dir}:str", pn, pi ]
     _ = '\n'.join(_)
     _ = f"""
 Required keys: {pn} OR {pi}.
