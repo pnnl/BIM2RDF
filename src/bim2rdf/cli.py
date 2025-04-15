@@ -14,7 +14,8 @@ class Run(Run):
         
 db_dir = 'db_dir'
 
-def run(params: Path= Path('params.yaml')):
+def run(params: Path= Path('params.yaml'), print_schema:bool=False):
+    if print_schema: return schema()
     params = Path(params)
     from yaml import safe_load
     params: dict = safe_load(open(params))
@@ -24,7 +25,7 @@ def run(params: Path= Path('params.yaml')):
     params.setdefault('project_name',   '')
     _ = r.run(**params)
     return db
-def attdoc(f):
+def schema():
     # bc it wont show up if it's not the first line
     defaults = Run.defaults
     _ = [atr for atr in dir(defaults) if not atr.startswith('_')]
@@ -45,9 +46,7 @@ def attdoc(f):
     Optional config keys:
     {_}
     """
-    f.__doc__ = _
-    return f
-run = attdoc(run)
+    return _
 from fire import Fire
 run = Fire(run)
 exit(0)
