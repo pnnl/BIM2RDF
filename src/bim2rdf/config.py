@@ -4,7 +4,7 @@ from dynaconf import Dynaconf
 config = Dynaconf(
     environments=False,  #  top-level [default] [dev] ...
     merge_enabled=True,
-    settings_files=['config.toml', '.secrets.toml'],
+    settings_files=['config.toml', '.secrets.toml', '.config.local.toml' ],
     envvar_prefix = envvar_prefix,    
     load_dotenv=True,
 )
