@@ -30,7 +30,7 @@ dev = [
     #'aider-install', can uvx aider-install
     "ipython", "ipdb",
     "icecream",
-    "marimo",
+    #"marimo", use uv run --with marimo ...
     "cachier",
     # automation
     "project",
