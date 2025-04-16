@@ -1,6 +1,7 @@
 from pathlib import Path
 
 pn, pi = 'project_name', 'project_id'
+mn, mv = 'model_names', 'model_versions'
 def run(
         params: Path= Path('params.yaml'),
         print_schema:bool=False):
@@ -23,10 +24,11 @@ def schema():
         if f.name in dir(defaults):
             d = str(getattr(defaults, f.name))
         else:
-            if f.name in {pn, pi}:
-                d = f'{pn} OR {pi} *REQUIRED*'
-            else:
-                d = '*REQUIRED*'
+            d = '*REQUIRED*'
+        if f.name in {pn, pi}:
+            d = d+' '+f'{pn} OR {pi}'
+        elif f.name in {mn, mv}:
+            d = d+' '+f'{mn} OR {mv}'
         d = ' = '+d
         if f.name == 'db':
             type = str(f.type.__name__)+' '+'dir'
