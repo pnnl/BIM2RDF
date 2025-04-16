@@ -18,7 +18,7 @@ def run(
     from .engine import Run
     _ = Run(**params).run()
     return db_dir
-def schema():
+def schema(): # TODO: may want to do pydantic-jsonschema
     from .engine import Run, defaults
     def s(f):
         if f.name in dir(defaults):
