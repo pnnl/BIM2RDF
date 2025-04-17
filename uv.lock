@@ -75,9 +75,6 @@ wheels = [
 name = "bim2rdf"
 source = { editable = "." }
 dependencies = [
-    { name = "bim2rdf-mapping" },
-    { name = "bim2rdf-rules" },
-    { name = "bim2rdf-speckle" },
     { name = "dynaconf" },
     { name = "rdflib" },
 ]
@@ -106,9 +103,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "bim2rdf-mapping", editable = "mapping" },
-    { name = "bim2rdf-rules", editable = "rules" },
-    { name = "bim2rdf-speckle", editable = "speckle" },
     { name = "bim2rdf-spklauto", marker = "extra == 'spklauto'", editable = "spklauto" },
     { name = "dynaconf" },
     { name = "fire", marker = "extra == 'cli'" },

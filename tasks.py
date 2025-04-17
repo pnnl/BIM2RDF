@@ -1,12 +1,12 @@
-pkgs = [
-    'bim2rdf',  # 'main'
-    'mapping',  # -> bim2rdf-mapping. this is how it's named in its pyproject.toml
-    'rules',    # ...
-    'speckle',
-    'spklauto',]
+from tomllib import load
+from pathlib import Path
+pkgs = load(open(Path(__file__).parent / 'pyproject.toml', 'rb'))
+pkgs = pkgs['tool']['uv']['workspace']['members']
+pkgs.remove('project')
 pkgs = [f"{pkgs[0]}-{p}" if i !=0 else p
-        for i,p in enumerate(pkgs) ]
+      for i,p in enumerate(pkgs) ]
 pkg = pkgs[0]
+
 
 from subprocess import CalledProcessError
 def get_rev():
@@ -18,7 +18,7 @@ except CalledProcessError: # no git in cicd maybe
     rev = '{NO GIT}' # 
 
 
-def build(commit=False):
+def build(commit=False, packages=pkgs):
     def run(cmd, *p, **k):
         from subprocess import check_call as run
         from pathlib import Path
@@ -28,7 +28,9 @@ def build(commit=False):
         for pkg in pkgs: run(f'uv lock --upgrade-package {pkg}', ) 
         # https://github.com/pre-commit/pre-commit/issues/747#issuecomment-386782080
         run('git add -u', )
-    run('uv build', )
+
+    for p in pkgs: run(f'uv build --package {p}', )
+    return
 
 
 def ver(*,increment=False):
@@ -57,6 +59,7 @@ def test():
 
 
 if __name__ == '__main__':
+    import bim2rdf # just to invoke patch in src/__init__.py
     from fire import Fire
     _ = {f.__name__:f for f in {build, chk_ver, test, ncommits, ver}}
     Fire(_)

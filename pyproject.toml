@@ -11,11 +11,6 @@ requires-python = "==3.11.9"
 dependencies = [
     #"bim2rdf",
     'dynaconf', # 'python-dotenv', vendored in dyanconf https://www.dynaconf.com/#vendored
-    # 'local' ones
-    "bim2rdf_rules",
-    "bim2rdf_mapping",
-    #"ontologies", # ? need this? or just create a ttl loader rule
-    "bim2rdf_speckle",
     "rdflib", # just to make a nice looking ttl bc pyoxigraph doesn't. otherwise dont want to use!
 ]
 [project.optional-dependencies]
@@ -27,13 +22,13 @@ bim2rdf = "bim2rdf.cli:run"
 
 [dependency-groups]
 dev = [
-    #'aider-install', can uvx aider-install
     "ipython", "ipdb",
     "icecream",
     #"marimo", use uv run --with marimo ...
     "cachier",
     # automation
     "project",
+    # opts
     "bim2rdf[spklauto, cli]", #nice
     # testing
     "pytest", "pytest-regressions",
@@ -50,6 +45,7 @@ bim2rdf-speckle =   { workspace=true}
 bim2rdf-spklauto =  { workspace=true}
 [tool.uv.workspace]
 members = [ # same order as above
+'bim2rdf',
 "mapping",
 "project",
 "rules",
