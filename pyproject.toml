@@ -4,16 +4,33 @@ dynamic = ["version"]
 description = "Convert BIM data to RDF models"
 authors = [
     { name = "Majid alDosari",  email = "majid.aldosari@pnnl.gov" },
-    { name = "Trisha Gupta",    email = "trisha.gupta@pnnl.gov" }, # mapping
+    { name = "Trisha Gupta",    email =   "trisha.gupta@pnnl.gov" }, # mapping
 ]
 readme = "README.md"
 requires-python = ">=3.13"
-[project.optional-dependencies]
 # unfortunately not contained in their respective pyproject.tomls
-cli = ["fire", "pyyaml"] # ... 'bim2rdf-cli' taken as a global name from then index
+# b/c then the distributable will refer to bim2rdf-*
+# which does not exist in the global index
+dependencies = [
+    #'bim2rdf-core',# 'bim2rdf-core' taken as a global name from then index  
+        'rdf_engine', 'pyoxigraph',
+        'dynaconf', # 'python-dotenv', vendored in dyanconf https://www.dynaconf.com/#vendored
+        "rdflib", # just to make a nice looking ttl bc pyoxigraph doesn't. otherwise dont want to use!
+    # mapping
+        # just importing from core
+    # rules
+        "pytqshacl[java]",    
+        "rdf-engine",         
+        "json2rdf",
+    # speckle
+        "gql[requests]",
+        "json2rdf>=67", "boltons",
+]
+[project.optional-dependencies]
+cli = ["fire", "pyyaml"]
 spklauto = [ "specklepy",
     "rdflib", # just to make a nice ttl
-     ]
+]
 
 
 [dependency-groups]

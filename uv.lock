@@ -75,6 +75,16 @@ wheels = [
 [[package]]
 name = "bim2rdf"
 source = { editable = "." }
+dependencies = [
+    { name = "boltons" },
+    { name = "dynaconf" },
+    { name = "gql", extra = ["requests"] },
+    { name = "json2rdf" },
+    { name = "pyoxigraph" },
+    { name = "pytqshacl", extra = ["java"] },
+    { name = "rdf-engine" },
+    { name = "rdflib" },
+]
 
 [package.optional-dependencies]
 cli = [
@@ -97,8 +107,17 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "boltons" },
+    { name = "dynaconf" },
     { name = "fire", marker = "extra == 'cli'" },
+    { name = "gql", extras = ["requests"] },
+    { name = "json2rdf" },
+    { name = "json2rdf", specifier = ">=67" },
+    { name = "pyoxigraph" },
+    { name = "pytqshacl", extras = ["java"] },
     { name = "pyyaml", marker = "extra == 'cli'" },
+    { name = "rdf-engine" },
+    { name = "rdflib" },
     { name = "rdflib", marker = "extra == 'spklauto'" },
     { name = "specklepy", marker = "extra == 'spklauto'" },
 ]
@@ -121,12 +140,6 @@ source = { editable = "cli" }
 [[package]]
 name = "bim2rdf-core"
 source = { editable = "core" }
-dependencies = [
-    { name = "dynaconf" },
-    { name = "pyoxigraph" },
-    { name = "rdf-engine" },
-    { name = "rdflib" },
-]
 
 [package.dev-dependencies]
 dev = [
@@ -137,12 +150,6 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "dynaconf" },
-    { name = "pyoxigraph" },
-    { name = "rdf-engine" },
-    { name = "rdflib" },
-]
 
 [package.metadata.requires-dev]
 dev = [
@@ -164,11 +171,6 @@ dev = []
 [[package]]
 name = "bim2rdf-rules"
 source = { editable = "rules" }
-dependencies = [
-    { name = "json2rdf" },
-    { name = "pytqshacl", extra = ["java"] },
-    { name = "rdf-engine" },
-]
 
 [package.dev-dependencies]
 dev = [
@@ -176,11 +178,6 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "json2rdf" },
-    { name = "pytqshacl", extras = ["java"] },
-    { name = "rdf-engine" },
-]
 
 [package.metadata.requires-dev]
 dev = [{ name = "pytqshacl", extras = ["java", "cli"] }]
@@ -188,11 +185,6 @@ dev = [{ name = "pytqshacl", extras = ["java", "cli"] }]
 [[package]]
 name = "bim2rdf-speckle"
 source = { editable = "speckle" }
-dependencies = [
-    { name = "boltons" },
-    { name = "gql", extra = ["requests"] },
-    { name = "json2rdf" },
-]
 
 [package.dev-dependencies]
 dev = [
@@ -204,11 +196,6 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "boltons" },
-    { name = "gql", extras = ["requests"] },
-    { name = "json2rdf", specifier = ">=67" },
-]
 
 [package.metadata.requires-dev]
 dev = [

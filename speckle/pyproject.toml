@@ -6,9 +6,6 @@ authors = [
     {name =  "Majid alDosari", email = "majid.aldosari@pnnl.gov" }, 
 ]
 readme = "README.md"
-dependencies = [
-    "gql[requests]",
-    "json2rdf>=67", "boltons",]
 [dependency-groups]
 dev = [
     "fire",
