@@ -8,54 +8,51 @@ authors = [
 ]
 readme = "README.md"
 requires-python = "==3.11.9"
-dependencies = [
-    #"bim2rdf",
-    'dynaconf', # 'python-dotenv', vendored in dyanconf https://www.dynaconf.com/#vendored
-    "rdflib", # just to make a nice looking ttl bc pyoxigraph doesn't. otherwise dont want to use!
-]
 [project.optional-dependencies]
-spklauto = ["bim2rdf_spklauto"]
-cli = ["fire", "pyyaml"]
+spklauto = ["bim2rdf-spklauto"]
+cli = ['bim2rdf-cli']
 
-[project.scripts]
-bim2rdf = "bim2rdf.cli:run"
 
 [dependency-groups]
-dev = [
+dev = ['project',
     "ipython", "ipdb",
     "icecream",
     #"marimo", use uv run --with marimo ...
-    "cachier",
-    # automation
-    "project",
-    # opts
-    "bim2rdf[spklauto, cli]", #nice
-    # testing
-    "pytest", "pytest-regressions",
-    "rdflib", # just to check if the same
 ]
 
 [tool.uv.sources]
-# just listing the dirs alphabetically
-bim2rdf-mapping =   { workspace=true}
-#ontologies =     { path = 'ontologies'      , editable = true} 
 project =           { workspace=true}
+# just listing the dirs alphabetically
+bim2rdf-cli =      {workspace = true}
+bim2rdf-core =      {workspace = true}
+bim2rdf-mapping =   { workspace=true}
+# #ontologies =     { path = 'ontologies'      , editable = true} 
 bim2rdf-rules =     { workspace=true}
 bim2rdf-speckle =   { workspace=true}
 bim2rdf-spklauto =  { workspace=true}
 [tool.uv.workspace]
-members = [ # same order as above
-'bim2rdf',
+members = [ "project",# same order as above
+'cli',
+'core',
 "mapping",
-"project",
 "rules",
 "speckle",
 "spklauto",
 ]
 
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 [tool.hatch.version]
-path = "src/bim2rdf/__init__.py"
+path = "core/src/bim2rdf/core/__init__.py"
+[tool.hatch.build.targets.wheel]
+# for distribution purposes,
+# roll 'sub'pkgs into bim2rdf
+packages = [#tools.uv.workspace.members minus project
+'cli', # ~ 
+'core',
+'mapping',
+'rules',
+'speckle',
+'spklauto'# ~
+]

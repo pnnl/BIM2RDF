@@ -2,7 +2,7 @@
 
 
 def test():
-    import bim2rdf_speckle.data as sd
+    import bim2rdf.speckle.data as sd
     p = sd.Project("d0b5d1503f")
     m = p.models[0]
     v = m.versions[0]

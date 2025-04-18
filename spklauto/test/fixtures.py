@@ -36,7 +36,7 @@ def automation_run(
     """
     _ = _.replace('_pid',     testenv.project_id)
     _ = _.replace('_aid',  testenv.automation_id)
-    from bim2rdf_speckle.graphql import query
+    from bim2rdf.speckle.graphql import query
     result = query(_, )
     return (
         result.get("projectMutations")

@@ -1,0 +1,32 @@
+[project]
+name = "bim2rdf-core"
+dynamic = ['version']
+description = "collects functionality "
+authors = [
+    { name = "Trisha Gupta",    email =   "trisha.gupta@pnnl.gov" }, 
+    { name = "Majid alDosari",  email = "majid.aldosari@pnnl.gov" }, 
+]
+readme = "README.md"
+dependencies = [
+    'pyoxigraph',
+    'dynaconf', # 'python-dotenv', vendored in dyanconf https://www.dynaconf.com/#vendored
+    "rdflib", # just to make a nice looking ttl bc pyoxigraph doesn't. otherwise dont want to use!
+]
+[dependency-groups]
+dev = [
+    "cachier",
+    # automation
+    # opts
+    #"bim2rdf[spklauto, cli]", #nice
+    # testing
+    "pytest", "pytest-regressions",
+    "rdflib", # just to check if the same
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[tool.hatch.build.targets.wheel]
+packages = ['src/bim2rdf']
+[tool.hatch.version]
+path = 'src/bim2rdf/core/__init__.py'

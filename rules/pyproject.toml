@@ -1,6 +1,6 @@
 [project]
 name = "bim2rdf-rules"
-version = "0"
+dynamic = ['version']
 description = "BIM2RDF/rules"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" },
@@ -21,8 +21,11 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-[tool.hatch.build.targets.sdist] # or .wheel??
+[tool.hatch.build.targets.wheel]
+packages = ['src/bim2rdf']
 include = [
     'src/**/*.py',
     'src/**/*.rq', # 
     ]
+[tool.hatch.version]
+path = '../core/src/bim2rdf/core/__init__.py'

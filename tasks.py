@@ -25,11 +25,11 @@ def build(commit=False, packages=pkgs):
         return run(cmd, *p, cwd=Path(__file__).parent, shell=True, **k)
     if commit:  
         run(f'uvx hatchling version {ver(increment=True)}', )
-        for pkg in pkgs: run(f'uv lock --upgrade-package {pkg}', ) 
+        for pkg in packages: run(f'uv lock --upgrade-package {pkg}', ) 
         # https://github.com/pre-commit/pre-commit/issues/747#issuecomment-386782080
         run('git add -u', )
 
-    for p in pkgs: run(f'uv build --package {p}', )
+    run(f'uv build')
     return
 
 
