@@ -6,7 +6,6 @@ readme = "README.md"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
 ]
-requires-python = "==3.11.9"
 dependencies = [
     "specklepy",
     "rdflib", # just to make a nice ttl

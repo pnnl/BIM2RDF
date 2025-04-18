@@ -7,7 +7,7 @@ authors = [
     { name = "Trisha Gupta",    email = "trisha.gupta@pnnl.gov" }, # mapping
 ]
 readme = "README.md"
-requires-python = "==3.11.9"
+requires-python = ">=3.13"
 [project.optional-dependencies]
 spklauto = ["bim2rdf-spklauto"]
 cli = ['bim2rdf-cli']
