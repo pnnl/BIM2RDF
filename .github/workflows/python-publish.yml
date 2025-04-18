@@ -27,7 +27,7 @@ jobs:
       #   run: uv python install
 
       - name: Build release distributions
-        run: uv run --all-packages python tasks.py build
+        run: uv build
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
