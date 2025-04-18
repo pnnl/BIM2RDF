@@ -8,7 +8,7 @@ authors = [
 ]
 readme = "README.md"
 dependencies = [
-    'pyoxigraph',
+    'rdf_engine', 'pyoxigraph',
     'dynaconf', # 'python-dotenv', vendored in dyanconf https://www.dynaconf.com/#vendored
     "rdflib", # just to make a nice looking ttl bc pyoxigraph doesn't. otherwise dont want to use!
 ]

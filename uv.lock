@@ -124,6 +124,7 @@ source = { editable = "core" }
 dependencies = [
     { name = "dynaconf" },
     { name = "pyoxigraph" },
+    { name = "rdf-engine" },
     { name = "rdflib" },
 ]
 
@@ -139,6 +140,7 @@ dev = [
 requires-dist = [
     { name = "dynaconf" },
     { name = "pyoxigraph" },
+    { name = "rdf-engine" },
     { name = "rdflib" },
 ]
 
