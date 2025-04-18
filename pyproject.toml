@@ -9,8 +9,10 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 [project.optional-dependencies]
-spklauto = ["bim2rdf-spklauto"]
-cli = ['bim2rdf-cli']
+cli = ["fire", "pyyaml"]
+spklauto = [ "specklepy",
+    "rdflib", # just to make a nice ttl
+     ]
 
 
 [dependency-groups]
@@ -18,6 +20,8 @@ dev = ['project',
     "ipython", "ipdb",
     "icecream",
     #"marimo", use uv run --with marimo ...
+    'bim2rdf[cli]',
+    'bim2rdf[spklauto]',
 ]
 
 [tool.uv.sources]

@@ -6,10 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Majid alDosari", email = "majid.aldosari@pnnl.gov" }
 ]
-dependencies = [
-    "specklepy",
-    "rdflib", # just to make a nice ttl
-     ]
+dependencies = [] # in ../pyproject.toml :(
 [dependency-groups]
 dev = []
 

@@ -5,7 +5,7 @@ description = 'bim2rdf cli'
 authors = [
     { name = "Majid alDosari",  email = "majid.aldosari@pnnl.gov" },
 ]
-dependencies = ["fire", "pyyaml"]
+dependencies = [] # in ../pyproject.toml :(
 [project.scripts]
 bim2rdf = "bim2rdf.cli.main:run"
 

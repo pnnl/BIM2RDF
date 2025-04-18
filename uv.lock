@@ -78,14 +78,17 @@ source = { editable = "." }
 
 [package.optional-dependencies]
 cli = [
-    { name = "bim2rdf-cli" },
+    { name = "fire" },
+    { name = "pyyaml" },
 ]
 spklauto = [
-    { name = "bim2rdf-spklauto" },
+    { name = "rdflib" },
+    { name = "specklepy" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "bim2rdf", extra = ["cli", "spklauto"] },
     { name = "icecream" },
     { name = "ipdb" },
     { name = "ipython" },
@@ -94,13 +97,17 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "bim2rdf-cli", marker = "extra == 'cli'", editable = "cli" },
-    { name = "bim2rdf-spklauto", marker = "extra == 'spklauto'", editable = "spklauto" },
+    { name = "fire", marker = "extra == 'cli'" },
+    { name = "pyyaml", marker = "extra == 'cli'" },
+    { name = "rdflib", marker = "extra == 'spklauto'" },
+    { name = "specklepy", marker = "extra == 'spklauto'" },
 ]
 provides-extras = ["cli", "spklauto"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "bim2rdf", extras = ["cli"] },
+    { name = "bim2rdf", extras = ["spklauto"] },
     { name = "icecream" },
     { name = "ipdb" },
     { name = "ipython" },
@@ -110,16 +117,6 @@ dev = [
 [[package]]
 name = "bim2rdf-cli"
 source = { editable = "cli" }
-dependencies = [
-    { name = "fire" },
-    { name = "pyyaml" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fire" },
-    { name = "pyyaml" },
-]
 
 [[package]]
 name = "bim2rdf-core"
@@ -223,16 +220,8 @@ dev = [
 [[package]]
 name = "bim2rdf-spklauto"
 source = { editable = "spklauto" }
-dependencies = [
-    { name = "rdflib" },
-    { name = "specklepy" },
-]
 
 [package.metadata]
-requires-dist = [
-    { name = "rdflib" },
-    { name = "specklepy" },
-]
 
 [package.metadata.requires-dev]
 dev = []
