@@ -26,6 +26,8 @@ dependencies = [
         "gql[requests]",
         "json2rdf>=67", "boltons",
 ]
+[project.scripts]
+bim2rdf = "bim2rdf.cli.main:run"
 [project.optional-dependencies]
 cli = ["fire", "pyyaml"]
 spklauto = [ "specklepy",

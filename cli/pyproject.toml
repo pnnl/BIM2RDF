@@ -6,8 +6,7 @@ authors = [
     { name = "Majid alDosari",  email = "majid.aldosari@pnnl.gov" },
 ]
 dependencies = [] # in ../pyproject.toml :(
-[project.scripts]
-bim2rdf = "bim2rdf.cli.main:run"
+
 
 [build-system]
 requires = ["hatchling"]
