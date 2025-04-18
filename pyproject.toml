@@ -9,7 +9,8 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 [project.optional-dependencies]
-cli = ["fire", "pyyaml"]
+# unfortunately not contained in their respective pyproject.tomls
+cli = ["fire", "pyyaml"] # ... 'bim2rdf-cli' taken as a global name from then index
 spklauto = [ "specklepy",
     "rdflib", # just to make a nice ttl
      ]
@@ -53,10 +54,10 @@ path = "core/src/bim2rdf/core/__init__.py"
 # for distribution purposes,
 # roll 'sub'pkgs into bim2rdf
 packages = [#tools.uv.workspace.members minus project
-'cli', # ~ 
-'core',
-'mapping',
-'rules',
-'speckle',
-'spklauto'# ~
+     'cli/src/bim2rdf', # ~ 
+    'core/src/bim2rdf',
+ 'mapping/src/bim2rdf',
+   'rules/src/bim2rdf',
+ 'speckle/src/bim2rdf',
+'spklauto/src/bim2rdf'# ~
 ]
