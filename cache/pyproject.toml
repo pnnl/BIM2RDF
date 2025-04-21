@@ -6,15 +6,9 @@ authors = [
     { name = "Majid alDosari",  email = "majid.aldosari@pnnl.gov" }, 
 ]
 readme = "README.md"
+dependencies = []  # in ../pyproject.toml
 [dependency-groups]
-dev = [
-    # automation
-    # opts
-    #"bim2rdf[spklauto, cli]", #nice
-    # testing
-    "pytest", "pytest-regressions",
-    "rdflib", # just to check if the same
-]
+dev = []
 
 [build-system]
 requires = ["hatchling"]

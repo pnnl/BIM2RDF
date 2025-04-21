@@ -143,21 +143,10 @@ dev = [
 name = "bim2rdf-cache"
 source = { editable = "cache" }
 
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-regressions" },
-    { name = "rdflib" },
-]
-
 [package.metadata]
 
 [package.metadata.requires-dev]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-regressions" },
-    { name = "rdflib" },
-]
+dev = []
 
 [[package]]
 name = "bim2rdf-cli"
