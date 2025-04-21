@@ -144,7 +144,7 @@ class Model:
         return [self.Version(id=v['id'], model=self)
                 for v in self.meta['versions']['items']]
 
-from bim2rdf.core.cache import cache
+from bim2rdf.cache import cache
 @cache
 def json2rdf(*p, **k):
     from json2rdf import j2r

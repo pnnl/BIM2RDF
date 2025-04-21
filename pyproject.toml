@@ -26,36 +26,43 @@ dependencies = [
         "gql[requests]",
         "json2rdf>=67", "boltons",
 ]
-[project.scripts]
-bim2rdf = "bim2rdf.cli.main:run"
 [project.optional-dependencies]
 cli = ["fire", "pyyaml"]
 spklauto = [ "specklepy",
     "rdflib", # just to make a nice ttl
 ]
+cache = ['cachier']
 
+[project.scripts]
+bim2rdf = "bim2rdf.cli.main:run"
+
+
+# I. 'DEV' MODE stuff
 
 [dependency-groups]
 dev = ['project',
     "ipython", "ipdb",
     "icecream",
     #"marimo", use uv run --with marimo ...
+    'bim2rdf[cache]',
     'bim2rdf[cli]',
     'bim2rdf[spklauto]',
 ]
 
 [tool.uv.sources]
-project =           { workspace=true}
+project =           {workspace = true}
 # just listing the dirs alphabetically
-bim2rdf-cli =      {workspace = true}
+bim2rdf-cli =       {workspace = true}
+bim2rdf-cache =     {workspace = true}
 bim2rdf-core =      {workspace = true}
-bim2rdf-mapping =   { workspace=true}
+bim2rdf-mapping =   {workspace = true}
 # #ontologies =     { path = 'ontologies'      , editable = true} 
-bim2rdf-rules =     { workspace=true}
-bim2rdf-speckle =   { workspace=true}
-bim2rdf-spklauto =  { workspace=true}
+bim2rdf-rules =     {workspace = true}
+bim2rdf-speckle =   {workspace = true}
+bim2rdf-spklauto =  {workspace = true}
 [tool.uv.workspace]
 members = [ "project",# same order as above
+'cache',
 'cli',
 'core',
 "mapping",
@@ -63,6 +70,8 @@ members = [ "project",# same order as above
 "speckle",
 "spklauto",
 ]
+
+# II. 'PROD' MODE stuff
 
 [build-system]
 requires = ["hatchling"]
@@ -73,6 +82,7 @@ path = "core/src/bim2rdf/core/__init__.py"
 # for distribution purposes,
 # roll 'sub'pkgs into bim2rdf
 packages = [#tools.uv.workspace.members minus project
+   'cache/src/bim2rdf', # ~ 
      'cli/src/bim2rdf', # ~ 
     'core/src/bim2rdf',
  'mapping/src/bim2rdf',

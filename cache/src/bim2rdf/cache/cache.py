@@ -2,7 +2,7 @@
 try:
     from cachier import cachier
     from pathlib import Path
-    dir = Path('.') / 'cache'
+    dir = Path('.') / '.cache'
     dir.mkdir(exist_ok=True)
     (dir / '.gitignore').touch()
     (dir / '.gitignore').write_text("*")

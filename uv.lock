@@ -5,6 +5,7 @@ requires-python = ">=3.13"
 [manifest]
 members = [
     "bim2rdf",
+    "bim2rdf-cache",
     "bim2rdf-cli",
     "bim2rdf-core",
     "bim2rdf-mapping",
@@ -87,6 +88,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+cache = [
+    { name = "cachier" },
+]
 cli = [
     { name = "fire" },
     { name = "pyyaml" },
@@ -98,7 +102,7 @@ spklauto = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "bim2rdf", extra = ["cli", "spklauto"] },
+    { name = "bim2rdf", extra = ["cache", "cli", "spklauto"] },
     { name = "icecream" },
     { name = "ipdb" },
     { name = "ipython" },
@@ -108,6 +112,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "boltons" },
+    { name = "cachier", marker = "extra == 'cache'" },
     { name = "dynaconf" },
     { name = "fire", marker = "extra == 'cli'" },
     { name = "gql", extras = ["requests"] },
@@ -121,16 +126,37 @@ requires-dist = [
     { name = "rdflib", marker = "extra == 'spklauto'" },
     { name = "specklepy", marker = "extra == 'spklauto'" },
 ]
-provides-extras = ["cli", "spklauto"]
+provides-extras = ["cache", "cli", "spklauto"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "bim2rdf", extras = ["cache"] },
     { name = "bim2rdf", extras = ["cli"] },
     { name = "bim2rdf", extras = ["spklauto"] },
     { name = "icecream" },
     { name = "ipdb" },
     { name = "ipython" },
     { name = "project", editable = "project" },
+]
+
+[[package]]
+name = "bim2rdf-cache"
+source = { editable = "cache" }
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-regressions" },
+    { name = "rdflib" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-regressions" },
+    { name = "rdflib" },
 ]
 
 [[package]]
@@ -143,7 +169,6 @@ source = { editable = "core" }
 
 [package.dev-dependencies]
 dev = [
-    { name = "cachier" },
     { name = "pytest" },
     { name = "pytest-regressions" },
     { name = "rdflib" },
@@ -153,7 +178,6 @@ dev = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "cachier" },
     { name = "pytest" },
     { name = "pytest-regressions" },
     { name = "rdflib" },

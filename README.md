@@ -50,7 +50,7 @@ r = Run(db)
 help(Run.run)
 ```
 
-In development, a `cache` directory will be created in the working directory
+In development, a `.cache` directory will be created in the working directory
 to save expensive expensive processing in general
 but mainly to save Speckle query results.
 Thus, the user must clear the cache to be able to access new data.
