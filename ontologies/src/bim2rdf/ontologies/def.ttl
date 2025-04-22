@@ -1,0 +1,108 @@
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix sh: <http://www.w3.org/ns/shacl#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+<http://pnnl/semint/imports>
+#<urn:pnnlsemint:imports> # https://github.com/gtfierro/ontoenv-rs/issues/9
+  a owl:Ontology ;
+  # these import "all"
+  #owl:imports <http://data.ashrae.org/standard223/1.0/inference/data-rules>;
+  #owl:imports <http://data.ashrae.org/standard223/1.0/inference/model-rules>;
+  #owl:imports <http://data.ashrae.org/standard223/1.0/inference/owl-subset>;
+  # update this manually by going to the github repo and getting the permalink.
+  owl:imports <https://raw.githubusercontent.com/open223/defs.open223.info/365d0bd7d19ebe3a572ffbaaa30d94cbd3591c16/ontologies/223p.ttl>;
+
+
+  # copy/pasted into rec folder for control
+  #owl:imports <https://raw.githubusercontent.com/RealEstateCore/rec/main/Source/SHACL/RealEstateCore/rec.ttl>;
+  owl:imports <https://w3id.org/rec/recimports>;
+  #owl:imports <https://raw.githubusercontent.com/RealEstateCore/rec/main/Source/SHACL/RealEstateCore/recimports.ttl>.
+  owl:imports <https://w3id.org/rec/rec>.
+  # #does this have an effect? seems to take longer for no additional triples.
+  #sh:entailment <http://www.w3.org/ns/entailment/RDFS>. 
+# Add rec:Room and rec:OutdoorSpace as a rdfs:subClassOf s223:PhysicalSpace.
+
+
+#List of rec room types 
+#Atrium
+#Auditorium
+#BackOffice
+#Bathroom
+#Bedroom
+#Cinema
+#CleaningRoom
+#CloakRoom
+#ConferenceRoom
+#ConversationRoom
+#CopyingRoom
+#DressingRoom
+#EducationalRoom
+#ElevatorRoom
+#ElevatorShaft
+#Entrance
+#ExerciseRoom
+#ExhibitionRoom
+#FoodHandlingRoom
+#Garage
+#Hallway
+#HealthcareRoom
+#Laboratory
+#LaundryRoom
+#Library
+#LivingRoom
+#LoadingReceivingRoom
+#Lobby
+#LockerRoom
+#Lounge
+#MeditationRoom
+#MothersRoom
+#MultiPurposeRoom
+#Office
+#PersonalHygiene
+#Reception
+#RecordingRoom
+#RecreationalRoom
+#RestingRoom
+#RetailRoom3
+#SecurityRoom
+#ServiceShaft
+#Shelter
+#StaffRoom
+#Stairwell
+#Storage
+#TeamRoom
+#Theater
+#TreatmentRoom
+#UtilitiesRoom
+#WasteManagementRoom
+#Workshop
+
+#adding some space type names that do not exist in rec
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix sh: <http://www.w3.org/ns/shacl#>
+prefix recx: <urn:rec:extentions:>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rec: <https://w3id.org/rec#> 
+PREFIX s223: <http://data.ashrae.org/standard223#>
+#rec:Room rdfs:subClassOf s223:PhysicalSpace.
+#rec:OutdoorSpace rdfs:subClassOf s223:PhysicalSpace.
+
+#recx:MechanicalRoom rdfs:subClassOf rec:UtilitiesRoom;
+  #rdfs:label "Mechanical Room".
+#recx:OpenOffice rdfs:subClassOf rec:Office;
+  #rdfs:label "Open Office".
+#recx:PrivateOffice rdfs:subClassOf rec:Office;
+  #rdfs:label "Private Office".
+#recx:ComputerRoom rdfs:subClassOf rec:Room;
+  #rdfs:label "Computer Room".
+
+#recx:Lobby rdfs:subClassOf rec:Room;
+  #rdfs:label "Lobby". #add from rec
+#recx:Lounge rdfs:subClassOf rec:Room;
+  #rdfs:label "Lounge". #add from rec
+
+# TODO delete once added in 223 ontology. 
+#s223:PowerAndSignal-PoE     
+  #a s223:PowerAndSignal-PoE.
+  

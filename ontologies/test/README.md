@@ -1,0 +1,1 @@
+`python -m bim2rdf.ontologies.cli`

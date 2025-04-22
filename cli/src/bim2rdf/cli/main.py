@@ -1,7 +1,4 @@
-from . import patch
-
 from pathlib import Path
-
 
 pn, pi = 'project_name', 'project_id'
 mn, mv = 'model_names', 'model_versions'
@@ -41,5 +38,7 @@ def schema(): # TODO: may want to do pydantic-jsonschema
     return _
 
 from fire import Fire
-run = Fire(run)
+from . import patch
+from bim2rdf.ontologies.cli import main
+main = Fire({'run':run, **{f'ontologies.{k}':v for k,v in main.items()} })
 exit(0)

@@ -18,6 +18,10 @@ dependencies = [
         "rdflib", # just to make a nice looking ttl bc pyoxigraph doesn't. otherwise dont want to use!
     # mapping
         # just importing from core
+    # ontologies
+        'pyontoenv',
+            #"oxrdflib",# https://github.com/gtfierro/ontoenv-rs/issues/10
+        'rdflib',
     # rules
         "pytqshacl[java]",    
         "rdf-engine",         
@@ -34,7 +38,7 @@ spklauto = [ "specklepy",
 cache = ['cachier']
 
 [project.scripts]
-bim2rdf = "bim2rdf.cli.main:run"
+bim2rdf = "bim2rdf.cli.main:main"
 
 
 # I. 'DEV' MODE stuff
@@ -66,6 +70,7 @@ members = [ "project",# same order as above
 'cli',
 'core',
 "mapping",
+'ontologies',
 "rules",
 "speckle",
 "spklauto",
@@ -82,11 +87,12 @@ path = "core/src/bim2rdf/core/__init__.py"
 # for distribution purposes,
 # roll 'sub'pkgs into bim2rdf
 packages = [#tools.uv.workspace.members minus project
-   'cache/src/bim2rdf', # ~ 
-     'cli/src/bim2rdf', # ~ 
-    'core/src/bim2rdf',
- 'mapping/src/bim2rdf',
-   'rules/src/bim2rdf',
- 'speckle/src/bim2rdf',
-'spklauto/src/bim2rdf'# ~
+     'cache/src/bim2rdf', # ~ 
+       'cli/src/bim2rdf', # ~ 
+      'core/src/bim2rdf',
+   'mapping/src/bim2rdf',
+'ontologies/src/bim2rdf',
+     'rules/src/bim2rdf',
+   'speckle/src/bim2rdf',
+  'spklauto/src/bim2rdf'  # ~
 ]
