@@ -8,7 +8,7 @@ def _():
     return _
 included_def = _(); del _
 
-def import_(def_=included_def):
+def import_(definition=included_def):
     assert(isinstance(included_def, Path))
     # best to run this in a separate process
     # bc oxigraph store gets locked
@@ -20,7 +20,7 @@ def import_(def_=included_def):
     env = OntoEnv(cfg)
     from rdflib import Graph
     dg = Graph()
-    dg.parse(def_, format='turtle')
+    dg.parse(definition, format='turtle')
     env.import_dependencies(dg) # removes owl:imports
     return Path('.ontoenv/store.db')
 
