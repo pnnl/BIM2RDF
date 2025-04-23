@@ -1,1 +1,1 @@
-ECHO is on.
+`python -m bim2rdf.cli.main ontologies --help`

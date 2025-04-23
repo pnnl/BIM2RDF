@@ -27,18 +27,35 @@ Make a [`.secrets.toml`](./.secrets.toml) file with
 token = "yourtoken"
 ```
 
+In development, a `.cache` directory will be created in the working directory
+to save expensive processing in general
+but mainly to save Speckle query results.
+Thus, the user must clear the cache to be able to access new data.
+
 ## Process
 
 Follow [test](./test/) [instructions](./test/README.md).
 
 # Usage
 
-## [CLI](./src/bim2rdf/cli.py)
+...is a three-step process:
+1. Get an ontology.
+   You can use the built-in process,
+   `bim2rdf ontologies.import`
+   followed by
+   `bim2rdf ontologies.import`,
+   to create an ontology ttl from a [definition](./ontologies/src/bim2rdf/ontologies/def.ttl).
+2. Create mappings.
+3. Execute. Configure with a [params.yaml](./test/params.yaml).
+
+## Interfaces
+
+### [CLI](./src/bim2rdf/cli.py)
 ```bash
 bim2rdf --help
 ```
 
-## [Function](./src/bim2rdf/engine.py)
+### [Function](./src/bim2rdf/engine.py)
 
 ```python
 from bim2rdf import Run
@@ -50,7 +67,3 @@ r = Run(db)
 help(Run.run)
 ```
 
-In development, a `.cache` directory will be created in the working directory
-to save expensive expensive processing in general
-but mainly to save Speckle query results.
-Thus, the user must clear the cache to be able to access new data.

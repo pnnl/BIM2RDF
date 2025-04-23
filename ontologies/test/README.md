@@ -1,1 +1,1 @@
-`python -m bim2rdf.ontologies.cli`
+`python -m bim2rdf.cli.main ontologies --help`
