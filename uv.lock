@@ -120,7 +120,7 @@ requires-dist = [
     { name = "gql", extras = ["requests"] },
     { name = "json2rdf" },
     { name = "json2rdf", specifier = ">=67" },
-    { name = "pyontoenv" },
+    { name = "pyontoenv", specifier = "==0.1.10" },
     { name = "pyoxigraph" },
     { name = "pytqshacl", extras = ["java"] },
     { name = "pyyaml", marker = "extra == 'cli'" },

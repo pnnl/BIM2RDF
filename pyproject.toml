@@ -19,7 +19,7 @@ dependencies = [
     # mapping
         # just importing from core
     # ontologies
-        'pyontoenv',
+        'pyontoenv==0.1.10', # pinned until https://github.com/gtfierro/ontoenv-rs/issues/ are resolved.
             #"oxrdflib",# https://github.com/gtfierro/ontoenv-rs/issues/10
         'rdflib',
     # rules
