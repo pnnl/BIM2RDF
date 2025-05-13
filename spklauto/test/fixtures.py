@@ -8,7 +8,7 @@ class TestAutomationEnvironment:
     server_url: str
     project_id: str
     automation_id: str
-from bim2rdf.config import config
+from bim2rdf.core.config import config
 testenv = TestAutomationEnvironment(
     token=config.speckle.token,
     server_url=f'https://{config.speckle.server}/',
