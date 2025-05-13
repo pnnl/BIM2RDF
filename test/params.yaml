@@ -1,6 +1,9 @@
 db: db
-project_name: Model 1
-#model_names: []
+project_name: bldg1
+model_names: [] # keep blank when want to use model_versions
+model_versions:
+  - 8ef9627927 # rooms and lights
+  - beaf7d65a4 # lighting device
 #ttls: []
 included_mappings:
   - data
