@@ -37,9 +37,8 @@ def get_void_query(client=client):
     _ = _.Query._
     return _
 
-from bim2rdf.cache import cache
-@cache
-def query(q=get_void_query(), client=client) -> dict: # json
+
+def query_function(q=get_void_query(), client=client) -> dict: # json
     if isinstance(q, str):
         from gql import gql
         q = gql(q)
@@ -52,6 +51,9 @@ def query(q=get_void_query(), client=client) -> dict: # json
     _ = client()
     _ = _.execute(q)
     return _
+from bim2rdf.cache import cache
+@cache
+def query(*p, **k): return query_function(*p, **k)
 
 class queries:
 
