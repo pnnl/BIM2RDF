@@ -37,19 +37,12 @@ def automate_function(
             It also has convenient methods for attaching result data to the Speckle model.
         function_inputs: An instance object matching the defined schema.
     """
-    #db = engine_run(automate_context)
+    db = run(automate_context)
     # The context provides a convenient way to receive the triggering version.
     version_root_object = automate_context.receive_version()
-
-    #os = RunOutputs(db)
-    #shacl = os.shacl_report()
-    #shacl = [s for s in shacl]
-    # objects_with_forbidden_speckle_type = [
-    #     b
-    #     for b in flatten_base(version_root_object)
-    #     if b.speckle_type == function_inputs.forbidden_speckle_type
-    # ]
-    # count = len(objects_with_forbidden_speckle_type)
+    os = RunOutputs(db)
+    shacl = os.shacl_report()
+    shacl = [s for s in shacl]  # do stuff
 
     if True: #count > 0:
         # This is how a run is marked with a failure cause.
@@ -74,32 +67,41 @@ def automate_function(
         automate_context.mark_run_success("no errors")
     # If the function generates file results, this is how it can be
     # attached to the Speckle project/model
+    #_ = os.mapped_and_inferred()
+    #automate_context.store_file_result(_)
+    # todo: att shacl report?
 
-
-def engine_run(ctx: AutomationContext):
+def run(ctx: AutomationContext):
     pid = ctx.automation_run_data.project_id
-    from bim2rdf.speckle.data import Project
-    pn = Project(pid).name
-    from bim2rdf.engine import Run
-    r = Run()
-    _ = r.run(project_name=pn)
+    from bim2rdf.core.engine import Run
+    from pyoxigraph import Store
+    from pathlib import Path
+    if Path('db').exists():
+        from shutil import rmtree
+        rmtree(Path('db'), ignore_errors=True)
+    #           use pid instead of name bc more unique
+    r = Run("", project_id=pid, db=Store('db'))
+    _ = r.run()
     return _
+
 
 class RunOutputs:
     def __init__(self, store) -> None:
         from pyoxigraph import Store
         self.store: Store = store
-    
-    def mapped(self):
-        from bim2rdf.queries import queries
+
+    from pathlib import Path    
+    def mapped_and_inferred(self, o=Path('mapped_and_inferred.ttl')):
+        from bim2rdf.core.queries import queries
         _ = self.store.query(queries['mapped_and_inferred'])
         from pyoxigraph import serialize, RdfFormat
+        _ = serialize(_, RdfFormat.TURTLE)
         # rdflib is nicer though
-        from pathlib import Path
-        o = Path('mapped_and_inferred.ttl')
-        _ = serialize(_, open(o, 'wb'), RdfFormat.TURTLE)
+        from rdflib import Graph
+        g = Graph()
+        g.parse(_, format='turtle')
+        g.serialize(o, format='turtle')
         return o
-        #automate_context.store_file_result(_)
     
     def shacl_report(self):
         class Node:
@@ -119,14 +121,14 @@ class RunOutputs:
         sv = S('resultSeverity')
         sc = S('sourceConstraintComponent')
         _ = f"""
-        select  {fn.var} {rm.var} {vl.var} {rp.var} {sv.var} {ss.var} where {{
-        {vr.var} a {vr}.
-        optional {{{vr.var} {fn} {fn.var}}}.
-        optional {{{vr.var} {rm} {rm.var}}}.
-        optional {{{vr.var} {vl} {vl.var}}}.
-        optional {{{vr.var} {rp} {rp.var}}}.
-        optional {{{vr.var} {sv} {sv.var}}}.
-        optional {{{vr.var} {ss} {ss.var}}}.
+        select  ?{fn.var} ?{rm.var} ?{vl.var} ?{rp.var} ?{sv.var} ?{ss.var} where {{
+                   ?{vr.var}  a          {vr}.
+        optional {{?{vr.var} {fn} ?{fn.var}}}.
+        optional {{?{vr.var} {rm} ?{rm.var}}}.
+        optional {{?{vr.var} {vl} ?{vl.var}}}.
+        optional {{?{vr.var} {rp} ?{rp.var}}}.
+        optional {{?{vr.var} {sv} ?{sv.var}}}.
+        optional {{?{vr.var} {ss} ?{ss.var}}}.
         }}
         """
         _ = self.store.query(_)
