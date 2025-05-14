@@ -5,9 +5,9 @@ model_versions:
   - 8ef9627927 # rooms and lights
   - beaf7d65a4 # lighting device
 #ttls: []
-included_mappings:
-  - data
-  - mappings/AC
+#included_mappings:
+ # - data
+#  - mappings/AC
 #additional_mapping_paths:
   #- maps
   #- maps/luminaire.mapping.rq
