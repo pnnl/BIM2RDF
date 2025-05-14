@@ -67,8 +67,8 @@ def automate_function(
         automate_context.mark_run_success("no errors")
     # If the function generates file results, this is how it can be
     # attached to the Speckle project/model
-    #_ = os.mapped_and_inferred()
-    #automate_context.store_file_result(_)
+    _ = os.mapped_and_inferred()
+    automate_context.store_file_result(_)
     # todo: att shacl report?
 
 def run(ctx: AutomationContext):
@@ -95,7 +95,7 @@ class RunOutputs:
         from bim2rdf.core.queries import queries
         _ = self.store.query(queries['mapped_and_inferred'])
         from pyoxigraph import serialize, RdfFormat
-        _ = serialize(_, RdfFormat.TURTLE)
+        _ = serialize(_, format=RdfFormat.TURTLE)
         # rdflib is nicer though
         from rdflib import Graph
         g = Graph()
