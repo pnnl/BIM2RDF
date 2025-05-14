@@ -9,7 +9,7 @@ class _defaults:
         @property
         def included_mappings(self):
             from bim2rdf.mapping.construct import included_dir
-            _ = list(included_dir.glob('**'))
+            _ = list(included_dir.glob('**/*.rq'))
             _ = [_.relative_to(included_dir) for _ in _]
             _ = [_ for _ in _ if _.parts and not _.name.startswith('_') ]
             _ = [str(_.as_posix()) for _ in _]
