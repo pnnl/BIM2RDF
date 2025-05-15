@@ -59,7 +59,7 @@ def automate_function(
         if id not in triggering_ids: continue
         lvl =  str(s['resultSeverity']).lower()
         d = {v:str(s[v]) for v in variables}
-        args = {'category': 'category', 'object_ids':[id], 'metadata':d, 'message':d['resultMessage']}
+        args = {'category': triggering_ids[id] , 'object_ids':[id], 'metadata':d, 'message':d['resultMessage']}
         if 'violation' in lvl:
             errors = True
             automate_context.attach_error_to_objects(**args,)
@@ -108,14 +108,13 @@ class RunOutputs:
         prefix d: <{dp.uri}>
         prefix s: <{sp.uri}>
         prefix m: <{mp.uri}>
-        select distinct ?id where {{
-        <<?id s:category  ?_ >> m:model_name "{model_name}".
+        select distinct ?id ?category where {{
+        <<?id s:category  ?category >> m:model_name "{model_name}".
         }}
         """
         _ = self.store.query(_)
-        _ = (str(i['id'])       for i in _)
-        _ = (i.split('/')[-1]   for i in _)
-        _ = frozenset(_)
+        _ = ((str(i['id']).split('/')[-1], str(i['category'])) for i in _)
+        _ = dict(_)
         return _
 
     from pathlib import Path    
