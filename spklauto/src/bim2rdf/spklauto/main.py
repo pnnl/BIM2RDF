@@ -55,7 +55,8 @@ def automate_function(
     groups = defaultdict(list)
     for s in shacl:
         _ = s['focusNode'].value
-        # can i put in whatever id or do i have to figure out the triggering model?
+        # if you put an id that's not in the view,
+        # it will not be 'selectable' but will still show in the results
         if 'speckle' not in _: continue # not a speckle id
         id = _.split('/')[-1]
         if id not in triggering_ids: continue
