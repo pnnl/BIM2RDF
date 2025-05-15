@@ -61,7 +61,7 @@ def automate_function(
         if id not in triggering_ids: continue
         lvl =  str(s['resultSeverity']).lower()
         category = triggering_ids[id]
-        groups[(lvl, category , str(s['resultMessage']))].append(id)
+        groups[(lvl, category , str(s['resultMessage']).strip('"') )].append(id)
     
     for g, ids in groups.items():
         if 'violation' in g[0]:
@@ -80,7 +80,7 @@ def automate_function(
         automate_context.mark_run_failed('shacl errors')
 
     # file attachments    
-    _ = os.mapped_and_inferred()
+    _ = os.mapped_and_inferred(project_id=project.id)
     automate_context.store_file_result(_)
     # todo: att shacl report?
 
@@ -123,7 +123,7 @@ class RunOutputs:
         return _
 
     from pathlib import Path    
-    def mapped_and_inferred(self, o=Path('mapped_and_inferred.ttl')):
+    def mapped_and_inferred(self, o=Path('mapped_and_inferred.ttl'), project_id=None):
         from bim2rdf.core.queries import queries
         _ = self.store.query(queries['mapped_and_inferred'])
         from pyoxigraph import serialize, RdfFormat
@@ -131,6 +131,15 @@ class RunOutputs:
         # rdflib is nicer though
         from rdflib import Graph
         g = Graph()
+        from bim2rdf.core.queries import DefaultSubstitutions
+        for p,n in DefaultSubstitutions.dict().items():
+            if 'prefix.' in p:
+                g.bind(prefix=p.split('.')[-1], namespace=n)
+        if project_id:
+            from bim2rdf.speckle.meta import prefixes
+            dp = prefixes.data(project_id=project_id, object_id="")
+            g.bind(prefix=dp.name, namespace=dp.uri)
+
         g.parse(_, format='turtle')
         g.serialize(o, format='turtle')
         return o
