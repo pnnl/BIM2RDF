@@ -29,7 +29,6 @@ def automate_function(
     function_inputs: FunctionInputs,
 ) -> None:
     """This is an example Speckle Automate function.
-
     Args:
         automate_context: A context-helper object that carries relevant information
             about the runtime context of this function.
@@ -37,10 +36,16 @@ def automate_function(
             It also has convenient methods for attaching result data to the Speckle model.
         function_inputs: An instance object matching the defined schema.
     """
-    db = run(automate_context)
-    # The context provides a convenient way to receive the triggering version.
-    version_root_object = automate_context.receive_version()
-    os = RunOutputs(db)
+    r = run(automate_context)
+    
+    os = RunOutputs(r.db)
+    _ = automate_context.automation_run_data.triggers[0] # speckle only has one trigger now
+    _ = _.payload.model_id # version_id
+    from bim2rdf.speckle.data import Project
+    project = Project(automate_context.automation_run_data.project_id)
+    for model in project.models:
+        if model.id == _: break
+    triggering_ids = os.ids(project_id=project.id, model_name=model.name)
     _ = os.shacl_report()
     variables = [v.value for v in _.variables]
     shacl = list(_)
@@ -51,6 +56,7 @@ def automate_function(
         # can i put in whatever id or do i have to figure out the triggering model?
         if 'speckle' not in _: continue # not a speckle id
         id = _.split('/')[-1]
+        if id not in triggering_ids: continue
         lvl =  str(s['resultSeverity']).lower()
         d = {v:str(s[v]) for v in variables}
         args = {'category': 'category', 'object_ids':[id], 'metadata':d, 'message':d['resultMessage']}
@@ -63,9 +69,8 @@ def automate_function(
             assert('info' in lvl)
             automate_context.attach_info_to_objects(**args)
     if not errors:
-        automate_context.mark_run_success(("no shacl errors"
-                                           " but maybe warnings"
-                                           " or errors not in model scope"))
+        automate_context.mark_run_success(("no shacl errors in model scope"
+                                           " but maybe warnings"))
     else:
         automate_context.mark_run_failed('shacl errors')
 
@@ -73,6 +78,7 @@ def automate_function(
     _ = os.mapped_and_inferred()
     automate_context.store_file_result(_)
     # todo: att shacl report?
+
 
 def run(ctx: AutomationContext):
     pid = ctx.automation_run_data.project_id
@@ -85,13 +91,32 @@ def run(ctx: AutomationContext):
     #           use pid instead of name bc more unique
     r = Run("", project_id=pid, db=Store('db'))
     _ = r.run()
-    return _
+    return r
 
 
 class RunOutputs:
     def __init__(self, store) -> None:
         from pyoxigraph import Store
         self.store: Store = store
+
+    def ids(self, *, project_id, model_name):
+        from bim2rdf.speckle.meta import prefixes
+        dp = prefixes.data(project_id=project_id, object_id="")
+        mp = prefixes.meta
+        sp = prefixes.concept
+        _ = f"""
+        prefix d: <{dp.uri}>
+        prefix s: <{sp.uri}>
+        prefix m: <{mp.uri}>
+        select distinct ?id where {{
+        <<?id s:category  ?_ >> m:model_name "{model_name}".
+        }}
+        """
+        _ = self.store.query(_)
+        _ = (str(i['id'])       for i in _)
+        _ = (i.split('/')[-1]   for i in _)
+        _ = frozenset(_)
+        return _
 
     from pathlib import Path    
     def mapped_and_inferred(self, o=Path('mapped_and_inferred.ttl')):
