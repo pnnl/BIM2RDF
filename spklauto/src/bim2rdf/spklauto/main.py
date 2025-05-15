@@ -52,7 +52,7 @@ def automate_function(
     errors: bool = False
 
     from collections import defaultdict
-    groups = defaultdict(list)
+    groups = defaultdict(set)
     for s in shacl:
         _ = s['focusNode'].value
         # if you put an id that's not in the view,
@@ -62,17 +62,17 @@ def automate_function(
         if id not in triggering_ids: continue
         lvl =  (s['resultSeverity'].value).lower()
         category = triggering_ids[id]
-        groups[(lvl, category , s['resultMessage'].value )].append(id)
+        groups[(lvl, category , s['resultMessage'].value )].add(id)
     
     for g, ids in groups.items():
         if 'violation' in g[0]:
             errors = True
-            automate_context.attach_error_to_objects(category=g[1], message=g[2], object_ids=ids)
+            automate_context.attach_error_to_objects(category=g[1], message=g[2], object_ids=list(ids))
         elif 'warn' in g[0]:
-            automate_context.attach_warning_to_objects(category=g[1], message=g[2], object_ids=ids)
+            automate_context.attach_warning_to_objects(category=g[1], message=g[2], object_ids=list(ids))
         else:
             assert('info' in g[0])
-            automate_context.attach_info_to_objects(category=g[1], message=g[2], object_ids=ids)
+            automate_context.attach_info_to_objects(category=g[1], message=g[2], object_ids=list(ids))
         automate_context.set_context_view()
     if not errors:
         automate_context.mark_run_success(("no shacl errors in model scope"
