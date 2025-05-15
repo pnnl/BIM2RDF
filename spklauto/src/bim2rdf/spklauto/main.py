@@ -72,6 +72,7 @@ def automate_function(
         else:
             assert('info' in g[0])
             automate_context.attach_info_to_objects(category=g[1], message=g[2], object_ids=ids)
+        automate_context.set_context_view()
     if not errors:
         automate_context.mark_run_success(("no shacl errors in model scope"
                                            " but maybe warnings"))
@@ -117,7 +118,7 @@ class RunOutputs:
         }}
         """
         _ = self.store.query(_)
-        _ = ((str(i['id']).split('/')[-1], str(i['category'])) for i in _)
+        _ = ((str(i['id']).split('/')[-1], str(i['category']).strip('"') ) for i in _)
         _ = dict(_)
         return _
 
