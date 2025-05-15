@@ -60,7 +60,7 @@ def automate_function(
         if 'speckle' not in _: continue # not a speckle id
         id = _.split('/')[-1]
         if id not in triggering_ids: continue
-        lvl =  str(s['resultSeverity']).lower()
+        lvl =  (s['resultSeverity'].value).lower()
         category = triggering_ids[id]
         groups[(lvl, category , s['resultMessage'].value )].append(id)
     
