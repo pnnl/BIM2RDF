@@ -54,14 +54,14 @@ def automate_function(
     from collections import defaultdict
     groups = defaultdict(list)
     for s in shacl:
-        _ = str(s['focusNode'])
+        _ = s['focusNode'].value
         # can i put in whatever id or do i have to figure out the triggering model?
         if 'speckle' not in _: continue # not a speckle id
         id = _.split('/')[-1]
         if id not in triggering_ids: continue
         lvl =  str(s['resultSeverity']).lower()
         category = triggering_ids[id]
-        groups[(lvl, category , str(s['resultMessage']).strip('"') )].append(id)
+        groups[(lvl, category , s['resultMessage'].value )].append(id)
     
     for g, ids in groups.items():
         if 'violation' in g[0]:
@@ -118,7 +118,9 @@ class RunOutputs:
         }}
         """
         _ = self.store.query(_)
-        _ = ((str(i['id']).split('/')[-1], str(i['category']).strip('"') ) for i in _)
+        _ = ( (i['id'].value.split('/')[-1],
+               i['category'].value)
+               for i in _)
         _ = dict(_)
         return _
 
