@@ -22,7 +22,6 @@ def test():
             forbidden_speckle_type="sdfsd",
         ),
     )
-    assert automate_sdk.run_status == AutomationStatus.SUCCEEDED
 
 
 if __name__ == '__main__':

@@ -41,32 +41,35 @@ def automate_function(
     # The context provides a convenient way to receive the triggering version.
     version_root_object = automate_context.receive_version()
     os = RunOutputs(db)
-    shacl = os.shacl_report()
-    shacl = [s for s in shacl]  # do stuff
-
-    if True: #count > 0:
-        # This is how a run is marked with a failure cause.
-        # automate_context.attach_error_to_objects(
-        #     category="Forbidden speckle_type"
-        #     f" ({function_inputs.forbidden_speckle_type})",
-        #     object_ids=[o.id for o in objects_with_forbidden_speckle_type if o.id],
-        #     message="This project should not contain the type: "
-        #     f"{function_inputs.forbidden_speckle_type}",
-        # )
-        # automate_context.mark_run_failed(
-        #     "Automation failed: "
-        #     f"Found {count} object that have one of the forbidden speckle types: "
-        #     f"{function_inputs.forbidden_speckle_type}"
-        # )
-
-        # # Set the automation context view to the original model/version view
-        # # to show the offending objects.
-        # automate_context.set_context_view()
-        ...
+    _ = os.shacl_report()
+    variables = [v.value for v in _.variables]
+    shacl = list(_)
+    errors: bool = False
+    
+    for s in shacl:
+        _ = str(s['focusNode'])
+        # can i put in whatever id or do i have to figure out the triggering model?
+        if 'speckle' not in _: continue # not a speckle id
+        id = _.split('/')[-1]
+        lvl =  str(s['resultSeverity']).lower()
+        d = {v:str(s[v]) for v in variables}
+        args = {'category': 'category', 'object_ids':[id], 'metadata':d, 'message':d['resultMessage']}
+        if 'violation' in lvl:
+            errors = True
+            automate_context.attach_error_to_objects(**args,)
+        elif 'warn' in lvl:
+            automate_context.attach_warning_to_objects(**args)
+        else:
+            assert('info' in lvl)
+            automate_context.attach_info_to_objects(**args)
+    if not errors:
+        automate_context.mark_run_success(("no shacl errors"
+                                           " but maybe warnings"
+                                           " or errors not in model scope"))
     else:
-        automate_context.mark_run_success("no errors")
-    # If the function generates file results, this is how it can be
-    # attached to the Speckle project/model
+        automate_context.mark_run_failed('shacl errors')
+
+    # file attachments    
     _ = os.mapped_and_inferred()
     automate_context.store_file_result(_)
     # todo: att shacl report?
