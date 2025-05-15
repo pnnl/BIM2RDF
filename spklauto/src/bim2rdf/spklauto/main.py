@@ -50,7 +50,9 @@ def automate_function(
     variables = [v.value for v in _.variables]
     shacl = list(_)
     errors: bool = False
-    
+
+    from collections import defaultdict
+    groups = defaultdict(list)
     for s in shacl:
         _ = str(s['focusNode'])
         # can i put in whatever id or do i have to figure out the triggering model?
@@ -58,16 +60,18 @@ def automate_function(
         id = _.split('/')[-1]
         if id not in triggering_ids: continue
         lvl =  str(s['resultSeverity']).lower()
-        d = {v:str(s[v]) for v in variables}
-        args = {'category': triggering_ids[id] , 'object_ids':[id], 'metadata':d, 'message':d['resultMessage']}
-        if 'violation' in lvl:
+        category = triggering_ids[id]
+        groups[(lvl, category , str(s['resultMessage']))].append(id)
+    
+    for g, ids in groups.items():
+        if 'violation' in g[0]:
             errors = True
-            automate_context.attach_error_to_objects(**args,)
-        elif 'warn' in lvl:
-            automate_context.attach_warning_to_objects(**args)
+            automate_context.attach_error_to_objects(category=g[1], message=g[2], object_ids=ids)
+        elif 'warn' in g[0]:
+            automate_context.attach_warning_to_objects(category=g[1], message=g[2], object_ids=ids)
         else:
-            assert('info' in lvl)
-            automate_context.attach_info_to_objects(**args)
+            assert('info' in g[0])
+            automate_context.attach_info_to_objects(category=g[1], message=g[2], object_ids=ids)
     if not errors:
         automate_context.mark_run_success(("no shacl errors in model scope"
                                            " but maybe warnings"))
