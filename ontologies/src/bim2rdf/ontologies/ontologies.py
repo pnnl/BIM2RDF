@@ -15,7 +15,7 @@ def import_(definition=included_def):
     # https://github.com/gtfierro/ontoenv-rs/issues/11
 
     from ontoenv import Config, OntoEnv
-    cfg = Config([str(included_def.parent)], strict=False, offline=False)
+    cfg = Config([str(included_def.parent)], strict=False, offline=False, )
     # make the environment
     env = OntoEnv(cfg)
     from rdflib import Graph
@@ -26,6 +26,7 @@ def import_(definition=included_def):
 
 class Turtle(str): ...
 def ontology(*, store=Path('.ontoenv/store.db'), out=Path('ontology.ttl')) -> Turtle | Path:
+    """use output of importation process to create ontology """
     from pyoxigraph import Store
     os = Store((store))
     from pyoxigraph import RdfFormat
