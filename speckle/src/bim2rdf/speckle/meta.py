@@ -3,7 +3,7 @@ class object:
     @classmethod
     def uri(cls, project_id, object_id):
         from bim2rdf.core.config import config
-        return f"https://{config.speckle.server}/projects/{project_id}/objects/{object_id}"
+        return f"https://{config.speckle.server}/projects/{project_id}/models/{object_id}"
 
 
 class prefixes:
