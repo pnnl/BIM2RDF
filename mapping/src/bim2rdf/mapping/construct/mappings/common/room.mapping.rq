@@ -12,7 +12,7 @@ prefix spkl.meta: <urn:speckle:meta:>
 prefix spkl: <urn:speckle:concept:>
 
 CONSTRUCT { 
-#?this a s223:PhysicalSpace.
+?this a s223:PhysicalSpace.  # enabled for validation test.
 #?this a rec:Room.
 ?this a ?rec_or_recx.
 ?this rdfs:label ?recname.

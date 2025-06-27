@@ -29,6 +29,8 @@ dependencies = [
     # speckle
         "gql[requests]",
         "json2rdf>=67", "boltons",
+    # validation
+        "rdflib" # to parse sparql
 ]
 [project.optional-dependencies]
 cli = ["fire", "pyyaml"]
@@ -45,6 +47,7 @@ bim2rdf = "bim2rdf.cli.main:main"
 
 [dependency-groups]
 dev = ['project',
+    'oxigraph', # cli
     "ipython", "ipdb",
     "icecream",
     #"marimo", use uv run --with marimo ...
@@ -64,16 +67,19 @@ bim2rdf-mapping =   {workspace = true}
 bim2rdf-rules =     {workspace = true}
 bim2rdf-speckle =   {workspace = true}
 bim2rdf-spklauto =  {workspace = true}
+bim2rdf-validation ={workspace = true}
 [tool.uv.workspace]
-members = [ "project",# same order as above
-'cache',
-'cli',
-'core',
-"mapping",
-'ontologies',
-"rules",
-"speckle",
-"spklauto",
+members = [
+ "project", # same order as above
+ 'cache',
+ 'cli',
+ 'core',
+ "mapping",
+ 'ontologies',
+ "rules",
+ "speckle",
+ "spklauto",
+ "validation",
 ]
 
 # II. 'PROD' MODE stuff
@@ -94,5 +100,6 @@ packages = [#tools.uv.workspace.members minus project
 'ontologies/src/bim2rdf',
      'rules/src/bim2rdf',
    'speckle/src/bim2rdf',
-  'spklauto/src/bim2rdf'  # ~
+  'spklauto/src/bim2rdf', # ~
+'validation/src/bim2rdf'  # ~
 ]

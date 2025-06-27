@@ -36,11 +36,12 @@ class DefaultSubstitutions:
         (f'{CQ.meta_prefix.name}',          CQ.meta_prefix.uri),
         (f'{TQI.meta_prefix.name}',         TQI.meta_prefix.uri),
         (f'{TQV.meta_prefix.name}',         TQV.meta_prefix.uri),
-        ('rdfs',                            'http://www.w3.org/2000/01/rdf-schema#'),
         ('s223',                            'http://data.ashrae.org/standard223#'),
         ('qudt',                            'http://qudt.org/schema/qudt/'),
         ('qudt.unit',                       'http://qudt.org/vocab/unit/'),
         ('qudt.kind',                       'http://qudt.org/vocab/quantitykind/'),
+        ('rdfs',                            'http://www.w3.org/2000/01/rdf-schema#'),
+        ('sh',                              'http://www.w3.org/ns/shacl#'),
         ('xsd',                             'http://www.w3.org/2001/XMLSchema#'),
         )
         from bim2rdf.core.rdf import Prefix as P
@@ -78,6 +79,8 @@ class SPARQLQuery:
         dirs = [included_dir]
         #                    more explicit as it's under sparqlqauery
         substitutions = DefaultSubstitutions.dict({'prefixes', 'models'})
+        prefixes = {p:v for p,v in substitutions.items()  if p.startswith('prefix')}
+        prefixes = {'.'.join(p.split('.')[1:]):v for p,v in prefixes.items() }
 
     def __init__(self, _s: str, *, substitutions=defaults.substitutions):
         self._s = _s

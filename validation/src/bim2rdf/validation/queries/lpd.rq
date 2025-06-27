@@ -1,0 +1,37 @@
+# message: lpd spec bad
+# TODO: severity
+PREFIX rec: <https://w3id.org/rec#> 
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix recx: <urn:rec:extentions:>
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+# outer as the 'valdidation' query
+# - use ?this and ?value (?)
+# - filter 'invalid'
+select ?this (?lpd as ?value)  where {
+  filter(?lpd<100)
+# nested inner as 'regular' query
+{select ?this  ((sum(?power)) as ?lpd)
+WHERE { 
+    ?this a s223:PhysicalSpace. #
+ 	?this s223:hasProperty ?roomproperty.
+ 	?roomproperty qudt:hasQuantityKind quantitykind:Area.
+ 	?roomproperty s223:hasValue ?_area.
+  	BIND(xsd:float(?_area) AS ?area)
+  
+   ?light a s223:Luminaire.
+   ?light s223:hasPhysicalLocation ?this.
+   ?light s223:hasProperty ?lightproperty.
+   ?lightproperty qudt:hasQuantityKind quantitykind:RadiantFlux.
+   ?lightproperty s223:hasValue ?_power.
+   BIND(xsd:float(?_power) AS ?power)
+}
+    group by ?this}
+}

@@ -17,11 +17,22 @@ class _defaults:
             return _
         additional_mapping_paths = frozenset()
         @property
-        def mapping_substitutions(self):
+        def included_validations(self):
+            from bim2rdf.validation import included_dir
+            _ = list(included_dir.glob('**/*.rq'))
+            _ = [_.relative_to(included_dir) for _ in _]
+            _ = [_ for _ in _ if _.parts and not _.name.startswith('_') ]
+            _ = [str(_.as_posix()) for _ in _]
+            _ = frozenset(_)
+            return _
+        additional_validation_paths = frozenset()
+
+        @property
+        def query_substitutions(self):
             from .queries import SPARQLQuery
             _ = SPARQLQuery.defaults.substitutions; del SPARQLQuery
             return _
-        mapping_subs_overrides = {}
+        query_subs_overrides = {}
         @property
         def ttls(self):
             return frozenset([Path('ontology.ttl')])
@@ -43,11 +54,13 @@ class Run:
     included_mappings:          frozenset[str]  =   defaults.included_mappings
     additional_mapping_paths:   frozenset[Path] =   defaults.additional_mapping_paths
     from dataclasses import field
-    mapping_substitutions:      dict[str, str]  =   field(default_factory=lambda: defaults.mapping_substitutions)
-    mapping_subs_overrides:     dict[str, str]  =   field(default_factory=lambda: defaults.mapping_subs_overrides)
+    query_substitutions:        dict[str, str]  =   field(default_factory=lambda: defaults.query_substitutions)
+    query_subs_overrides:       dict[str, str]  =   field(default_factory=lambda: defaults.query_subs_overrides)
     ttls:                       frozenset[Path] =   defaults.ttls
     inference:                  bool            =   defaults.inference
     validation:                 bool            =   defaults.validation
+    included_validations:       frozenset[str]  =   defaults.included_validations
+    additional_validation_paths:frozenset[str]  =   defaults.additional_validation_paths
     MAX_NCYCLES:                int             =   defaults.MAX_NCYCLES
     log:                        bool            =   defaults.log
 
@@ -81,7 +94,6 @@ class Run:
             assert(len(_) == 1)
             project = _[0]
 
-        
         #####
         lg(f'[1/{n_phases}] data loading')
         db = self.db
@@ -104,7 +116,7 @@ class Run:
 
         #######
         lg(f'[2/{n_phases}] mapping and maybe inferencing')
-        self.mapping_substitutions.update(self.mapping_subs_overrides)
+        self.query_substitutions.update(self.query_subs_overrides)
         included_mappings = tuple(self.included_mappings)
         if included_mappings:
             from bim2rdf.mapping.construct import included_dir
@@ -113,9 +125,9 @@ class Run:
         else:
             included_mappings = []
         map_paths = tuple(included_mappings)+tuple(Path(p) for p in self.additional_mapping_paths)
-        def unique_queries():
+        def unique_queries(paths):
             from .queries import SPARQLQuery
-            qs = SPARQLQuery.s((map_paths), substitutions=self.mapping_substitutions)
+            qs = SPARQLQuery.s((paths), substitutions=self.query_substitutions)
             from collections import defaultdict
             dd = defaultdict(list)
             for q in qs: dd[q.string].append(q)
@@ -124,7 +136,7 @@ class Run:
         ms = [r.ConstructQuery(
                     q.string,
                     name=r.ConstructQuery.mk_name(q.source))
-              for q in unique_queries()]
+              for q in unique_queries(map_paths)]
         
         from .queries import queries
         if self.inference:
@@ -153,8 +165,23 @@ class Run:
         ######
         if self.validation:
             lg(f'[3/{n_phases}] validation')
+            included_validations = tuple(self.included_validations)
+            if included_validations:
+                from bim2rdf.validation import included_dir
+                for _ in included_validations: assert((included_dir / _).exists() )
+                included_validations = [(included_dir / _) for _ in included_validations]
+            val_paths = tuple(included_validations)+tuple(Path(p) for p in self.additional_validation_paths)
+            val_qs = unique_queries(val_paths)
+            from bim2rdf.validation.validation import ValidationQuery
+            val_qs = [ValidationQuery(v) for v in val_qs]
+            shs = [v.shacl() for v in val_qs]
+            vtp = Path('_validation-ontology.ttl')
+            if vtp.exists(): vtp.unlink()
+            vtp.write_text('\n'.join(shs))
+            db = Engine([r.ttlLoader(vtp)], db=db, derand=False, MAX_NCYCLES=1, log_print=self.log).run()
+            vtp.unlink()
             db = Engine([r.TopQuadrantValidation(
-                                data=queries['mapped'],
+                                data=queries['mapped'],#_and_inferred'], need this?
                                 shapes=queries['ontology'])],
                          db=db,
                          derand=False,

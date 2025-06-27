@@ -13,6 +13,7 @@ members = [
     "bim2rdf-rules",
     "bim2rdf-speckle",
     "bim2rdf-spklauto",
+    "bim2rdf-validation",
     "project",
 ]
 
@@ -108,6 +109,7 @@ dev = [
     { name = "icecream" },
     { name = "ipdb" },
     { name = "ipython" },
+    { name = "oxigraph" },
     { name = "project" },
 ]
 
@@ -139,6 +141,7 @@ dev = [
     { name = "icecream" },
     { name = "ipdb" },
     { name = "ipython" },
+    { name = "oxigraph" },
     { name = "project", editable = "project" },
 ]
 
@@ -239,6 +242,11 @@ source = { editable = "spklauto" }
 
 [package.metadata.requires-dev]
 dev = []
+
+[[package]]
+name = "bim2rdf-validation"
+version = "0.1.0"
+source = { editable = "validation" }
 
 [[package]]
 name = "boltons"
@@ -692,6 +700,19 @@ wheels = [
 ]
 
 [[package]]
+name = "oxigraph"
+version = "0.4.11"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/a2/f0c17ead964c71d4f808f1e2c3fed3526c902e2cb8c77a33e4bab87d51b8/oxigraph-0.4.11.tar.gz", hash = "sha256:4df60e793afa1ad9dcb1e63960648d916abb784fb488e6f1e2397b6676efff13", size = 6158812, upload-time = "2025-05-21T20:54:14.261Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6d/a9/0ddc9266a99a6ee2d860a80b0d9b7e016796ae50a51064c73c402abb3af4/oxigraph-0.4.11-py3-none-macosx_10_14_x86_64.whl", hash = "sha256:816073269929487ff4590100653e23718bb5723a384694ad6e3c1ecfc0753f0e", size = 6327905, upload-time = "2025-05-21T20:54:04.358Z" },
+    { url = "https://files.pythonhosted.org/packages/02/c9/454aaa6eab5978cc44b0cf05fdf5775b85f60568c23fafe001d7f0dc6c4f/oxigraph-0.4.11-py3-none-macosx_11_0_arm64.whl", hash = "sha256:ccdfe775fd5d2817af22e9265f03f8253ed8da6e71c0f2c2b4ae222719e576fd", size = 5773572, upload-time = "2025-05-21T20:54:06.063Z" },
+    { url = "https://files.pythonhosted.org/packages/32/66/5199176db0348eea6946f34d420da10b14e8eedc9b593f2abc5f10b6fcc7/oxigraph-0.4.11-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f3600a61894a20a0dd948fe3bd0646a83adb7bbf3452e55dfb9916eb7a03fb7a", size = 7288694, upload-time = "2025-05-21T20:54:08.457Z" },
+    { url = "https://files.pythonhosted.org/packages/84/18/d6551b605bc97b963ebf5c94678160fb02e0ff713d100c2a5f4c2706320a/oxigraph-0.4.11-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cfa23e59907c47bb9198888a6a17dd4762d40b38c3ae9e68db5ab6e5bdc9469c", size = 7679259, upload-time = "2025-05-21T20:54:10.581Z" },
+    { url = "https://files.pythonhosted.org/packages/b2/0c/d7236a0b603d1c938ad48be20d796e71e30f5a1f19ef72fc1214845bc8c0/oxigraph-0.4.11-py3-none-win_amd64.whl", hash = "sha256:ac0725641b317ec487c7f996f8cdb8a5a25b01f27a767c9cc6535c149d717f3e", size = 5356629, upload-time = "2025-05-21T20:54:12.505Z" },
+]
+
+[[package]]
 name = "packaging"
 version = "24.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1013,11 +1034,11 @@ wheels = [
 
 [[package]]
 name = "pytqshacl"
-version = "138"
+version = "139"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3a/e1/d92fb3b0742ad9db2a676c279c7b3175507133a5250b04a152881319e285/pytqshacl-138.tar.gz", hash = "sha256:34c740179e0ef175ad7158549a3594d58cfc5979fd61497ec68c96b61586ae33", size = 21272706, upload-time = "2025-01-29T01:10:33.375Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c9/9e/836924f032a7d6d7e2f016b885e3f4bd387e0b8187c2e3f75d5383fe405c/pytqshacl-139.tar.gz", hash = "sha256:d27f1f9f8234ea9585a114de653c516a1b1ac34c214219f7e4c25e1913f3a0b5", size = 21272744, upload-time = "2025-06-27T20:12:48.461Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7d/d9/85f7d9d7cb01627d1754961c41fb84489cedc5b95ebcb0c0cd2a08016029/pytqshacl-138-py2.py3-none-any.whl", hash = "sha256:f76316d29965d0fd8a12295ede85c10b4843f440d63b9b3851671c0ef83e03fe", size = 21287089, upload-time = "2025-01-29T01:10:27.222Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/a2/2a6a485d0df990ff1bf8d69d0a00ec69d29ad406d4924ebd91072285401a/pytqshacl-139-py2.py3-none-any.whl", hash = "sha256:e31c256ee517c9ff4eaa1fc66dc87c57b77a25ca303968c86b8502465230aac9", size = 21287141, upload-time = "2025-06-27T20:12:45.877Z" },
 ]
 
 [package.optional-dependencies]
