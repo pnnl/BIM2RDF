@@ -1,5 +1,5 @@
 # message: lpd spec bad
-# TODO: severity
+# TODO: severity. check if it's one of info, warning, violation
 PREFIX rec: <https://w3id.org/rec#> 
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX spkl: <http://speckle.systems/> 
@@ -16,11 +16,11 @@ PREFIX unit: <http://qudt.org/vocab/unit/>
 # - use ?this and ?value (?)
 # - filter 'invalid'
 select ?this (?lpd as ?value)  where {
-  filter(?lpd<100)
+  filter(?lpd<3)
 # nested inner as 'regular' query
-{select ?this  ((sum(?power)) as ?lpd)
+{select ?this  ((sum(?power)/sum(?area)) as ?lpd)
 WHERE { 
-    ?this a s223:PhysicalSpace. #
+    ?this a s223:PhysicalSpace. # need to have this line. will be extracted to make the shacl def.
  	?this s223:hasProperty ?roomproperty.
  	?roomproperty qudt:hasQuantityKind quantitykind:Area.
  	?roomproperty s223:hasValue ?_area.
