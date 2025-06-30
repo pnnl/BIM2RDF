@@ -1,5 +1,6 @@
 # message: lpd spec bad
-# TODO: severity. check if it's one of info, warning, violation
+# one of info, warning, violation
+# severity: violation
 PREFIX rec: <https://w3id.org/rec#> 
 PREFIX s223: <http://data.ashrae.org/standard223#>
 PREFIX spkl: <http://speckle.systems/> 

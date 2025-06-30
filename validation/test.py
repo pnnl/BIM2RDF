@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.14.8"
+__generated_with = "0.14.9"
 app = marimo.App(width="full")
 
 

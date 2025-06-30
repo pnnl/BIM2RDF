@@ -6,17 +6,40 @@ class ValidationQuery:
         else:
             assert(isinstance(q, SPARQLQuery))
         self.q = q
-        self.msg = self.extract_msg(str(q))
-    from functools import cache, cached_property
+        m = self.extract_meta(str(q))
+        self.msg =      m['message']
+        self.target =   m['target']
+        self.severity = m['severity']
 
+    @property
+    def severity(self): return self._severity
+    @severity.setter
+    def severity(self, v):
+        v = v.strip()
+        if not v:
+            self._severity = ''
+            return v
+        s = {'info', 'warning', 'violation'}
+        if v.lower() not in s: raise ValueError(f'severity not one of {s}')
+        self._severity = v
+
+    from functools import cache, cached_property
+    
     def __str__(self) -> str:
         return str(self.q)
-    
+
     @classmethod
-    def extract_msg(cls, s: str):
+    def extract_meta(cls, s:str):
+        return {
+            'message':  cls.extract_('message', s),
+            'severity': cls.extract_('severity', s),
+            'target':   cls.extract_tgt(s)
+        }
+    @classmethod
+    def extract_(cls, spec:str, s: str):
         _ = s
         _ = s.split('\n')
-        _ = (m for m in _ if 'message:' in m)
+        _ = (m for m in _ if f'{spec}:' in m)
         _ = (m[m.find(':')+1:] for m in _)
         _ = ' '.join(_)
         return _
@@ -29,6 +52,7 @@ class ValidationQuery:
         if match:
             return match.group(1)
         else:
+            raise ValueError('no target found')
             return None
     
     @cached_property
@@ -81,13 +105,13 @@ class ValidationQuery:
         query_prefixes = SPARQLQuery.defaults.substitutions['query.prefixes']
         # sh:targetClass  rdfs:Resource; # 'wildcard' doesnt work. i wish it did.
         # dynamic target (w/ query) https://www.w3.org/TR/shacl12-sparql/#example-dynamically-computed-target-nodes-using-a-node-expression-based-on-a-sparql-query
-        # sh:
         s = f"""{query_prefixes}
         _:s a sh:NodeShape;
             sh:targetClass {self.extract_tgt(q)};
             sh:sparql [
                 a sh:SPARQLConstraint;
-                sh:message \"""{self.msg}\""";
+                sh:message \"""{self.target}\""";
+                {f'sh:severity sh:{self.severity.capitalize()};' if self.severity else ''}
                 sh:prefixes _:p;
                 sh:select \""" {q} \"""
         ].
