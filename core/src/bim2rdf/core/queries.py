@@ -75,8 +75,9 @@ from pathlib import Path
 from typing import Self
 class SPARQLQuery:
     class defaults:
-        from bim2rdf.mapping.construct import included_dir
-        dirs = [included_dir]
+        from bim2rdf.mapping.construct import included_dir as mapping_dir
+        from bim2rdf.validation import included_dir as validation_dir
+        dirs = [mapping_dir, validation_dir]
         #                    more explicit as it's under sparqlqauery
         substitutions = DefaultSubstitutions.dict({'prefixes', 'models'})
         prefixes = {p:v for p,v in substitutions.items()  if p.startswith('prefix')}
@@ -138,9 +139,9 @@ class SPARQLQuery:
 
 class Queries:
     def __init__(self):
-        self._set_included_mappings()
+        self._set_included()
     
-    def _set_included_mappings(self):
+    def _set_included(self):
         for q in SPARQLQuery.s():
             n  = q.source
             assert(isinstance(n, Path))
