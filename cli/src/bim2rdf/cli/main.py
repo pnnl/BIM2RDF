@@ -39,6 +39,12 @@ def schema(): # TODO: may want to do pydantic-jsonschema
 
 from fire import Fire
 from . import patch
-from bim2rdf.ontologies.cli import main
-main = Fire({'run':run, **{f'ontologies.{k}':v for k,v in main.items()} })
+from bim2rdf.ontologies.cli import main as omain
+from bim2rdf.core.queries import cli_funcs as qmain
+main = Fire({
+    'run':run,
+    **{f'ontologies.{k}':v for k,v in omain.  items()},
+    **{f'queries.{k}':   v for k,v in qmain().items()}
+    }
+    )
 exit(0)

@@ -297,7 +297,7 @@ def query(*, db: Path|Store|str=Path('db'), query: str|Path,
         return r
 
 
-if __name__ == '__main__':
+def cli_funcs():
     from typing import Literal, List
     def sparql(*, idirs: List[Path]=SPARQLQuery.defaults.dirs,
           substitutions: Path|Literal['default']='default',
@@ -338,6 +338,10 @@ if __name__ == '__main__':
         return 
 
     
-    from fire import Fire
     def default_substitutions(): return SPARQLQuery.defaults.substitutions
-    Fire({f.__name__:f for f in {sparql, list, query, default_substitutions}})
+    return ({f.__name__:f for f in {sparql, list, query, default_substitutions}})
+
+
+if __name__ == '__main__':
+    from fire import Fire
+    Fire(cli_funcs)
