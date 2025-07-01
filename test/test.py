@@ -26,7 +26,7 @@ def is_eq(g1: str, g2: str):
     return isomorphic(g1, g2)
 
 
-from bim2rdf.queries import queries
+from bim2rdf.core.queries import queries
 @pytest.fixture(params=list(n for n in queries if n not in {'ontology'}))
 def query(request):
     return request.param
@@ -35,9 +35,9 @@ def query(request):
 
 def test_ttl(query, file_regression):
     p = params()
-    from bim2rdf.queries import query as queryf
+    from bim2rdf.core.queries import query as queryf
     ttl = queryf(
-        db=Path(p['db_dir']),
+        db=Path(p['db']),
         query=query,
         out=None)
     def check_fn(obtained_fn, expected_fn):
