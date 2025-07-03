@@ -1034,11 +1034,11 @@ wheels = [
 
 [[package]]
 name = "pytqshacl"
-version = "139"
+version = "140"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/c9/9e/836924f032a7d6d7e2f016b885e3f4bd387e0b8187c2e3f75d5383fe405c/pytqshacl-139.tar.gz", hash = "sha256:d27f1f9f8234ea9585a114de653c516a1b1ac34c214219f7e4c25e1913f3a0b5", size = 21272744, upload-time = "2025-06-27T20:12:48.461Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/02/e3/351f6730c2d620225ab342d82303a9785b631d7828a004595e86ccca331c/pytqshacl-140.tar.gz", hash = "sha256:b6849b622d2e0082ee42296cc8ee5f0cea6d2290e557017e2cf5f8ef0f6665f7", size = 15563356, upload-time = "2025-07-02T00:16:27.997Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ed/a2/2a6a485d0df990ff1bf8d69d0a00ec69d29ad406d4924ebd91072285401a/pytqshacl-139-py2.py3-none-any.whl", hash = "sha256:e31c256ee517c9ff4eaa1fc66dc87c57b77a25ca303968c86b8502465230aac9", size = 21287141, upload-time = "2025-06-27T20:12:45.877Z" },
+    { url = "https://files.pythonhosted.org/packages/31/dc/0208e41b3944b5b0dc19c6aa29e0924a6fc56f44a3db165801497d6828a1/pytqshacl-140-py2.py3-none-any.whl", hash = "sha256:9af70c436dd37cacae8c0c9187a01860e05bc0c50514730930a8502c36f15fb7", size = 15569866, upload-time = "2025-07-02T00:16:25.621Z" },
 ]
 
 [package.optional-dependencies]
