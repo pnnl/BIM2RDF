@@ -591,15 +591,15 @@ wheels = [
 
 [[package]]
 name = "json2rdf"
-version = "71"
+version = "79"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
     { name = "numpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/24/ce/56f23ee728809a834423e2f5982589e46eea5c7d113d5c1be2b25b414bb8/json2rdf-71.tar.gz", hash = "sha256:96015ddd0375a0fd094dcf9d8a1b6de19e37fdd280c24ac916bf8563c230612d", size = 5829, upload-time = "2025-03-04T17:13:01.221Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/88/cd/9cc69bcf4329fe1fe3ddf412fde50f161dba73147e0e6fe08fafdc9045cd/json2rdf-79.tar.gz", hash = "sha256:6bb3fcdfcca620f4da499d5b2deb927e22c4d643385d4dad991959ab635ef6b4", size = 6237, upload-time = "2025-07-31T18:39:10.768Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8e/09/85e76fe026475153b6c18236e8eb5b70f75e21bf5c58e5869e029d84fd69/json2rdf-71-py3-none-any.whl", hash = "sha256:7851511b2d5b2753e95920ff31ab9dcd4ff418ffb7a84c7cd3e4ab78bffc2499", size = 6508, upload-time = "2025-03-04T17:12:58.236Z" },
+    { url = "https://files.pythonhosted.org/packages/0f/22/63bcd4567129d434fdf874a19d34f84c17852ed1c25aea204654c028167d/json2rdf-79-py3-none-any.whl", hash = "sha256:0bc2d255490e37a3919f0876746fb943b128b2048e9c44413604af938dbd605a", size = 6944, upload-time = "2025-07-31T18:39:09.785Z" },
 ]
 
 [package.optional-dependencies]
@@ -1078,15 +1078,15 @@ wheels = [
 
 [[package]]
 name = "rdf-engine"
-version = "219"
+version = "222"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyoxigraph" },
     { name = "rdflib" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a2/23/a545ff4e720e19f6ca8a26edfd2d915d2f8d31a1d5bed8606d015b5dd206/rdf_engine-219.tar.gz", hash = "sha256:c0ad4e3dc132b50fc42efbbd2dfec6fa356257c39944edfd9c9bc1eea78e23c3", size = 7937, upload-time = "2025-02-18T23:27:48.247Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/52/0f/b6a07c63f75506710568dee5143663fe4a6046eeb4c7610e685ae952f3c9/rdf_engine-222.tar.gz", hash = "sha256:92e473531a85820821bb5c46df89b00166fd00e68d016f01fba4382684a0063f", size = 8012, upload-time = "2025-07-30T23:02:54.77Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a1/84/2459dce7216f91d1cec0b6a32e717c00e61d17ba050bfeec5bc58b23ff6e/rdf_engine-219-py3-none-any.whl", hash = "sha256:72c109a8e5123bd0d4bc804a442f365e7b54895942886b743d5ab79730bb4b23", size = 10271, upload-time = "2025-02-18T23:27:46.485Z" },
+    { url = "https://files.pythonhosted.org/packages/38/63/4cd1f4498e4bbfec427cd74dc03909b1525c00d597d4544e7b951d7070d1/rdf_engine-222-py3-none-any.whl", hash = "sha256:d9641727ac3261a7e0a9f949629ad1f43160181263865ab88a27bda98158ae47", size = 10383, upload-time = "2025-07-30T23:02:53.518Z" },
 ]
 
 [[package]]
