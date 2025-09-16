@@ -141,8 +141,7 @@ class Run:
         from .queries import queries
         if self.inference:
             inf = [r.TopQuadrantInference(
-                        data=queries['mapped'],
-                        shapes=queries['ontology'])]
+                        data=queries['tqinput'])]
         else:
             inf = []
         _ = ['ontology' in str(t.source) for t in ttls if isinstance(t.source, Path) ]
@@ -181,8 +180,7 @@ class Run:
             db = Engine([r.ttlLoader(vtp)], db=db, derand=False, MAX_NCYCLES=1, log_print=self.log).run()
             vtp.unlink()
             db = Engine([r.TopQuadrantValidation(
-                                data=queries['mapped'],#_and_inferred'], need this?
-                                shapes=queries['ontology'])],
+                                data=queries['tqinput'] )],
                          db=db,
                          derand=False,
                          MAX_NCYCLES=1,  # just one

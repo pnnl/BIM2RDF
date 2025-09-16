@@ -1,19 +1,21 @@
 from ..rule import Rule
 Query = str
 class _TQ(Rule):
-    def __init__(self, *, data: Query, shapes: Query):
+    def __init__(self, *, data: Query, shapes: None | Query=None):
         assert('construct' in data.lower())
-        assert('construct' in shapes.lower())
+        if shapes:
+            assert('construct' in shapes.lower())
         from bim2rdf.core.queries import SPARQLQuery
         data:str =   str(SPARQLQuery(data))
-        shapes:str = str(SPARQLQuery(shapes))
+        if shapes:
+            shapes:str = str(SPARQLQuery(shapes))
         self.tqdata = data
         self.shapes = shapes
 
     def __repr__(self):
         nm = self.__class__.__name__
         qr = lambda q: q[-50:].replace('\n', '')
-        return f"{nm}(data={qr(self.tqdata)}, shapes={qr(self.shapes[-50:])})"
+        return f"{nm}(data={qr(self.tqdata)}, shapes={qr(self.shapes[-50:]) if self.shapes else self.shapes })"
 
     from functools import cached_property
     @cached_property
@@ -33,7 +35,8 @@ class _TQ(Rule):
             return _
         
         write(inputs.dp, self.tqdata)
-        write(inputs.sp, self.shapes)
+        if self.shapes:
+            write(inputs.sp, self.shapes)
         return inputs
         # yield inputs  # context mgr? https://github.com/pnnl/pytqshacl/issues/5
         # inputs.dp.unlink()
@@ -46,9 +49,13 @@ class _TQ(Rule):
             assert('valid' in self.__class__.__name__.lower())
             from pytqshacl import validate as tq
         inputs = self.prep(db)
-        _ = tq(inputs.dp, shapes=inputs.sp)
+        if self.shapes:
+            _ = tq(inputs.dp, shapes=inputs.sp)
+        else:
+            _ = tq(inputs.dp)
         inputs.dp.unlink()
-        inputs.sp.unlink()
+        if self.shapes:
+            inputs.sp.unlink()
         from pyoxigraph import parse, RdfFormat
         _ =  parse(_.stdout, format=RdfFormat.TURTLE)
         _ = (q.triple for q in _)

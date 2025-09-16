@@ -171,6 +171,8 @@ class Queries:
             {<<?s ?p ?o>> i:data ?_. } # there's also i:shapes
         }"""
         return self.mk(_)
+    #note: copy/pasting here
+
     @property
     def ontology(self) -> str:
         _ = """
@@ -179,6 +181,26 @@ class Queries:
         WHERE {
         <<?s ?p ?o>> t:source ?mo.
         filter (CONTAINS(?mo, "ontology.ttl") )
+        }"""
+        return self.mk(_)
+    #note: copy/pasting here
+    @property
+    def tqinput(self) -> str:
+        _ ="""
+        prefix c: <${prefix.construct.meta}>
+        prefix i: <${prefix.tq.inf.meta}>
+        prefix t: <${prefix.ttl.meta}>
+        construct {?s ?p ?o.}
+        WHERE {
+            {<<?s ?p ?o>> c:name ?mo.
+            filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data."))}
+        union
+            {<<?s ?p ?o>> i:data ?_. } # there's also i:shapes
+        union
+            {
+            <<?s ?p ?o>> t:source ?mo.
+            filter (CONTAINS(?mo, "ontology.ttl") )
+            }
         }"""
         return self.mk(_)
     
