@@ -13,9 +13,8 @@ def import_(definition=included_def):
     # best to run this in a separate process
     # bc oxigraph store gets locked
     # https://github.com/gtfierro/ontoenv-rs/issues/11
-
     from ontoenv import Config, OntoEnv
-    cfg = Config([str(included_def.parent)], strict=False, offline=False, )
+    cfg = Config([str(definition.parent)], strict=False, offline=False, )
     # make the environment
     env = OntoEnv(cfg)
     from rdflib import Graph
