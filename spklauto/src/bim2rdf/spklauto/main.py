@@ -26,7 +26,7 @@ class FunctionInputs(AutomateBase):
 
 def automate_function(
     automate_context: AutomationContext,
-    function_inputs: FunctionInputs,
+    function_inputs: FunctionInputs | None, # not used
 ) -> None:
     """This is an example Speckle Automate function.
     Args:
@@ -185,7 +185,7 @@ def automate_function_without_inputs(automate_context: AutomationContext) -> Non
      besides what the automation context provides,
      the inputs argument can be omitted.
     """
-    pass
+    return automate_function(automate_context, None)
 
 
 
@@ -193,7 +193,8 @@ def automate_function_without_inputs(automate_context: AutomationContext) -> Non
 if __name__ == "__main__":
     # NOTE: always pass in the automate function by its reference; do not invoke it!
     # Pass in the function reference with the inputs schema to the executor.
-    execute_automate_function(automate_function, FunctionInputs)
+    #execute_automate_function(automate_function, FunctionInputs)
+    execute_automate_function(automate_function_without_inputs, )
 
     # If the function has no arguments, the executor can handle it like so
     # execute_automate_function(automate_function_without_inputs)

@@ -4,8 +4,8 @@ in the the repo that the speckle automate workflow wants to
 [create](https://github.com/specklesystems/speckle_automate_python_example).
 
 
-copy paste into the `main.py` file in the speckle automate workflow repo
-the function input def `class FunctionInputs(AutomateBase)`
+Copy/paste [this main.py](./src/bim2rdf/spklauto/main.py)
+to the [automation repo's main.py](https://github.com/specklesystems/speckle_automate_python_example/blob/main/main.py)
 and make a 'release'.
 
 todo:

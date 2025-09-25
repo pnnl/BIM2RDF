@@ -4,7 +4,8 @@ from speckle_automate import (
     AutomationStatus,
     run_function
 )
-from bim2rdf.spklauto.main import FunctionInputs, automate_function
+#from bim2rdf.spklauto.main import FunctionInputs, automate_function
+from bim2rdf.spklauto.main import automate_function_without_inputs
 import fixtures as f
 
 
@@ -16,11 +17,11 @@ def test():
     from pydantic import SecretStr
     automate_sdk = run_function(
         automation_context,
-        automate_function,
-        FunctionInputs(
-            whisper_message=SecretStr("sdfsdsdf"),
-            forbidden_speckle_type="sdfsd",
-        ),
+        automate_function_without_inputs,
+        #FunctionInputs(
+         #   whisper_message=SecretStr("sdfsdsdf"),
+          #  forbidden_speckle_type="sdfsd",
+        #),
     )
 
 

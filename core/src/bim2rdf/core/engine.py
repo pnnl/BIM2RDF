@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Self
 class _defaults:
         @property
         def model_names(self):
@@ -146,12 +145,12 @@ class Run:
             inf = []
         _ = ['ontology' in str(t.source) for t in ttls if isinstance(t.source, Path) ]
         if sum(_) == 0:
-            if self.inference:
+            if self.inference or self.validation:
                 from warnings import warn
                 warn('ontology.ttl not found')
                 inf = []
         if sum(_) > 1:
-            if self.inference:
+            if self.inference or self.validation:
                 from warnings import warn
                 warn('more than one ontology.ttl found')
         db = Engine(ms+inf,
