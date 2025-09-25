@@ -18,14 +18,15 @@ except CalledProcessError: # no git in cicd maybe
     rev = '{NO GIT}' # 
 
 
-def build(commit=False, packages=pkgs):
+def build(packages=pkgs, update=True, commit=False, ):
     def run(cmd, *p, **k):
         from subprocess import check_call as run
         from pathlib import Path
         return run(cmd, *p, cwd=Path(__file__).parent, shell=True, **k)
-    if commit:  
+    if update:  
         run(f'uvx hatchling version {ver(increment=True)}', )
-        for pkg in packages: run(f'uv lock --upgrade-package {pkg}', ) 
+        for pkg in packages: run(f'uv lock --upgrade-package {pkg}',)
+    if commit:
         # https://github.com/pre-commit/pre-commit/issues/747#issuecomment-386782080
         run('git add -u', )
 
@@ -46,7 +47,7 @@ def ncommits(rev=rev):
     return int(c)
 
 def chk_ver():
-    from bim2rdf import __version__ as v
+    from bim2rdf.core import __version__ as v
     return str(v) == str(ver())
 
 

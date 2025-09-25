@@ -12,7 +12,7 @@ repos:
   - id: bump-ver
     name: bump version
     language: system
-    entry: python tasks.py build --commit=True
+    entry: python tasks.py build --commit=True --update=True
     pass_filenames: false
     stages:
       - pre-commit
