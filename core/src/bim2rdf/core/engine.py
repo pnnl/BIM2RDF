@@ -70,12 +70,16 @@ class Run:
             return self.Store()
 
         n_phases = 3 if self.validation else 2
-        from rdf_engine import Engine, logger
+        from rdf_engine import Engine
+
+        if self.log:
+            from loguru import logger
+            logger.remove()
+            from sys import stderr
+            logger.add(stderr, format="{message}" , level='INFO')
+
         def lg(phase):
             if self.log:
-                import logging
-                logging.basicConfig(force=True) # force removes other loggers that got picked up.
-                logger.setLevel(logging.INFO)
                 div = '========='
                 l = f"{div}{phase.upper()}{div}"
                 logger.info(l)

@@ -608,6 +608,19 @@ cli = [
 ]
 
 [[package]]
+name = "loguru"
+version = "0.7.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "win32-setctime", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3a/05/a1dae3dffd1116099471c643b8924f5aa6524411dc6c63fdae648c4f1aca/loguru-0.7.3.tar.gz", hash = "sha256:19480589e77d47b8d85b2c827ad95d49bf31b0dcde16593892eb51dd18706eb6", size = 63559, upload-time = "2024-12-06T11:20:56.608Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0c/29/0348de65b8cc732daa3e33e67806420b2ae89bdce2b04af740289c5c6c8c/loguru-0.7.3-py3-none-any.whl", hash = "sha256:31a33c10c8e1e10422bfd431aeb5d351c7cf7fa671e3c4df004162264b28220c", size = 61595, upload-time = "2024-12-06T11:20:54.538Z" },
+]
+
+[[package]]
 name = "matplotlib-inline"
 version = "0.1.7"
 source = { registry = "https://pypi.org/simple" }
@@ -1078,15 +1091,16 @@ wheels = [
 
 [[package]]
 name = "rdf-engine"
-version = "222"
+version = "227"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "loguru" },
     { name = "pyoxigraph" },
     { name = "rdflib" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/52/0f/b6a07c63f75506710568dee5143663fe4a6046eeb4c7610e685ae952f3c9/rdf_engine-222.tar.gz", hash = "sha256:92e473531a85820821bb5c46df89b00166fd00e68d016f01fba4382684a0063f", size = 8012, upload-time = "2025-07-30T23:02:54.77Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d1/05/fab1fd99915a6c9e734b2385c43bede1a87f7c9246804d24819efefa4184/rdf_engine-227.tar.gz", hash = "sha256:8bed2700370d94a7f5fac86d94d0a833ab3f9bf977d7e2f0b98505aef80cf841", size = 8407, upload-time = "2025-10-09T21:02:07.564Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/38/63/4cd1f4498e4bbfec427cd74dc03909b1525c00d597d4544e7b951d7070d1/rdf_engine-222-py3-none-any.whl", hash = "sha256:d9641727ac3261a7e0a9f949629ad1f43160181263865ab88a27bda98158ae47", size = 10383, upload-time = "2025-07-30T23:02:53.518Z" },
+    { url = "https://files.pythonhosted.org/packages/43/9b/d24f3953ff0a1c386785caeac2820eda8306d5856fdb5eb1bd4ae35c0164/rdf_engine-227-py3-none-any.whl", hash = "sha256:4f0cece336237c784d7f5d1b337cdadce097e498ba28dc568af416285d47f991", size = 10697, upload-time = "2025-10-09T21:02:06.294Z" },
 ]
 
 [[package]]
@@ -1295,6 +1309,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d8/3b/2ed38e52eed4cf277f9df5f0463a99199a04d9e29c9e227cfafa57bd3993/websockets-11.0.3.tar.gz", hash = "sha256:88fc51d9a26b10fc331be344f1781224a375b78488fc343620184e95a4b27016", size = 104235, upload-time = "2023-05-07T14:25:20.083Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/47/96/9d5749106ff57629b54360664ae7eb9afd8302fad1680ead385383e33746/websockets-11.0.3-py3-none-any.whl", hash = "sha256:6681ba9e7f8f3b19440921e99efbb40fc89f26cd71bf539e45d8c8a25c976dc6", size = 118056, upload-time = "2023-05-07T14:25:18.508Z" },
+]
+
+[[package]]
+name = "win32-setctime"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b3/8f/705086c9d734d3b663af0e9bb3d4de6578d08f46b1b101c2442fd9aecaa2/win32_setctime-1.2.0.tar.gz", hash = "sha256:ae1fdf948f5640aae05c511ade119313fb6a30d7eabe25fef9764dca5873c4c0", size = 4867, upload-time = "2024-12-07T15:28:28.314Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e1/07/c6fe3ad3e685340704d314d765b7912993bcb8dc198f0e7a89382d37974b/win32_setctime-1.2.0-py3-none-any.whl", hash = "sha256:95d644c4e708aba81dc3704a116d8cbc974d70b3bdb8be1d150e36be6e9d1390", size = 4083, upload-time = "2024-12-07T15:28:26.465Z" },
 ]
 
 [[package]]
