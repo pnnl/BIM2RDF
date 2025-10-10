@@ -52,18 +52,25 @@ class Rule(Rule):
         raise NotImplementedError
 
     def meta_and_data(self, db: Store) ->Iterable[Quad]:
-        for d in self.data(db):                 
-            yield Quad(*d)                      # data
-            for m in self.meta:                 #
-                assert(isinstance(d, Triple))   #
-                yield Quad(d, # nesting triple  # meta
-                           # no need for m.'id' bc simple as possible
-                           m.predicate, m.object)
-        # List all metadata for the given reference to a statement
-        # SELECT *
-        # WHERE {
-        #     <<:man :hasSpouse :woman>> ?p ?o
-        # }
+        rdf = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+        data = Store()
+        data.bulk_extend(Quad(*t) for t in self.data(db))
+        mv = ((m.predicate, m.object) for m in self.meta )
+        mv = map(lambda a: f"({a[0]} {a[1]})", mv)
+        mv = '\n'.join(mv)
+        q  = """
+        construct {
+        ?s ?p ?o.
+        <<?s ?p ?o>> ?mp ?mo.
+        }
+        where {
+        ?s ?p ?o.
+          VALUES (?mp ?mo) {
+            mv
+        } }
+        """
+        q = q.replace('mv', mv)
+        yield from (Quad(*t) for t in data.query(q))
     def __call__(self, db): yield from self.meta_and_data(db)
 
 
