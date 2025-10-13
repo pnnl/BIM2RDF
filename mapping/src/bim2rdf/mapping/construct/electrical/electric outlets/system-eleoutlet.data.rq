@@ -1,0 +1,29 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT { 
+?elecoutlet s223:cnx _:out.
+_:out a s223:OutletConnectionPoint.
+_:out s223:hasMedium s223:Constituent-Electricity.
+_:sys a s223:System. 
+_:sys s223:hasMember ?elecoutlet.
+_:sys s223:hasBoundaryConnectionPoint _:out.
+
+
+} 
+WHERE { 
+ ?elecoutlet a s223:ElectricityOutlet.
+  <<?elecoutlet spkl:category "Lighting Devices">> meta: <<?y spkl:name "electrical/electric outlets">>.
+  ?elecoutlet spkl:parameters ?outletparams.
+  ?outletparams ?outletparamkey ?suboutletparam.
+  ?suboutletparam spkl:applicationInternalName "RBS_ELEC_SWITCH_ID_PARAM".
+  ?suboutletparam spkl:value "null".
+
+
+}

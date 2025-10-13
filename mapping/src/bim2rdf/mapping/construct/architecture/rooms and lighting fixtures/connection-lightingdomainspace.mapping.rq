@@ -1,0 +1,26 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX meta: <http://meta>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX spkl: <http://speckle.systems/> 
+
+CONSTRUCT {
+?cp s223:cnx ?this.
+}
+WHERE {
+<<?l spkl:category "Lighting Fixtures">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+?l spkl:parameters ?p.
+?p ?k ?o1.
+?o1 spkl:applicationInternalName "c05b27f4-316d-447d-b99f-c0372ce73c7e".
+?o1 spkl:value ?id.
+?l s223:cnx ?o.
+?o a s223:OutletConnectionPoint.
+?o s223:hasMedium s223:EM-Light.
+?o s223:cnx ?c.
+?c s223:cnx ?cp.
+?cp a s223:InletConnectionPoint.
+?cp s223:hasMedium s223:EM-Light.
+?this a s223:DomainSpace.
+?this s223:hasDomain s223:Domain-Lighting.
+?this spkl:category "Spaces".
+?this spkl:elementId ?id.
+}

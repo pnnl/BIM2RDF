@@ -1,0 +1,34 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX meta: <http://meta>
+PREFIX spkl: <http://speckle.systems/> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+CONSTRUCT {
+?elecbreaker s223:cnx ?conn.
+?conn a s223:OutletConnectionPoint.
+?conn rdfs:label "OutletConnectionPoint"^^xsd:string.
+?conn s223:hasMedium s223:Constituent-Electricity. 
+} 
+WHERE 
+{
+?elecbreaker a s223:ElectricityBreaker. 
+<<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/panels">>. 
+?elecbreaker spkl:Connectors ?l.
+?l  ?in ?r. # list item
+?r  spkl:referencedId ?conn.
+#?li spkl:connectedConnectorIds ?conn.
+ 
+#?conn s223:cnx ?wirejunction.
+#?wirejunction a s223:ElectricWire.
+#?wirejunction rdfs:label "ElectricWire"^^xsd:string.
+#?wirejunction s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
+#?wirejunction s223:cnx ?i.
+#?i a s223:InletConnectionPoint. #circuitname can be applied here aswell
+#?i rdfs:label "InletConnectionPoint"^^xsd:string.
+#?i s223:hasMedium s223:AC-277VLN-1Ph-60Hz. 
+#?i s223:cnx ?j.
+#?j a s223:Junction. #circuitname can be applied here aswell
+#?j rdfs:label "Junction"^^xsd:string.
+#?j s223:hasMedium  s223:AC-277VLN-1Ph-60Hz.
+}

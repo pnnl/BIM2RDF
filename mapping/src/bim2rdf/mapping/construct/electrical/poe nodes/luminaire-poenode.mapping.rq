@@ -1,0 +1,36 @@
+PREFIX rec: <https://w3id.org/rec#> 
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix recx: <urn:rec:extentions:>
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT {
+  
+?this s223:contains ?o2. 
+}
+
+WHERE {
+?this a s223:Luminaire.
+<<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
+?this spkl:elementId ?eid.
+{
+<<?lum spkl:category  "Lighting Fixtures">> meta: <<?si spkl:name "electrical/poe node">>.
+?lum spkl:elementId ?eid.
+?lum spkl:elements ?l.
+    ?l ?k ?o1.
+    ?o1 ?p1 ?v.
+    ?v spkl:category  "Electrical Fixtures".
+    ?v spkl:elementId ?eid1.
+}
+{
+?o2 a s223:ElectricEnergyDCDCConverter.
+<<?o2 spkl:category "Electrical Fixtures">> meta: <<?li spkl:name "electrical/poe node">>.
+?o2 spkl:elementId ?eid1.
+}
+} 

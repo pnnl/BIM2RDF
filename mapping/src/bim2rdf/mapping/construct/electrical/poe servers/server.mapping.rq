@@ -1,0 +1,25 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT {
+  ?elecoutlet a s223:Controller.
+  ?elecoutlet rdfs:label "Controller"^^xsd:string.
+  ?elecoutlet s223:hasMedium s223:Constituent-Electricity.
+  ?elecoutlet s223:hasPhysicalLocation ?room.
+
+}
+WHERE 
+{
+  <<?elecoutlet spkl:category "Electrical Equipment">> meta: <<?x spkl:name "electrical/poe server">>.
+  ?elecoutlet spkl:phaseCreated ?_.
+  ?elecoutlet spkl:roomId ?rId.
+  <<?room spkl:category "Rooms">> meta: <<?y spkl:name "architecture/rooms and lighting fixtures">>. 
+  ?room spkl:elementId ?rId. 
+
+}

@@ -1,0 +1,45 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX meta: <http://meta>
+prefix x: <urn:anon:fake:>
+
+CONSTRUCT {
+?conn s223:cnx _:connection.
+_:connection a s223:Connection.
+_:connection rdfs:label "Connection"^^xsd:string.
+_:connection s223:hasMedium s223:Signal-WiredEthernet.
+_:connection s223:cnx _:inconnect.
+_:inconnect  a s223:InletConnectionPoint.
+_:inconnect rdfs:label "InletConnectionPoint"^^xsd:string.
+_:inconnect s223:hasMedium s223:Signal-WiredEthernet.
+_:inconnect s223:cnx ?port.
+
+}
+WHERE {
+?es a s223:EthernetSwitch. 
+?es s223:cnx ?conn.
+?conn a s223:BidirectionalConnectionPoint.
+?es spkl:Connectors ?l.
+?l  ?in ?r.# list item
+?r  spkl:referencedId ?conn.
+
+{
+<<?es spkl:category "Lighting Devices">> meta: <<?si spkl:name "electrical/ethernet switch">>. 
+?es spkl:parameters ?m1.
+?m1 ?y1 ?circuit2.
+?circuit2 spkl:applicationInternalName "RBS_ELEC_SWITCH_ID_PARAM".
+?circuit2 spkl:value ?switchid.
+}
+
+{
+?port a s223:WiredEthernetOutlet.
+<<?port spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "electrical/ethernet ports">>.
+?port spkl:parameters ?m3.
+?m3 ?y3 ?circuit3.
+?circuit3 spkl:applicationInternalName "RBS_ELEC_SWITCH_ID_PARAM".
+?circuit3 spkl:value ?switchid.
+}
+}

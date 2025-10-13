@@ -1,0 +1,32 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/>
+PREFIX meta: <http://meta>
+
+CONSTRUCT {
+?p s223:encloses ?d.
+}
+WHERE {
+
+{
+    # common
+   <<?p spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+    ?p spkl:elementId ?ei.
+     ?d spkl:category  "Spaces".
+    # /common
+  ?d spkl:roomId ?ei.
+}
+union
+{
+    # common
+  <<?p spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
+    ?p spkl:elementId ?ei.
+     ?d spkl:category  "Spaces".
+    # /common
+    ?d spkl:parameters ?t.
+    ?t ?k ?o1.
+    ?o1 spkl:applicationInternalName "2aee439a-9568-46e6-be17-e9ccba6ff8d5".
+    ?o1 spkl:value ?ei.
+    }
+}
+

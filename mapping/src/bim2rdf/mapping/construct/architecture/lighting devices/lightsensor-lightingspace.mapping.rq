@@ -1,0 +1,24 @@
+PREFIX geom: <http://mapping/geo#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX meta: <http://meta>
+
+
+CONSTRUCT { 
+?o1 s223:hasObservationLocation ?o2.
+
+} 
+WHERE { 
+<<?o2 spkl:category  "Spaces">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
+?o2 spkl:elementId ?id.
+?o2 s223:hasDomain s223:Domain-Lighting. # domain-lighting should work.
+?o1 a s223:LightSensor.
+<<?o1 spkl:category "Lighting Devices">> meta: <<?_ spkl:name "architecture/lighting device">>.
+#?o1 spkl:definition/spkl:family ?f.
+#filter(contains(lcase(?f), "occupancy")) #why lcase?
+?o1 spkl:parameters ?p.
+?p ?k ?l.
+?l spkl:applicationInternalName "c05b27f4-316d-447d-b99f-c0372ce73c7e".
+?l spkl:value ?id.
+
+}

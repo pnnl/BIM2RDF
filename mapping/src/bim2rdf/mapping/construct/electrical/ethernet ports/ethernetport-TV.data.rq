@@ -1,0 +1,39 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+prefix x: <urn:anon:fake:>
+
+CONSTRUCT {
+?elecoutlet s223:cnx _:out2.
+_:out2 a s223:OutletConnectionPoint.
+_:out2 rdfs:label "OutletConnectionPoint"^^xsd:string.
+_:out2  s223:hasMedium s223:Signal-WiredEthernet.
+_:out2 s223:cnx _:connection2.
+_:connection2 a s223:Connection.
+_:connection2 s223:hasMedium s223:Signal-WiredEthernet.
+_:connection2 s223:cnx _:inconnect2.
+_:inconnect2  a s223:InletConnectionPoint.
+_:inconnect2 rdfs:label "InletConnectionPoint"^^xsd:string.
+_:inconnect2 s223:hasMedium s223:Signal-WiredEthernet.
+_:inconnect2 s223:cnx ?tv.
+_:inconnect2 x:tv "tv".
+}
+WHERE 
+{{
+?elecoutlet a s223:WiredEthernetOutlet.
+<<?elecoutlet spkl:category "Lighting Fixtures">> meta: <<?x spkl:name "electrical/ethernet ports">>.
+?elecoutlet spkl:parameters ?s.
+?s ?o ?p.
+?p spkl:applicationInternalName "d0145932-8ad8-49e5-96ec-7dd69439bec2".
+?p spkl:value ?eid.
+}
+{
+  ?tv a s223:Television.  
+  <<?tv spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/mels">>. 
+?tv spkl:elementId ?eid.
+}}

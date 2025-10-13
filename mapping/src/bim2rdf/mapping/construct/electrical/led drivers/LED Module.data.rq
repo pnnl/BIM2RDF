@@ -1,0 +1,25 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+prefix s223x: <urn:s223:extentions:>
+
+CONSTRUCT {
+_:module a s223x:LEDModule.
+_:module rdfs:label "LEDModule"^^xsd:string.
+_:module s223:cnx _:out.
+_:out a s223:OutletConnectionPoint.
+_:out rdfs:label "OutletConnectionPoint"^^xsd:string.
+_:out s223:hasMedium s223:EM-Light.
+?this s223:contains _:module. 
+}
+WHERE 
+{ 
+?this a s223:Luminaire.
+ <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
+
+}

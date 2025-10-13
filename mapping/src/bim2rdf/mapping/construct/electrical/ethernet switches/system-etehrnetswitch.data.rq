@@ -1,0 +1,24 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT { 
+_:conn a s223:BidirectionalConnectionPoint.
+_:conn rdfs:label "BidirectionalConnectionPoint"^^xsd:string.
+_:conn s223:hasMedium s223:Signal-WiredEthernet. 
+_:conn s223:cnx ?es.
+_:sys a s223:System. 
+_:sys s223:hasMember ?es.
+_:sys s223:hasBoundaryConnectionPoint _:conn.
+} 
+WHERE { 
+
+{
+?es a s223:EthernetSwitch.   
+}
+}

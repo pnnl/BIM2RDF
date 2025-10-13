@@ -1,0 +1,38 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX meta: <http://meta>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix x: <urn:anon:fake:>
+
+CONSTRUCT { 
+?wirejunction s223:cnx  _:inlet.
+_:inlet a s223:InletConnectionPoint. #circuitname can be applied here aswell
+_:inlet rdfs:label "InletConnectionPoint"^^xsd:string.
+_:inlet s223:hasMedium s223:Constituent-Electricity. 
+_:inlet s223:cnx ?poe.
+_:inlet x:poe "poe". #to avoid duplicate insatnces causing validation error
+} 
+WHERE {
+?elecbreaker a s223:ElectricityBreaker.
+?elecbreaker s223:cnx ?conn.
+?conn a s223:OutletConnectionPoint.
+?conn s223:cnx ?wirejunction.
+?wirejunction a s223:Conductor.
+{
+ <<?wirejunction spkl:category  "Electrical Circuits">> meta: <<?mi spkl:name "electrical/poe switches">>.
+  ?wirejunction spkl:parameters ?m.
+  ?m ?y ?circuit1.
+  ?circuit1 spkl:applicationInternalName "RBS_ELEC_CIRCUIT_NUMBER".
+  ?circuit1 spkl:value ?circuitname.
+}
+?poe a s223:PowerOverEthernetSwitch. 
+ {
+<<?poe spkl:category "Lighting Devices">> meta: <<?si spkl:name "electrical/poe switches">>.
+  ?poe spkl:parameters ?m2.
+  ?m2 ?y2 ?circuit3.
+  ?circuit3 spkl:applicationInternalName "RBS_ELEC_CIRCUIT_NUMBER".
+ ?circuit3 spkl:value ?circuitname.
+}
+}

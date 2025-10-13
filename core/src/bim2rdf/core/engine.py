@@ -25,6 +25,7 @@ class _defaults:
             _ = frozenset(_)
             return _
         additional_validation_paths = frozenset()
+        match_paths_with_model_names = True
 
         @property
         def query_substitutions(self):
@@ -52,6 +53,7 @@ class Run:
     model_versions:             frozenset[str]  =   defaults.model_versions
     included_mappings:          frozenset[str]  =   defaults.included_mappings
     additional_mapping_paths:   frozenset[Path] =   defaults.additional_mapping_paths
+    match_paths_with_model_names:bool           =   defaults.match_paths_with_model_names
     from dataclasses import field
     query_substitutions:        dict[str, str]  =   field(default_factory=lambda: defaults.query_substitutions)
     query_subs_overrides:       dict[str, str]  =   field(default_factory=lambda: defaults.query_subs_overrides)
@@ -110,6 +112,7 @@ class Run:
         else:
             #assert(model_versions) to allow no models
             sgs = [r.SpeckleGetter(project_id=project.id, version_id=v) for v in model_versions]
+            model_names = frozenset(p.name for p in project.models)
         # gl https://raw.githubusercontent.com/open223/defs.open223.info/0a70c244f7250734cc1fd59742ab9e069919a3d8/ontologies/223p.ttl
         # https://github.com/open223/defs.open223.info/blob/4a6dd3a2c7b2a7dfc852ebe71887ebff483357b0/ontologies/223p.ttl
         ttls = [r.ttlLoader(Path(ttl)) for ttl in self.ttls]
@@ -128,6 +131,34 @@ class Run:
         else:
             included_mappings = []
         map_paths = tuple(included_mappings)+tuple(Path(p) for p in self.additional_mapping_paths)
+
+        if self.match_paths_with_model_names:
+            def match_paths(paths: tuple[Path], model_names=model_names):
+                _ = []
+                for p in paths:
+                    if p.is_dir():
+                        for m in p.glob('**/*.rq'):
+                            _.append(m)
+                    else:
+                        assert(p.is_file())
+                        assert(p.suffix == '.rq')
+                        _.append(p)
+                rqs = _; del _
+                fqs = []
+                for n in model_names:
+                    for i in range(len(Path(n).parts)):
+                        # increasing path segments
+                        # arch/hvac zones -> arch, arch/hvac zones
+                        np = (Path(n).parts)[:i+1]
+                        np = '/'.join(np)
+                        np = Path(np)
+                        for rq in rqs:
+                            test = np / rq.name
+                            if rq.as_posix().lower().endswith(test.as_posix().lower()):
+                                fqs.append(rq)
+                return fqs
+            map_paths = match_paths(map_paths)
+
         def unique_queries(paths):
             from .queries import SPARQLQuery
             qs = SPARQLQuery.s((paths), substitutions=self.query_substitutions)

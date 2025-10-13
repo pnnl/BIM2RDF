@@ -1,0 +1,42 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix x: <urn:anon:fake:>
+
+CONSTRUCT {
+  ?elecoutlet s223:cnx _:outlet.
+  _:outlet a s223:OutletConnectionPoint.
+  _:outlet rdfs:label "OutletConnectionPoint"^^xsd:string.              
+  _:outlet s223:hasMedium s223:Constituent-Electricity.
+  _:outlet s223:cnx _:elecwire.
+  _:elecwire a s223:Conductor.
+  _:elecwire rdfs:label "Conductor"^^xsd:string.
+  _:elecwire s223:hasMedium s223:Constituent-Electricity.
+  _:elecwire s223:cnx _:inletm.
+  _:inletm a s223:InletConnectionPoint.
+  _:inletm rdfs:label "InletConnectionPoint"^^xsd:string.              
+  _:inletm s223:hasMedium s223:Constituent-Electricity.
+  _:inletm s223:cnx ?mel.
+  _:inletm x:m "m". #to avoid duplicate insatnces causing validation error
+}
+WHERE {
+  {
+  ?mel a s223:Monitor.
+  <<?mel spkl:category "Lighting Fixtures">> meta: <<?x spkl:name "architecture/mels">>.
+  ?mel spkl:parameters ?melparams.
+  ?melparams ?melparamkey ?submelparam.
+  ?submelparam spkl:applicationInternalName "RBS_ELEC_SWITCH_ID_PARAM".
+  ?submelparam spkl:value ?switchId.
+  }
+  {
+  ?elecoutlet a s223:ElectricityOutlet.
+  <<?elecoutlet spkl:category "Lighting Devices">> meta: <<?y spkl:name "electrical/electric outlets">>.
+  ?elecoutlet spkl:parameters ?outletparams.
+  ?outletparams ?outletparamkey ?suboutletparam.
+  ?suboutletparam spkl:applicationInternalName "RBS_ELEC_SWITCH_ID_PARAM".
+  ?suboutletparam spkl:value ?switchId.
+  }
+  
+}

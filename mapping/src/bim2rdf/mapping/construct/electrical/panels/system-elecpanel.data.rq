@@ -1,0 +1,29 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT { 
+?eb s223:cnx _:out.
+_:out a s223:InletConnectionPoint.
+_:out s223:hasMedium s223:Constituent-Electricity.
+_:sys a s223:System. 
+_:sys s223:hasMember ?eb.
+_:sys s223:hasBoundaryConnectionPoint _:out.
+
+
+} 
+WHERE { 
+?eb a s223:ElectricityBreaker.
+<<?eb spkl:category  "Electrical Equipment">> meta: <<?mi spkl:name "electrical/panels">>.
+  ?eb spkl:parameters ?m. 
+  ?m ?y ?circuit5.
+  ?circuit5 spkl:applicationInternalName "RBS_ELEC_PANEL_SUPPLY_FROM_PARAM".
+  ?circuit5 spkl:value "".
+
+
+}

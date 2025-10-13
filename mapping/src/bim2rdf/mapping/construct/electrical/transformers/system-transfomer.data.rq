@@ -1,0 +1,23 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT {
+_:inn a s223:InletConnectionPoint. 
+_:inn s223:hasMedium s223:Electricity-AC.
+_:inn s223:cnx ?tr. 
+_:sys s223:hasMember ?tr.
+_:sys s223:hasBoundaryConnectionPoint _:inn.
+
+} 
+WHERE { 
+{
+?tr a s223:ElectricEnergyTransformer.  
+
+}
+}

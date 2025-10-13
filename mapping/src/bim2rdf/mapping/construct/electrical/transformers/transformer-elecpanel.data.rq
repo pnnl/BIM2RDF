@@ -1,0 +1,42 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX meta: <http://meta>
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT {
+?conn s223:cnx _:luminairewire.
+_:luminairewire a s223:Conductor.
+_:luminairewire s223:hasMedium  s223:Electricity-AC.
+_:luminairewire rdfs:label "Conductor"^^xsd:string.
+_:luminairewire s223:cnx _:ebconn.
+_:ebconn  a s223:InletConnectionPoint.
+_:ebconn rdfs:label "InletConnectionPoint"^^xsd:string.
+_:ebconn s223:hasMedium s223:Electricity-AC.
+_:ebconn s223:cnx ?eb.
+
+}
+WHERE {
+?tr a s223:ElectricEnergyTransformer.
+?tr s223:cnx ?conn.
+?conn  a s223:OutletConnectionPoint.
+{
+<<?tr spkl:category  "Electrical Equipment">> meta: <<?si spkl:name "electrical/transformers">>.
+  ?tr spkl:parameters ?n.
+  ?n ?v ?u.
+  ?u spkl:applicationInternalName "RBS_ELEC_PANEL_NAME".
+  ?u spkl:value "T-1".
+ }
+{ 
+?eb a s223:ElectricityBreaker.
+<<?eb spkl:category  "Electrical Equipment">> meta: <<?mi spkl:name "electrical/panels">>.
+  ?eb spkl:parameters ?m. 
+  ?m ?y ?circuit5.
+  ?circuit5 spkl:applicationInternalName "RBS_ELEC_PANEL_SUPPLY_FROM_PARAM".
+  ?circuit5 spkl:value "T-1".
+}  
+}

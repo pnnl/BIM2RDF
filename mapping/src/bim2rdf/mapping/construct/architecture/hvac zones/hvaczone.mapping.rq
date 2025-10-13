@@ -1,0 +1,25 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+CONSTRUCT { 
+?this   a                 s223:Zone.
+?this   s223:hasDomain    s223:Domain-HVAC. 
+?this rdfs:label "Zone-HVAC"^^xsd:string.
+#?this   rdfs:label        ?zn. # as it's a name
+?this s223:hasProperty ?l.
+?l a s223:Property.
+?l s223:hasValue ?name.
+?l rdfs:label "Property"^^xsd:string.
+
+} 
+WHERE { 
+<<?this spkl:category "HVAC Zones">> meta: <<?_ spkl:name "architecture/hvac zone">>. # TODO branchName could be used here
+?this spkl:parameters ?zonename.
+?zonename ?p ?l.
+?l spkl:applicationInternalName "ZONE_NAME".
+?l spkl:value ?name. 
+}

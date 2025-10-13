@@ -1,0 +1,39 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+prefix x: <urn:anon:fake:>
+
+CONSTRUCT {
+?elecoutlet s223:cnx _:out1.
+_:out1 a s223:OutletConnectionPoint.
+_:out1 rdfs:label "OutletConnectionPoint"^^xsd:string.
+_:out1 s223:hasMedium s223:Signal-WiredEthernet.
+_:out1 s223:cnx _:connection1.
+_:connection1 a s223:Connection.
+_:connection1 s223:hasMedium s223:Signal-WiredEthernet.
+_:connection1 s223:cnx _:inconnect1.
+_:inconnect1  a s223:InletConnectionPoint.
+_:inconnect1 rdfs:label "InletConnectionPoint"^^xsd:string.
+_:inconnect1 s223:hasMedium s223:Signal-WiredEthernet.
+_:inconnect1 s223:cnx ?monitor.
+_:inconnect1 x:in "in".
+}
+WHERE 
+{{
+?elecoutlet a s223:WiredEthernetOutlet.
+<<?elecoutlet spkl:category "Lighting Fixtures">> meta: <<?x spkl:name "electrical/ethernet ports">>.
+?elecoutlet spkl:parameters ?s.
+?s ?o ?p.
+?p spkl:applicationInternalName "d0145932-8ad8-49e5-96ec-7dd69439bec2".
+?p spkl:value ?eid.
+}
+{
+  ?monitor a s223:Monitor.   
+  <<?monitor spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/mels">>. 
+?monitor spkl:elementId ?eid.
+}}

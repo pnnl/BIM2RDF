@@ -1,0 +1,24 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+prefix x: <urn:anon:fake:>
+
+CONSTRUCT {
+_:inconnect2  a s223:InletConnectionPoint.
+_:inconnect2 rdfs:label "InletConnectionPoint"^^xsd:string.
+_:inconnect2 s223:hasMedium s223:Electricity-Signal.
+_:inconnect2 s223:cnx ?tv.
+_:sys s223:hasMember ?tv.
+_:sys s223:hasBoundaryConnectionPoint _:inconnect2.
+}
+WHERE 
+{
+{
+  ?tv a s223:Television.  
+
+}}

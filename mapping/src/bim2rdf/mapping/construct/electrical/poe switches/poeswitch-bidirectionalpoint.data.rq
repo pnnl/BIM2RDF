@@ -1,0 +1,39 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX meta: <http://meta>
+
+CONSTRUCT {
+?poe s223:cnx ?conn.
+?conn a s223:BidirectionalConnectionPoint.
+?conn rdfs:label "BidirectionalConnectionPoint"^^xsd:string.
+?conn s223:hasMedium _:medium.
+_:medium a s223:PowerAndSignal-PoE.
+_:medium s223:composedOf _:power.
+_:power a s223:Property. 
+_:power s223:ofConstituent s223:Constituent-Electricity.
+_:medium s223:composedOf _:signal.
+_:signal a s223:Property. 
+_:signal s223:ofConstituent s223:Electricity-Signal.
+?conn s223:cnx _:luminairewire.
+_:luminairewire a s223:Connection.
+_:luminairewire s223:hasMedium  _:medium1.
+_:medium1 a s223:PowerAndSignal-PoE.
+_:medium1 s223:composedOf _:elec1.
+_:elec1 a s223:Property.
+_:elec1 s223:ofConstituent s223:Constituent-Electricity.
+_:medium1 s223:composedOf _:sig1.
+_:sig1 a s223:Property.
+_:sig1 s223:ofConstituent s223:Electricity-Signal.
+_:luminairewire rdfs:label "Conductor"^^xsd:string.
+
+}
+WHERE 
+{
+?poe a s223:PowerOverEthernetSwitch. 
+?poe spkl:Connectors ?l.
+?l  ?in ?r.# list item
+?r  spkl:referencedId ?conn.
+}

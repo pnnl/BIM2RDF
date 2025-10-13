@@ -1,0 +1,36 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT { 
+?monitor s223:cnx _:out.
+_:out a s223:OutletConnectionPoint.
+_:out rdfs:label "OutletConnectionPoint"^^xsd:string.
+_:out s223:hasMedium s223:EM-RF.
+_:out s223:cnx _:connection.
+_:connection a s223:Connection.
+_:connection s223:hasMedium s223:EM-RF.
+_:connection s223:cnx _:inconnect.
+_:inconnect  a s223:InletConnectionPoint.
+_:inconnect rdfs:label "InletConnectionPoint"^^xsd:string.
+_:inconnect s223:hasMedium s223:EM-RF.
+_:inconnect s223:cnx ?printer.
+
+  
+} 
+WHERE { 
+ <<?monitor spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/mels">>.
+    ?monitor a s223:Monitor.
+    ?monitor spkl:roomId ?rl.
+
+{
+    <<?printer spkl:category  "Lighting Fixtures">> meta: <<?si spkl:name "architecture/mels">>.
+     ?printer a s223:ComputerPrinter.
+    ?printer spkl:roomId ?rl.
+}
+}

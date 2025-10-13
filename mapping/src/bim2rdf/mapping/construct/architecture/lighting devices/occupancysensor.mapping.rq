@@ -1,0 +1,42 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX meta: <http://meta>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix x: <urn:anon:fake:>
+CONSTRUCT { 
+?o1 a s223:OccupantMotionSensor.
+?o1 rdfs:label "OccupantMotionSensor"^^xsd:string.
+#?o1 rdfs:label ?f.
+?o1 s223:observes _:q.
+_:q a s223:EnumeratedObservableProperty. 
+_:q s223:hasEnumerationKind s223:Occupancy-Motion.
+_:q rdfs:label "Enumerated observable property"^^xsd:string.
+?o1 s223:hasPhysicalLocation ?o2.
+_:q x:l "l".
+} 
+WHERE {{
+<<?o1 spkl:category "Lighting Devices">> meta: <<?si spkl:name "architecture/lighting device">>.
+?o1 spkl:phaseCreated ?_.
+?o1 spkl:definition ?_dr.
+?_dr spkl:referencedId ?type.
+?type spkl:type "Occupancy Sensor".
+?o1 spkl:roomId ?rl.
+<<?o2 spkl:category  "Rooms">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
+?o2 spkl:elementId ?rl.
+}
+ union
+{
+<<?o1 spkl:category "Lighting Devices">> meta: <<?xi spkl:name "architecture/lighting device">>.
+?o1 spkl:phaseCreated ?_.
+?o1 spkl:definition ?_dr.
+?_dr spkl:referencedId ?type.
+?type spkl:type "Occupancy Sensor".
+<<?o2 spkl:category  "Rooms">> meta: <<?li spkl:name "architecture/rooms and lighting fixtures">>.
+?o2 spkl:elementId ?rl.   
+?o1 spkl:parameters ?p.
+?p ?k ?t.
+?t spkl:applicationInternalName "2aee439a-9568-46e6-be17-e9ccba6ff8d5".
+?t spkl:value ?rl.
+}
+}

@@ -1,0 +1,39 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT { 
+    ?this a s223:Television.
+    ?this rdfs:label "Television".
+    ?this s223:hasProperty ?p.
+    ?p a s223:QuantifiableProperty.
+    ?p qudt:hasQuantityKind quantitykind:RadiantFlux.
+    ?p s223:hasValue ?vd.
+    ?p qudt:hasUnit unit:W.
+    ?p rdfs:label "QuantifiableProperty"^^xsd:string.
+    ?this s223:hasPhysicalLocation ?room. 
+  
+} 
+WHERE { 
+    # keep this mapping 'pure' to arch. elec stuff somewhere else.
+    <<?this spkl:category  "Lighting Fixtures">> meta: <<?mi spkl:name "architecture/mels">>. # TODO branchName could be used here
+    ?this spkl:phaseCreated ?_.  # to say it's being 'used' in the plan and not part of the 'types'
+    ?this spkl:definition ?_dr.
+    ?_dr spkl:referencedId ?type.
+    ?type spkl:family "TV".
+    ?this spkl:parameters ?s.
+    ?s ?o ?p.
+    ?p spkl:applicationInternalName "FBX_LIGHT_WATTAGE".
+    ?p spkl:value ?v.
+    BIND(xsd:decimal(?v) AS ?vd).
+{
+    <<?room spkl:category  "Rooms">> meta: <<?si spkl:name "architecture/rooms and lighting fixtures">>.
+    ?room spkl:elementId ?rl.
+    ?this spkl:roomId ?rl.
+}
+}

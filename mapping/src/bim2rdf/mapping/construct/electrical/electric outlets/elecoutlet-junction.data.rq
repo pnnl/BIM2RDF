@@ -1,0 +1,52 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+CONSTRUCT {
+  ?elecwire s223:cnx _:outlet.
+  _:outlet a s223:OutletConnectionPoint.
+  _:outlet rdfs:label "OutletConnectionPoint"^^xsd:string.              
+  _:outlet s223:hasMedium s223:Constituent-Electricity.
+  _:outlet s223:cnx ?j.
+ ?elecoutlet  ?circuit1 _:outlet.
+}
+WHERE 
+{
+{
+?elecoutlet a s223:ElectricityOutlet.
+?elecoutlet s223:cnx ?conn.
+?conn s223:cnx ?elecwire.
+?elecwire a s223:Conductor.
+?elecwire s223:hasMedium s223:Constituent-Electricity.
+<<?elecwire spkl:category "Electrical Circuits">> meta: <<?x spkl:name "electrical/electric outlets">>.
+  ?elecwire spkl:parameters ?m.
+  ?m ?y ?circuit1.
+  ?circuit1 spkl:applicationInternalName "RBS_ELEC_CIRCUIT_PANEL_PARAM".
+  ?circuit1 spkl:value ?circuitname.
+  }
+
+
+  {
+  ?elecbreaker a s223:ElectricityBreaker.
+<<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?mi spkl:name "electrical/panels">>. 
+  ?elecbreaker spkl:parameters ?q.
+  ?q ?a ?circuit.
+  ?circuit spkl:applicationInternalName "RBS_ELEC_PANEL_NAME".
+  ?circuit spkl:value ?circuitname. 
+  ?elecbreaker ?circuit ?j.
+  }
+{
+  
+  ?elecbreaker s223:cnx ?o.
+  ?o a s223:OutletConnectionPoint.
+  ?o s223:cnx ?e.
+  ?e a s223:Conductor.
+  ?e s223:cnx ?i.
+  ?i a s223:InletConnectionPoint.
+  ?i s223:cnx ?j.
+  ?j a s223:Junction.
+	
+}
+}

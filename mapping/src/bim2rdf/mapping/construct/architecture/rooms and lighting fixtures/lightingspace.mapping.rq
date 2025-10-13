@@ -1,0 +1,31 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX unit: <http://qudt.org/vocab/unit/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+CONSTRUCT { 
+?this a s223:DomainSpace.
+?this s223:hasDomain s223:Domain-Lighting.
+ ?this rdfs:label "Domain-Lighting"^^xsd:string.
+#?this rdfs:label ?name.
+?this s223:hasProperty ?l.
+?l a s223:QuantifiableProperty.
+?l qudt:hasQuantityKind quantitykind:Area.
+?l s223:hasValue ?vd.
+?l qudt:hasUnit unit:M2.
+?l rdfs:label "QuantifiableProperty"^^xsd:string.
+} 
+WHERE { 
+<<?this spkl:category  "Spaces">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
+    #?this spkl:name ?name. 
+    ?this spkl:parameters ?p.
+    ?p ?k ?l.
+    ?l spkl:applicationInternalName "ROOM_AREA".
+  ?l spkl:value ?v.
+  BIND(xsd:decimal(?v) AS ?vd).
+}

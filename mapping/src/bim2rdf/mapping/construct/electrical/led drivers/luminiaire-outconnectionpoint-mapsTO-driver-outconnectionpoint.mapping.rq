@@ -1,0 +1,32 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX meta: <http://meta>
+prefix s223x: <urn:s223:extentions:>
+
+CONSTRUCT 
+{
+
+?out s223:mapsTo ?conn1.
+
+ 
+
+}
+WHERE 
+{
+?lum a s223:Luminaire.
+?lum s223:cnx  ?conn1.
+?conn1  a s223:OutletConnectionPoint.
+?conn1 s223:hasMedium s223:EM-Light.
+
+{
+?module a s223x:LEDModule.
+?module s223:cnx ?out.
+?out a s223:OutletConnectionPoint.
+?out s223:hasMedium s223:EM-Light.
+
+}
+?lum s223:contains ?module.
+}

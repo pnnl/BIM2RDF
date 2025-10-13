@@ -1,0 +1,24 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+CONSTRUCT {
+  ?elecoutlet s223:cnx ?conn.
+  ?conn a s223:InletConnectionPoint.
+  ?conn rdfs:label "InletConnectionPoint"^^xsd:string.              
+  ?conn s223:hasMedium s223:Constituent-Electricity.
+  #?conn s223:cnx ?elecwire.
+  #?elecwire a s223:Conductor.
+  #?elecwire s223:hasMedium  s223:Constituent-Electricity.
+  #?elecwire rdfs:label "ElectricWire"^^xsd:string.
+}
+WHERE 
+{
+?elecoutlet a s223:ElectricityOutlet.
+ <<?elecoutlet spkl:category "Lighting Devices">> meta: <<?x spkl:name "electrical/electric outlets">>.
+  ?elecoutlet spkl:Connectors ?l.
+  ?l  ?in ?r.# list item
+  ?r  spkl:referencedId ?conn.
+}

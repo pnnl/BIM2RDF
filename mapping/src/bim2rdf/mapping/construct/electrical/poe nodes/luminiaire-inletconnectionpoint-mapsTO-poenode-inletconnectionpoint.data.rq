@@ -1,0 +1,30 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX meta: <http://meta>
+
+CONSTRUCT 
+{
+_:inlet a s223:InletConnectionPoint.
+_:inlet rdfs:label "InletConnectionPoint"^^xsd:string.
+_:inlet s223:hasMedium s223:Electricity-DC.
+_:inlet s223:cnx ?driver.
+_:inlet s223:mapsTo ?conn.
+
+ 
+
+}
+WHERE 
+{
+?lum a s223:Luminaire.
+?conn s223:cnx ?lum.
+?conn  a s223:InletConnectionPoint.
+
+{
+?driver a s223:ElectricEnergyDCDCConverter.
+
+}
+?lum s223:contains ?driver.
+}

@@ -1,0 +1,22 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+prefix s223x: <urn:s223:extentions:>
+
+CONSTRUCT {
+?driver s223:connectedTo ?module.
+}
+WHERE 
+{ 
+?driver a s223:ElectricEnergyDCDCConverter.
+?module a s223x:LEDModule.
+?lum a s223:Luminaire.
+?lum s223:contains ?driver.
+?lum s223:contains ?module. 
+
+}

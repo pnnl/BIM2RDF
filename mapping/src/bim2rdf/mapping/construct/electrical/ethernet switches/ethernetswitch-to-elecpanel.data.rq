@@ -1,0 +1,54 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX meta: <http://meta>
+
+CONSTRUCT {
+?es s223:cnx _:conn.
+_:conn a s223:InletConnectionPoint.
+_:conn s223:hasMedium s223:Constituent-Electricity.
+_:conn s223:cnx _:luminairewire.
+_:luminairewire a s223:Conductor.
+_:luminairewire s223:hasMedium s223:Constituent-Electricity.
+_:luminairewire s223:cnx _:junctionoutlet.
+_:junctionoutlet a s223:OutletConnectionPoint.
+_:junctionoutlet rdfs:label "OutletConnectionPoint"^^xsd:string.
+_:junctionoutlet s223:hasMedium s223:Constituent-Electricity. 
+_:junctionoutlet s223:cnx ?j.
+?es ?circuit1 _:junctionoutlet.
+}
+WHERE {
+{
+?es a s223:EthernetSwitch.
+ <<?es spkl:category "Lighting Devices">> meta: <<?x spkl:name "electrical/ethernet switch">>.
+  ?es spkl:parameters ?m.
+  ?m ?y ?circuit1.
+  ?circuit1 spkl:applicationInternalName "RBS_ELEC_CIRCUIT_PANEL_PARAM".
+  ?circuit1 spkl:value ?circuitname.
+  }
+
+
+  {
+  ?elecbreaker a s223:ElectricityBreaker.
+<<?elecbreaker spkl:category  "Electrical Equipment">> meta: <<?mi spkl:name "electrical/panels">>. 
+  ?elecbreaker spkl:parameters ?q.
+  ?q ?a ?circuit.
+  ?circuit spkl:applicationInternalName "RBS_ELEC_PANEL_NAME".
+  ?circuit spkl:value ?circuitname. 
+  ?elecbreaker ?circuit ?j.
+  }
+{
+  
+  ?elecbreaker s223:cnx ?o.
+  ?o a s223:OutletConnectionPoint.
+  ?o s223:cnx ?e.
+  ?e a s223:Conductor.
+  ?e s223:cnx ?i.
+  ?i a s223:InletConnectionPoint.
+  ?i s223:cnx ?j.
+  ?j a s223:Junction.
+	
+}
+}

@@ -1,0 +1,25 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT {
+  ?elecoutlet a s223:EthernetSwitch.
+  ?elecoutlet rdfs:label "EthernetSwitch"^^xsd:string.
+  ?elecoutlet s223:hasMedium s223:Signal-WiredEthernet.
+  ?elecoutlet s223:hasPhysicalLocation ?room.
+
+}
+WHERE 
+{
+  <<?elecoutlet spkl:category "Lighting Devices">> meta: <<?x spkl:name "electrical/ethernet switch">>.
+  ?elecoutlet spkl:phaseCreated ?_.
+  ?elecoutlet spkl:roomId ?rId.
+  <<?room spkl:category "Rooms">> meta: <<?y spkl:name "architecture/rooms and lighting fixtures">>. 
+  ?room spkl:elementId ?rId. 
+
+}

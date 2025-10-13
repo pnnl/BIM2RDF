@@ -1,0 +1,33 @@
+PREFIX meta: <http://meta>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT {
+  ?elecoutlet a s223:ElectricityOutlet.
+  ?elecoutlet rdfs:label "ElectricityOutlet"^^xsd:string.
+  ?elecoutlet s223:hasMedium s223:Constituent-Electricity.
+  ?elecoutlet s223:hasPhysicalLocation ?room.
+  ?elecoutlet s223:hasProperty ?p.
+  ?p a s223:QuantifiableProperty.
+  ?p qudt:hasQuantityKind quantitykind:ApparentPower.
+  ?p s223:hasValue ?vd.
+  ?p qudt:hasUnit unit:V-A.
+}
+WHERE 
+{
+  <<?elecoutlet spkl:category "Lighting Devices">> meta: <<?x spkl:name "electrical/electric outlets">>.
+  ?elecoutlet spkl:phaseCreated ?_.
+  ?elecoutlet spkl:roomId ?rId.
+  <<?room spkl:category "Rooms">> meta: <<?y spkl:name "architecture/rooms and lighting fixtures">>. 
+  ?room spkl:elementId ?rId. 
+  ?elecoutlet spkl:parameters ?s.
+  ?s ?o ?p.
+  ?p spkl:applicationInternalName "Load".
+  ?p spkl:value ?v.
+  BIND(xsd:decimal(?v) AS ?vd).
+}
