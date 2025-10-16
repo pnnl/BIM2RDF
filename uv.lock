@@ -713,15 +713,16 @@ wheels = [
 
 [[package]]
 name = "oxigraph"
-version = "0.4.11"
+version = "0.5.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/fc/a2/f0c17ead964c71d4f808f1e2c3fed3526c902e2cb8c77a33e4bab87d51b8/oxigraph-0.4.11.tar.gz", hash = "sha256:4df60e793afa1ad9dcb1e63960648d916abb784fb488e6f1e2397b6676efff13", size = 6158812, upload-time = "2025-05-21T20:54:14.261Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/17/8f568ebf4ad43188695b075e7acacbec54eba9f4f75df97ed709ccfffe75/oxigraph-0.5.1.tar.gz", hash = "sha256:f6fb59748a33744f8299a0c2dffdbe19c48a73a7e1917a31919c555db18d036f", size = 6242232, upload-time = "2025-10-11T19:35:57.074Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6d/a9/0ddc9266a99a6ee2d860a80b0d9b7e016796ae50a51064c73c402abb3af4/oxigraph-0.4.11-py3-none-macosx_10_14_x86_64.whl", hash = "sha256:816073269929487ff4590100653e23718bb5723a384694ad6e3c1ecfc0753f0e", size = 6327905, upload-time = "2025-05-21T20:54:04.358Z" },
-    { url = "https://files.pythonhosted.org/packages/02/c9/454aaa6eab5978cc44b0cf05fdf5775b85f60568c23fafe001d7f0dc6c4f/oxigraph-0.4.11-py3-none-macosx_11_0_arm64.whl", hash = "sha256:ccdfe775fd5d2817af22e9265f03f8253ed8da6e71c0f2c2b4ae222719e576fd", size = 5773572, upload-time = "2025-05-21T20:54:06.063Z" },
-    { url = "https://files.pythonhosted.org/packages/32/66/5199176db0348eea6946f34d420da10b14e8eedc9b593f2abc5f10b6fcc7/oxigraph-0.4.11-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f3600a61894a20a0dd948fe3bd0646a83adb7bbf3452e55dfb9916eb7a03fb7a", size = 7288694, upload-time = "2025-05-21T20:54:08.457Z" },
-    { url = "https://files.pythonhosted.org/packages/84/18/d6551b605bc97b963ebf5c94678160fb02e0ff713d100c2a5f4c2706320a/oxigraph-0.4.11-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cfa23e59907c47bb9198888a6a17dd4762d40b38c3ae9e68db5ab6e5bdc9469c", size = 7679259, upload-time = "2025-05-21T20:54:10.581Z" },
-    { url = "https://files.pythonhosted.org/packages/b2/0c/d7236a0b603d1c938ad48be20d796e71e30f5a1f19ef72fc1214845bc8c0/oxigraph-0.4.11-py3-none-win_amd64.whl", hash = "sha256:ac0725641b317ec487c7f996f8cdb8a5a25b01f27a767c9cc6535c149d717f3e", size = 5356629, upload-time = "2025-05-21T20:54:12.505Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/a5/536c4fb54809aa95e631ab629031d920f65c004db6a63505e448a94c2ad1/oxigraph-0.5.1-py3-none-macosx_10_14_x86_64.whl", hash = "sha256:437324db6673e786863c8e765d0c29d1753241f569035b3f49c487667b4a89ad", size = 6285354, upload-time = "2025-10-11T19:35:41.436Z" },
+    { url = "https://files.pythonhosted.org/packages/c2/f3/cd5815a9bb098f1e6dc18a2b835bd92511e27efc578e2c0386c958408e26/oxigraph-0.5.1-py3-none-macosx_11_0_arm64.whl", hash = "sha256:6cb506d9204ef0a30004af528d5d81d65366fad4a23bcb6397fef013a3e6c64c", size = 5717885, upload-time = "2025-10-11T19:35:43.567Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/6e/a06736bd9fcc57e3620fe86d8803004334a01439a63a1298b934b5a2f76f/oxigraph-0.5.1-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a288f2b1597811f1d04c2684540a655423d63c7d75bf391c999b18856fac5f9f", size = 7233522, upload-time = "2025-10-11T19:35:45.625Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/00/0b9165eebebea5ab8a0c4fdb83f7fa25ea06e90071cf74a94033da09b6fa/oxigraph-0.5.1-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9768f18c23bff86d1ef40e5c8253354db05fa574aa99f276e7bc24f767ad222a", size = 7521822, upload-time = "2025-10-11T19:35:47.358Z" },
+    { url = "https://files.pythonhosted.org/packages/94/d5/618bb4a735e5033986d297b3c4c6447f5a5e1609d1a6e015ac4b3ba628d4/oxigraph-0.5.1-py3-none-win_amd64.whl", hash = "sha256:8b3debfa84497c805aad2a832fd42aa1e8264406359340cbad9d3bf7c23bbeae", size = 5327745, upload-time = "2025-10-11T19:35:53.294Z" },
+    { url = "https://files.pythonhosted.org/packages/85/b9/e63f4010dd3e093e8c246eabc095a277fc6bb4bd010b34450cacdf40ea95/oxigraph-0.5.1-py3-none-win_arm64.whl", hash = "sha256:ffe2e5578141c3939dccf838812d733ff2f0d7f477cd882e44aae23d971b239a", size = 4952042, upload-time = "2025-10-11T19:35:55.011Z" },
 ]
 
 [[package]]

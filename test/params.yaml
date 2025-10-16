@@ -1,9 +1,14 @@
 db: db
-project_name: bldg1
-model_names: [] # keep blank when want to use model_versions
-model_versions:
-  - 8ef9627927 # arch / rooms and lights
-  - beaf7d65a4 # arch / lighting device
+project_name: Building 1
+#model_names: [] # keep blank when want to use model_versions
+model_names:
+  - architecture/rooms and lighting fixtures
+  - architecture/lighting devices
+  - electrical/panels
+
+#model_versions:
+  #- 8ef9627927 # arch / rooms and lights
+  #- beaf7d65a4 # arch / lighting device
 #ttls: []
 #included_mappings:
  # - data
