@@ -21,6 +21,9 @@ _.py
 !*.yaml
 !*.yml
 !uv.lock
+!Containerfile
+!Dockerfile
+!.containerignore
 # still secrets out
 *.secrets.*
 *.secret.*
