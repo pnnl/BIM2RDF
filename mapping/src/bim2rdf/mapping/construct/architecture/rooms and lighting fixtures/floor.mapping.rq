@@ -1,7 +1,7 @@
-PREFIX meta: <http://meta>
+prefix spkl.meta: <urn:speckle:meta:>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX spkl: <http://speckle.systems/> 
+PREFIX spkl: <urn:speckle:concept:> 
 PREFIX qudt: <http://qudt.org/schema/qudt/>
 PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
 PREFIX unit: <http://qudt.org/vocab/unit/>
@@ -11,7 +11,7 @@ CONSTRUCT {
 ?this a s223:PhysicalSpace.
 ?this rdfs:label "PhysicalSpace"^^xsd:string.
 #?this rdfs:label ?name.
-?this s223:hasProperty ?l.
+?this s223:hasProperty ?a.
 ?l a s223:QuantifiableProperty.
 ?l qudt:hasQuantityKind quantitykind:Area.
 ?l s223:hasValue ?vd.
@@ -19,14 +19,12 @@ CONSTRUCT {
 ?l rdfs:label "QuantifiableProperty"^^xsd:string.
 } 
 WHERE { 
-<<?this spkl:category  "Floors">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
-   #                  or level?
-    #?this spkl:level/spkl:name ?name. 
-    #?this spkl:parameters/spkl:HOST_AREA_COMPUTED ?p.
-    ?this spkl:parameters ?p.
-    ?p ?k ?l.
-    ?l spkl:applicationInternalName "HOST_AREA_COMPUTED".
-    ?l spkl:value ?v.
-    #?p spkl:value ?v.
-    BIND(xsd:decimal(?v) AS ?vd).
+<<?this spkl:category  "Floors">> spkl.meta:model_name "architecture/rooms and lighting fixtures". # TODO branchName could be used here
+    ?this spkl:properties ?pr.
+    ?pr spkl:Parameters ?l.
+    ?l spkl:Instance%20Parameters ?c.
+    ?c spkl:Dimensions ?a.
+    ?a spkl:Area ?vr.
+    ?vr spkl:value ?value.
+    BIND(xsd:decimal(?value) AS ?vd).
 }

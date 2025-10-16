@@ -1,35 +1,26 @@
-PREFIX meta: <http://meta>
+prefix spkl.meta: <urn:speckle:meta:>
 PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX spkl: <http://speckle.systems/> 
+PREFIX spkl: <urn:speckle:concept:> 
 
 
 CONSTRUCT { 
-?o1 s223:hasPhysicalLocation ?o2. 
+  ?o1 s223:hasPhysicalLocation ?o2. 
 } 
-WHERE { 
-#{
-?o1 a s223:Luminaire.
-<<?o1 spkl:category "Lighting Fixtures">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
-<<?o2 spkl:category  "Rooms">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
-?o2 spkl:elementId ?rl.
-?o1 spkl:roomId ?rl.
-#}
-#union
-    #{
-    #?o1 a s223:Luminaire.
-    #<<?o1 spkl:category "Lighting Fixtures">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
-    #<<?o2 spkl:category  "Rooms">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>.
-    #?o2 spkl:elementId ?rl.
-    #?o1 spkl:parameters ?p.
-    #?p ?k ?t.
-    #?t spkl:applicationInternalName "2aee439a-9568-46e6-be17-e9ccba6ff8d5".
-    #?t spkl:value ?rl.
-    #}
-    }
+WHERE 
+  {
+    <<?o1 spkl:category "Lighting Fixtures">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
+    ?o1 a s223:Luminaire.
+    ?o1 spkl:properties ?pr.
+    ?pr spkl:Parameters ?l.
+    ?l spkl:Instance%20Parameters ?c1.
+    ?c1 spkl:Text ?a1.
+    ?a1 spkl:Room%20Element%20Id ?w.
+    ?w spkl:value ?value.
+  
+    <<?o2 spkl:category  "Rooms">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
+     ?o2 a s223:PhysicalSpace.
+     ?o2 spkl:properties ?pr1.
+     ?pr1 spkl:elementId ?value.
 
-
-#?o2 a s223:PhysicalSpace.
-
-
-
+  }
 

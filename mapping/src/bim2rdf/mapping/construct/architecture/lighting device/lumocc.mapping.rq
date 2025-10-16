@@ -1,0 +1,26 @@
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <http://speckle.systems/> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX spkl: <urn:speckle:concept:> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix spkl.meta: <urn:speckle:meta:>
+
+CONSTRUCT { 
+?o1 a s223:OccupantMotionSensor.
+?o1 rdfs:label "OccupantMotionSensor"^^xsd:string.
+#?o1 rdfs:label ?f.
+#?o1 s223:observes _:q.
+#_:q a s223:EnumeratedObservableProperty. 
+#_:q s223:hasEnumerationKind s223:Occupancy-Motion.
+#_:q rdfs:label "Enumerated observable property"^^xsd:string.
+} 
+WHERE { 
+<<?o1 spkl:category "Lighting Devices">> spkl.meta:model_name "architecture/lighting devices".
+    ?o1 spkl:properties ?pr.
+    ?pr spkl:Parameters ?l.
+    ?l spkl:Instance%20Parameters ?c.
+    ?c spkl:Phasing ?a.
+    ?a spkl:Phase%20Created ?_.
+#?o1 spkl:definition/spkl:family ?f.
+#filter(contains(lcase(?f), "occupancy"))
+}

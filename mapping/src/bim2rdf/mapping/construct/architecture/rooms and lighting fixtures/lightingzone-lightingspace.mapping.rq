@@ -1,25 +1,33 @@
-PREFIX meta: <http://meta>
+prefix spkl.meta: <urn:speckle:meta:>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX s223: <http://data.ashrae.org/standard223#>
-PREFIX spkl: <http://speckle.systems/>
+PREFIX spkl: <urn:speckle:concept:> 
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 
 CONSTRUCT { 
 ?this   a                 s223:Zone.
 ?this   s223:hasDomain    s223:Domain-Lighting.
-    ?this s223:hasDomainSpace ?d.
+?this s223:hasDomainSpace ?d.
      #?this rdfs:label "Zone-Lighting"^^xsd:string.
 #?this   rdfs:label        ?zn. # as it's a name
 
 } 
 WHERE { 
-<<?this spkl:category "HVAC Zones">> meta: <<?_ spkl:name "architecture/rooms and lighting fixtures">>. # TODO branchName could be used here
-?this spkl:elementId ?zn.
-<<?d spkl:category "Spaces">> meta: <<?mi spkl:name "architecture/rooms and lighting fixtures">>.
- ?d spkl:zone ?zone.
- #?zone spkl:referencedId ?ref.
- ?zone spkl:elementId ?zn.
+<<?this spkl:category "HVAC Zones">> spkl.meta:model_name "architecture/rooms and lighting fixtures". # TODO branchName could be used here
+?this spkl:properties ?pr.
+  ?pr spkl:Parameters ?l.
+  ?l spkl:Instance%20Parameters ?c1.
+  ?c1 spkl:Identity%20Data ?a1.
+  ?a1 spkl:Name ?l1.
+  ?l1 spkl:value ?name.
+<<?d spkl:category "Spaces">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
+?d spkl:properties ?pr1.
+  ?pr1 spkl:Parameters ?l3.
+  ?l3 spkl:Instance%20Parameters ?c2.
+  ?c2 spkl:Energy%20Analysis ?a2.
+  ?a2 spkl:Zone ?l2.
+  ?l2 spkl:value ?name.
  
 
 }

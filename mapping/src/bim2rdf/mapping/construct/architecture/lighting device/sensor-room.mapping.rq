@@ -1,0 +1,23 @@
+PREFIX geom: <http://mapping/geo#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <urn:speckle:concept:> 
+prefix spkl.meta: <urn:speckle:meta:>
+
+CONSTRUCT { 
+?o1 s223:hasPhysicalLocation ?o2.
+} 
+WHERE  
+{
+?o1 a s223:OccupantMotionSensor.
+<<?o1 spkl:category "Lighting Devices">> spkl.meta:model_name "architecture/lighting devices".
+    ?o1 spkl:properties ?pr.
+    ?pr spkl:Parameters ?l.
+    ?l spkl:Instance%20Parameters ?c1.
+    ?c1 spkl:Text ?a1.
+    ?a1 spkl:Room%20Element%20Id ?w.
+    ?w spkl:value ?value.
+<<?o2 spkl:category  "Rooms">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
+     ?o2 a s223:PhysicalSpace.
+     ?o2 spkl:properties ?pr1.
+     ?pr1 spkl:elementId ?value.
+}
