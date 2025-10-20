@@ -191,7 +191,7 @@ class Run:
         db = Engine(ms+inf,
                       db=db,
                       MAX_NCYCLES=self.MAX_NCYCLES,
-                      #derand='canonicalize', # gets stuck! probably bc some bad interaction with inferencing
+                      derand='urn:bim2rdf:id:', 
                       log_print=self.log).run()
         
 

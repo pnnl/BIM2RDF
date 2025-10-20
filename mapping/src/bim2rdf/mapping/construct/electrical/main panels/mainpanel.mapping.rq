@@ -1,0 +1,29 @@
+prefix spkl.meta: <urn:speckle:meta:>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <urn:speckle:concept:> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+
+CONSTRUCT { 
+?this a s223:ElectricityBreaker.
+#?this rdfs:label ?name . 
+?this rdfs:label "ElectricityBreaker"^^xsd:string.
+#?this s223:hasPhysicalLocation ?r.
+} 
+WHERE { 
+
+
+<<?this spkl:category  "Electrical Equipment">> spkl.meta:model_name "electrical/main panels". # TODO branchName could be used here
+   ?this spkl:properties ?pr.
+    ?pr spkl:Parameters ?l.
+    ?l spkl:Instance%20Parameters ?c.
+    ?c spkl:Phasing ?a.
+    ?a spkl:Phase%20Created ?_.
+#?this spkl:parameters/spkl:RBS_ELEC_PANEL_NAME/spkl:value ?name. 
+#<<?r spkl:category  "Rooms">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
+#?r spkl:elementId ?rl.
+#?this spkl:roomId ?rl.
+
+
+}

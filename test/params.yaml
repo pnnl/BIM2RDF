@@ -11,7 +11,8 @@ model_names:
   #- beaf7d65a4 # arch / lighting device
 #ttls: []
 #included_mappings:
- # - data
+  #- architecture/rooms and lighting fixtures/luminaire-to-space.data.rq
+  #- architecture/rooms and lighting fixtures/luminaire.mapping.rq
 #  - mappings/AC
 #additional_mapping_paths:
   #- maps

@@ -1,0 +1,28 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <urn:speckle:concept:> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix spkl.meta: <urn:speckle:meta:>
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT {
+?outletwire s223:hasProperty ?pr.
+?pr a s223:QuantifiableProperty.
+?pr qudt:hasQuantityKind quantitykind:Length.
+?pr s223:hasValue ?finallenghth.
+?pr qudt:hasUnit unit:M.
+?pr rdfs:label "QuantifiableProperty"^^xsd:string.
+}
+
+WHERE 
+{
+?outletwire a s223:Conductor.
+?outletwire spkl:parameters ?se.
+?se ?oi ?pr.
+?pr spkl:applicationInternalName "RBS_ELEC_CIRCUIT_LENGTH_PARAM".
+?pr spkl:value ?length.
+BIND(xsd:string(?length) AS ?finallenghth). 
+}

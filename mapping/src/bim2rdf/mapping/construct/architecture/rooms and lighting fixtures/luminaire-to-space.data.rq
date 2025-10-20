@@ -1,0 +1,25 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <urn:speckle:concept:> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix spkl.meta: <urn:speckle:meta:>
+
+CONSTRUCT { 
+?this s223:cnx  _:cp.
+ _:cp  a s223:OutletConnectionPoint.
+_:cp rdfs:label "OutletConnectionPoint"^^xsd:string.
+_:cp s223:hasMedium s223:EM-Light.
+_:cp     s223:cnx   _:conn.
+_:conn  a   s223:Connection.
+_:conn rdfs:label  "Connection"^^xsd:string.
+_:conn  s223:hasMedium    s223:EM-Light.
+_:conn     s223:cnx  _:c.
+_:c a s223:InletConnectionPoint.
+_:c s223:hasMedium s223:EM-Light.
+_:c rdfs:label "InletConnectionPoint"^^xsd:string.
+} 
+WHERE { 
+?this a s223:Luminaire.
+<<?this spkl:category  "Lighting Fixtures">> spkl.meta:model_name "architecture/rooms and lighting fixtures".
+}

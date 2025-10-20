@@ -1,0 +1,28 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX s223: <http://data.ashrae.org/standard223#>
+PREFIX spkl: <urn:speckle:concept:> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix spkl.meta: <urn:speckle:meta:>
+PREFIX qudt: <http://qudt.org/schema/qudt/>
+PREFIX quantitykind: <http://qudt.org/vocab/quantitykind/> 
+PREFIX unit: <http://qudt.org/vocab/unit/>
+
+CONSTRUCT {
+?outletwire s223:hasProperty ?voltage.
+?voltage a s223:Property.
+?voltage s223:hasAspect s223:Aspect-LowLimit.
+?voltage s223:hasValue ?finalvoltagedrop.
+?voltage rdfs:label "Property"^^xsd:string.
+}
+
+WHERE 
+{
+?outletwire a s223:Conductor.
+?outletwire spkl:parameters ?is.
+ ?is ?io ?voltage.
+?voltage spkl:applicationInternalName "RBS_ELEC_VOLTAGE_DROP_PARAM".
+ ?voltage spkl:value ?voltagedrop.
+ BIND(xsd:decimal(?voltagedrop) AS ?finalvoltagedrop). 
+
+}
