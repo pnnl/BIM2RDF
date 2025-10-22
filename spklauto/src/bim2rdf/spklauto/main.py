@@ -36,6 +36,7 @@ def automate_function(
             It also has convenient methods for attaching result data to the Speckle model.
         function_inputs: An instance object matching the defined schema.
     """
+    intercept_token(automate_context)
     r = run(automate_context)
     
     os = RunOutputs(r.db)
@@ -186,6 +187,17 @@ def automate_function_without_inputs(automate_context: AutomationContext) -> Non
      the inputs argument can be omitted.
     """
     return automate_function(automate_context, None)
+
+
+def intercept_token(ctx: AutomationContext):
+    """to put it into bim2rdf config """
+    t = ctx._speckle_token
+    from bim2rdf.core.config import config
+    try:
+        if not config.speckle.token:
+            config.speckle.token = t
+    except AttributeError:
+        config.speckle.token = t
 
 
 
