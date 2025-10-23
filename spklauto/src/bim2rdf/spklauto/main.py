@@ -2,7 +2,7 @@
 This module contains the function's business logic.
 Use the automation_context module to wrap your function in an Automate context helper.
 """
-from pydantic import Field, SecretStr
+from pydantic import Field
 from speckle_automate import (
     AutomateBase,
     AutomationContext,
@@ -10,23 +10,25 @@ from speckle_automate import (
 )
 
 class FunctionInputs(AutomateBase):
-    """These are function author-defined values.
+    # """These are function author-defined values.
+    # Automate will make sure to supply them matching the types specified here.
+    # Please use the pydantic model schema to define your inputs:
+    # https://docs.pydantic.dev/latest/usage/models/
+    # """
+    additional_model_names:     str|None = Field(
+        default=None,
+        title="model names",
+        description="(csv)...in addition to triggering model.",)
+    # decided not to use this
+    # additional_model_versions:  str|None = Field(
+    #     default=None,
+    #     title="model versions",
+    #     description="(csv)...in addition to triggering model.")
 
-    Automate will make sure to supply them matching the types specified here.
-    Please use the pydantic model schema to define your inputs:
-    https://docs.pydantic.dev/latest/usage/models/
-    """
-    # An example of how to use secret values.
-    whisper_message: SecretStr = Field(title="This is a secret message")
-    forbidden_speckle_type: str = Field(
-        title="Forbidden speckle type",
-        description=(
-            "If a object has the following speckle_type,"
-            " it will be marked with an error."),)
 
 def automate_function(
     automate_context: AutomationContext,
-    function_inputs: FunctionInputs | None, # not used
+    function_inputs: FunctionInputs,
 ) -> None:
     """This is an example Speckle Automate function.
     Args:
@@ -37,7 +39,7 @@ def automate_function(
         function_inputs: An instance object matching the defined schema.
     """
     intercept_token(automate_context)
-    r = run(automate_context)
+    r = run(automate_context, function_inputs)
     
     os = RunOutputs(r.db)
     _ = automate_context.automation_run_data.triggers[0] # speckle only has one trigger now
@@ -87,8 +89,31 @@ def automate_function(
     # todo: att shacl report?
 
 
-def run(ctx: AutomationContext):
-    pid = ctx.automation_run_data.project_id
+def run(ctx: AutomationContext, fins: FunctionInputs):
+    def parse(csv: str):
+        _ = csv.split(',')
+        _ = map(lambda v: v.strip(), _)
+        _ = (v for v in _ if v) # remove blanks
+        _ = frozenset(_)
+        return _
+    
+    def creation_triggers(ctx: AutomationContext):
+        pid = ctx.automation_run_data.project_id
+        from bim2rdf.speckle.data import Model, Project
+        prj = Project(pid)
+        r = []
+        from speckle_automate.schema import VersionCreationTrigger
+        for t in ctx.automation_run_data.triggers:
+            if isinstance(t, VersionCreationTrigger):
+                _ = t.payload.model_id
+                _ = Model(project=prj, id=_)
+                r.append(_)
+        return r
+    
+    model_names = parse(fins.additional_model_names) if fins.additional_model_names else set()
+    model_names = {m.name for m in creation_triggers(ctx) } | model_names
+    model_names = frozenset(model_names)
+    
     from bim2rdf.core.engine import Run
     from pyoxigraph import Store
     from pathlib import Path
@@ -96,7 +121,11 @@ def run(ctx: AutomationContext):
         from shutil import rmtree
         rmtree(Path('db'), ignore_errors=True)
     #           use pid instead of name bc more unique
-    r = Run("", project_id=pid, db=Store('db'))
+    pid = ctx.automation_run_data.project_id
+    r = Run("",
+            project_id=pid,
+            model_names=model_names,
+             db=Store('db'))
     _ = r.run()
     return r
 
@@ -144,8 +173,8 @@ class RunOutputs:
             dp = prefixes.data(project_id=project_id, object_id="")
             g.bind(prefix=dp.name, namespace=dp.uri)
 
-        g.parse(_, format='turtle')
-        g.serialize(o, format='turtle')
+        g.parse(_,      format='turtle')
+        g.serialize(o,  format='turtle')
         return o
     
     def shacl_report(self):
@@ -205,7 +234,7 @@ def intercept_token(ctx: AutomationContext):
 if __name__ == "__main__":
     # NOTE: always pass in the automate function by its reference; do not invoke it!
     # Pass in the function reference with the inputs schema to the executor.
-    #execute_automate_function(automate_function, FunctionInputs)
+    execute_automate_function(automate_function, FunctionInputs)
 
     # If the function has no arguments, the executor can handle it like so
-    execute_automate_function(automate_function_without_inputs)
+    # execute_automate_function(automate_function_without_inputs)
