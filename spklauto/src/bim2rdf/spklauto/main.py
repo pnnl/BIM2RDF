@@ -15,6 +15,7 @@ class FunctionInputs(AutomateBase):
     # Please use the pydantic model schema to define your inputs:
     # https://docs.pydantic.dev/latest/usage/models/
     # """
+    """BIM2RDF inputs"""
     additional_model_names:     str|None = Field(
         default=None,
         title="model names",
