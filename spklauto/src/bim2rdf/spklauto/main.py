@@ -67,16 +67,20 @@ def automate_function(
         lvl =  (s['resultSeverity'].value).lower()
         category = triggering_ids[id]
         groups[(lvl, category , s['resultMessage'].value )].add(id)
+
     
+    def objects(ids):
+        from specklepy.objects import Base
+        return [Base(id=id) for id in ids]
     for g, ids in groups.items():
         if 'violation' in g[0]:
             errors = True
-            automate_context.attach_error_to_objects(category=g[1], message=g[2], object_ids=list(ids))
+            automate_context.attach_error_to_objects(   category=g[1], message=g[2], affected_objects=objects(ids))
         elif 'warn' in g[0]:
-            automate_context.attach_warning_to_objects(category=g[1], message=g[2], object_ids=list(ids))
+            automate_context.attach_warning_to_objects( category=g[1], message=g[2], affected_objects=objects(ids))
         else:
             assert('info' in g[0])
-            automate_context.attach_info_to_objects(category=g[1], message=g[2], object_ids=list(ids))
+            automate_context.attach_info_to_objects(    category=g[1], message=g[2], affected_objects=objects(ids))
         automate_context.set_context_view()
     if not errors:
         automate_context.mark_run_success(("no shacl errors in model scope"
