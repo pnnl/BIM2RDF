@@ -26,7 +26,7 @@ def run(cmd, *p, **k):
 
 def build(packages=pkgs, update=True, commit=False, ):
     if update:  
-        increment_ver(packages=pkgs)
+        increment_ver(packages=packages)
     if commit:
         # https://github.com/pre-commit/pre-commit/issues/747#issuecomment-386782080
         run('git add -u', )
