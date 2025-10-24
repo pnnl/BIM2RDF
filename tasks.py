@@ -18,20 +18,26 @@ except CalledProcessError: # no git in cicd maybe
     rev = '{NO GIT}' # 
 
 
+def run(cmd, *p, **k):
+    from subprocess import check_call as run
+    from pathlib import Path
+    return run(cmd, *p, cwd=Path(__file__).parent, shell=True, **k)
+
+
 def build(packages=pkgs, update=True, commit=False, ):
-    def run(cmd, *p, **k):
-        from subprocess import check_call as run
-        from pathlib import Path
-        return run(cmd, *p, cwd=Path(__file__).parent, shell=True, **k)
     if update:  
-        run(f'uvx hatchling version {ver(increment=True)}', )
-        for pkg in packages: run(f'uv lock --upgrade-package {pkg}',)
+        increment_ver(packages=pkgs)
     if commit:
         # https://github.com/pre-commit/pre-commit/issues/747#issuecomment-386782080
         run('git add -u', )
 
     run(f'uv build')
     return
+
+
+def increment_ver(packages=pkgs):
+    run(f'uvx hatchling version {ver(increment=True)}', )
+    for pkg in packages: run(f'uv lock --upgrade-package {pkg}',)
 
 
 def ver(*,increment=False):
@@ -62,5 +68,5 @@ def test():
 if __name__ == '__main__':
     import bim2rdf # just to invoke patch in src/__init__.py
     from fire import Fire
-    _ = {f.__name__:f for f in {build, chk_ver, test, ncommits, ver}}
+    _ = {f.__name__:f for f in {build, chk_ver, test, ncommits, ver, increment_ver} }
     Fire(_)
