@@ -133,9 +133,10 @@ class Model:
             _ = getattr(_, json_method.__name__ if not isinstance(json_method, str) else json_method) # ?
             _ = _()
             _ = json2rdf(_,
-                    subject_id_keys=('id',),     object_id_keys=('referencedId', 'connectedConnectorIds'),
+                    subject_id_keys=('_id', 'id',),     object_id_keys=('referencedId', 'connectedConnectorIds'),
                     id_prefix=(str(dp.name), str(dp.uri)),
                     key_prefix=(str(prefixes.concept.name), str(prefixes.concept.uri)),
+                    deanon=True,
                     **kw)
             return _
 
