@@ -1,4 +1,4 @@
-from .ontologies import included_def, ontology
+from .ontologies import included_def
 from pathlib import Path
 
 
@@ -24,6 +24,5 @@ def included_definition(out: Path|None = Path('ontology.def.ttl')):
 #from bim2rdf.cli import patch
 main = ({ # steps order
     'included_definition' :included_definition,
-    'import': import_,
-    'write': ontology, })
+    'import': import_, })
 #exit(0)

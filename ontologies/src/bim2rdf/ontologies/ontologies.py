@@ -8,38 +8,23 @@ def _():
     return _
 included_def = _(); del _
 
-def import_(definition=included_def):
+def import_(
+        definition=included_def, 
+        out=Path('ontology.ttl')
+        ):
     assert(isinstance(included_def, Path))
     # best to run this in a separate process
     # bc oxigraph store gets locked
     # https://github.com/gtfierro/ontoenv-rs/issues/11
-    from ontoenv import Config, OntoEnv
-    cfg = Config([str(definition.parent)], strict=False, offline=False, )
-    # make the environment
-    env = OntoEnv(cfg)
+    from ontoenv import OntoEnv
+    env = OntoEnv('.',
+            search_directories=[str(definition.parent)],
+            create_or_use_cached=False, temporary=True,
+            strict=False,
+            offline=False,)
     from rdflib import Graph
-    dg = Graph()
-    dg.parse(definition, format='turtle')
-    env.import_dependencies(dg) # removes owl:imports
-    return Path('.ontoenv/store.db')
-
-class Turtle(str): ...
-def ontology(*, store=Path('.ontoenv/store.db'), out=Path('ontology.ttl')) -> Turtle | Path:
-    """use output of importation process to create ontology """
-    from pyoxigraph import Store
-    os = Store((store))
-    from pyoxigraph import RdfFormat
-    from rdflib import Graph
-    og = Graph()
-    for g in os.named_graphs():
-        _ = os.dump(from_graph=g, format=RdfFormat.TURTLE)
-        og.parse(data=_, format='turtle')
-    _ = og.serialize()
-    _ = Turtle(_)
-    if out:
-        out = Path(out)
-        out.write_text(_)
-        return out
-    else:
-        return _
+    g = Graph()
+    env.get_closure(included_uri, destination_graph=g)
+    g.serialize(out, format='text/turtle')
+    return out
 
