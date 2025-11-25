@@ -87,6 +87,7 @@ class SPARQLQuery:
         self._s = _s
         self.substitutions = substitutions.copy()
     
+    
     @classmethod
     def from_path(cls, p: Path, *, substitutions=defaults.substitutions) -> Self:
         p = Path(p)

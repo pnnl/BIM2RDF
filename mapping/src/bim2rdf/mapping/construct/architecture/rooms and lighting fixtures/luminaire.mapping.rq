@@ -24,7 +24,7 @@ CONSTRUCT {
 } 
 WHERE { 
     # keep this mapping 'pure' to arch. elec stuff somewhere else.
-    <<?this spkl:category  "Lighting Fixtures">> spkl.meta:model_name "architecture/rooms and lighting fixtures". # TODO branchName could be used here
+    <<?this spkl:category  "Lighting Fixtures">> spkl.meta:model_name "${model.arch.rooms&lights.name}".
     ?this spkl:properties ?pr.
     ?pr spkl:Parameters ?l.
     ?l spkl:Instance%20Parameters ?c.
