@@ -1,12 +1,7 @@
 from .ontologies import included_def
 from pathlib import Path
 
-
-def import_(definition: Path = included_def):
-    """go through compilation process"""
-    from .ontologies import import_ as f
-    _ = f(Path(definition))
-    return _
+from .ontologies import import_
 
 def included_definition(out: Path|None = Path('ontology.def.ttl')):
     """print out included definition"""
