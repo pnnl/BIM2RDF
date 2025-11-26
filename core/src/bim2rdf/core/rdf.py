@@ -39,5 +39,31 @@ class Prefix:
         _ = str(v)
         _ = _.strip().strip('<').strip('>')
         self._uri = URI(_)
-
+    
+    @classmethod
+    def s(cls):
+        from bim2rdf.speckle.meta import prefixes as                        spkl_prefixes
+        from bim2rdf.rules.rule import                                      Rule
+        from bim2rdf.rules.construct.rule import ConstructQuery as          CQ
+        from bim2rdf.rules.topquadrant.rule import TopQuadrantInference as  TQI
+        from bim2rdf.rules.topquadrant.rule import TopQuadrantValidation as TQV
+        from bim2rdf.rules.ttl.rule import                                  ttlLoader
+        _ = (
+        (f'{Rule.meta_prefix.name}',        Rule.meta_prefix.uri,),
+        (f'{ttlLoader.meta_prefix.name}',   ttlLoader.meta_prefix.uri),
+        (f'{spkl_prefixes.concept.name}',   spkl_prefixes.concept.uri,),
+        (f'{spkl_prefixes.meta.name}',      spkl_prefixes.meta.uri,),
+        (f'{CQ.meta_prefix.name}',          CQ.meta_prefix.uri),
+        (f'{TQI.meta_prefix.name}',         TQI.meta_prefix.uri),
+        (f'{TQV.meta_prefix.name}',         TQV.meta_prefix.uri),
+        ('s223',                            'http://data.ashrae.org/standard223#'),
+        ('qudt',                            'http://qudt.org/schema/qudt/'),
+        ('qudt.unit',                       'http://qudt.org/vocab/unit/'),
+        ('qudt.kind',                       'http://qudt.org/vocab/quantitykind/'),
+        ('rdfs',                            'http://www.w3.org/2000/01/rdf-schema#'),
+        ('sh',                              'http://www.w3.org/ns/shacl#'),
+        ('xsd',                             'http://www.w3.org/2001/XMLSchema#'),
+        )
+        objs = tuple(Prefix(t[0], t[1]) for t in _)
+        return objs
 

@@ -22,30 +22,8 @@ class DefaultSubstitutions:
     
     @classmethod
     def prefixes(cls) -> List[Tuple[str, str]]:
-        from bim2rdf.speckle.meta import prefixes as                        spkl_prefixes
-        from bim2rdf.rules.rule import                                      Rule
-        from bim2rdf.rules.construct.rule import ConstructQuery as          CQ
-        from bim2rdf.rules.topquadrant.rule import TopQuadrantInference as  TQI
-        from bim2rdf.rules.topquadrant.rule import TopQuadrantValidation as TQV
-        from bim2rdf.rules.ttl.rule import                                  ttlLoader
-        _ = (
-        (f'{Rule.meta_prefix.name}',        Rule.meta_prefix.uri,),
-        (f'{ttlLoader.meta_prefix.name}',   ttlLoader.meta_prefix.uri),
-        (f'{spkl_prefixes.concept.name}',   spkl_prefixes.concept.uri,),
-        (f'{spkl_prefixes.meta.name}',      spkl_prefixes.meta.uri,),
-        (f'{CQ.meta_prefix.name}',          CQ.meta_prefix.uri),
-        (f'{TQI.meta_prefix.name}',         TQI.meta_prefix.uri),
-        (f'{TQV.meta_prefix.name}',         TQV.meta_prefix.uri),
-        ('s223',                            'http://data.ashrae.org/standard223#'),
-        ('qudt',                            'http://qudt.org/schema/qudt/'),
-        ('qudt.unit',                       'http://qudt.org/vocab/unit/'),
-        ('qudt.kind',                       'http://qudt.org/vocab/quantitykind/'),
-        ('rdfs',                            'http://www.w3.org/2000/01/rdf-schema#'),
-        ('sh',                              'http://www.w3.org/ns/shacl#'),
-        ('xsd',                             'http://www.w3.org/2001/XMLSchema#'),
-        )
-        from bim2rdf.core.rdf import Prefix as P
-        objs = tuple(P(t[0], t[1]) for t in _)
+        from bim2rdf.core.rdf import Prefix
+        objs = Prefix.s()
         subs = tuple((f"prefix.{p.name}", p.uri) for p in objs)
         query = '\n'.join(f'PREFIX {p.name}: <{p.uri}>' for p in objs)+'\n\n'
         _ = subs + (('query.prefixes', query ),)

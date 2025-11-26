@@ -24,6 +24,8 @@ def import_(
             offline=False,)
     from rdflib import Graph
     g = Graph()
+    from bim2rdf.core.rdf import Prefix
+    for p in Prefix.s(): g.bind(p.name, p.uri)
     env.get_closure(included_uri, destination_graph=g)
     g.serialize(out, format='text/turtle')
     return out
