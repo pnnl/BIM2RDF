@@ -38,7 +38,7 @@ def get_void_query(client=client):
     return _
 
 
-def query_function(q=get_void_query(), client=client) -> dict: # json
+def query_function(q, client=client) -> dict: # json
     if isinstance(q, str):
         from gql import gql
         q = gql(q)
@@ -57,10 +57,6 @@ def query(*p, **k): return query_function(*p, **k)
 
 class queries:
 
-    def __init__(self, client=client):
-        from .graphql import get_dsl_schema
-        self.schema = get_dsl_schema(client=client)
-    
     # dev the query at https://app.speckle.systems/graphql
     def general_meta(self):
         return """ query  { activeUser {
