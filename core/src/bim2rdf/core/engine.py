@@ -131,6 +131,8 @@ class Run:
         else:
             included_mappings = []
         map_paths = tuple(included_mappings)+tuple(Path(p) for p in self.additional_mapping_paths)
+        for mp in map_paths:
+            if not (mp.exists()): raise ValueError('mapping path doest exist')
 
         if self.match_paths_with_model_names:
             def match_paths(paths: tuple[Path], model_names=model_names):
@@ -204,6 +206,8 @@ class Run:
                 for _ in included_validations: assert((included_dir / _).exists() )
                 included_validations = [(included_dir / _) for _ in included_validations]
             val_paths = tuple(included_validations)+tuple(Path(p) for p in self.additional_validation_paths)
+            for vp in val_paths:
+                if not (vp.exists()): raise ValueError('validation path doest exist')
             val_qs = unique_queries(val_paths)
             from bim2rdf.validation.validation import ValidationQuery
             val_qs = [ValidationQuery(v) for v in val_qs]
