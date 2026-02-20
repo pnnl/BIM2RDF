@@ -41,8 +41,6 @@ Follow [test](./test/) [instructions](./test/README.md).
 ...is a three-step process:
 1. Get an ontology.
    You can use the built-in process,
-   `bim2rdf ontologies.import`
-   followed by
    `bim2rdf ontologies.import`,
    to create an ontology ttl from a [definition](./ontologies/src/bim2rdf/ontologies/def.ttl).
 2. Create mappings.
