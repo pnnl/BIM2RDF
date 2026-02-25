@@ -12,6 +12,7 @@ def import_(
         definition=included_def, 
         out=Path('ontology.ttl')
         ):
+    definition = Path(definition)
     assert(isinstance(included_def, Path))
     # best to run this in a separate process
     # bc oxigraph store gets locked
