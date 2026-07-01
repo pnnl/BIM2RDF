@@ -10,6 +10,7 @@ generic stand-alone libraries:
 [RDF-Engine](https://github.com/pnnl/rdf-engine/),
 [JSON2RDF](https://github.com/pnnl/json2rdf/).
 
+[Documentation is in the wiki.](https://github.com/pnnl/BIM2RDF/wiki)
 
 # Development
 
