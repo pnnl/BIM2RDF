@@ -9,6 +9,7 @@ generic stand-alone libraries:
 [PyTQSHACL](https://github.com/pnnl/pytqshacl/),
 [RDF-Engine](https://github.com/pnnl/rdf-engine/),
 [JSON2RDF](https://github.com/pnnl/json2rdf/).
+[RDF-Rules](https://github.com/pnnl/rdf-rules) [should also be a dependency](https://github.com/pnnl/BIM2RDF/issues/16).
 
 [Documentation is in the wiki.](https://github.com/pnnl/BIM2RDF/wiki)
 
