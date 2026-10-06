@@ -10,7 +10,7 @@ prefix xsd: <http://www.w3.org/2001/XMLSchema#>
   #owl:imports <http://data.ashrae.org/standard223/1.0/inference/model-rules>;
   #owl:imports <http://data.ashrae.org/standard223/1.0/inference/owl-subset>;
   # update this manually by going to the github repo and getting the permalink.
-  owl:imports <https://raw.githubusercontent.com/open223/defs.open223.info/365d0bd7d19ebe3a572ffbaaa30d94cbd3591c16/ontologies/223p.ttl>;
+  owl:imports <https://raw.githubusercontent.com/open223/defs.open223.info/2f042a5d9a689fc6b3379bdc85ddf13d47cd1590/ontologies/223p.ttl>;
 
 
   # copy/pasted into rec folder for control

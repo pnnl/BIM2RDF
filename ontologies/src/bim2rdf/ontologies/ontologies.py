@@ -20,14 +20,10 @@ def import_(
     from ontoenv import OntoEnv
     env = OntoEnv('.',
             search_directories=[str(definition.parent)],
-            create_or_use_cached=False, temporary=True,
-            strict=False,
-            offline=False,)
-    from rdflib import Graph
-    g = Graph()
+            temporary=True)
+    g, names =  env.get_closure(included_uri, )
     from bim2rdf.core.rdf import Prefix
     for p in Prefix.s(): g.bind(p.name, p.uri)
-    env.get_closure(included_uri, destination_graph=g)
-    g.serialize(out, format='text/turtle')
+    g.serialize(out, format='text/turtle', )
     return out
 
