@@ -68,7 +68,7 @@ class SpeckleGetter(JSON):
     def __init__(self, *, project_id, version_id):
         sg = _SpeckleGetter(project_id=project_id, version_id=version_id)
         j = sg.json.data
-        super().__init__(j)
+        super().__init__(j, name=sg.model.name)
 
     @classmethod
     def from_names(cls, *, project, model):
