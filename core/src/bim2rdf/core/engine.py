@@ -149,7 +149,9 @@ class Run:
             #      take the first
             return [q[0] for q in dd.values()]
         from rdf_rules.construct import ConstructQuery
-        ms = [ConstructQuery(path=q.source, name=q.source.stem)
+        ms = [ConstructQuery(
+                    path=q.source,
+                    name=q.source.stem)
               for q in unique_queries(map_paths)]
 
         _ = self.ontology
@@ -167,10 +169,11 @@ class Run:
         _ = run(db=db, data_rules=sgs,
                 rules=ms,
                 ontologies=list(self.ontology),
-                MAX_NCYCLES=self.MAX_NCYCLES
-                 )
+                MAX_NCYCLES=self.MAX_NCYCLES,
+                infer=self.inference,
+                validate=self.validation,)
         return _
-
+        # this is some shacl-defined validation to RE-integrate
         ######
         if self.validation:
             lg(f'[3/{n_phases}] validation')
