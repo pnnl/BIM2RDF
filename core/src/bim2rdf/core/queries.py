@@ -79,7 +79,7 @@ class SPARQLQuery:
     def check(self) -> bool:
         from pyoxigraph import Store
         _ = self.substitute()
-        #Store().query(_) # err
+        Store().query(_) # err
         return True
     @cache
     def substitute(self) -> str:
@@ -127,70 +127,17 @@ class Queries:
             n = n.stem#.replace('-', '_').replace(' ', '_')
             setattr(self, n, q.string)
 
-    @property
-    def mapped(self) -> str:
-        _ ="""
-        prefix c: <${prefix.construct.meta}>
-        construct {?s ?p ?o.}
-        WHERE {
-        <<?s ?p ?o>> c:name ?mo.
-        filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data.") ) 
-        }"""
-        return self.mk(_)
-    @property
-    def mapped_and_inferred(self) -> str:
-        _ ="""
-        prefix c: <${prefix.construct.meta}>
-        prefix i: <${prefix.tq.inf.meta}>
-        construct {?s ?p ?o.}
-        WHERE {
-            {<<?s ?p ?o>> c:name ?mo.
-            filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data."))}
-        union
-            {<<?s ?p ?o>> i:data ?_. } # there's also i:shapes
-        }"""
-        return self.mk(_)
-    #note: copy/pasting here
 
     @property
-    def ontology(self) -> str:
-        _ = """
-        prefix t: <${prefix.ttl.meta}>
-        construct {?s ?p ?o.}
-        WHERE {
-        <<?s ?p ?o>> t:source ?mo.
-        filter (CONTAINS(?mo, "ontology.ttl") )
-        }"""
-        return self.mk(_)
+    def mapped_and_inferred(self) -> str:
+        from rdf_rules.queries import mapped_and_inferred
+        return self.mk(mapped_and_inferred)
     #note: copy/pasting here
-    @property
-    def tqinput(self) -> str:
-        _ ="""
-        prefix c: <${prefix.construct.meta}>
-        prefix i: <${prefix.tq.inf.meta}>
-        prefix t: <${prefix.ttl.meta}>
-        construct {?s ?p ?o.}
-        WHERE {
-            {<<?s ?p ?o>> c:name ?mo.
-            filter (CONTAINS(?mo, ".mapping.") || CONTAINS(?mo, ".data."))}
-        union
-            {<<?s ?p ?o>> i:data ?_. } # there's also i:shapes
-        union
-            {
-            <<?s ?p ?o>> t:source ?mo.
-            filter (CONTAINS(?mo, "ontology.ttl") )
-            }
-        }"""
-        return self.mk(_)
     
     @property
     def validation(self) -> str:
-        _ = """
-        prefix v: <${prefix.tq.val.meta}>
-        construct {?s ?p ?o.}
-        where {<<?s ?p ?o>> v:data ?_.}
-        """
-        return self.mk(_)
+        from rdf_rules.queries import validation
+        return self.mk(validation)
     #     @property just for ref. does not gen triples
     # def shacl_report(self):
     #     from .query import Prefixes, Node, known_prefixes
