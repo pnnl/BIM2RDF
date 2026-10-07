@@ -1,8 +1,5 @@
-from ..rule import Rule, Store
 
-class SpeckleGetter(Rule):
-    from bim2rdf.speckle.meta import prefixes
-    meta_prefix = prefixes.meta
+class _SpeckleGetter:
     def __init__(self, *, project_id, version_id):
         self.project_id = project_id
         self.version_id = version_id
@@ -51,24 +48,45 @@ class SpeckleGetter(Rule):
                 if v.id == self.version_id:
                     return v
         assert(not True)
-    
-    def __repr__(self):
-        _ = {#'project': self.project.name,
-            'model_name': self.model.name,
-             'version': self.version.id,}
-        _ = self.repr(**_)
+
+    @property
+    def json(self, ):
+        return self.version.json()
+
+    @property
+    def rule(self):
+        from rdf_rules.data.json import JSON
+        class SpeckleGetter(JSON): pass
+        return SpeckleGetter(lambda: self.data,
+            additional_params={
+                'model_name':self.model.name,
+                'version': self.version.id } )
+
+
+from rdf_rules.data.json import JSON
+class SpeckleGetter(JSON):
+    def __init__(self, *, project_id, version_id):
+        sg = _SpeckleGetter(project_id=project_id, version_id=version_id)
+        j = sg.json.data
+        super().__init__(j)
+
+    @classmethod
+    def from_names(cls, *, project, model):
+        _ = _SpeckleGetter.from_names(project=project, model=model)
+        _ = cls(project_id=_.project_id, version_id=_.version_id)
         return _
-    
-    @cached_property
-    def spec(self):
-        _ = {#'project': self.project.name,
-             'model_name': self.model.name, }
-        return _
-    
-    def data(self, db: Store):
-        _ = self.version.ttl()
-        _ = _+'\n' # https://github.com/oxigraph/oxigraph/issues/1164
-        from pyoxigraph import parse, RdfFormat
-        _ = parse(_, format=RdfFormat.TURTLE)
-        _ = (q.triple for q in _)
-        yield from _
+
+# from typing import Callable
+# def ttl(self, *, json_method:str|Callable=Json.wo_geometry, **kw):
+#     from .meta import prefixes
+#     dp = prefixes.data(project_id=self.model.project.id, object_id="") # objid filled in
+#     _ = self.json()
+#     _ = getattr(_, json_method.__name__ if not isinstance(json_method, str) else json_method) # ?
+#     _ = _()
+#     _ = json2rdf(_,
+#             subject_id_keys=('_id', 'id',),     object_id_keys=('referencedId', 'connectedConnectorIds'),
+#             id_prefix=(str(dp.name), str(dp.uri)),
+#             key_prefix=(str(prefixes.concept.name), str(prefixes.concept.uri)),
+#             deanon=True,
+#             **kw)
+#     return _

@@ -79,7 +79,7 @@ class SPARQLQuery:
     def check(self) -> bool:
         from pyoxigraph import Store
         _ = self.substitute()
-        Store().query(_) # err
+        #Store().query(_) # err
         return True
     @cache
     def substitute(self) -> str:

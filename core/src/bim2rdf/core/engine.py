@@ -33,9 +33,7 @@ class _defaults:
             _ = SPARQLQuery.defaults.substitutions; del SPARQLQuery
             return _
         query_subs_overrides = {}
-        @property
-        def ttls(self):
-            return frozenset([Path('ontology.ttl')])
+        ontology =  Path('ontology.ttl')
         inference = True
         validation = True
         MAX_NCYCLES = 10
@@ -57,7 +55,7 @@ class Run:
     from dataclasses import field
     query_substitutions:        dict[str, str]  =   field(default_factory=lambda: defaults.query_substitutions)
     query_subs_overrides:       dict[str, str]  =   field(default_factory=lambda: defaults.query_subs_overrides)
-    ttls:                       frozenset[Path] =   defaults.ttls
+    ontology:                   Path            =   defaults.ontology
     inference:                  bool            =   defaults.inference
     validation:                 bool            =   defaults.validation
     included_validations:       frozenset[str]  =   defaults.included_validations
@@ -70,21 +68,6 @@ class Run:
         model_versions =    tuple(self.model_versions)
         if not (model_names or model_versions):
             return self.Store()
-
-        n_phases = 3 if self.validation else 2
-        from rdf_engine import Engine
-
-        if self.log:
-            from loguru import logger
-            logger.remove()
-            from sys import stderr
-            logger.add(stderr, format="{message}" , level='INFO')
-
-        def lg(phase):
-            if self.log:
-                div = '========='
-                l = f"{div}{phase.upper()}{div}"
-                logger.info(l)
         
         if self.project_name and self.project_id:
             raise ValueError('use project_id OR project_name')
@@ -99,8 +82,8 @@ class Run:
             assert(len(_) == 1)
             project = _[0]
 
+        from rdf_rules import run#, mkrule
         #####
-        lg(f'[1/{n_phases}] data loading')
         db = self.db
         import bim2rdf.rules as r
         model_names =    frozenset(model_names)
@@ -115,11 +98,9 @@ class Run:
             model_names = frozenset(p.name for p in project.models)
         # gl https://raw.githubusercontent.com/open223/defs.open223.info/0a70c244f7250734cc1fd59742ab9e069919a3d8/ontologies/223p.ttl
         # https://github.com/open223/defs.open223.info/blob/4a6dd3a2c7b2a7dfc852ebe71887ebff483357b0/ontologies/223p.ttl
-        ttls = [r.ttlLoader(Path(ttl)) for ttl in self.ttls]
-        # data loading phase.                          no need to cycle
-        db = Engine(sgs+ttls, db=db, derand=False, MAX_NCYCLES=1, log_print=self.log).run()
-
-
+        
+        _ = run(db=db, data_rules=sgs, ontologies=[self.ontology])
+        return _
         #######
         lg(f'[2/{n_phases}] mapping and maybe inferencing')
         self.query_substitutions.update(self.query_subs_overrides)

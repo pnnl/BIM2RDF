@@ -10,7 +10,6 @@ readme = "README.md"
 dev = [
     "fire",
     "ipython", "ipdb",
-    "json2rdf[cli]",
     "project",]
 
 [build-system]

@@ -124,21 +124,6 @@ class Model:
                 return _
         def json(self):
             return self.Json(self)
-        
-        from typing import Callable
-        def ttl(self, *, json_method:str|Callable=Json.wo_geometry, **kw):
-            from .meta import prefixes
-            dp = prefixes.data(project_id=self.model.project.id, object_id="") # objid filled in
-            _ = self.json()
-            _ = getattr(_, json_method.__name__ if not isinstance(json_method, str) else json_method) # ?
-            _ = _()
-            _ = json2rdf(_,
-                    subject_id_keys=('_id', 'id',),     object_id_keys=('referencedId', 'connectedConnectorIds'),
-                    id_prefix=(str(dp.name), str(dp.uri)),
-                    key_prefix=(str(prefixes.concept.name), str(prefixes.concept.uri)),
-                    deanon=True,
-                    **kw)
-            return _
 
     @cached_property
     def versions(self):

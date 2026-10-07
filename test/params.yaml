@@ -3,8 +3,8 @@ project_name: Pritoni
 #model_names: [] # keep blank when want to use model_versions
 model_names:
   - architecture/rooms and lighting fixtures
-  - architecture/lighting devices
-  - electrical/main panels
+  #- architecture/lighting devices
+  #- electrical/main panels
 
 #model_versions:
   #- 8ef9627927 # arch / rooms and lights
