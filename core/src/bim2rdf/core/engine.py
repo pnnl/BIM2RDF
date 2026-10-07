@@ -33,7 +33,7 @@ class _defaults:
             _ = SPARQLQuery.defaults.substitutions; del SPARQLQuery
             return _
         query_subs_overrides = {}
-        ontology =  Path('ontology.ttl')
+        ontology =  frozenset((Path('ontology.ttl'),))
         inference = True
         validation = True
         MAX_NCYCLES = 10
@@ -55,7 +55,7 @@ class Run:
     from dataclasses import field
     query_substitutions:        dict[str, str]  =   field(default_factory=lambda: defaults.query_substitutions)
     query_subs_overrides:       dict[str, str]  =   field(default_factory=lambda: defaults.query_subs_overrides)
-    ontology:                   Path            =   defaults.ontology
+    ontology:                   frozenset[Path] =   defaults.ontology
     inference:                  bool            =   defaults.inference
     validation:                 bool            =   defaults.validation
     included_validations:       frozenset[str]  =   defaults.included_validations
@@ -82,8 +82,8 @@ class Run:
             assert(len(_) == 1)
             project = _[0]
 
-        from rdf_rules import run#, mkrule
-        #####
+        
+        ##### DATA RULES
         db = self.db
         import bim2rdf.rules as r
         model_names =    frozenset(model_names)
@@ -99,10 +99,8 @@ class Run:
         # gl https://raw.githubusercontent.com/open223/defs.open223.info/0a70c244f7250734cc1fd59742ab9e069919a3d8/ontologies/223p.ttl
         # https://github.com/open223/defs.open223.info/blob/4a6dd3a2c7b2a7dfc852ebe71887ebff483357b0/ontologies/223p.ttl
         
-        _ = run(db=db, data_rules=sgs, ontologies=[self.ontology])
-        return _
-        #######
-        lg(f'[2/{n_phases}] mapping and maybe inferencing')
+
+        ####### MAPPING
         self.query_substitutions.update(self.query_subs_overrides)
         included_mappings = tuple(self.included_mappings)
         if included_mappings:
@@ -150,33 +148,28 @@ class Run:
             for q in qs: dd[q.string].append(q)
             #      take the first
             return [q[0] for q in dd.values()]
-        ms = [r.ConstructQuery(
-                    q.string,
-                    name=r.ConstructQuery.mk_name(q.source))
+        from rdf_rules.construct import ConstructQuery
+        ms = [ConstructQuery(path=q.source, name=q.source.stem)
               for q in unique_queries(map_paths)]
-        
-        from .queries import queries
-        if self.inference:
-            inf = [r.TopQuadrantInference(
-                        data=queries['tqinput'])]
-        else:
-            inf = []
-        _ = ['ontology' in str(t.source) for t in ttls if isinstance(t.source, Path) ]
-        if sum(_) == 0:
+
+        _ = self.ontology
+        if len(_) == 0:
             if self.inference or self.validation:
                 from warnings import warn
                 warn('ontology.ttl not found')
                 inf = []
-        if sum(_) > 1:
+        if len(_) > 1:
             if self.inference or self.validation:
                 from warnings import warn
                 warn('more than one ontology.ttl found')
-        db = Engine(ms+inf,
-                      db=db,
-                      MAX_NCYCLES=self.MAX_NCYCLES,
-                      derand='urn:bim2rdf:id:', 
-                      log_print=self.log).run()
-        
+
+        from rdf_rules import run
+        _ = run(db=db, data_rules=sgs,
+                rules=ms,
+                ontologies=list(self.ontology),
+                MAX_NCYCLES=self.MAX_NCYCLES
+                 )
+        return _
 
         ######
         if self.validation:
