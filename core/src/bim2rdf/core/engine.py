@@ -14,6 +14,7 @@ class _defaults:
             _ = [str(_.as_posix()) for _ in _]
             _ = frozenset(_)
             return _
+        include_geometry = False
         additional_mapping_paths = frozenset()
         @property
         def included_validations(self):
@@ -49,6 +50,7 @@ class Run:
     db:                         Store           =   Store()
     model_names:                frozenset[str]  =   defaults.model_names
     model_versions:             frozenset[str]  =   defaults.model_versions
+    include_geometry:           bool            =   defaults.include_geometry
     included_mappings:          frozenset[str]  =   defaults.included_mappings
     additional_mapping_paths:   frozenset[Path] =   defaults.additional_mapping_paths
     match_paths_with_model_names:bool           =   defaults.match_paths_with_model_names
@@ -91,14 +93,23 @@ class Run:
         if model_names and model_versions:
             raise ValueError('use model names OR versions')
         if model_names:
-            sgs = [r.SpeckleGetter.from_names(project=project.name, model=n) for n in model_names]
+            def _():
+                for n in model_names:
+                    yield from r.SpeckleGetter.from_names(
+                        project=project.name,
+                        model=n,
+                        geometry=self.include_geometry)
+            sgs = list(_())
         else:
             #assert(model_versions) to allow no models
-            sgs = [r.SpeckleGetter(project_id=project.id, version_id=v) for v in model_versions]
+            def _():
+                for v in model_versions:
+                    yield from r.SpeckleGetter.s(
+                        project_id=project.id,
+                        version_id=v,)
+            sgs = list(_())
             model_names = frozenset(p.name for p in project.models)
-        # gl https://raw.githubusercontent.com/open223/defs.open223.info/0a70c244f7250734cc1fd59742ab9e069919a3d8/ontologies/223p.ttl
-        # https://github.com/open223/defs.open223.info/blob/4a6dd3a2c7b2a7dfc852ebe71887ebff483357b0/ontologies/223p.ttl
-        
+
 
         ####### MAPPING
         self.query_substitutions.update(self.query_subs_overrides)

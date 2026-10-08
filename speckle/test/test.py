@@ -1,6 +1,5 @@
 
 
-
 def test():
     import bim2rdf.speckle.data as sd
     p = sd.Project.from_name("Pritoni")

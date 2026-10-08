@@ -1,11 +1,12 @@
 
-class _SpeckleGetter:
-    def __init__(self, *, project_id, version_id):
+class _SpeckleGetters:
+    def __init__(self, *, project_id, version_id, geometry=False):
         self.project_id = project_id
         self.version_id = version_id
+        self.geometry =geometry
         
     @classmethod
-    def from_names(cls, *, project, model):
+    def from_names(cls, *, project, model, geometry=False):
         from bim2rdf.speckle.data import Project
         p = [p for p in cls.projects() if p.name == project]
         assert(len(p) == 1)
@@ -17,7 +18,7 @@ class _SpeckleGetter:
         v = sorted(m.versions, key=lambda m: m.meta['createdAt'])
         v = list(reversed(v))
         v = v[0]
-        return cls(project_id=p.id, version_id=v.id)
+        return cls(project_id=p.id, version_id=v.id, geometry=geometry)
 
     from bim2rdf.speckle.data import Project, Model
     from functools import cache
@@ -50,43 +51,28 @@ class _SpeckleGetter:
         assert(not True)
 
     @property
-    def json(self, ):
-        return self.version.json()
-
-    @property
-    def rule(self):
-        from rdf_rules.data.json import JSON
-        class SpeckleGetter(JSON): pass
-        return SpeckleGetter(lambda: self.data,
-            additional_params={
-                'model_name':self.model.name,
-                'version': self.version.id } )
+    def tables(self):
+        for n, df in self.version.parquets.items():
+            if not self.geometry:
+                if 'geometries' in n:
+                    continue
+            yield n, df
 
 
-from rdf_rules.data.json import JSON
-class SpeckleGetter(JSON):
-    def __init__(self, *, project_id, version_id):
-        sg = _SpeckleGetter(project_id=project_id, version_id=version_id)
-        j = sg.json.data
-        super().__init__(j, name=sg.model.name)
+from rdf_rules.data.table import Table
+class SpeckleGetter(Table):
+    def __init__(self, df,  *,  version_id, name, ):
+        super().__init__(df,  name=name, additional_params={
+            'version_id':version_id,
+        })
 
     @classmethod
-    def from_names(cls, *, project, model):
-        _ = _SpeckleGetter.from_names(project=project, model=model)
-        _ = cls(project_id=_.project_id, version_id=_.version_id)
-        return _
+    def s(cls, *, project_id, version_id, geometry=False):
+        for n, df in _SpeckleGetters(project_id=project_id, version_id=version_id, geometry=geometry).tables:
+            yield cls(df,  version_id=version_id, name=n)
 
-# from typing import Callable
-# def ttl(self, *, json_method:str|Callable=Json.wo_geometry, **kw):
-#     from .meta import prefixes
-#     dp = prefixes.data(project_id=self.model.project.id, object_id="") # objid filled in
-#     _ = self.json()
-#     _ = getattr(_, json_method.__name__ if not isinstance(json_method, str) else json_method) # ?
-#     _ = _()
-#     _ = json2rdf(_,
-#             subject_id_keys=('_id', 'id',),     object_id_keys=('referencedId', 'connectedConnectorIds'),
-#             id_prefix=(str(dp.name), str(dp.uri)),
-#             key_prefix=(str(prefixes.concept.name), str(prefixes.concept.uri)),
-#             deanon=True,
-#             **kw)
-#     return _
+    @classmethod
+    def from_names(cls, *, project, model, geometry=False):
+        sgs = _SpeckleGetters.from_names(project=project, model=model, geometry=geometry)
+        for n, df in sgs.tables:
+            yield cls(df, version_id=sgs.version_id, name=n)

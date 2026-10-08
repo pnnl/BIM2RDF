@@ -87,7 +87,7 @@ class Model:
             assert(not True)
 
         @cached_property
-        def parquets(self):
+        def parquets(self): 
             from .rest import artifacts
             p = self.model.project  .id
             m = self.model          .id
