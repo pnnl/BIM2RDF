@@ -22,10 +22,7 @@ def artifacts_list(*, project_id, model_id, version_id) -> dict:
     _ = _.json()
     return _
 
-#@cache
-#def artifact(*, project_id, model_id, version_id, name): # name not url b/c url is temporary
-#    _ = requests.get(i)
-#    return _
+
 @cache
 def artifacts(*, project_id, model_id, version_id) ->dict:
     _ = {}

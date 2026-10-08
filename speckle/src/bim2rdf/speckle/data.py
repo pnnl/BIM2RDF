@@ -88,8 +88,19 @@ class Model:
             assert(not True)
 
         @cached_property
-        def bundle(self):
-            raise NotImplementedError 
+        def parquets(self):
+            from .rest import artifacts
+            p = self.model.project  .id
+            m = self.model          .id
+            v = self                .id
+            a = artifacts(project_id=p, model_id=m, version_id=v)
+            _ = {}
+            import pandas as pd
+            from io import BytesIO as B
+            for n,b in a.items():
+                if n.endswith('.parquet'):
+                    _[n] = pd.read_parquet(B(b))
+            return _
 
     @cached_property
     def versions(self):

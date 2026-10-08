@@ -4,6 +4,8 @@
 def test():
     import bim2rdf.speckle.data as sd
     p = sd.Project.from_name("Pritoni")
+    _ = p.models[0].versions[0].parquets
+    return _
     m = p.models[0]
     v = m.versions[0]
     p = p.id #"9e62692a26"
