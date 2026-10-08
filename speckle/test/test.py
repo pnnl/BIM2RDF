@@ -11,7 +11,6 @@ def test():
     v = v.id#"dd38e48235"
     import bim2rdf.speckle.rest as sr
     _ = sr.artifacts(project_id=p, model_id=m, version_id=v)
-    
     return _
 
 if __name__ == '__main__':
