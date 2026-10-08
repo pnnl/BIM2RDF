@@ -96,11 +96,12 @@ wheels = [
 name = "bim2rdf"
 source = { editable = "." }
 dependencies = [
-    { name = "boltons" },
     { name = "dynaconf" },
     { name = "gql", extra = ["requests"] },
     { name = "json2rdf" },
     { name = "ontoenv" },
+    { name = "pandas" },
+    { name = "pyarrow" },
     { name = "rdf-rules" },
     { name = "rdflib" },
 ]
@@ -130,14 +131,14 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "boltons" },
     { name = "cachier", marker = "extra == 'cache'" },
     { name = "dynaconf" },
     { name = "fire", marker = "extra == 'cli'" },
     { name = "gql", extras = ["requests"] },
     { name = "json2rdf" },
-    { name = "json2rdf", specifier = ">=67" },
     { name = "ontoenv" },
+    { name = "pandas" },
+    { name = "pyarrow" },
     { name = "pyyaml", marker = "extra == 'cli'" },
     { name = "rdf-rules" },
     { name = "rdflib" },
