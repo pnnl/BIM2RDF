@@ -70,7 +70,6 @@ class Model:
     def __repr__(self):
         return f"{self.__class__.__name__}(project={repr(self.project)}, id={self.id}, name={self.name})"
     
-
     class Version:
         """convenience wrapper around graphql"""
         def __init__(self, *, id, model):
@@ -123,12 +122,14 @@ if __name__ == '__main__':
             for v in m.versions:
                 if v.id == version_id:
                     return v
-    def ttl(project_id, version_id, geometry: bool=False):
-        return version(project_id, version_id).ttl(json_method='data' if geometry else 'wo_geometry')
-    def json(project_id, version_id):
-        _ = version(project_id, version_id)
-        _ = _.json().data()
-        from json import dumps
-        _ = dumps(_, indent=2)
-        return _
-    Fire({f.__name__:f for f in (meta, json, ttl) })
+    def data(project_id, version_id, geometry: bool=False):
+        p = Project(project_id)
+        v = version(project_id, version_id)
+        ps = []
+        from pathlib import Path
+        for n, df in v.parquets.items():
+            p = Path(n)
+            df.to_parquet(p)
+            ps.append(p)
+        return ps
+    Fire({f.__name__:f for f in (meta, data) })
