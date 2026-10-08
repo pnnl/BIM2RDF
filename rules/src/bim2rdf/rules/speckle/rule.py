@@ -61,18 +61,20 @@ class _SpeckleGetters:
 
 from rdf_rules.data.table import Table
 class SpeckleGetter(Table):
-    def __init__(self, df,  *,  version_id, name, ):
+    def __init__(self, df,  *,  version_id, model_name,  table_name, ):
+        name = f"{model_name}/{table_name}"
         super().__init__(df,  name=name, additional_params={
             'version_id':version_id,
         })
 
     @classmethod
     def s(cls, *, project_id, version_id, geometry=False):
-        for n, df in _SpeckleGetters(project_id=project_id, version_id=version_id, geometry=geometry).tables:
-            yield cls(df,  version_id=version_id, name=n)
+        sgs = _SpeckleGetters(project_id=project_id, version_id=version_id, geometry=geometry)
+        for n, df in sgs.tables:
+            yield cls(df,  version_id=version_id, model_name=sgs.model.name, table_name=n)
 
     @classmethod
     def from_names(cls, *, project, model, geometry=False):
         sgs = _SpeckleGetters.from_names(project=project, model=model, geometry=geometry)
         for n, df in sgs.tables:
-            yield cls(df, version_id=sgs.version_id, name=n)
+            yield cls(df, version_id=sgs.version_id, model_name=sgs.model.name, table_name=n)
