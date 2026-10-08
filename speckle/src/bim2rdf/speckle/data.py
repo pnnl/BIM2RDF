@@ -86,44 +86,10 @@ class Model:
                 if v['id'] == self.id:
                     return v
             assert(not True)
-        
+
         @cached_property
-        def rootid(self) -> str:
-            return self.meta['referencedObject']
-
-        class Json:
-            def __init__(self, version: 'Version'):
-                self.version = version
-            def data(self) -> dict:
-                from .graphql import queries, query
-                _ = queries.objects(project_id=self.version.model.project.id, object_id=self.version.rootid)
-                _ = query(_) # dict
-                return _
-
-            def wo_geometry(self):
-                _ = self.data()
-                from boltons.iterutils import remap#, get_path
-                def notvec(p,k,v):
-                    if p:
-                        if k in {'matrix', 'data', 'faces', 'vertices'}:
-                            if isinstance(v, list):
-                                if all(isinstance(e, (int, float)) for e in v):
-                                    return False
-                    return True
-                def notgeo(p,k,v):
-                    # should have the above vec keys
-                    types = {'Objects.Other.Transform', "Speckle.Core.Models.DataChunk"}
-                    id = 'id'
-                    st = 'speckle_type'
-                    if isinstance(v, dict):
-                        if (st in v) and (id in v):
-                            if (v[st] in types) or (v[st].lower().startswith('objects.geometry') ):
-                                return False
-                    return True
-                _ = remap(_, notgeo)
-                return _
-        def json(self):
-            return self.Json(self)
+        def bundle(self):
+            raise NotImplementedError 
 
     @cached_property
     def versions(self):

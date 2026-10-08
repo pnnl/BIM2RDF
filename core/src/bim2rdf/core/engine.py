@@ -150,8 +150,7 @@ class Run:
             return [q[0] for q in dd.values()]
         from rdf_rules.construct import ConstructQuery
         ms = [ConstructQuery(
-                    path=q.source,
-                    name=q.source.stem)
+                    path=q.source,)
               for q in unique_queries(map_paths)]
 
         _ = self.ontology

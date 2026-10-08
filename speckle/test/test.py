@@ -3,17 +3,18 @@
 
 def test():
     import bim2rdf.speckle.data as sd
-    p = sd.Project("d0b5d1503f")
+    p = sd.Project.from_name("Pritoni")
     m = p.models[0]
     v = m.versions[0]
-    j = v.json().wo_geometry()
-    from json import dumps
-    open('data.json', 'w').write(dumps(j, indent=2))
-    t = v.ttl()
-    open('data.ttl', 'w').write(t)
-    #ic(j)
-    #sd.json(project_id=, )
-
+    p = p.id #"9e62692a26"
+    m = m.id #"f515d35487"
+    v = v.id#"dd38e48235"
+    import bim2rdf.speckle.rest as sr
+    _ = sr.artifacts(project_id=p, model_id=m, version_id=v)
+    
+    return _
 
 if __name__ == '__main__':
+    print(
     test()
+    )

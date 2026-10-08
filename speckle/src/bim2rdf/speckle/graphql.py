@@ -1,12 +1,12 @@
 from bim2rdf.core.config import config
-gql_url = f'https://{config.speckle.server}/graphql'
+url = f'https://{config.speckle.server}/graphql'
 del config
 
 def client():
     from gql import Client
     from .requests import TokenAuth
     from gql.transport.requests import RequestsHTTPTransport
-    default_transport = RequestsHTTPTransport(url=gql_url, auth=TokenAuth())
+    default_transport = RequestsHTTPTransport(url=url, auth=TokenAuth())
     #from gql.transport.aiohttp import AIOHTTPTransport
     #default_transport = AIOHTTPTransport(url=gql_url,headers= {'Authorization': TokenAuth().token}  )
     _ = Client(transport = default_transport, fetch_schema_from_transport=True)
@@ -73,22 +73,6 @@ class queries:
                     createdAt
         }}}}}}}}
         """
-    
-    biglim = 999999 # https://github.com/specklesystems/speckle-server/issues/3908
-    def objects(self, *, project_id, object_id):
-        _ = """ query {
-        project(id: "project_id") {
-            object(id: "object_id") {
-            data
-            children(limit: biglim, depth: biglim) {
-                objects {
-                data
-        }}}}}
-        """
-        _ = _.replace('project_id', project_id)
-        _ = _.replace('object_id',  object_id)
-        _ = _.replace('biglim', str(self.biglim))
-        return _
 
 queries = queries()
 

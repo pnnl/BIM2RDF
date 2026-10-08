@@ -10,6 +10,7 @@ class TokenAuth(AuthBase):
         request.headers['Authorization'] = f'{self.auth_scheme} {self.token}'
         return request
 
+
 def get_session( ):
     from requests import Session
     return Session()
