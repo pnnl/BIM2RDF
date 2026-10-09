@@ -5,7 +5,8 @@ model_names:
   - architecture/rooms and lighting fixtures
   #- architecture/lighting devices
   #- electrical/main panels
-
+ontologies: 
+  - ontology.ttl
 #model_versions:
   #- 8ef9627927 # arch / rooms and lights
   #- beaf7d65a4 # arch / lighting device

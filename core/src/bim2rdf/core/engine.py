@@ -34,7 +34,7 @@ class _defaults:
             _ = SPARQLQuery.defaults.substitutions; del SPARQLQuery
             return _
         query_subs_overrides = {}
-        ontology =  frozenset((Path('ontology.ttl'),))
+        ontologies =  frozenset((Path('ontology.ttl'),))
         inference = True
         validation = True
         MAX_NCYCLES = 10
@@ -57,7 +57,7 @@ class Run:
     from dataclasses import field
     query_substitutions:        dict[str, str]  =   field(default_factory=lambda: defaults.query_substitutions)
     query_subs_overrides:       dict[str, str]  =   field(default_factory=lambda: defaults.query_subs_overrides)
-    ontology:                   frozenset[Path] =   defaults.ontology
+    ontologies:                 frozenset[Path] =   defaults.ontologies
     inference:                  bool            =   defaults.inference
     validation:                 bool            =   defaults.validation
     included_validations:       frozenset[str]  =   defaults.included_validations
@@ -164,7 +164,8 @@ class Run:
                     path=q.source,)
               for q in unique_queries(map_paths)]
 
-        _ = self.ontology
+        self.ontologies = list(Path(o) for o in self.ontologies)
+        _ = self.ontologies
         if len(_) == 0:
             if self.inference or self.validation:
                 from warnings import warn
@@ -178,7 +179,7 @@ class Run:
         from rdf_rules import run
         _ = run(db=db, data_rules=sgs,
                 rules=ms,
-                ontologies=list(self.ontology),
+                ontologies=list(self.ontologies),
                 MAX_NCYCLES=self.MAX_NCYCLES,
                 infer=self.inference,
                 validate=self.validation,)
