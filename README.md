@@ -6,8 +6,8 @@ The operationalized version will be on [Speckle Automate](https://www.speckle.sy
 Each top-level directory is a 'component' of the project.
 Furthermore, the following dependencies were extracted as
 generic stand-alone libraries:
-[PyTQSHACL](https://github.com/pnnl/pytqshacl/),
 [RDF-Engine](https://github.com/pnnl/rdf-engine/),
+[RDF-Rules](https://github.com/pnnl/rdf-rules/), and
 [JSON2RDF](https://github.com/pnnl/json2rdf/).
 
 
