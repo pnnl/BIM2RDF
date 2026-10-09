@@ -26,7 +26,7 @@ class _defaults:
             _ = frozenset(_)
             return _
         additional_validation_paths = frozenset()
-        match_paths_with_model_names = True
+        match_paths_with_model_names = False # TODO: remove this option when confirming model name independence
 
         @property
         def query_substitutions(self):
