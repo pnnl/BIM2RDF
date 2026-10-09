@@ -42,10 +42,7 @@ class Prefix:
     
     @classmethod
     def s(cls):
-        from bim2rdf.speckle.meta import prefixes as                        spkl_prefixes
         _ = (
-        (f'{spkl_prefixes.concept.name}',   spkl_prefixes.concept.uri,),
-        (f'{spkl_prefixes.meta.name}',      spkl_prefixes.meta.uri,),
         ('s223',                            'http://data.ashrae.org/standard223#'),
         ('qudt',                            'http://qudt.org/schema/qudt/'),
         ('qudt.unit',                       'http://qudt.org/vocab/unit/'),

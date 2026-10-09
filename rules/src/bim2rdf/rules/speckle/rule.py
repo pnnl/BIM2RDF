@@ -62,10 +62,15 @@ class _SpeckleGetters:
 from rdf_rules.data.table import Table
 class SpeckleGetter(Table):
     def __init__(self, df,  *,  version_id, model_name,  table_name, ):
-        name = f"{model_name}/{table_name}"
-        super().__init__(df,  name=name, additional_params={
-            'version_id':version_id,
-        })
+        from bim2rdf.speckle.meta import prefixes
+        *_, table_name , _dotparquet = table_name.split('.')
+        super().__init__(df,
+            name=f"{model_name}/{table_name}", 
+            data_prefix=    str(prefixes.data(name=table_name).uri),
+            data_id_prefix= str(prefixes.data(name=table_name).uri)+'id:',
+            additional_params={
+                'version_id':version_id,
+            })
 
     @classmethod
     def s(cls, *, project_id, version_id, geometry=False):
