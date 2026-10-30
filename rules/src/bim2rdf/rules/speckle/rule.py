@@ -63,16 +63,29 @@ class _SpeckleGetters:
 
 from rdf_rules.data.table import Table
 class SpeckleData(Table):
+    id_col = '_hash'
     def __init__(self, df,  *,  version_id, model_name,  table_name, ):
         from bim2rdf.speckle.meta import prefixes
         *_, table_name , _dotparquet = table_name.split('.')
-        super().__init__(df,
+        super().__init__(
+            lambda : self._add_meta(df, {'version_id': version_id, 'model_name': model_name }),
             name=f"{model_name}/{table_name}", 
             data_prefix=    str(prefixes.data(name=table_name).uri),
             data_id_prefix= str(prefixes.data(name=table_name).uri)+'id:',
+            json2rdf_options = {'subject_id_keys':(self.id_col,)},
             additional_params={
-                'version_id':version_id,
+                'version_id': version_id,
             })
+
+
+    @classmethod
+    def _add_meta(cls, df, meta: dict):
+        df = df() if callable(df) else df
+        from pandas.util import hash_pandas_object
+        _ = hash_pandas_object(df, index=False)
+        df[cls.id_col] = _
+        for k,v in meta.items(): df[f"_{k}"] = v
+        return df
 
     @classmethod
     def s(cls, *, project_id, version_id, geometry=False):
