@@ -24,13 +24,15 @@ def artifacts_list(*, project_id, model_id, version_id) -> dict:
 
 
 @cache
-def artifacts(*, project_id, model_id, version_id) ->dict:
-    _ = {}
+def artifact(*, project_id, model_id, version_id, name) ->bytes:
     l = artifacts_list(project_id=project_id, model_id=model_id, version_id=version_id)
     for i in l['files']:
         if 'name' and 'url' in i:
-            d = requests.get(i['url'])
-            d = d.content
-            assert(isinstance(d, bytes))
-            _[i['name']] = d
-    return _
+            if name.lower() == i['name'].lower():
+                d = requests.get(i['url'])
+                d = d.content
+                assert(isinstance(d, bytes))
+                return d
+    raise ValueError(f'artifact {name} not found.')
+
+

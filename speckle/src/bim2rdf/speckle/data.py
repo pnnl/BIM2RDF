@@ -88,17 +88,19 @@ class Model:
 
         @cached_property
         def parquets(self): 
-            from .rest import artifacts
+            from .rest import artifact, artifacts_list
             p = self.model.project  .id
             m = self.model          .id
             v = self                .id
-            a = artifacts(project_id=p, model_id=m, version_id=v)
+            al = artifacts_list(project_id=p, model_id=m, version_id=v)
             _ = {}
             import pandas as pd
             from io import BytesIO as B
-            for n,b in a.items():
-                if n.endswith('.parquet'):
-                    _[n] = pd.read_parquet(B(b))
+            for i in al['files']:
+                if 'name' and 'url' in i:
+                    if i['name'].endswith('.parquet'):
+                        pb = artifact(project_id=p, model_id=m, version_id=v, name=i['name'])
+                        _[i['name']] = pd.read_parquet( B(pb) )
             return _
 
     @cached_property
