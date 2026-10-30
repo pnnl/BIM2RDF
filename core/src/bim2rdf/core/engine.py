@@ -95,7 +95,7 @@ class Run:
         if model_names:
             def _():
                 for n in model_names:
-                    yield from r.SpeckleGetter.from_names(
+                    yield from r.SpeckleData.from_names(
                         project=project.name,
                         model=n,
                         geometry=self.include_geometry)
@@ -104,7 +104,7 @@ class Run:
             #assert(model_versions) to allow no models
             def _():
                 for v in model_versions:
-                    yield from r.SpeckleGetter.s(
+                    yield from r.SpeckleData.s(
                         project_id=project.id,
                         version_id=v,)
             sgs = list(_())

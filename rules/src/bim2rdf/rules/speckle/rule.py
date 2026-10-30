@@ -50,17 +50,19 @@ class _SpeckleGetters:
                     return v
         assert(not True)
 
-    @property
-    def tables(self):
-        for n, df in self.version.parquets.items():
+    def parquet_list(self):
+        for n in self.version.parquet_list():
             if not self.geometry:
                 if 'geometries' in n:
                     continue
-            yield n, df
+            yield n
+
+    def table(self, name):
+        return self.version.table(name)
 
 
 from rdf_rules.data.table import Table
-class SpeckleGetter(Table):
+class SpeckleData(Table):
     def __init__(self, df,  *,  version_id, model_name,  table_name, ):
         from bim2rdf.speckle.meta import prefixes
         *_, table_name , _dotparquet = table_name.split('.')
@@ -75,11 +77,13 @@ class SpeckleGetter(Table):
     @classmethod
     def s(cls, *, project_id, version_id, geometry=False):
         sgs = _SpeckleGetters(project_id=project_id, version_id=version_id, geometry=geometry)
-        for n, df in sgs.tables:
-            yield cls(df,  version_id=version_id, model_name=sgs.model.name, table_name=n)
+        for n in sgs.parquet_list():
+            def gettbl(n=n): return sgs.table(n)
+            yield cls(gettbl,  version_id=version_id, model_name=sgs.model.name, table_name=n)
 
     @classmethod
     def from_names(cls, *, project, model, geometry=False):
         sgs = _SpeckleGetters.from_names(project=project, model=model, geometry=geometry)
-        for n, df in sgs.tables:
-            yield cls(df, version_id=sgs.version_id, model_name=sgs.model.name, table_name=n)
+        for n in sgs.parquet_list():
+            def gettbl(n=n): return sgs.table(n)
+            yield cls(gettbl, version_id=sgs.version_id, model_name=sgs.model.name, table_name=n)

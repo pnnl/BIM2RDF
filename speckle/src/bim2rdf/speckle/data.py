@@ -87,21 +87,32 @@ class Model:
             assert(not True)
 
         @cached_property
-        def parquets(self): 
-            from .rest import artifact, artifacts_list
+        def artifacts_list(self):
+            from .rest import artifacts_list
             p = self.model.project  .id
             m = self.model          .id
             v = self                .id
             al = artifacts_list(project_id=p, model_id=m, version_id=v)
-            _ = {}
+            return al
+
+        def table(self, name: str):
+            assert(name.endswith('.parquet'))
+            p = self.model.project  .id
+            m = self.model          .id
+            v = self                .id
+            from .rest import artifact
+            _ = artifact(project_id=p, model_id=m, version_id=v, name=name)
             import pandas as pd
             from io import BytesIO as B
-            for i in al['files']:
-                if 'name' and 'url' in i:
-                    if i['name'].endswith('.parquet'):
-                        pb = artifact(project_id=p, model_id=m, version_id=v, name=i['name'])
-                        _[i['name']] = pd.read_parquet( B(pb) )
+            _ = pd.read_parquet( B(_))
             return _
+
+        def parquet_list(self):
+            for i in self.artifacts_list['files']:
+                if 'name' and 'url' in i:
+                    n = i['name']
+                    if n.endswith('.parquet'):
+                        yield n
 
     @cached_property
     def versions(self):
