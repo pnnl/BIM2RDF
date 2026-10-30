@@ -98,7 +98,6 @@ source = { editable = "." }
 dependencies = [
     { name = "dynaconf" },
     { name = "gql", extra = ["requests"] },
-    { name = "json2rdf" },
     { name = "ontoenv" },
     { name = "pandas" },
     { name = "pyarrow" },
@@ -135,7 +134,6 @@ requires-dist = [
     { name = "dynaconf" },
     { name = "fire", marker = "extra == 'cli'" },
     { name = "gql", extras = ["requests"] },
-    { name = "json2rdf" },
     { name = "ontoenv" },
     { name = "pandas" },
     { name = "pyarrow" },

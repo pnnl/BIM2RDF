@@ -23,7 +23,6 @@ dependencies = [
         'rdflib',
     # rules
         "rdf-rules",
-        "json2rdf",
     # speckle
         "gql[requests]",
         "pandas", "pyarrow",
