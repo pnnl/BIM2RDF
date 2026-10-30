@@ -1,3 +1,3 @@
-__version__ = '2026.11.1887'
+__version__ = '2026.11.1888'
 # reset to 0 if problem
 from .engine import *

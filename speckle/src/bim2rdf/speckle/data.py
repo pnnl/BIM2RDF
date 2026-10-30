@@ -135,9 +135,9 @@ if __name__ == '__main__':
         v = version(project_id, version_id)
         ps = []
         from pathlib import Path
-        for n, df in v.parquets.items():
-            p = Path(n)
+        for p in v.parquet_list():
+            df = v.table(p)
+            p = Path(p)
             df.to_parquet(p)
-            ps.append(p)
         return ps
     Fire({f.__name__:f for f in (meta, data) })
